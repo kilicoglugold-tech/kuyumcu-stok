@@ -1473,7 +1473,7 @@ async function loadPlatformData() {
 
   // Siparişleri yükle
   try {
-    const url = `platform_siparisler?platform=eq.${aktifPlatform}&ay=eq.${ay}&order=tarih.asc,olusturma.asc`;
+    const url = `platform_siparisler?platform=eq.${aktifPlatform}&order=tarih.asc,olusturma.asc`;
     platSiparisler = await api(url);
     console.log('Yüklenen:', platSiparisler?.length, 'platform:', aktifPlatform, 'ay:', ay);
     renderPlatTablo();
