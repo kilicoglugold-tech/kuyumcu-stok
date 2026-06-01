@@ -1397,7 +1397,7 @@ const PLATFORM_LABELS = {
 function initPlatformlar() {
   // Ay seçicisini doldur
   const sel = document.getElementById('platAy');
-  if (!sel.options.length) {
+  sel.innerHTML = ''; if (true) {
     const now = new Date();
     for (let i = 0; i < 24; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -1444,6 +1444,7 @@ async function saveKargoFiyatlari() {
 
 async function loadPlatformData() {
   const ay = document.getElementById('platAy').value;
+  console.log('Seçilen ay:', ay);
   if (!ay) return;
 
   // Aylık parametre yükle
