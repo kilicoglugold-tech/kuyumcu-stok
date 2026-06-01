@@ -1473,7 +1473,9 @@ async function loadPlatformData() {
 
   // Siparişleri yükle
   try {
-    platSiparisler = await api(`platform_siparisler?platform=eq.${aktifPlatform}&ay=eq.${ay}&order=tarih.asc,olusturma.asc`);
+    const url = `platform_siparisler?platform=eq.${aktifPlatform}&ay=eq.${ay}&order=tarih.asc,olusturma.asc`;
+    platSiparisler = await api(url);
+    console.log('Yüklenen:', platSiparisler?.length, 'platform:', aktifPlatform, 'ay:', ay);
     renderPlatTablo();
     updatePlatOzet();
   } catch(e) { console.error('Sipariş yükleme hatası:', e); }
@@ -1655,8 +1657,7 @@ async function savePlatSiparis() {
   }
 
   closeModal('platSiparisModal');
-  // Kısa bekleyip yenile
-  setTimeout(() => loadPlatformData(), 300);
+  await loadPlatformData();
 }
 
 async function editPlatSiparis(id) {
