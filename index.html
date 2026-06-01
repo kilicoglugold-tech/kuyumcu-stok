@@ -1229,7 +1229,7 @@ async function loadRapor() {
   const bitStr = bit.toISOString().slice(0,10);
   try {
     const [siparisler, params] = await Promise.all([
-      api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&ay=eq.${ay}&order=tarih.desc`),
+      api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&order=tarih.desc`),
       api(`aylik_parametreler?ay=eq.${ay}&limit=1`)
     ]);
     const p = params && params.length ? params[0] : { dolar_kuru:0, altin_fiyati_usd:0, reklam_usd:0 };
