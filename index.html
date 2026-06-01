@@ -1229,7 +1229,7 @@ async function loadRapor() {
   const bitStr = bit.toISOString().slice(0,10);
   try {
     const [siparisler, params] = await Promise.all([
-      api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&ay=eq.${ay}&order=tarih.desc`),
+      api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&order=tarih.desc`),
       api(`aylik_parametreler?ay=eq.${ay}&limit=1`)
     ]);
     const p = params && params.length ? params[0] : { dolar_kuru:0, altin_fiyati_usd:0, reklam_usd:0 };
@@ -1456,7 +1456,7 @@ async function loadPlatformData() {
 
   // Platform reklam yükle
   try {
-    const rekData = await api(`platform_parametreler?platform=eq.${aktifPlatform}&ay=eq.${ay}&limit=1`);
+    const rekData = await api(`platform_parametreler?platform=eq.${aktifPlatform}&limit=1`);
     if (rekData && rekData.length) {
       const r = rekData[0];
       if (aktifPlatform === 'essos_etsy') {
@@ -1473,7 +1473,7 @@ async function loadPlatformData() {
 
   // Siparişleri yükle
   try {
-    const url = `platform_siparisler?platform=eq.${aktifPlatform}&ay=eq.${ay}&order=tarih.asc,olusturma.asc`;
+    const url = `platform_siparisler?platform=eq.${aktifPlatform}&order=tarih.asc,olusturma.asc`;
     platSiparisler = await api(url);
     console.log('Yüklenen:', platSiparisler?.length, 'platform:', aktifPlatform, 'ay:', ay);
     renderPlatTablo();
@@ -1529,7 +1529,7 @@ async function updatePlatOzet() {
   // Reklam düş
   let reklamUsd = 0;
   try {
-    const rekData = await api(`platform_parametreler?platform=eq.${aktifPlatform}&ay=eq.${ay}&limit=1`);
+    const rekData = await api(`platform_parametreler?platform=eq.${aktifPlatform}&limit=1`);
     if (rekData && rekData.length) {
       if (aktifPlatform === 'essos_etsy') {
         reklamUsd = platAylikParam?.dolar_kuru ? (parseFloat(rekData[0].reklam_try)||0) / platAylikParam.dolar_kuru : 0;
@@ -1718,9 +1718,9 @@ async function savePlatReklam() {
     rekData.reklam_usd = parseFloat(document.getElementById('prReklamUsd').value) || 0;
   }
   try {
-    const existing = await api(`platform_parametreler?platform=eq.${aktifPlatform}&ay=eq.${ay}&limit=1`);
+    const existing = await api(`platform_parametreler?platform=eq.${aktifPlatform}&limit=1`);
     if (existing && existing.length) {
-      await api(`platform_parametreler?platform=eq.${aktifPlatform}&ay=eq.${ay}`, 'PATCH', rekData);
+      await api(`platform_parametreler?platform=eq.${aktifPlatform}`, 'PATCH', rekData);
     } else {
       await api('platform_parametreler', 'POST', rekData);
     }
