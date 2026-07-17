@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -307,14 +307,14 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <div style="font-size:13px;color:#9A9890;">Stok Yönetim Sistemi</div>
     </div>
     <div style="margin-bottom:14px;">
-      <label style="font-size:11px;font-weight:600;color:#6B6960;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px;">Kullanıcı Adı</label>
-      <input type="text" id="loginUser" class="form-control" placeholder="kullanici_adi" onkeydown="if(event.key==='Enter')doLogin()">
+      <label style="font-size:11px;font-weight:600;color:#6B6960;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px;">E-posta</label>
+      <input type="email" id="loginUser" class="form-control" placeholder="ornek@kkgold.com" autocomplete="username" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div style="margin-bottom:20px;">
       <label style="font-size:11px;font-weight:600;color:#6B6960;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:5px;">Şifre</label>
-      <input type="password" id="loginPass" class="form-control" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+      <input type="password" id="loginPass" class="form-control" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
-    <div id="loginErr" style="display:none;background:#FDF0EE;color:#C0392B;font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:14px;">Kullanıcı adı veya şifre hatalı.</div>
+    <div id="loginErr" style="display:none;background:#FDF0EE;color:#C0392B;font-size:13px;padding:10px 14px;border-radius:8px;margin-bottom:14px;">E-posta veya şifre hatalı.</div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
       <input type="checkbox" id="beniHatirla" style="width:16px;height:16px;accent-color:#8B6508;cursor:pointer;">
       <label for="beniHatirla" style="font-size:13px;color:#6B6960;cursor:pointer;">Beni Hatırla</label>
@@ -1066,11 +1066,27 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <!-- ŞİFRE YÖNETİMİ - sadece admin -->
   <div id="sifreYonetimPanel" style="display:none;margin-top:1.5rem;">
     <div class="param-panel">
-      <div style="font-size:15px;font-weight:500;margin-bottom:1rem;">👤 Kullanıcı Şifre Yönetimi</div>
+      <div style="font-size:15px;font-weight:500;margin-bottom:1rem;">👤 Kullanıcı ve Rol Yönetimi</div>
       <table>
-        <thead><tr><th>Kullanıcı Adı</th><th>Ad Soyad</th><th>Rol</th><th>Yeni Şifre (boş = değişmez)</th><th>İşlem</th></tr></thead>
+        <thead><tr><th>Kullanıcı Adı</th><th>Ad Soyad</th><th>Rol</th><th>E-posta</th><th>İşlem</th></tr></thead>
         <tbody id="sifreTablo"><tr><td colspan="5" class="loading">Yükleniyor...</td></tr></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- ROL İZİNLERİ - sadece admin -->
+  <div id="rolIzinPanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel">
+      <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">🔐 Rol İzinleri</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Muhasebe ve satış rollerinin hangi sekmeleri görebileceğini buradan ayarla. Ana Sayfa ve Ürünler her role her zaman açıktır. Admin her şeyi görür, değiştirilemez.</div>
+      <table>
+        <thead><tr><th>Sekme</th><th>Muhasebe</th><th>Satış</th></tr></thead>
+        <tbody id="rolIzinTablo"><tr><td colspan="3" class="loading">Yükleniyor...</td></tr></tbody>
+      </table>
+      <div style="margin-top:12px;display:flex;gap:10px;align-items:center;">
+        <button class="btn btn-primary" onclick="saveRolIzinleri()">Kaydet</button>
+        <span id="rolIzinMsg" style="font-size:13px;color:var(--green);display:none;">✓ Kaydedildi!</span>
+      </div>
     </div>
   </div>
 </div>
@@ -1196,19 +1212,92 @@ function rawVal(el) {
 }
 </script><script>
 const SUPABASE_URL = 'https://axwmzarljokczbtvhrva.supabase.co';
-const SUPABASE_KEY = 'sb_secret_6T8Dd0mtkrssVRJIv4HM7A_vua_gfDN';
+const SUPABASE_KEY = 'sb_publishable_LXdLQh0GLLESibqnqzS7zw_hhE2wvvB';
 const URUN_TIPLERI = ['Kolye','Bileklik','Yüzük','Küpe','Bilezik','Halhal','Broş'];
 
 let allUrunler = [], allVaryantlar = [];
 let currentFotoFile = null, editingVaryantId = null;
 let aylikParam = { dolar_kuru: 0, altin_fiyati_usd: 0, reklam_usd: 0 };
 
+// ===== SUPABASE AUTH (gerçek oturum yönetimi) =====
+let authSession = null; // { access_token, refresh_token, expires_at, user }
+
+function readStoredSession() {
+  try {
+    const l = localStorage.getItem('kkgold_session');
+    if (l) return JSON.parse(l);
+    const s = sessionStorage.getItem('kkgold_session');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return null;
+}
+function saveAuthSession(session, remember) {
+  authSession = session;
+  if (remember) { localStorage.setItem('kkgold_session', JSON.stringify(session)); sessionStorage.removeItem('kkgold_session'); }
+  else { sessionStorage.setItem('kkgold_session', JSON.stringify(session)); localStorage.removeItem('kkgold_session'); }
+}
+function clearAuthSession() {
+  authSession = null;
+  localStorage.removeItem('kkgold_session');
+  sessionStorage.removeItem('kkgold_session');
+}
+
+async function authLogin(email, password) {
+  const r = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error_description || data.msg || 'Giriş başarısız');
+  return { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: Date.now() + (data.expires_in * 1000), user: data.user };
+}
+async function authRefresh(refresh_token) {
+  const r = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=refresh_token', {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token })
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error('refresh_failed');
+  return { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: Date.now() + (data.expires_in * 1000), user: data.user };
+}
+async function authLogout() {
+  if (authSession && authSession.access_token) {
+    try {
+      await fetch(SUPABASE_URL + '/auth/v1/logout', { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + authSession.access_token } });
+    } catch(e) {}
+  }
+  clearAuthSession();
+}
+async function authSendPasswordReset(email) {
+  await fetch(SUPABASE_URL + '/auth/v1/recover', { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
+}
+// Erişim jetonu süresi dolmuşsa (veya dolmak üzereyse) sessizce yeniler.
+async function ensureValidSession() {
+  if (!authSession) authSession = readStoredSession();
+  if (!authSession) return null;
+  if (Date.now() > (authSession.expires_at - 30000)) {
+    try {
+      const wasRemembered = !!localStorage.getItem('kkgold_session');
+      const fresh = await authRefresh(authSession.refresh_token);
+      saveAuthSession(fresh, wasRemembered);
+    } catch(e) {
+      clearAuthSession();
+      return null;
+    }
+  }
+  return authSession;
+}
+
 async function api(endpoint, method='GET', body=null) {
+  const session = await ensureValidSession();
+  if (!session) throw new Error('Oturum bulunamadı. Lütfen giriş yapın.');
   const opts = {
     method,
     headers: {
       'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Authorization': 'Bearer ' + session.access_token,
       'Content-Type': 'application/json',
       'Prefer': method==='POST' ? 'return=representation' : ''
     }
@@ -1236,11 +1325,13 @@ function notlarWithTas(base, tasGr) {
 }
 
 async function uploadFoto(file) {
+  const session = await ensureValidSession();
+  if (!session) return null;
   const ext = file.name.split('.').pop();
   const name = Date.now() + '.' + ext;
   const r = await fetch(`${SUPABASE_URL}/storage/v1/object/urun-fotograflari/${name}`, {
     method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': file.type },
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + session.access_token, 'Content-Type': file.type },
     body: file
   });
   if (!r.ok) return null;
@@ -1256,7 +1347,7 @@ function showPage(page) {
   document.querySelectorAll('.nav-tab')[pages.indexOf(page)]?.classList.add('active');
   if (page === 'anasayfa') { asInit(); }
   if (page === 'rapor') { loadRapor(); loadGecmisVeriler(); }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); }
+  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); baRender(); }
@@ -1339,9 +1430,13 @@ async function loadKullanicilar() {
     tbody.innerHTML = data.map(u => `<tr>
       <td><input type="text" id="ku_${u.id}" value="${u.kullanici_adi}" style="padding:6px 10px;border:0.5px solid var(--border2);border-radius:6px;font-size:13px;width:120px;font-family:DM Sans,sans-serif;background:var(--bg)"></td>
       <td><input type="text" id="as_${u.id}" value="${u.ad_soyad||''}" placeholder="Ad Soyad" style="padding:6px 10px;border:0.5px solid var(--border2);border-radius:6px;font-size:13px;width:120px;font-family:DM Sans,sans-serif;background:var(--bg)"></td>
-      <td><span style="background:${u.rol==='admin'?'var(--gold-light)':'var(--green-bg)'};color:${u.rol==='admin'?'var(--gold-dark)':'var(--green)'};padding:2px 8px;border-radius:20px;font-size:12px;font-weight:500">${u.rol}</span></td>
-      <td><input type="password" id="np_${u.id}" placeholder="Yeni şifre (boş=değişmez)" style="padding:6px 10px;border:0.5px solid var(--border2);border-radius:6px;font-size:13px;width:180px;font-family:DM Sans,sans-serif;background:var(--bg)"></td>
-      <td><button class="btn btn-sm btn-primary" onclick="updateKullanici('${u.id}')">Kaydet</button></td>
+      <td><select id="rl_${u.id}" style="padding:6px 8px;border:0.5px solid var(--border2);border-radius:6px;font-size:12px;font-family:DM Sans,sans-serif;background:var(--bg)">
+        <option value="admin" ${u.rol==='admin'?'selected':''}>admin</option>
+        <option value="muhasebe" ${u.rol==='muhasebe'?'selected':''}>muhasebe</option>
+        <option value="satis" ${u.rol==='satis'?'selected':''}>satis</option>
+      </select></td>
+      <td style="font-size:12px;color:var(--text2)">${u.email || '<span style="color:#C0392B">e-posta tanımlanmamış</span>'}</td>
+      <td><button class="btn btn-sm" onclick="sifreSifirlaEmail('${u.email||''}')" ${u.email?'':'disabled'}>Şifre sıfırlama bağlantısı gönder</button> <button class="btn btn-sm btn-primary" onclick="updateKullanici('${u.id}')">Kaydet</button></td>
     </tr>`).join('');
   } catch(e) {}
 }
@@ -1349,24 +1444,64 @@ async function loadKullanicilar() {
 async function updateKullanici(userId) {
   const kuEl = document.getElementById('ku_' + userId);
   const asEl = document.getElementById('as_' + userId);
-  const npEl = document.getElementById('np_' + userId);
+  const rlEl = document.getElementById('rl_' + userId);
   const yeniKu = kuEl.value.trim();
   const yeniAs = asEl.value.trim();
-  const yeniSifre = npEl.value.trim();
+  const yeniRol = rlEl.value;
   if (!yeniKu) { alert('Kullanıcı adı boş olamaz.'); return; }
-  if (yeniSifre && yeniSifre.length < 6) { alert('Şifre en az 6 karakter olmalı.'); return; }
-  const data = { kullanici_adi: yeniKu, ad_soyad: yeniAs };
-  if (yeniSifre) data.sifre = yeniSifre;
+  if (currentUser && currentUser.id === userId && yeniRol !== 'admin') {
+    if (!confirm('Kendi rolünüzü admin olmaktan çıkarmak üzeresiniz. Emin misiniz?')) return;
+  }
+  const data = { kullanici_adi: yeniKu, ad_soyad: yeniAs, rol: yeniRol };
   await api('kullanicilar?id=eq.' + userId, 'PATCH', data);
   if (currentUser && currentUser.id === userId) {
     currentUser.kullanici_adi = yeniKu;
     currentUser.ad_soyad = yeniAs;
-    const saved = localStorage.getItem('kkgold_user');
-    if (saved) localStorage.setItem('kkgold_user', JSON.stringify(currentUser));
+    currentUser.rol = yeniRol;
   }
-  npEl.value = '';
   kuEl.style.borderColor = 'var(--green)';
   setTimeout(() => { kuEl.style.borderColor = ''; loadKullanicilar(); }, 1500);
+}
+
+async function sifreSifirlaEmail(email) {
+  if (!email) { alert('Bu kullanıcı için e-posta tanımlı değil. Önce Supabase panelinden e-posta/hesap bağlantısını kurun.'); return; }
+  if (!confirm(email + ' adresine şifre sıfırlama bağlantısı gönderilsin mi?')) return;
+  try {
+    await authSendPasswordReset(email);
+    alert('Sıfırlama bağlantısı gönderildi. E-postayı kontrol edin.');
+  } catch(e) {
+    alert('Gönderilemedi: ' + e.message);
+  }
+}
+
+const ROL_IZIN_ETIKETLERI = {
+  rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
+  borcalacak: 'Borç/Alacak', parametreler: 'Parametreler (kullanıcı/kur yönetimi)'
+};
+async function loadRolIzinPanel() {
+  if (!isAdmin()) return;
+  document.getElementById('rolIzinPanel').style.display = 'block';
+  try {
+    const data = await api('rol_izinleri?select=*');
+    const map = {};
+    (data || []).forEach(r => { map[r.rol] = r.sekmeler || []; });
+    const tbody = document.getElementById('rolIzinTablo');
+    tbody.innerHTML = AYARLANABILIR_SEKMELER.map(s => `<tr>
+      <td>${ROL_IZIN_ETIKETLERI[s]}</td>
+      <td style="text-align:center"><input type="checkbox" id="ri_muhasebe_${s}" ${(map.muhasebe||[]).includes(s)?'checked':''} style="accent-color:var(--gold);width:16px;height:16px;cursor:pointer;"></td>
+      <td style="text-align:center"><input type="checkbox" id="ri_satis_${s}" ${(map.satis||[]).includes(s)?'checked':''} style="accent-color:var(--gold);width:16px;height:16px;cursor:pointer;"></td>
+    </tr>`).join('');
+  } catch(e) {}
+}
+async function saveRolIzinleri() {
+  for (const rol of ['muhasebe','satis']) {
+    const sekmeler = AYARLANABILIR_SEKMELER.filter(s => document.getElementById(`ri_${rol}_${s}`)?.checked);
+    await api('rol_izinleri?rol=eq.' + rol, 'PATCH', { sekmeler });
+  }
+  await loadRolIzinleri();
+  const msg = document.getElementById('rolIzinMsg');
+  msg.style.display = 'inline';
+  setTimeout(() => { msg.style.display = 'none'; }, 2000);
 }
 
 async function loadParamTablo() {
@@ -2098,12 +2233,13 @@ async function loadRapor() {
 // ===== GİRİŞ SİSTEMİ =====
 let currentUser = null;
 
-function showMainApp() {
+async function showMainApp() {
   document.getElementById('loginErr').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('mainNav').style.display = 'flex';
   document.getElementById('mainParamBar').style.display = 'flex';
   document.getElementById('mainContent').style.display = 'block';
+  await loadRolIzinleri();
   applyRol();
   initParamAy();
   initRaporAylar();
@@ -2111,56 +2247,84 @@ function showMainApp() {
 }
 
 function checkOtomatikGiris() {
-  try {
-    const saved = localStorage.getItem('kkgold_user');
-    if (saved) {
-      currentUser = JSON.parse(saved);
+  const saved = readStoredSession();
+  if (!saved) return false;
+  authSession = saved;
+  (async () => {
+    try {
+      const session = await ensureValidSession();
+      if (!session) throw new Error('no session');
+      const profile = await api(`kullanicilar?auth_id=eq.${session.user.id}&limit=1`);
+      if (!profile || !profile.length) throw new Error('no profile');
+      currentUser = profile[0];
       showMainApp();
-      return true;
+    } catch(e) {
+      clearAuthSession();
+      document.getElementById('loginScreen').style.display = 'flex';
     }
-  } catch(e) {
-    localStorage.removeItem('kkgold_user');
-  }
-  return false;
+  })();
+  return true;
 }
 
 async function doLogin() {
-  const kullanici = document.getElementById('loginUser').value.trim();
+  const email = document.getElementById('loginUser').value.trim();
   const sifre = document.getElementById('loginPass').value;
-  if (!kullanici || !sifre) return;
+  if (!email || !sifre) return;
+  document.getElementById('loginErr').style.display = 'none';
   try {
-    const data = await api(`kullanicilar?kullanici_adi=eq.${encodeURIComponent(kullanici)}&sifre=eq.${encodeURIComponent(sifre)}&limit=1`);
-    if (!data || !data.length) {
+    const session = await authLogin(email, sifre);
+    const hatirla = document.getElementById('beniHatirla');
+    saveAuthSession(session, !!(hatirla && hatirla.checked));
+    const profile = await api(`kullanicilar?auth_id=eq.${session.user.id}&limit=1`);
+    if (!profile || !profile.length) {
+      document.getElementById('loginErr').textContent = 'Bu hesap için personel kaydı bulunamadı. Yöneticinizle iletişime geçin.';
       document.getElementById('loginErr').style.display = 'block';
+      await authLogout();
       return;
     }
-    currentUser = data[0];
-    // Beni Hatırla
-    const hatirla = document.getElementById('beniHatirla');
-    if (hatirla && hatirla.checked) {
-      localStorage.setItem('kkgold_user', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('kkgold_user');
-    }
+    currentUser = profile[0];
     showMainApp();
   } catch(e) {
     console.error("Login hatası:", e);
+    document.getElementById('loginErr').textContent = 'E-posta veya şifre hatalı.';
     document.getElementById('loginErr').style.display = 'block';
   }
 }
 
+// Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Giderler(4), Borç/Alacak(5), Parametreler(6)
+// Ana Sayfa(0) ve Ürünler(1) her role her zaman açık. Diğerleri "rol_izinleri" tablosundan
+// (admin tarafından Parametreler > Rol İzinleri panelinden) dinamik olarak belirlenir.
+const SEKME_INDEX = { anasayfa:0, urunler:1, rapor:2, platformlar:3, giderler:4, borcalacak:5, parametreler:6 };
+const AYARLANABILIR_SEKMELER = ['rapor','platformlar','giderler','borcalacak','parametreler'];
+let rolIzinleriCache = null; // { muhasebe: ['rapor','platformlar',...], satis: [...] }
+
+async function loadRolIzinleri() {
+  try {
+    const data = await api('rol_izinleri?select=*');
+    rolIzinleriCache = {};
+    (data || []).forEach(r => { rolIzinleriCache[r.rol] = r.sekmeler || []; });
+  } catch(e) {
+    rolIzinleriCache = {};
+  }
+}
+function rolSekmeleri() {
+  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6];
+  const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
+  const digerleri = izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
+  return Array.from(new Set([0, 1, ...digerleri]));
+}
 function applyRol() {
-  const isAdmin = currentUser.rol === 'admin';
-  // Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Parametreler(4)
+  const isAdminRol = currentUser.rol === 'admin';
+  const gorunur = rolSekmeleri();
   const tabs = document.querySelectorAll('.nav-tab');
-  if (!isAdmin) {
-    // Personel: sadece Ana Sayfa(0) ve Ürünler(1) görünür
-    tabs[2].style.display = 'none'; // Rapor
-    tabs[3].style.display = 'none'; // Platformlar
-    tabs[4].style.display = 'none'; // Parametreler
+  tabs.forEach((tab, i) => { tab.style.display = gorunur.includes(i) ? '' : 'none'; });
+  if (!gorunur.includes(6)) {
+    // Parametreler'de gösterilen kur/altın barı, yetkisi olmayanlarda gizli kalsın
     document.getElementById('mainParamBar').style.display = 'none';
+  }
+  if (!isAdminRol) {
     window._personelMod = true;
-    // Yeni ürün butonunu gizle
+    // Yeni ürün butonunu gizle (sadece admin yeni ürün ekleyebilir)
     setTimeout(() => {
       const btn = document.getElementById('yeniUrunBtn');
       if (btn) btn.style.display = 'none';
@@ -2177,19 +2341,14 @@ function applyRol() {
 function logout() {
   if (!confirm('Çıkış yapmak istediğinize emin misiniz?')) return;
   currentUser = null;
-  localStorage.removeItem('kkgold_user');
-  location.reload();
+  authLogout().finally(() => location.reload());
 }
 
 function isAdmin() { return currentUser && currentUser.rol === 'admin'; }
 
 
-// INIT - otomatik giriş kontrolü
-if (!checkOtomatikGiris()) {
-  // Giriş ekranı gösterilecek
-}
-initRaporAylar();
-loadAylikParam().then(() => loadUrunler());
+// INIT - otomatik giriş kontrolü (oturum yoksa giriş ekranı zaten görünür durumda kalır)
+checkOtomatikGiris();
 
 // ===== PLATFORM SİSTEMİ =====
 let aktifGrup = 'A';
