@@ -1078,7 +1078,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div id="rolIzinPanel" style="display:none;margin-top:1.5rem;">
     <div class="param-panel">
       <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">🔐 Rol İzinleri</div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Muhasebe ve satış rollerinin hangi sekmeleri görebileceğini buradan ayarla. Ana Sayfa ve Ürünler her role her zaman açıktır. Admin her şeyi görür, değiştirilemez.</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Muhasebe ve satış rollerinin hangi sekmeleri görebileceğini buradan ayarla. Admin her şeyi görür, değiştirilemez.</div>
       <table>
         <thead><tr><th>Sekme</th><th>Muhasebe</th><th>Satış</th></tr></thead>
         <tbody id="rolIzinTablo"><tr><td colspan="3" class="loading">Yükleniyor...</td></tr></tbody>
@@ -1211,16 +1211,16 @@ function rawVal(el) {
   return parseInt((el.value || '').replace(/\./g, '')) || 0;
 }
 </script><script>
-const SUPABASE_URL = 'https://axwmzarljokczbtvhrva.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_LXdLQh0GLLESibqnqzS7zw_hhE2wvvB';
+const SUPABASE_URL = 'https://xufyzwioeguudrynkjvc.supabase.co/rest/v1/';
+const SUPABASE_KEY = 'sb_publishable_jQeVQUHMze43X1cwak2ELA_VHTCMqyV';
 const URUN_TIPLERI = ['Kolye','Bileklik','Yüzük','Küpe','Bilezik','Halhal','Broş'];
 
 let allUrunler = [], allVaryantlar = [];
 let currentFotoFile = null, editingVaryantId = null;
 let aylikParam = { dolar_kuru: 0, altin_fiyati_usd: 0, reklam_usd: 0 };
 
-// ===== SUPABASE AUTH (gerçek oturum yönetimi) =====
-let authSession = null; // { access_token, refresh_token, expires_at, user }
+// ===== SUPABASE AUTH (gercek oturum yonetimi) =====
+let authSession = null;
 
 function readStoredSession() {
   try {
@@ -1241,7 +1241,6 @@ function clearAuthSession() {
   localStorage.removeItem('kkgold_session');
   sessionStorage.removeItem('kkgold_session');
 }
-
 async function authLogin(email, password) {
   const r = await fetch(SUPABASE_URL + '/auth/v1/token?grant_type=password', {
     method: 'POST',
@@ -1249,7 +1248,7 @@ async function authLogin(email, password) {
     body: JSON.stringify({ email, password })
   });
   const data = await r.json();
-  if (!r.ok) throw new Error(data.error_description || data.msg || 'Giriş başarısız');
+  if (!r.ok) throw new Error(data.error_description || data.msg || 'Giris basarisiz');
   return { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: Date.now() + (data.expires_in * 1000), user: data.user };
 }
 async function authRefresh(refresh_token) {
@@ -1273,7 +1272,6 @@ async function authLogout() {
 async function authSendPasswordReset(email) {
   await fetch(SUPABASE_URL + '/auth/v1/recover', { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) });
 }
-// Erişim jetonu süresi dolmuşsa (veya dolmak üzereyse) sessizce yeniler.
 async function ensureValidSession() {
   if (!authSession) authSession = readStoredSession();
   if (!authSession) return null;
@@ -1292,7 +1290,7 @@ async function ensureValidSession() {
 
 async function api(endpoint, method='GET', body=null) {
   const session = await ensureValidSession();
-  if (!session) throw new Error('Oturum bulunamadı. Lütfen giriş yapın.');
+  if (!session) throw new Error('Oturum bulunamadi. Lutfen giris yapin.');
   const opts = {
     method,
     headers: {
@@ -1475,7 +1473,7 @@ async function sifreSifirlaEmail(email) {
 }
 
 const ROL_IZIN_ETIKETLERI = {
-  rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
+  anasayfa: 'Ana Sayfa', urunler: 'Ürünler', rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
   borcalacak: 'Borç/Alacak', parametreler: 'Parametreler (kullanıcı/kur yönetimi)'
 };
 async function loadRolIzinPanel() {
@@ -2292,11 +2290,11 @@ async function doLogin() {
 }
 
 // Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Giderler(4), Borç/Alacak(5), Parametreler(6)
-// Ana Sayfa(0) ve Ürünler(1) her role her zaman açık. Diğerleri "rol_izinleri" tablosundan
-// (admin tarafından Parametreler > Rol İzinleri panelinden) dinamik olarak belirlenir.
+// Hepsi rol_izinleri tablosundan (admin > Parametreler > Rol İzinleri panelinden) ayarlanır.
+// admin her zaman hepsini görür ve buradan kısıtlanamaz (kilitlenmeyi önlemek için).
 const SEKME_INDEX = { anasayfa:0, urunler:1, rapor:2, platformlar:3, giderler:4, borcalacak:5, parametreler:6 };
-const AYARLANABILIR_SEKMELER = ['rapor','platformlar','giderler','borcalacak','parametreler'];
-let rolIzinleriCache = null; // { muhasebe: ['rapor','platformlar',...], satis: [...] }
+const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler'];
+let rolIzinleriCache = null;
 
 async function loadRolIzinleri() {
   try {
@@ -2310,8 +2308,7 @@ async function loadRolIzinleri() {
 function rolSekmeleri() {
   if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6];
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
-  const digerleri = izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
-  return Array.from(new Set([0, 1, ...digerleri]));
+  return izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
 }
 function applyRol() {
   const isAdminRol = currentUser.rol === 'admin';
@@ -2319,20 +2316,20 @@ function applyRol() {
   const tabs = document.querySelectorAll('.nav-tab');
   tabs.forEach((tab, i) => { tab.style.display = gorunur.includes(i) ? '' : 'none'; });
   if (!gorunur.includes(6)) {
-    // Parametreler'de gösterilen kur/altın barı, yetkisi olmayanlarda gizli kalsın
     document.getElementById('mainParamBar').style.display = 'none';
   }
   if (!isAdminRol) {
     window._personelMod = true;
-    // Yeni ürün butonunu gizle (sadece admin yeni ürün ekleyebilir)
     setTimeout(() => {
       const btn = document.getElementById('yeniUrunBtn');
       if (btn) btn.style.display = 'none';
     }, 500);
   }
-  // Kullanıcı adını navda göster
+  // Kullanıcı adını navda göster (tekrar tekrar çağrılırsa eski etiketi temizle)
   const navRight = document.querySelector('.nav-right');
+  navRight.querySelectorAll('.kkgold-user-chip').forEach(el => el.remove());
   const userChip = document.createElement('div');
+  userChip.className = 'kkgold-user-chip';
   userChip.style.cssText = 'font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;';
   userChip.innerHTML = `<span style="background:var(--gold-light);color:var(--gold-dark);padding:3px 10px;border-radius:20px;font-weight:500">${currentUser.ad_soyad || currentUser.kullanici_adi}</span> <button onclick="logout()" style="font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:2px 6px;">Çıkış</button>`;
   navRight.appendChild(userChip);
