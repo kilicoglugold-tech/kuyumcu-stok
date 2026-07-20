@@ -350,7 +350,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 <div class="page active" id="page-anasayfa">
   <div class="as-header">
     <div>
-      <div class="as-tarih" id="asTarih">—</div>
+      <div style="display:flex;align-items:center;gap:8px;"><div class="as-tarih" id="asTarih">—</div><button class="gizli-btn" onclick="toggleGizliMod()" title="Rakamları gizle">👁️</button></div>
       <div class="as-tarih-sub">Kılıçoğlu Stok Yönetim Sistemi</div>
     </div>
     <div class="as-btn-group">
@@ -364,6 +364,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div class="gorev-kolon"><div class="gorev-kolon-baslik">🤝 Ortak</div><div id="gk-ortak"></div></div>
     <div class="gorev-kolon"><div class="gorev-kolon-baslik">👤 Burak</div><div id="gk-burak"></div></div>
     <div class="gorev-kolon"><div class="gorev-kolon-baslik">👤 Furkan</div><div id="gk-furkan"></div></div>
+    <div class="gorev-kolon"><div class="gorev-kolon-baslik">👤 Mehmet</div><div id="gk-mehmet"></div></div>
   </div>
 
   <!-- HATIRLATMALAR -->
@@ -479,6 +480,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
           <option value="ortak">🤝 Ortak</option>
           <option value="burak">👤 Burak</option>
           <option value="furkan">👤 Furkan</option>
+          <option value="mehmet">👤 Mehmet</option>
         </select>
       </div>
     </div>
@@ -522,6 +524,9 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div class="page-header">
     <div><div class="page-title">Ürün Kartları</div><div class="page-sub" id="urunSayac">Yükleniyor...</div></div>
     <button class="btn btn-primary" id="yeniUrunBtn" onclick="openUrunModal()">+ Yeni Ürün</button>
+    <button class="btn" id="secModBtn" onclick="toggleSecimModu()" style="display:none;">☑ Seç</button>
+    <button class="btn" id="kopyaBulBtn" onclick="olasiKopyalariBul()" style="display:none;">🔍 Olası Kopyaları Bul</button>
+    <button class="btn btn-danger" id="topluSilBtn" onclick="topluSilSecilenler()" style="display:none;">🗑 Seçilenleri Sil (<span id="topluSilSayi">0</span>)</button>
   </div>
   <div class="search-bar">
     <input class="search-input" type="text" id="urunArama" placeholder="Ürün adı veya kodu ara..." oninput="filterUrunler()">
@@ -539,6 +544,10 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="ayar-tab" onclick="secKategori('SH',this)">(SH) Su Hayvanları</button>
     <button class="ayar-tab" onclick="secKategori('T',this)">(T) Taşlı</button>
     <button class="ayar-tab" onclick="secKategori('YZ',this)">(YZ) Yüzükler</button>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;" id="ozelFiltreBar">
+    <button class="ayar-tab" id="ozelFiltreTasBtn" onclick="secOzelFiltre('tas',this)">🪨 Taşı Bitenler (0)</button>
+    <button class="ayar-tab" id="ozelFiltreMumBtn" onclick="secOzelFiltre('mum',this)">🕯️ Mumu Bitenler (0)</button>
   </div>
   <div class="filtre-panel" id="filtrePanel">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
@@ -1089,6 +1098,15 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       </div>
     </div>
   </div>
+
+  <!-- BİR KERELİK: yerel urun verisini Supabase'e tasi - sadece admin -->
+  <div id="metaMigratePanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel">
+      <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">📤 Ürün Verilerini Ortak Veritabanına Taşı</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Ürünlerin durum (Yeşil Mum, 3D Project vb.), kategori ve taş bilgileri artık Supabase'te (herkeste ortak) tutuluyor. Bu tarayıcıda daha önce girilmiş veri varsa, bir kereliğine buraya basarak Supabase'e kopyalayabilirsiniz. Sadece verinin gerçekten bulunduğu tarayıcıdan (muhtemelen Burak'ın bilgisayarından) bir kez çalıştırmanız yeterli.</div>
+      <button class="btn" onclick="migrateLocalUrunMetaToSupabase()">Bu Tarayıcıdaki Ürün Verilerini Taşı</button>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -1211,8 +1229,8 @@ function rawVal(el) {
   return parseInt((el.value || '').replace(/\./g, '')) || 0;
 }
 </script><script>
-const SUPABASE_URL = 'https://xufyzwioeguudrynkjvc.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_jQeVQUHMze43X1cwak2ELA_VHTCMqyV';
+const SUPABASE_URL = '__SUPABASE_URL__';
+const SUPABASE_KEY = '__SUPABASE_KEY__';
 const URUN_TIPLERI = ['Kolye','Bileklik','Yüzük','Küpe','Bilezik','Halhal','Broş'];
 
 let allUrunler = [], allVaryantlar = [];
@@ -1338,14 +1356,20 @@ async function uploadFoto(file) {
 
 // NAV
 function showPage(page) {
+  const pages = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler'];
+  const idx = pages.indexOf(page);
+  // Ana Sayfa'daki kısayol kartları, alt menüler vb. üzerinden de olsa,
+  // yetkisi olmayan bir role sayfa açtırma (sadece üst menüyü gizlemek yetmiyordu).
+  if (currentUser && currentUser.rol !== 'admin' && !rolSekmeleri().includes(idx)) {
+    return;
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  const pages = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler'];
-  document.querySelectorAll('.nav-tab')[pages.indexOf(page)]?.classList.add('active');
+  document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
   if (page === 'anasayfa') { asInit(); }
   if (page === 'rapor') { loadRapor(); loadGecmisVeriler(); }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); }
+  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); baRender(); }
@@ -1522,11 +1546,13 @@ async function loadUrunler() {
     allUrunler = await api('urunler?select=*&order=olusturma_tarihi.desc');
     allVaryantlar = await api('varyantlar?select=*');
     allUrunler = sortUrunler(allUrunler);
+    await loadUrunMetaCache();
     otomatikKategoriAta();
     renderUrunGrid(allUrunler);
     document.getElementById('urunSayac').textContent = allUrunler.length + ' ürün';
     initFiltrePanel();
     updateKategoriCounts();
+    updateOzelFiltreCounts();
   } catch(e) {
     document.getElementById('urunGrid').innerHTML = `<div class="empty"><div class="empty-icon">⚠</div><div>${e.message}</div></div>`;
   }
@@ -1550,7 +1576,9 @@ function renderUrunGrid(urunler) {
       const fw  = var_ ? '700' : '500';
       return `<span style="background:${bg};color:${clr};font-size:11px;padding:2px 8px;border-radius:20px;font-weight:${fw};">${lbl} ${var_ ? '✓' : '✗'}</span>`;
     };
-    return `<div class="urun-card" style="position:relative;" onclick="openDetay('${u.id}')">
+    const secili = seciliUrunler.has(u.id);
+    return `<div class="urun-card" style="position:relative;${secimModuAktif && secili ? 'outline:2px solid #C0392B;outline-offset:-2px;' : ''}" onclick="${secimModuAktif ? `toggleUrunSecim('${u.id}')` : `openDetay('${u.id}')`}">
+      ${secimModuAktif ? `<div style="position:absolute;top:6px;left:6px;z-index:3;width:22px;height:22px;border-radius:5px;background:${secili?'#C0392B':'#fff'};border:2px solid ${secili?'#C0392B':'#D8D5CC'};display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;pointer-events:none;">${secili?'✓':''}</div>` : ''}
       <div style="position:absolute;top:6px;right:6px;z-index:2;display:flex;flex-direction:column;gap:3px;"><button onclick="event.stopPropagation();dokumSiparisVer('${u.id}','10K',this)" style="background:#3B82F6;color:#fff;border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">10K + Döküm</button><button onclick="event.stopPropagation();dokumSiparisVer('${u.id}','14K',this)" style="background:#D97706;color:#fff;border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">14K + Döküm</button></div>
       ${u.fotograf_url ? `<div class="urun-card-foto"><img src="${u.fotograf_url}" loading="lazy"></div>` : `<div class="urun-card-foto-placeholder">💍</div>`}
       <div class="urun-card-body">
@@ -1558,9 +1586,131 @@ function renderUrunGrid(urunler) {
         <div class="urun-card-ad">${u.ad}</div>
         <div class="ayar-badges">${ayarlar.map(a=>`<span class="ayar-badge">${a} Ayar</span>`).join('')}${(()=>{const t=meta.tas||{};return(!t.tasSiz&&t.gram)?`<span class="tas-badge" style="font-size:10px;padding:2px 8px">💎 ${t.gram} gr</span>`:'';})()}</div>
         <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">${badge('Yeşil Mum')}${badge('3D Project')}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">
+          <button onclick="event.stopPropagation();toggleUrunFlag('${u.id}','tasBitti')" style="background:${meta.tasBitti?'#C0392B':'#F1F0EC'};color:${meta.tasBitti?'#fff':'#6B6960'};border:none;border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;cursor:pointer;">🪨 Taşı Bitti${meta.tasBitti?' ✓':''}</button>
+          <button onclick="event.stopPropagation();toggleUrunFlag('${u.id}','mumBitti')" style="background:${meta.mumBitti?'#C0392B':'#F1F0EC'};color:${meta.mumBitti?'#fff':'#6B6960'};border:none;border-radius:20px;padding:3px 9px;font-size:10px;font-weight:600;cursor:pointer;">🕯️ Mumu Bitti${meta.mumBitti?' ✓':''}</button>
+        </div>
       </div>
     </div>`;
   }).join('');
+}
+
+function toggleUrunFlag(urunId, key) {
+  const meta = getUrunMeta(urunId);
+  meta[key] = !meta[key];
+  setUrunMeta(urunId, meta);
+  updateOzelFiltreCounts();
+  filterUrunler();
+}
+
+// ===== TOPLU SEÇ / SİL =====
+let secimModuAktif = false;
+let seciliUrunler = new Set();
+
+function toggleSecimModu() {
+  secimModuAktif = !secimModuAktif;
+  seciliUrunler.clear();
+  const btn = document.getElementById('secModBtn');
+  btn.textContent = secimModuAktif ? '✕ Seçimi Bitir' : '☑ Seç';
+  document.getElementById('kopyaBulBtn').style.display = secimModuAktif ? '' : 'none';
+  updateTopluSilUI();
+  filterUrunler();
+}
+
+function toggleUrunSecim(urunId) {
+  if (seciliUrunler.has(urunId)) seciliUrunler.delete(urunId);
+  else seciliUrunler.add(urunId);
+  updateTopluSilUI();
+  filterUrunler();
+}
+
+function updateTopluSilUI() {
+  const sayi = seciliUrunler.size;
+  document.getElementById('topluSilSayi').textContent = sayi;
+  document.getElementById('topluSilBtn').style.display = (secimModuAktif && sayi > 0) ? '' : 'none';
+}
+
+function normalizeUrunAdi(ad) {
+  return (ad || '').toLocaleLowerCase('tr-TR').replace(/[_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function olasiKopyalariBul() {
+  const gruplar = {};
+  allUrunler.forEach(u => {
+    const key = normalizeUrunAdi(u.ad);
+    if (!key) return;
+    if (!gruplar[key]) gruplar[key] = [];
+    gruplar[key].push(u);
+  });
+  let grupSayisi = 0, urunSayisi = 0;
+  seciliUrunler.clear();
+  Object.values(gruplar).forEach(list => {
+    if (list.length > 1) {
+      grupSayisi++;
+      list.forEach(u => { seciliUrunler.add(u.id); urunSayisi++; });
+    }
+  });
+  updateTopluSilUI();
+  filterUrunler();
+  if (grupSayisi === 0) {
+    alert('Aynı isimde (alt tire/boşluk farkı hariç) birden fazla ürün bulunamadı.');
+  } else {
+    alert(`${grupSayisi} olası kopya grubu, toplam ${urunSayisi} ürün işaretlendi.\n\nLütfen listeyi kontrol et: her gruptan SAKLAMAK istediğin ürünün işaretini kaldır (tıklayarak), sonra "Seçilenleri Sil" butonuna bas.`);
+  }
+}
+
+async function topluSilSecilenler() {
+  const ids = Array.from(seciliUrunler);
+  if (!ids.length) return;
+  if (!confirm(`${ids.length} ürünü kalıcı olarak silmek istediğine emin misin?\nBu işlem geri alınamaz.`)) return;
+  const btn = document.getElementById('topluSilBtn');
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  let basarili = 0, hatali = 0;
+  for (const urunId of ids) {
+    btn.innerHTML = `Siliniyor... (${basarili + hatali}/${ids.length})`;
+    try {
+      const varList = await api('varyantlar?urun_id=eq.' + urunId + '&select=id');
+      if (varList && varList.length) {
+        const vids = varList.map(v => v.id).join(',');
+        try { await api('siparisler?varyant_id=in.(' + vids + ')', 'DELETE'); } catch(e) {}
+      }
+      await api('varyantlar?urun_id=eq.' + urunId, 'DELETE');
+      await api('urunler?id=eq.' + urunId, 'DELETE');
+      basarili++;
+    } catch(e) {
+      hatali++;
+    }
+  }
+  seciliUrunler.clear();
+  secimModuAktif = false;
+  document.getElementById('secModBtn').textContent = '☑ Seç';
+  document.getElementById('kopyaBulBtn').style.display = 'none';
+  btn.disabled = false;
+  btn.innerHTML = origText;
+  updateTopluSilUI();
+  await loadUrunler();
+  alert(`${basarili} ürün silindi.${hatali ? ' ' + hatali + ' ürün silinemedi.' : ''}`);
+}
+
+let aktifOzelFiltre = '';
+function secOzelFiltre(tip, btn) {
+  aktifOzelFiltre = (aktifOzelFiltre === tip) ? '' : tip;
+  document.querySelectorAll('#ozelFiltreBar .ayar-tab').forEach(b => b.classList.remove('active'));
+  if (aktifOzelFiltre) btn.classList.add('active');
+  filterUrunler();
+}
+function updateOzelFiltreCounts() {
+  let tasSay = 0, mumSay = 0;
+  allUrunler.forEach(u => {
+    const m = getUrunMeta(u.id);
+    if (m.tasBitti) tasSay++;
+    if (m.mumBitti) mumSay++;
+  });
+  const tb = document.getElementById('ozelFiltreTasBtn');
+  const mb = document.getElementById('ozelFiltreMumBtn');
+  if (tb) tb.textContent = `🪨 Taşı Bitenler (${tasSay})`;
+  if (mb) mb.textContent = `🕯️ Mumu Bitenler (${mumSay})`;
 }
 
 let aktifKategori = '';
@@ -1578,15 +1728,18 @@ const KATEGORI_PREFIXLER = [
 ];
 
 function otomatikKategoriAta() {
+  const degisenler = [];
   allUrunler.forEach(u => {
     const meta = getUrunMeta(u.id);
     const match = KATEGORI_PREFIXLER.find(p => u.kod.toUpperCase().startsWith(p.prefix));
     const yeniKat = match ? match.kat : '';
     if (meta.kategori !== yeniKat) {
       meta.kategori = yeniKat;
-      setUrunMeta(u.id, meta);
+      urunMetaCache[u.id] = meta;
+      degisenler.push(metaToRow(u.id, meta));
     }
   });
+  if (degisenler.length) bulkUpsertUrunMeta(degisenler);
 }
 
 function updateKategoriCounts() {
@@ -1674,6 +1827,8 @@ function filterUrunler() {
     if (q && !u.ad.toLowerCase().includes(q) && !u.kod.toLowerCase().includes(q)) return false;
     const meta = getUrunMeta(u.id);
     if (aktifKategori && (meta.kategori || '') !== aktifKategori) return false;
+    if (aktifOzelFiltre === 'tas' && !meta.tasBitti) return false;
+    if (aktifOzelFiltre === 'mum' && !meta.mumBitti) return false;
     const durum = meta.durum || [];
     const mecralar = meta.mecralar || {};
     for (const d of DURUM_IDS) {
@@ -1801,8 +1956,8 @@ function openDetay(urunId) {
     ${vars.length ? ayarlar.map(buildAyarBlok).join('') : '<div style="color:var(--text3);font-size:13px;margin-bottom:1rem;">Henüz varyant eklenmemiş.</div>'}
     <div class="detay-actions">
       <button class="btn btn-sm" onclick="dokumSiparisVer('${u.id}')">🔥 Döküm Siparişine Ekle</button>
-      ${isAdmin() ? `<button class="btn btn-sm btn-primary" onclick="closeModal('detayModal');editUrun('${u.id}')">Düzenle</button>` : ''}
-      ${isAdmin() ? `<button class="btn btn-sm btn-danger" onclick="deleteUrun('${u.id}')">Sil</button>` : ''}
+      ${urunYetkiVar() ? `<button class="btn btn-sm btn-primary" onclick="closeModal('detayModal');editUrun('${u.id}')">Düzenle</button>` : ''}
+      ${urunYetkiVar() ? `<button class="btn btn-sm btn-danger" onclick="deleteUrun('${u.id}')">Sil</button>` : ''}
     </div>`;
   openModal('detayModal');
 }
@@ -2001,11 +2156,75 @@ function resetDurumMecra() {
   DURUM_IDS.forEach(d => { const el = document.getElementById(d.id); if (el) el.checked = false; });
   MECRA_CONFIG.forEach(g => g.items.forEach(i => { const el = document.getElementById(i.id); if (el) el.checked = false; }));
 }
+let urunMetaCache = {};
+function metaToRow(urunId, meta) {
+  return {
+    urun_id: urunId,
+    durum: meta.durum || [],
+    kategori: meta.kategori || '',
+    mecralar: meta.mecralar || {},
+    tas: meta.tas || {},
+    tas_bitti: !!meta.tasBitti,
+    mum_bitti: !!meta.mumBitti
+  };
+}
+async function bulkUpsertUrunMeta(rows) {
+  const session = await ensureValidSession();
+  if (!session || !rows.length) return;
+  try {
+    await fetch(SUPABASE_URL + '/rest/v1/urun_meta?on_conflict=urun_id', {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + session.access_token,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal'
+      },
+      body: JSON.stringify(rows)
+    });
+  } catch(e) { console.error('urun_meta kaydedilemedi', e); }
+}
+async function loadUrunMetaCache() {
+  urunMetaCache = {};
+  try {
+    const rows = await api('urun_meta?select=*');
+    (rows || []).forEach(r => {
+      urunMetaCache[r.urun_id] = {
+        durum: r.durum || [],
+        kategori: r.kategori || '',
+        mecralar: r.mecralar || {},
+        tas: r.tas || {},
+        tasBitti: !!r.tas_bitti,
+        mumBitti: !!r.mum_bitti
+      };
+    });
+  } catch(e) { urunMetaCache = {}; }
+}
 function getUrunMeta(urunId) {
-  try { return JSON.parse(localStorage.getItem('kkgold_urun_meta_' + urunId) || '{}'); } catch(e) { return {}; }
+  return urunMetaCache[urunId] || {};
 }
 function setUrunMeta(urunId, data) {
-  localStorage.setItem('kkgold_urun_meta_' + urunId, JSON.stringify(data));
+  urunMetaCache[urunId] = data;
+  bulkUpsertUrunMeta([metaToRow(urunId, data)]);
+}
+async function migrateLocalUrunMetaToSupabase() {
+  if (!confirm('Bu tarayıcıdaki tüm ürün durum/kategori/taş/taşı-mumu bitti bilgilerini ortak veritabanına (Supabase) kopyalamak üzeresiniz. Bu işlemi sadece BİR KERE, verinin gerçekten bulunduğu tarayıcıdan çalıştırın. Devam edilsin mi?')) return;
+  const rows = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('kkgold_urun_meta_')) {
+      const urunId = key.slice('kkgold_urun_meta_'.length);
+      try {
+        const meta = JSON.parse(localStorage.getItem(key) || '{}');
+        rows.push(metaToRow(urunId, meta));
+      } catch(e) {}
+    }
+  }
+  if (!rows.length) { alert('Bu tarayıcıda taşınacak ürün verisi bulunamadı.'); return; }
+  await bulkUpsertUrunMeta(rows);
+  await loadUrunMetaCache();
+  alert(rows.length + ' ürünün verisi Supabase\'e taşındı. Şimdi tüm kullanıcılar bu bilgileri görecek.');
+  filterUrunler();
 }
 
 function tasSizToggle() {
@@ -2310,6 +2529,10 @@ function rolSekmeleri() {
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
   return izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
 }
+function urunYetkiVar() {
+  // admin dahil, "Urunler" sekmesini gorebilen herkes urun ekleyip/duzenleyip/silebilir
+  return currentUser.rol === 'admin' || rolSekmeleri().includes(1);
+}
 function applyRol() {
   const isAdminRol = currentUser.rol === 'admin';
   const gorunur = rolSekmeleri();
@@ -2320,11 +2543,13 @@ function applyRol() {
   }
   if (!isAdminRol) {
     window._personelMod = true;
-    setTimeout(() => {
-      const btn = document.getElementById('yeniUrunBtn');
-      if (btn) btn.style.display = 'none';
-    }, 500);
   }
+  setTimeout(() => {
+    const btn = document.getElementById('yeniUrunBtn');
+    if (btn) btn.style.display = urunYetkiVar() ? '' : 'none';
+    const secBtn = document.getElementById('secModBtn');
+    if (secBtn) secBtn.style.display = urunYetkiVar() ? '' : 'none';
+  }, 500);
   // Kullanıcı adını navda göster (tekrar tekrar çağrılırsa eski etiketi temizle)
   const navRight = document.querySelector('.nav-right');
   navRight.querySelectorAll('.kkgold-user-chip').forEach(el => el.remove());
