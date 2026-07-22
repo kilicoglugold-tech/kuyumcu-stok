@@ -1107,6 +1107,15 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <button class="btn" onclick="migrateLocalUrunMetaToSupabase()">Bu Tarayıcıdaki Ürün Verilerini Taşı</button>
     </div>
   </div>
+
+  <!-- BİR KERELİK: yerel Kuyumcukent/Kapalı Çarşı listelerini Supabase'e tasi - sadece admin -->
+  <div id="kkMigratePanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel">
+      <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">📤 Kuyumcukent/Kapalı Çarşı Listelerini Ortak Veritabanına Taşı</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Ana Sayfa'daki Kuyumcukent ve Kapalı Çarşı listeleri artık Supabase'te (herkeste ortak) tutuluyor. Bu tarayıcıda daha önce girilmiş madde varsa, bir kereliğine buraya basarak Supabase'e kopyalayabilirsiniz. Sadece verinin gerçekten bulunduğu tarayıcıdan bir kez çalıştırmanız yeterli.</div>
+      <button class="btn" onclick="migrateLocalKkListeToSupabase()">Bu Tarayıcıdaki Alışveriş Listelerini Taşı</button>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -1369,7 +1378,7 @@ function showPage(page) {
   document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
   if (page === 'anasayfa') { asInit(); }
   if (page === 'rapor') { loadRapor(); loadGecmisVeriler(); }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
+  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); baRender(); }
@@ -2225,6 +2234,28 @@ async function migrateLocalUrunMetaToSupabase() {
   await loadUrunMetaCache();
   alert(rows.length + ' ürünün verisi Supabase\'e taşındı. Şimdi tüm kullanıcılar bu bilgileri görecek.');
   filterUrunler();
+}
+
+async function migrateLocalKkListeToSupabase() {
+  if (!confirm('Bu tarayıcıdaki Kuyumcukent ve Kapalı Çarşı listelerini ortak veritabanına (Supabase) kopyalamak üzeresiniz. Bu işlemi sadece BİR KERE, verinin gerçekten bulunduğu tarayıcıdan çalıştırın. Devam edilsin mi?')) return;
+  const rows = [];
+  Object.keys(KK_KEYS).forEach(key => {
+    try {
+      const liste = JSON.parse(localStorage.getItem(KK_KEYS[key]) || '[]');
+      liste.forEach(item => rows.push({ id: item.id, tip: key, metin: item.metin, tiklendi: !!item.tiklendi }));
+    } catch(e) {}
+  });
+  if (!rows.length) { alert('Bu tarayıcıda taşınacak liste verisi bulunamadı.'); return; }
+  try {
+    await api('alisveris_listeleri', 'POST', rows);
+  } catch(e) {
+    alert('Taşıma hatası: ' + e.message);
+    return;
+  }
+  await loadKkListeCache();
+  kkListeRender('kuyumcukent');
+  kkListeRender('kapalicarsi');
+  alert(rows.length + ' madde Supabase\'e taşındı. Şimdi tüm kullanıcılar bu listeleri görecek.');
 }
 
 function tasSizToggle() {
@@ -3930,12 +3961,13 @@ async function saveYuppionOdeme() {
 const AS_GUNLER = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
 const AS_AYLAR  = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 
-function asInit() {
+async function asInit() {
   const g = new Date();
   const el = document.getElementById('asTarih');
   if (el) el.textContent = AS_GUNLER[g.getDay()] + ', ' + g.getDate() + ' ' + AS_AYLAR[g.getMonth()] + ' ' + g.getFullYear();
   asGorevRender();
   asHatirlatmaRender();
+  await loadKkListeCache();
   kkListeRender('kuyumcukent');
   kkListeRender('kapalicarsi');
 }
@@ -4114,14 +4146,24 @@ function asTumOdemeSil(id) {
   asTumOdemelerAc();
 }
 
-// ===== ALIŞVERİŞ LİSTELERİ =====
+// ===== ALIŞVERİŞ LİSTELERİ (Supabase - herkeste ortak) =====
 const KK_KEYS = { kuyumcukent: 'kkgold_kuyumcukent', kapalicarsi: 'kkgold_kapalicarsi' };
+let kkListeCache = { kuyumcukent: [], kapalicarsi: [] };
+
+async function loadKkListeCache() {
+  try {
+    const rows = await api('alisveris_listeleri?select=*&order=olusturma.asc');
+    const yeni = { kuyumcukent: [], kapalicarsi: [] };
+    (rows || []).forEach(r => {
+      if (!yeni[r.tip]) yeni[r.tip] = [];
+      yeni[r.tip].push({ id: r.id, metin: r.metin, tiklendi: !!r.tiklendi });
+    });
+    kkListeCache = yeni;
+  } catch(e) { /* giriş öncesi olabilir, sessiz geç */ }
+}
 
 function kkGetListe(key) {
-  try { return JSON.parse(localStorage.getItem(KK_KEYS[key]) || '[]'); } catch(e) { return []; }
-}
-function kkSetListe(key, liste) {
-  localStorage.setItem(KK_KEYS[key], JSON.stringify(liste));
+  return kkListeCache[key] || [];
 }
 
 function kkListeEkleAc(key) {
@@ -4131,31 +4173,48 @@ function kkListeEkleAc(key) {
   if (open) setTimeout(() => document.getElementById('kkInput_' + key).focus(), 50);
 }
 
-function kkListeEkle(key) {
+async function kkListeEkle(key) {
   const input = document.getElementById('kkInput_' + key);
   const metin = input.value.trim();
   if (!metin) return;
-  const liste = kkGetListe(key);
-  liste.push({ id: Date.now(), metin, tiklendi: false });
-  kkSetListe(key, liste);
+  const id = Date.now();
+  kkListeCache[key] = [...kkGetListe(key), { id, metin, tiklendi: false }];
   input.value = '';
   document.getElementById('kkEkleWrap_' + key).style.display = 'none';
   kkListeRender(key);
+  try {
+    await api('alisveris_listeleri', 'POST', { id, tip: key, metin, tiklendi: false });
+  } catch(e) {
+    showToast('Kaydedilemedi: ' + e.message);
+  }
 }
 
-function kkTikle(key, id) {
+async function kkTikle(key, id) {
   const liste = kkGetListe(key);
   const item = liste.find(x => x.id === id);
-  if (item) item.tiklendi = !item.tiklendi;
-  kkSetListe(key, liste);
+  if (!item) return;
+  item.tiklendi = !item.tiklendi;
   kkListeRender(key);
+  try {
+    await api('alisveris_listeleri?id=eq.' + id, 'PATCH', { tiklendi: item.tiklendi });
+  } catch(e) {
+    item.tiklendi = !item.tiklendi;
+    kkListeRender(key);
+    showToast('Kaydedilemedi: ' + e.message);
+  }
 }
 
-function kkSil(key, id) {
-  let liste = kkGetListe(key);
-  liste = liste.filter(x => x.id !== id);
-  kkSetListe(key, liste);
+async function kkSil(key, id) {
+  const onceki = kkGetListe(key);
+  kkListeCache[key] = onceki.filter(x => x.id !== id);
   kkListeRender(key);
+  try {
+    await api('alisveris_listeleri?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    kkListeCache[key] = onceki;
+    kkListeRender(key);
+    showToast('Silinemedi: ' + e.message);
+  }
 }
 
 function kkListeRender(key) {
