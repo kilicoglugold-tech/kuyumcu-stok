@@ -584,6 +584,8 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;" id="ozelFiltreBar">
     <button class="ayar-tab" id="ozelFiltreTasBtn" onclick="secOzelFiltre('tas',this)">💎 Taşı Bitenler (0)</button>
     <button class="ayar-tab" id="ozelFiltreMumBtn" onclick="secOzelFiltre('mum',this)">🕯️ Mumu Bitenler (0)</button>
+    <button class="ayar-tab" id="ozelFiltreFotoBtn" onclick="secOzelFiltre('foto',this)">📷 Fotoğrafsız (0)</button>
+    <button class="ayar-tab" id="ozelFiltreGramBtn" onclick="secOzelFiltre('gram',this)">⚖️ Gramsız (0)</button>
   </div>
   <div class="filtre-panel" id="filtrePanel">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
@@ -1761,16 +1763,22 @@ function secOzelFiltre(tip, btn) {
   filterUrunler();
 }
 function updateOzelFiltreCounts() {
-  let tasSay = 0, mumSay = 0;
+  let tasSay = 0, mumSay = 0, fotoSay = 0, gramSay = 0;
   allUrunler.forEach(u => {
     const m = getUrunMeta(u.id);
     if (m.tasBitti) tasSay++;
     if (m.mumBitti) mumSay++;
+    if (!u.fotograf_url) fotoSay++;
+    if (!allVaryantlar.some(v => v.urun_id === u.id)) gramSay++;
   });
   const tb = document.getElementById('ozelFiltreTasBtn');
   const mb = document.getElementById('ozelFiltreMumBtn');
+  const fb = document.getElementById('ozelFiltreFotoBtn');
+  const gb = document.getElementById('ozelFiltreGramBtn');
   if (tb) tb.textContent = `💎 Taşı Bitenler (${tasSay})`;
   if (mb) mb.textContent = `🕯️ Mumu Bitenler (${mumSay})`;
+  if (fb) fb.textContent = `📷 Fotoğrafsız (${fotoSay})`;
+  if (gb) gb.textContent = `⚖️ Gramsız (${gramSay})`;
 }
 
 let aktifKategori = '';
@@ -1889,6 +1897,8 @@ function filterUrunler() {
     if (aktifKategori && (meta.kategori || '') !== aktifKategori) return false;
     if (aktifOzelFiltre === 'tas' && !meta.tasBitti) return false;
     if (aktifOzelFiltre === 'mum' && !meta.mumBitti) return false;
+    if (aktifOzelFiltre === 'foto' && u.fotograf_url) return false;
+    if (aktifOzelFiltre === 'gram' && allVaryantlar.some(v => v.urun_id === u.id)) return false;
     const durum = meta.durum || [];
     const mecralar = meta.mecralar || {};
     for (const d of DURUM_IDS) {
@@ -2026,6 +2036,7 @@ function openDetay(urunId) {
     ${vars.length ? ayarlar.map(buildAyarBlok).join('') : '<div style="color:var(--text3);font-size:13px;margin-bottom:1rem;">Henüz varyant eklenmemiş.</div>'}
     <div class="detay-actions">
       <button class="btn btn-sm" onclick="dokumSiparisVer('${u.id}')">🔥 Döküm Siparişine Ekle</button>
+      <button class="btn btn-sm" onclick="toggleUrunFlag('${u.id}','fotoYuklendi');openDetay('${u.id}')" style="${meta.fotoYuklendi ? 'background:#1B7A4A;color:#fff;border-color:#1B7A4A;' : ''}">📷 Fotoğrafları Yüklendi${meta.fotoYuklendi ? ' ✓' : ''}</button>
       ${urunYetkiVar() ? `<button class="btn btn-sm btn-primary" onclick="closeModal('detayModal');editUrun('${u.id}')">Düzenle</button>` : ''}
       ${urunYetkiVar() ? `<button class="btn btn-sm btn-danger" onclick="deleteUrun('${u.id}')">Sil</button>` : ''}
     </div>`;
@@ -2235,7 +2246,8 @@ function metaToRow(urunId, meta) {
     mecralar: meta.mecralar || {},
     tas: meta.tas || {},
     tas_bitti: !!meta.tasBitti,
-    mum_bitti: !!meta.mumBitti
+    mum_bitti: !!meta.mumBitti,
+    foto_yuklendi: !!meta.fotoYuklendi
   };
 }
 async function bulkUpsertUrunMeta(rows) {
@@ -2265,7 +2277,8 @@ async function loadUrunMetaCache() {
         mecralar: r.mecralar || {},
         tas: r.tas || {},
         tasBitti: !!r.tas_bitti,
-        mumBitti: !!r.mum_bitti
+        mumBitti: !!r.mum_bitti,
+        fotoYuklendi: !!r.foto_yuklendi
       };
     });
   } catch(e) { urunMetaCache = {}; }
