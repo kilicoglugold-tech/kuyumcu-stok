@@ -584,7 +584,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;" id="ozelFiltreBar">
     <button class="ayar-tab" id="ozelFiltreTasBtn" onclick="secOzelFiltre('tas',this)">💎 Taşı Bitenler (0)</button>
     <button class="ayar-tab" id="ozelFiltreMumBtn" onclick="secOzelFiltre('mum',this)">🕯️ Mumu Bitenler (0)</button>
-    <button class="ayar-tab" id="ozelFiltreFotoBtn" onclick="secOzelFiltre('foto',this)">📷 Fotoğrafsız (0)</button>
+    <button class="ayar-tab" id="ozelFiltreFotoBtn" onclick="secOzelFiltre('foto',this)">📷 Fotoğrafları Yüklenmemiş (0)</button>
     <button class="ayar-tab" id="ozelFiltreGramBtn" onclick="secOzelFiltre('gram',this)">⚖️ Gramsız (0)</button>
   </div>
   <div class="filtre-panel" id="filtrePanel">
@@ -1768,7 +1768,7 @@ function updateOzelFiltreCounts() {
     const m = getUrunMeta(u.id);
     if (m.tasBitti) tasSay++;
     if (m.mumBitti) mumSay++;
-    if (!u.fotograf_url) fotoSay++;
+    if (!m.fotoYuklendi) fotoSay++;
     if (!allVaryantlar.some(v => v.urun_id === u.id)) gramSay++;
   });
   const tb = document.getElementById('ozelFiltreTasBtn');
@@ -1777,7 +1777,7 @@ function updateOzelFiltreCounts() {
   const gb = document.getElementById('ozelFiltreGramBtn');
   if (tb) tb.textContent = `💎 Taşı Bitenler (${tasSay})`;
   if (mb) mb.textContent = `🕯️ Mumu Bitenler (${mumSay})`;
-  if (fb) fb.textContent = `📷 Fotoğrafsız (${fotoSay})`;
+  if (fb) fb.textContent = `📷 Fotoğrafları Yüklenmemiş (${fotoSay})`;
   if (gb) gb.textContent = `⚖️ Gramsız (${gramSay})`;
 }
 
@@ -1897,7 +1897,7 @@ function filterUrunler() {
     if (aktifKategori && (meta.kategori || '') !== aktifKategori) return false;
     if (aktifOzelFiltre === 'tas' && !meta.tasBitti) return false;
     if (aktifOzelFiltre === 'mum' && !meta.mumBitti) return false;
-    if (aktifOzelFiltre === 'foto' && u.fotograf_url) return false;
+    if (aktifOzelFiltre === 'foto' && meta.fotoYuklendi) return false;
     if (aktifOzelFiltre === 'gram' && allVaryantlar.some(v => v.urun_id === u.id)) return false;
     const durum = meta.durum || [];
     const mecralar = meta.mecralar || {};
@@ -2947,7 +2947,7 @@ function updatePlatOzet() {
     topKargo       += parseFloat(s.kargo_usd)||0;
     topKar         += parseFloat(s.kar_usd)||0;
     topGram        += gram * adet;
-    topTasGr       += parseTasGr(s.notlar) * adet;
+    topTasGr       += parseTasGr(s.notlar);
     topHas         += (parseFloat(s.has)||0) * adet;
     topKomisyon    += parseFloat(s.komisyon_usd)||0;
     topMilyemSum   += parseFloat(s.milyem)||0;
@@ -3039,9 +3039,9 @@ function psHesapla() {
   const adet = parseInt(document.getElementById('psAdet').value) || 1;
 
   const has = gram * milyem;
-  const maliyet = has * altin * adet;
-  const komisyon = satis * adet * 0.20;
-  const netKar = (satis * adet) - maliyet - kargo - komisyon;
+  const maliyet = has * altin;
+  const komisyon = satis * 0.20;
+  const netKar = satis - maliyet - kargo - komisyon;
 
   document.getElementById('psHas').value = has.toFixed(4);
   document.getElementById('psKomisyon').value = komisyon.toFixed(2);
@@ -3084,9 +3084,9 @@ async function savePlatSiparis() {
   const ay = tarih.slice(0,7);
 
   const has = gram * milyem;
-  const maliyet = has * altin * adet;
-  const komisyon = satis * adet * 0.20;
-  const kar = (satis * adet) - maliyet - kargo - komisyon;
+  const maliyet = has * altin;
+  const komisyon = satis * 0.20;
+  const kar = satis - maliyet - kargo - komisyon;
 
   const sipData = {
     platform: aktifPlatform, ay, tarih,
@@ -3619,7 +3619,7 @@ function updateGrupCOzet() {
     tk         += parseFloat(isTl?s.komisyon_try:s.komisyon_usd)||0;
     tkar       += parseFloat(isTl?s.kar_try:s.kar_usd)||0;
     topGram    += (parseFloat(s.gram)||0) * adet;
-    topTasGr   += parseTasGr(s.notlar) * adet;
+    topTasGr   += parseTasGr(s.notlar);
     topHasGC   += (parseFloat(s.has)||0) * adet;
     topKargoGC += parseFloat(isTl?s.kargo_try:s.kargo_usd)||0;
   });
@@ -3729,18 +3729,18 @@ function gcHesapla() {
     const altinUsd = parseFloat(grupcAylikParam?.altin_fiyati_usd) || 0;
     const kur      = grupcAylikParam?.dolar_kuru || 0;
     const altinTl  = altinUsd * kur;
-    maliyet  = has * altinTl * adet;
-    komisyon = satis * adet * kom;
-    netKar   = (satis * adet) - maliyet - kargo - komisyon;
+    maliyet  = has * altinTl;
+    komisyon = satis * kom;
+    netKar   = satis - maliyet - kargo - komisyon;
     document.getElementById('gcKomisyon').value = komisyon.toFixed(2);
     document.getElementById('gcHesapMaliyet').textContent = '₺' + maliyet.toFixed(2);
     document.getElementById('gcHesapKargo').textContent   = '₺' + kargo.toFixed(2);
     document.getElementById('gcHesapKomisyon').textContent = `₺${komisyon.toFixed(2)} (%${(kom*100).toFixed(0)})`;
   } else {
     const altin = parseFloat(grupcAylikParam?.altin_fiyati_usd) || 0;
-    maliyet  = has * altin * adet;
-    komisyon = satis * adet * kom;
-    netKar   = (satis * adet) - maliyet - kargo - komisyon;
+    maliyet  = has * altin;
+    komisyon = satis * kom;
+    netKar   = satis - maliyet - kargo - komisyon;
     document.getElementById('gcKomisyon').value = komisyon.toFixed(2);
     document.getElementById('gcHesapMaliyet').textContent = '$' + maliyet.toFixed(2);
     document.getElementById('gcHesapKargo').textContent   = '$' + kargo.toFixed(2);
@@ -3785,15 +3785,15 @@ async function saveGrupCSiparis() {
     const altinUsd = parseFloat(grupcAylikParam?.altin_fiyati_usd)||0;
     const kur      = grupcAylikParam?.dolar_kuru||0;
     const altinTl  = altinUsd * kur;
-    const mal = has * altinTl * adet;
-    const kom_ = satis * adet * kom;
-    const kar = (satis * adet) - mal - kargo - kom_;
+    const mal = has * altinTl;
+    const kom_ = satis * kom;
+    const kar = satis - mal - kargo - kom_;
     Object.assign(data, { kargo_try: kargo, satis_try: satis, maliyet_try: mal, komisyon_try: kom_, kar_try: kar, kargo_usd: 0, satis_usd: 0, maliyet_usd: 0, komisyon_usd: 0, kar_usd: 0 });
   } else {
     const altin = parseFloat(grupcAylikParam?.altin_fiyati_usd)||0;
-    const mal = has * altin * adet;
-    const kom_ = satis * adet * kom;
-    const kar = (satis * adet) - mal - kargo - kom_;
+    const mal = has * altin;
+    const kom_ = satis * kom;
+    const kar = satis - mal - kargo - kom_;
     Object.assign(data, { kargo_usd: kargo, satis_usd: satis, maliyet_usd: mal, komisyon_usd: kom_, kar_usd: kar, kargo_try: 0, satis_try: 0, maliyet_try: 0, komisyon_try: 0, kar_try: 0 });
   }
   if (editingGrupCId) {
@@ -3880,7 +3880,7 @@ function updateYuppionOzet() {
     tk       += parseFloat(s.kargo_usd)||0;
     tkar     += parseFloat(s.kar_usd)||0;
     topGram  += (parseFloat(s.gram)||0) * adet;
-    topTasGr += parseTasGr(s.notlar) * adet;
+    topTasGr += parseTasGr(s.notlar);
     topHasYP += (parseFloat(s.has)||0) * adet;
   });
   document.getElementById('ypTopSatis').textContent   = '$' + fmtPara(ts);
@@ -3980,8 +3980,8 @@ function ypHesapla() {
   const kargo = parseFloat(document.getElementById('ypKargo').value)||0;
   const adet  = parseInt(document.getElementById('ypAdet').value)||1;
   const has    = gram * milyem;
-  const maliyet = has * altin * adet;
-  const netKar  = (satis * adet) - maliyet - kargo;
+  const maliyet = has * altin;
+  const netKar  = satis - maliyet - kargo;
   document.getElementById('ypHas').value = has.toFixed(4);
   document.getElementById('ypHesapMaliyet').textContent  = '$' + maliyet.toFixed(2);
   document.getElementById('ypHesapKargo').textContent    = '$' + kargo.toFixed(2);
@@ -4007,8 +4007,8 @@ async function saveYuppionSiparis() {
   const tarih = document.getElementById('ypTarih').value;
   const ayar  = document.getElementById('ypAyar').value;
   const has    = gram * milyem;
-  const maliyet = has * altin * adet;
-  const kar = (satis * adet) - maliyet - kargo;
+  const maliyet = has * altin;
+  const kar = satis - maliyet - kargo;
   const data = {
     ay: tarih.slice(0,7), tarih, urun_adi: urun, adet, gram, ayar, milyem, has,
     ulke: document.getElementById('ypUlke').value, kargo_usd: kargo,
