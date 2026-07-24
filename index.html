@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V29-FMTTL-CAKISMA-DUZELTME --><!DOCTYPE html>
+﻿<!-- SURUM-V30-MAGAZA-OZET-RAPOR --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -662,10 +662,20 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       </table>
     </div>
   </div>
-  <div class="card siparis-tablo-wrap" style="overflow-x:auto;">
-    <table>
-      <thead><tr><th>#</th><th>Tarih</th><th>Müşteri</th><th>Ürün</th><th>Adet</th><th>Gram</th><th>Milyem</th><th>Maliyet $</th><th>Satış $</th><th>Kargo $</th><th>Kom. $</th><th>Net Kâr $</th><th>Net Kâr ₺</th></tr></thead>
-      <tbody id="raporTablo"><tr><td colspan="13" class="loading">Yükleniyor...</td></tr></tbody>
+  <div class="card" style="overflow-x:auto;">
+    <div style="font-weight:700;font-size:14px;margin-bottom:12px;">🏪 Mağaza Bazlı Özet</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:var(--bg2);">
+        <th style="padding:8px 12px;text-align:left;white-space:nowrap;">Mağaza</th>
+        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Satış Adet</th>
+        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Satış Gr</th>
+        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Taş Gr</th>
+        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Brüt Kâr $</th>
+        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Reklam Gideri $</th>
+        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Net Kâr $</th>
+        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Net Kâr ₺</th>
+      </tr></thead>
+      <tbody id="raporPlatformTablo"><tr><td colspan="8" class="loading">Yükleniyor...</td></tr></tbody>
     </table>
   </div>
 </div>
@@ -2553,42 +2563,100 @@ async function loadRapor() {
   const bit = new Date(ay+'-01'); bit.setMonth(bit.getMonth()+1);
   const bitStr = bit.toISOString().slice(0,10);
   try {
-    const [siparisler, params, platSip] = await Promise.all([
+    const [siparisler, params, platSip, platParam] = await Promise.all([
       api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`),
       api(`aylik_parametreler?ay=eq.${ay}&limit=1`),
-      api(`platform_siparisler?tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`)
+      api(`platform_siparisler?tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`),
+      api(`platform_parametreler?ay=eq.${ay}`)
     ]);
     let ypSip = [];
     try { ypSip = await api(`yuppion_siparisler?tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`); } catch(e) { ypSip = []; }
     const p = params && params.length ? params[0] : { dolar_kuru:0, altin_fiyati_usd:0, reklam_usd:0 };
     const kur = Number(p.dolar_kuru) || 0;
-    document.getElementById('rReklam').textContent = '$' + Number(p.reklam_usd).toFixed(2);
     document.getElementById('rKur').textContent = Number(p.dolar_kuru).toFixed(2) + ' ₺';
     document.getElementById('rAltin').textContent = '$' + Number(p.altin_fiyati_usd).toFixed(2) + '/gr';
 
-    let topSatis=0, topMaliyet=0, topGider=0, topKarUsd=0, topKarTry=0;
+    // ---- Mağaza bazlı gruplama ----
+    const gruplar = {};
+    RAPOR_MAGAZA_SIRA.forEach(k => { gruplar[k] = { adet:0, gram:0, tasGr:0, brutKarUsd:0, reklamUsd:0 }; });
+    const magazaGetir = (key) => { if (!gruplar[key]) gruplar[key] = { adet:0, gram:0, tasGr:0, brutKarUsd:0, reklamUsd:0 }; return gruplar[key]; };
+
+    const platformSatirlar = [...(platSip||[]), ...(ypSip||[])];
+    platformSatirlar.forEach(s => {
+      const n = normalizePlatformSatirGetir(s, kur);
+      const adet = parseFloat(s.adet) || 1;
+      const g = magazaGetir(s.platform || s.aktifPlatform || 'yuppion');
+      g.adet      += adet;
+      g.gram      += (parseFloat(s.gram)||0) * adet;
+      g.tasGr     += parseTasGr(s.notlar);
+      g.brutKarUsd += n.karUsd;
+    });
+
+    siparisler.forEach(s => {
+      const g = magazaGetir('_site');
+      const adet = parseFloat(s.adet) || 1;
+      g.adet       += adet;
+      g.gram       += (parseFloat(s.gram)||0) * adet;
+      g.brutKarUsd += s.net_kar_usd || 0;
+    });
+
+    (platParam||[]).forEach(rd => {
+      const g = gruplar[rd.platform];
+      if (!g) return;
+      g.reklamUsd = rd.platform === 'essos_etsy'
+        ? (kur ? (parseFloat(rd.reklam_try)||0) / kur : 0)
+        : (parseFloat(rd.reklam_usd)||0);
+    });
+
+    let toplamAdet=0, toplamGram=0, toplamTasGr=0, toplamBrutKar=0, toplamReklam=0, toplamNetKarUsd=0;
+    const satirlarHtml = RAPOR_MAGAZA_SIRA.map(key => {
+      const g = gruplar[key];
+      const netKarUsd = g.brutKarUsd - g.reklamUsd;
+      const netKarTry = netKarUsd * kur;
+      toplamAdet += g.adet; toplamGram += g.gram; toplamTasGr += g.tasGr;
+      toplamBrutKar += g.brutKarUsd; toplamReklam += g.reklamUsd; toplamNetKarUsd += netKarUsd;
+      return `<tr>
+        <td style="padding:8px 12px;font-weight:500;">${RAPOR_MAGAZA_AD[key] || key}</td>
+        <td style="padding:8px 12px;text-align:right;">${g.adet ? g.adet.toFixed(0) : 0}</td>
+        <td style="padding:8px 12px;text-align:right;">${g.gram.toFixed(2)}</td>
+        <td style="padding:8px 12px;text-align:right;">${g.tasGr.toFixed(2)}</td>
+        <td style="padding:8px 12px;text-align:right;">$${fmtTLTam(g.brutKarUsd)}</td>
+        <td style="padding:8px 12px;text-align:right;">$${fmtTLTam(g.reklamUsd)}</td>
+        <td style="padding:8px 12px;text-align:right;font-weight:500;color:${netKarUsd>=0?'var(--green)':'var(--red)'}">$${fmtTLTam(netKarUsd)}</td>
+        <td style="padding:8px 12px;text-align:right;font-weight:500;color:${netKarUsd>=0?'var(--green)':'var(--red)'}">${fmtTLTam(netKarTry)} ₺</td>
+      </tr>`;
+    }).join('');
+
+    const toplamNetKarTry = toplamNetKarUsd * kur;
+    const toplamHtml = `<tr style="background:var(--gold-light);font-weight:700;">
+      <td style="padding:8px 12px;">TOPLAM</td>
+      <td style="padding:8px 12px;text-align:right;">${toplamAdet.toFixed(0)}</td>
+      <td style="padding:8px 12px;text-align:right;">${toplamGram.toFixed(2)}</td>
+      <td style="padding:8px 12px;text-align:right;">${toplamTasGr.toFixed(2)}</td>
+      <td style="padding:8px 12px;text-align:right;">$${fmtTLTam(toplamBrutKar)}</td>
+      <td style="padding:8px 12px;text-align:right;">$${fmtTLTam(toplamReklam)}</td>
+      <td style="padding:8px 12px;text-align:right;color:${toplamNetKarUsd>=0?'var(--green)':'var(--red)'}">$${fmtTLTam(toplamNetKarUsd)}</td>
+      <td style="padding:8px 12px;text-align:right;color:${toplamNetKarUsd>=0?'var(--green)':'var(--red)'}">${fmtTLTam(toplamNetKarTry)} ₺</td>
+    </tr>`;
+
+    document.getElementById('raporPlatformTablo').innerHTML = satirlarHtml + toplamHtml;
+    document.getElementById('rReklam').textContent = '$' + fmtTLTam(toplamReklam);
+
+    // ---- Üstteki 5 özet kart (Satış / Maliyet / Kargo+Kom. eski sistemle uyumlu, Net Kâr yeni reklam toplamıyla) ----
+    let topSatis=0, topMaliyet=0, topGider=0;
     siparisler.forEach(s => {
       topSatis += (s.satis_fiyati_usd||0)*s.adet;
       topMaliyet += s.urun_maliyeti_usd||0;
       topGider += (s.kargo_usd||0) + (s.komisyon_usd||0);
-      topKarUsd += s.net_kar_usd||0;
-      topKarTry += s.net_kar_try||0;
     });
-
-    // Platform Siparişleri (Essos Etsy, Grup B/C platformları) ve Yuppion satışlarını da dahil et
-    const platformSatirlar = [...(platSip||[]), ...(ypSip||[])];
     platformSatirlar.forEach(s => {
       const n = normalizePlatformSatirGetir(s, kur);
       topSatis    += n.satisUsd;
       topMaliyet  += n.maliyetUsd;
       topGider    += n.kargoUsd + n.komisyonUsd;
-      topKarUsd   += n.karUsd;
-      topKarTry   += n.karUsd * kur;
     });
-
-    // reklam düş
-    topKarUsd -= Number(p.reklam_usd);
-    topKarTry -= Number(p.reklam_usd) * Number(p.dolar_kuru);
+    const topKarUsd = toplamNetKarUsd;
+    const topKarTry = toplamNetKarTry;
 
     document.getElementById('mSatis').textContent = '$' + fmtTLTam(topSatis);
     document.getElementById('mMaliyet').textContent = '$' + fmtTLTam(topMaliyet);
@@ -2599,53 +2667,7 @@ async function loadRapor() {
     const kt = document.getElementById('mKarTry');
     kt.textContent = fmtTLTam(topKarTry) + ' ₺';
     kt.className = 'metric-value ' + (topKarTry>=0?'green':'red');
-
-    const tbody = document.getElementById('raporTablo');
-    const satirSayisi = siparisler.length + platformSatirlar.length;
-    if (!satirSayisi) { tbody.innerHTML = '<tr><td colspan="13" class="empty">Bu ay sipariş yok</td></tr>'; return; }
-
-    const eskiSatirlarHtml = siparisler.map((s,i)=>{
-      const kar = s.net_kar_usd||0;
-      const v = s.varyantlar;
-      return `<tr>
-        <td style="color:#000;font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
-        <td>${s.tarih||'-'}</td>
-        <td>${s.musteri_adi}</td>
-        <td>${v?.urunler?.ad||'?'}</td>
-        <td>${s.adet}</td>
-        <td>${Number(s.gram||0).toFixed(3)}</td>
-        <td>${Number(s.milyem||0).toFixed(3)}</td>
-        <td>$${Number(s.urun_maliyeti_usd||0).toFixed(2)}</td>
-        <td>$${Number(s.satis_fiyati_usd||0).toFixed(2)}</td>
-        <td>$${Number(s.kargo_usd||0).toFixed(2)}</td>
-        <td>$${Number(s.komisyon_usd||0).toFixed(2)}</td>
-        <td style="font-weight:500;color:${kar>=0?'var(--green)':'var(--red)'}">$${kar.toFixed(2)}</td>
-        <td style="font-weight:500;color:${kar>=0?'var(--green)':'var(--red)'}">${Number(s.net_kar_try||0).toFixed(2)} ₺</td>
-      </tr>`;
-    }).join('');
-
-    const platformSatirlarHtml = platformSatirlar.map((s,i)=>{
-      const n = normalizePlatformSatirGetir(s, kur);
-      const platAd = PLATFORM_LABELS[s.platform] || s.platform || '-';
-      return `<tr>
-        <td style="color:#000;font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
-        <td>${s.tarih||'-'}</td>
-        <td>${s.musteri_adi||'-'}</td>
-        <td>${s.urun_adi||'-'} <span style="font-size:10px;color:var(--text3)">(${platAd})</span></td>
-        <td>${s.adet||1}</td>
-        <td>${Number(s.gram||0).toFixed(3)}</td>
-        <td>${Number(s.milyem||0).toFixed(3)}</td>
-        <td>$${n.maliyetUsd.toFixed(2)}</td>
-        <td>$${n.satisUsd.toFixed(2)}</td>
-        <td>$${n.kargoUsd.toFixed(2)}</td>
-        <td>$${n.komisyonUsd.toFixed(2)}</td>
-        <td style="font-weight:500;color:${n.karUsd>=0?'var(--green)':'var(--red)'}">$${n.karUsd.toFixed(2)}</td>
-        <td style="font-weight:500;color:${n.karUsd>=0?'var(--green)':'var(--red)'}">${(n.karUsd*kur).toFixed(2)} ₺</td>
-      </tr>`;
-    }).join('');
-
-    tbody.innerHTML = eskiSatirlarHtml + platformSatirlarHtml;
-  } catch(e) { document.getElementById('raporTablo').innerHTML = '<tr><td colspan="13">Hata: '+e.message+'</td></tr>'; }
+  } catch(e) { document.getElementById('raporPlatformTablo').innerHTML = '<tr><td colspan="8">Hata: '+e.message+'</td></tr>'; }
 }
 
 
@@ -2795,6 +2817,9 @@ const PLATFORM_LABELS = {
   'baileys': "Bailey's", 'bella': 'Bella', 'buse': 'Buse Jewelry',
   'alfred_com': 'alfred.com', 'trendyol': 'Trendyol', 'kilicoglu_com': 'kilicoglugold.com'
 };
+
+const RAPOR_MAGAZA_SIRA = ['essos_etsy','alfred_etsy','baileys','bella','buse','amazon','ebay','trendyol','alfred_com','yuppion','_site'];
+const RAPOR_MAGAZA_AD = { ...PLATFORM_LABELS, 'yuppion': 'Yuppion', '_site': 'İnternet Sitesi (Eski Kayıtlar)' };
 
 const GRUPB_TIPLER = {
   'kolye14':      { ad: 'Kolye 14K',       satis: 0.745, maliyet: 0.615 },
