@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V28-SAAT-DILIMI-DUZELTME --><!DOCTYPE html>
+﻿<!-- SURUM-V29-FMTTL-CAKISMA-DUZELTME --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1387,7 +1387,7 @@ function fmtPara(val) {
   if (dec === 0) return Math.round(n).toLocaleString('tr-TR');
   return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
-function fmtTL(val) {
+function fmtTLTam(val) {
   const n = parseFloat(val) || 0;
   return Math.round(n).toLocaleString('tr-TR');
 }
@@ -2590,14 +2590,14 @@ async function loadRapor() {
     topKarUsd -= Number(p.reklam_usd);
     topKarTry -= Number(p.reklam_usd) * Number(p.dolar_kuru);
 
-    document.getElementById('mSatis').textContent = '$' + fmtTL(topSatis);
-    document.getElementById('mMaliyet').textContent = '$' + fmtTL(topMaliyet);
-    document.getElementById('mGider').textContent = '$' + fmtTL(topGider);
+    document.getElementById('mSatis').textContent = '$' + fmtTLTam(topSatis);
+    document.getElementById('mMaliyet').textContent = '$' + fmtTLTam(topMaliyet);
+    document.getElementById('mGider').textContent = '$' + fmtTLTam(topGider);
     const ku = document.getElementById('mKarUsd');
-    ku.textContent = '$' + fmtTL(topKarUsd);
+    ku.textContent = '$' + fmtTLTam(topKarUsd);
     ku.className = 'metric-value ' + (topKarUsd>=0?'green':'red');
     const kt = document.getElementById('mKarTry');
-    kt.textContent = fmtTL(topKarTry) + ' ₺';
+    kt.textContent = fmtTLTam(topKarTry) + ' ₺';
     kt.className = 'metric-value ' + (topKarTry>=0?'green':'red');
 
     const tbody = document.getElementById('raporTablo');
