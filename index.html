@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V27-AY-DUZELTME --><!DOCTYPE html>
+﻿<!-- SURUM-V28-SAAT-DILIMI-DUZELTME --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1391,6 +1391,14 @@ function fmtTL(val) {
   const n = parseFloat(val) || 0;
   return Math.round(n).toLocaleString('tr-TR');
 }
+
+function bugunAy(d) {
+  // new Date(...).toISOString().slice(0,7) UTC+ saat dilimlerinde (Türkiye gibi)
+  // ayın 1'i yerel gece yarısını UTC'de bir önceki aya kaydırabiliyor -> bu yüzden
+  // ay hesaplarında HER ZAMAN yerel yıl/ay bileşenlerini kullan.
+  const x = d || new Date();
+  return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}`;
+}
 function parseTasGr(notlar) {
   const m = (notlar || '').match(/TAŞ:([\d.]+)/);
   return m ? parseFloat(m[1]) : 0;
@@ -1434,7 +1442,7 @@ function showPage(page) {
       raporAyIlkZorlamaYapildi = true;
       const selRA = document.getElementById('raporAy');
       if (selRA && selRA.options.length) {
-        const guncelAy = new Date().toISOString().slice(0,7);
+        const guncelAy = bugunAy();
         if ([...selRA.options].some(o => o.value === guncelAy)) selRA.value = guncelAy;
       }
     }
@@ -1453,7 +1461,7 @@ function closeModal(id) { document.getElementById(id).classList.remove('open'); 
 // ===== PARAMETRELERi =====
 async function loadAylikParam() {
   const now = new Date();
-  const ay = now.toISOString().slice(0,7);
+  const ay = bugunAy(now);
   try {
     const data = await api(`aylik_parametreler?ay=eq.${ay}&limit=1`);
     if (data && data.length) {
@@ -1472,7 +1480,7 @@ function updateParamBar(ay) {
 
 function initParamAy() {
   const now = new Date();
-  document.getElementById('paramAy').value = now.toISOString().slice(0,7);
+  document.getElementById('paramAy').value = bugunAy(now);
 }
 
 async function loadParametre() {
@@ -1505,7 +1513,7 @@ async function saveParametre() {
     } else {
       await api('aylik_parametreler', 'POST', { ay, dolar_kuru: kur, altin_fiyati_usd: altin, reklam_usd: reklam });
     }
-    const nowAy = new Date().toISOString().slice(0,7);
+    const nowAy = bugunAy();
     if (ay === nowAy) { aylikParam = { dolar_kuru: kur, altin_fiyati_usd: altin, reklam_usd: reklam }; updateParamBar(ay); }
     const msg = document.getElementById('paramMsg');
     msg.style.display = 'inline';
@@ -2524,7 +2532,7 @@ function initRaporAylar() {
   const opts = [];
   for (let i=0; i<24; i++) {
     const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    opts.push({ value: d.toISOString().slice(0,7), label: d.toLocaleDateString('tr-TR',{month:'long',year:'numeric'}) });
+    opts.push({ value: bugunAy(d), label: d.toLocaleDateString('tr-TR',{month:'long',year:'numeric'}) });
   }
   sel.innerHTML = opts.map(o=>`<option value="${o.value}">${o.label}</option>`).join('');
   sel.value = opts[0].value;
