@@ -2570,11 +2570,11 @@ async function loadRapor() {
     topKarUsd -= Number(p.reklam_usd);
     topKarTry -= Number(p.reklam_usd) * Number(p.dolar_kuru);
 
-    document.getElementById('mSatis').textContent = '$' + topSatis.toFixed(2);
-    document.getElementById('mMaliyet').textContent = '$' + topMaliyet.toFixed(2);
-    document.getElementById('mGider').textContent = '$' + topGider.toFixed(2);
+    document.getElementById('mSatis').textContent = '$' + fmtTL(topSatis);
+    document.getElementById('mMaliyet').textContent = '$' + fmtTL(topMaliyet);
+    document.getElementById('mGider').textContent = '$' + fmtTL(topGider);
     const ku = document.getElementById('mKarUsd');
-    ku.textContent = '$' + topKarUsd.toFixed(2);
+    ku.textContent = '$' + fmtTL(topKarUsd);
     ku.className = 'metric-value ' + (topKarUsd>=0?'green':'red');
     const kt = document.getElementById('mKarTry');
     kt.textContent = fmtTL(topKarTry) + ' ₺';
