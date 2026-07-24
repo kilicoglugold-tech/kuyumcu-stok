@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V32-YENI-KARTLAR-GECMIS-KALDIRILDI --><!DOCTYPE html>
+﻿<!-- SURUM-V36-NETKAR-DAR-KUTU --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -609,12 +609,18 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div style="display:flex;align-items:center;gap:8px;"><div class="page-title">Kar / Zarar Raporu</div><button class="gizli-btn" onclick="toggleGizliMod()" title="Rakamları gizle">👁️</button></div>
     <select class="form-control" id="raporAy" onchange="loadRapor()" style="width:auto;"></select>
   </div>
-  <div class="rapor-grid">
+  <div style="text-align:center;margin-bottom:1rem;">
+    <div class="card" style="text-align:center;background:var(--green-bg);border-color:var(--green);padding:1.25rem 2rem;display:inline-block;">
+      <div class="metric-label" style="text-align:center;">NET KÂR</div>
+      <div class="metric-value green" id="mKarBirlesik" style="font-size:30px;white-space:nowrap;">-</div>
+    </div>
+  </div>
+  <div class="rapor-grid" style="grid-template-columns:repeat(5,1fr);">
     <div class="metric-card"><div class="metric-label">Satış Adet</div><div class="metric-value gold" id="mAdet">-</div></div>
     <div class="metric-card"><div class="metric-label">Satış Gr</div><div class="metric-value" id="mGram">-</div></div>
     <div class="metric-card"><div class="metric-label">Taş Gr</div><div class="metric-value" id="mTasGr">-</div></div>
     <div class="metric-card"><div class="metric-label">Reklam Giderleri</div><div class="metric-value" id="mReklamGider">-</div></div>
-    <div class="metric-card" style="background:var(--green-bg);border-color:var(--green);"><div class="metric-label">Net Kâr</div><div class="metric-value green" id="mKarBirlesik" style="font-size:22px;">-</div></div>
+    <div class="metric-card"><div class="metric-label">Giderler</div><div class="metric-value red" id="mGiderlerToplam">-</div></div>
   </div>
   <div class="card" style="overflow-x:auto;">
     <div style="font-weight:700;font-size:14px;margin-bottom:12px;">🏪 Mağaza Bazlı Özet</div>
@@ -2517,11 +2523,12 @@ async function loadRapor() {
   const bit = new Date(ay+'-01'); bit.setMonth(bit.getMonth()+1);
   const bitStr = bit.toISOString().slice(0,10);
   try {
-    const [siparisler, params, platSip, platParam] = await Promise.all([
+    const [siparisler, params, platSip, platParam, giderKayitlari] = await Promise.all([
       api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`),
       api(`aylik_parametreler?ay=eq.${ay}&limit=1`),
       api(`platform_siparisler?tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`),
-      api(`platform_parametreler?ay=eq.${ay}`)
+      api(`platform_parametreler?ay=eq.${ay}`),
+      api(`giderler?ay=eq.${ay}`)
     ]);
     let ypSip = [];
     try { ypSip = await api(`yuppion_siparisler?tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`); } catch(e) { ypSip = []; }
@@ -2593,14 +2600,23 @@ async function loadRapor() {
 
     document.getElementById('raporPlatformTablo').innerHTML = satirlarHtml + toplamHtml;
 
+    // ---- Bu ayki genel giderler (Giderler sayfası: sabit + maaş + değişken, TL) ----
+    const giderlerToplamTry = (giderKayitlari||[])
+      .filter(d => ['sabit','maas','degisken'].includes(d.kategori))
+      .reduce((s,d) => s + (parseFloat(d.tutar)||0), 0);
+
     // ---- Üstteki özet kartlar ----
     document.getElementById('mAdet').textContent = toplamAdet.toFixed(0);
     document.getElementById('mGram').textContent = toplamGram.toFixed(2) + ' gr';
     document.getElementById('mTasGr').textContent = toplamTasGr.toFixed(2) + ' gr';
     document.getElementById('mReklamGider').textContent = '$' + fmtTLTam(toplamReklam);
+    const giderlerToplamUsd = kur ? (giderlerToplamTry / kur) : 0;
+    const netKarUsdSon = toplamNetKarUsd - giderlerToplamUsd;
+    const netKarTrySon = toplamNetKarTry - giderlerToplamTry;
     const kb = document.getElementById('mKarBirlesik');
-    kb.textContent = '$' + fmtTLTam(toplamNetKarUsd) + '  /  ' + fmtTLTam(toplamNetKarTry) + ' ₺';
-    kb.className = 'metric-value ' + (toplamNetKarUsd>=0?'green':'red');
+    kb.textContent = '$' + fmtTLTam(netKarUsdSon) + '  /  ' + fmtTLTam(netKarTrySon) + ' ₺';
+    kb.className = 'metric-value ' + (netKarUsdSon>=0?'green':'red');
+    document.getElementById('mGiderlerToplam').textContent = '-' + fmtTLTam(giderlerToplamTry) + ' ₺';
   } catch(e) { document.getElementById('raporPlatformTablo').innerHTML = '<tr><td colspan="8">Hata: '+e.message+'</td></tr>'; }
 }
 
