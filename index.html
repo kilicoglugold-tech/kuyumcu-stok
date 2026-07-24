@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V26-15-09 --><!DOCTYPE html>
+﻿<!-- SURUM-V27-AY-DUZELTME --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1415,6 +1415,7 @@ async function uploadFoto(file) {
 }
 
 // NAV
+let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
   const pages = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler'];
   const idx = pages.indexOf(page);
@@ -1428,7 +1429,17 @@ function showPage(page) {
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
   if (page === 'anasayfa') { asInit(); }
-  if (page === 'rapor') { loadRapor(); loadGecmisVeriler(); }
+  if (page === 'rapor') {
+    if (!raporAyIlkZorlamaYapildi) {
+      raporAyIlkZorlamaYapildi = true;
+      const selRA = document.getElementById('raporAy');
+      if (selRA && selRA.options.length) {
+        const guncelAy = new Date().toISOString().slice(0,7);
+        if ([...selRA.options].some(o => o.value === guncelAy)) selRA.value = guncelAy;
+      }
+    }
+    loadRapor(); loadGecmisVeriler();
+  }
   if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
@@ -2516,6 +2527,7 @@ function initRaporAylar() {
     opts.push({ value: d.toISOString().slice(0,7), label: d.toLocaleDateString('tr-TR',{month:'long',year:'numeric'}) });
   }
   sel.innerHTML = opts.map(o=>`<option value="${o.value}">${o.label}</option>`).join('');
+  sel.value = opts[0].value;
 }
 
 function normalizePlatformSatirGetir(s, kur) {
@@ -2825,6 +2837,9 @@ function fillAySec(selId) {
     const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
     sel.innerHTML += `<option value="${val}">${d.toLocaleDateString('tr-TR', {month:'long',year:'numeric'})}</option>`;
   }
+  // Tarayıcı sayfa yenilemesinde eski bir ay değerini geri yükleyebiliyor;
+  // ilk oluşturmada güncel aya zorla (bkz. Rapor sayfasındaki ay karışıklığı hatası).
+  sel.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 }
 
 function initPlatformlar() {
