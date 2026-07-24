@@ -2534,12 +2534,12 @@ async function loadRapor() {
   const bitStr = bit.toISOString().slice(0,10);
   try {
     const [siparisler, params, platSip] = await Promise.all([
-      api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&order=tarih.desc`),
+      api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`),
       api(`aylik_parametreler?ay=eq.${ay}&limit=1`),
-      api(`platform_siparisler?ay=eq.${ay}&order=tarih.desc`)
+      api(`platform_siparisler?tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`)
     ]);
     let ypSip = [];
-    try { ypSip = await api(`yuppion_siparisler?ay=eq.${ay}&order=tarih.desc`); } catch(e) { ypSip = []; }
+    try { ypSip = await api(`yuppion_siparisler?tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`); } catch(e) { ypSip = []; }
     const p = params && params.length ? params[0] : { dolar_kuru:0, altin_fiyati_usd:0, reklam_usd:0 };
     const kur = Number(p.dolar_kuru) || 0;
     document.getElementById('rReklam').textContent = '$' + Number(p.reklam_usd).toFixed(2);
