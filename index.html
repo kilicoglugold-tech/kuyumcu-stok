@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V36-NETKAR-DAR-KUTU --><!DOCTYPE html>
+﻿<!-- SURUM-V38-PLATFORMLAR-TUM-KARTLAR-KURUSSUZ --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -2913,7 +2913,7 @@ async function loadPlatformData() {
     if (aktifPlatform === 'essos_etsy') {
       const tryTutar = Number(rekData.reklam_try);
       const usdKarsilik = platAylikParam?.dolar_kuru ? (tryTutar / platAylikParam.dolar_kuru).toFixed(2) : '-';
-      document.getElementById('platReklam').textContent = tryTutar.toFixed(2) + ' ₺ ($' + usdKarsilik + ')';
+      document.getElementById('platReklam').textContent = fmtTLTam(tryTutar) + ' ₺ ($' + usdKarsilik + ')';
     } else {
       document.getElementById('platReklam').textContent = '$' + Number(rekData.reklam_usd).toFixed(2);
     }
@@ -2989,7 +2989,7 @@ function renderPlatTablo() {
 function tlAlti(usdVal, kur) {
   kur = parseFloat(kur) || 0;
   if (!kur) return '';
-  return `<div style="font-size:11px;color:var(--text3);font-weight:500;margin-top:2px;">₺${fmtTL(usdVal * kur)}</div>`;
+  return `<div style="font-size:11px;color:var(--text3);font-weight:500;margin-top:2px;">₺${fmtTLTam(usdVal * kur)}</div>`;
 }
 
 function updatePlatOzet() {
@@ -3021,16 +3021,16 @@ function updatePlatOzet() {
     }
   }
   const platKur = parseFloat(platAylikParam?.dolar_kuru) || 0;
-  document.getElementById('platTopSatis').innerHTML    = '$' + fmtPara(topSatis) + tlAlti(topSatis, platKur);
-  document.getElementById('platTopMaliyet').innerHTML  = '$' + fmtPara(topMaliyet) + tlAlti(topMaliyet, platKur);
-  document.getElementById('platTopKargo').innerHTML    = '$' + fmtPara(topKargo) + tlAlti(topKargo, platKur);
-  document.getElementById('platTopReklam').innerHTML   = '$' + fmtPara(reklamUsd) + tlAlti(reklamUsd, platKur);
+  document.getElementById('platTopSatis').innerHTML    = '$' + fmtTLTam(topSatis) + tlAlti(topSatis, platKur);
+  document.getElementById('platTopMaliyet').innerHTML  = '$' + fmtTLTam(topMaliyet) + tlAlti(topMaliyet, platKur);
+  document.getElementById('platTopKargo').innerHTML    = '$' + fmtTLTam(topKargo) + tlAlti(topKargo, platKur);
+  document.getElementById('platTopReklam').innerHTML   = '$' + fmtTLTam(reklamUsd) + tlAlti(reklamUsd, platKur);
   document.getElementById('platTopGram').textContent     = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('platTopTasGr').textContent    = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   document.getElementById('platTopAdet').textContent     = topAdet + ' adet';
   const netKar = topKar - reklamUsd;
   const karEl = document.getElementById('platTopKar');
-  karEl.innerHTML = '$' + fmtPara(netKar) + tlAlti(netKar, platKur);
+  karEl.innerHTML = '$' + fmtTLTam(netKar) + tlAlti(netKar, platKur);
   karEl.className = 'metric-value ' + (netKar >= 0 ? 'green' : 'red');
   const avgMilyem = topMilyemCntPT > 0 ? topMilyemSum / topMilyemCntPT : 0;
   const bdg = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
@@ -3038,11 +3038,11 @@ function updatePlatOzet() {
   pt('ptToplam_gram',    parseFloat(topGram.toFixed(3)).toString() + ' gr');
   pt('ptToplam_milyem',  parseFloat(avgMilyem.toFixed(4)).toString());
   pt('ptToplam_has',     topHas.toFixed(2));
-  pt('ptToplam_kargo',   '$' + fmtPara(topKargo));
-  pt('ptToplam_maliyet', '$' + fmtPara(topMaliyet));
-  pt('ptToplam_satis',   '$' + fmtPara(topSatis));
-  pt('ptToplam_komis',   '$' + fmtPara(topKomisyon));
-  pt('ptToplam_kar',     '$' + fmtPara(netKar));
+  pt('ptToplam_kargo',   '$' + fmtTLTam(topKargo));
+  pt('ptToplam_maliyet', '$' + fmtTLTam(topMaliyet));
+  pt('ptToplam_satis',   '$' + fmtTLTam(topSatis));
+  pt('ptToplam_komis',   '$' + fmtTLTam(topKomisyon));
+  pt('ptToplam_kar',     '$' + fmtTLTam(netKar));
 }
 
 // ===== SİPARİŞ MODAL =====
@@ -3333,7 +3333,7 @@ function updateGrupBOzet() {
   document.getElementById('gbTopTasGr').textContent      = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   const gbKur = parseFloat(grupbAylikParam?.dolar_kuru) || 0;
   const el = document.getElementById('gbTopKarUsd');
-  el.innerHTML = '$' + fmtPara(ku) + tlAlti(ku, gbKur);
+  el.innerHTML = '$' + fmtTLTam(ku) + tlAlti(ku, gbKur);
   el.className = 'metric-value ' + (ku >= 0 ? 'green' : 'red');
   const bdgGB = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
   const gb = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = bdgGB(v); };
@@ -3683,23 +3683,23 @@ function updateGrupCOzet() {
     topKargoGC += parseFloat(isTl?s.kargo_try:s.kargo_usd)||0;
   });
   const gcKur = parseFloat(grupcAylikParam?.dolar_kuru) || 0;
-  document.getElementById('gcTopSatis').innerHTML   = sym + (isTl ? fmtTL(ts) : fmtPara(ts) + tlAlti(ts, gcKur));
-  document.getElementById('gcTopMaliyet').innerHTML = sym + (isTl ? fmtTL(tm) : fmtPara(tm) + tlAlti(tm, gcKur));
-  document.getElementById('gcTopKom').innerHTML     = sym + (isTl ? fmtTL(tk) : fmtPara(tk) + tlAlti(tk, gcKur));
+  document.getElementById('gcTopSatis').innerHTML   = isTl ? (fmtTLTam(ts) + ' ₺') : ('$' + fmtTLTam(ts) + tlAlti(ts, gcKur));
+  document.getElementById('gcTopMaliyet').innerHTML = isTl ? (fmtTLTam(tm) + ' ₺') : ('$' + fmtTLTam(tm) + tlAlti(tm, gcKur));
+  document.getElementById('gcTopKom').innerHTML     = isTl ? (fmtTLTam(tk) + ' ₺') : ('$' + fmtTLTam(tk) + tlAlti(tk, gcKur));
   document.getElementById('gcTopGram').textContent    = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('gcTopTasGr').textContent   = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   const el = document.getElementById('gcTopKar');
-  el.innerHTML = sym + (isTl ? fmtTL(tkar) : fmtPara(tkar) + tlAlti(tkar, gcKur));
+  el.innerHTML = isTl ? (fmtTLTam(tkar) + ' ₺') : ('$' + fmtTLTam(tkar) + tlAlti(tkar, gcKur));
   el.className = 'metric-value ' + (tkar >= 0 ? 'green' : 'red');
   const bdgGC = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
   const gc = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = bdgGC(v); };
   gc('gcToplam_gram',    parseFloat(topGram.toFixed(3)).toString() + ' gr');
   gc('gcToplam_has',     topHasGC.toFixed(2));
-  gc('gcToplam_kargo',   sym + fmtPara(topKargoGC));
-  gc('gcToplam_maliyet', sym + fmtPara(tm));
-  gc('gcToplam_satis',   sym + fmtPara(ts));
-  gc('gcToplam_komis',   sym + fmtPara(tk));
-  gc('gcToplam_kar',     sym + fmtPara(tkar));
+  gc('gcToplam_kargo',   sym + fmtTLTam(topKargoGC));
+  gc('gcToplam_maliyet', sym + fmtTLTam(tm));
+  gc('gcToplam_satis',   sym + fmtTLTam(ts));
+  gc('gcToplam_komis',   sym + fmtTLTam(tk));
+  gc('gcToplam_kar',     sym + fmtTLTam(tkar));
 }
 
 let editingGrupCId = null;
@@ -3944,13 +3944,13 @@ function updateYuppionOzet() {
     topHasYP += (parseFloat(s.has)||0) * adet;
   });
   const ypKur = parseFloat(yuppionAylikParam?.dolar_kuru) || 0;
-  document.getElementById('ypTopSatis').innerHTML   = '$' + fmtPara(ts) + tlAlti(ts, ypKur);
-  document.getElementById('ypTopMaliyet').innerHTML = '$' + fmtPara(tm) + tlAlti(tm, ypKur);
-  document.getElementById('ypTopKargo').innerHTML   = '$' + fmtPara(tk) + tlAlti(tk, ypKur);
+  document.getElementById('ypTopSatis').innerHTML   = '$' + fmtTLTam(ts) + tlAlti(ts, ypKur);
+  document.getElementById('ypTopMaliyet').innerHTML = '$' + fmtTLTam(tm) + tlAlti(tm, ypKur);
+  document.getElementById('ypTopKargo').innerHTML   = '$' + fmtTLTam(tk) + tlAlti(tk, ypKur);
   document.getElementById('ypTopGram').textContent    = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('ypTopTasGr').textContent   = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   const el = document.getElementById('ypTopKar');
-  el.innerHTML = '$' + fmtPara(tkar) + tlAlti(tkar, ypKur);
+  el.innerHTML = '$' + fmtTLTam(tkar) + tlAlti(tkar, ypKur);
   el.className = 'metric-value ' + (tkar >= 0 ? 'green' : 'red');
   const bdgYP = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
   const yp = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = bdgYP(v); };
