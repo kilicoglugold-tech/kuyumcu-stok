@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V30-MAGAZA-OZET-RAPOR --><!DOCTYPE html>
+﻿<!-- SURUM-V32-YENI-KARTLAR-GECMIS-KALDIRILDI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -262,7 +262,6 @@ body.gizli-mod #gbToplam_gram, body.gizli-mod #gbToplam_milyem,
 body.gizli-mod #gbToplam_satishas, body.gizli-mod #gbToplam_maliyethas,
 body.gizli-mod #gbToplam_haskar, body.gizli-mod #gbToplam_kar,
 body.gizli-mod #gbBakiyeDeger,
-body.gizli-mod #gecmisTablo td:nth-child(n+3), body.gizli-mod #gecmisToplam td:nth-child(n+3) { filter: blur(7px); user-select:none; }
 body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: filter .2s; }
 #platTable .col-hide { display:none !important; }
 .col-panel { position:absolute;right:0;top:100%;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.12);padding:12px 16px;z-index:999;min-width:180px;display:none; }
@@ -609,58 +608,13 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div class="page-header">
     <div style="display:flex;align-items:center;gap:8px;"><div class="page-title">Kar / Zarar Raporu</div><button class="gizli-btn" onclick="toggleGizliMod()" title="Rakamları gizle">👁️</button></div>
     <select class="form-control" id="raporAy" onchange="loadRapor()" style="width:auto;"></select>
-    <button class="btn btn-primary btn-sm" onclick="openGecmisModal()" style="white-space:nowrap;">📥 Geçmiş Ay Ekle</button>
   </div>
   <div class="rapor-grid">
-    <div class="metric-card"><div class="metric-label">Toplam Satış</div><div class="metric-value gold" id="mSatis">-</div></div>
-    <div class="metric-card"><div class="metric-label">Toplam Maliyet</div><div class="metric-value" id="mMaliyet">-</div></div>
-    <div class="metric-card"><div class="metric-label">Kargo + Komisyon</div><div class="metric-value" id="mGider">-</div></div>
-    <div class="metric-card"><div class="metric-label">Net Kâr ($)</div><div class="metric-value green" id="mKarUsd">-</div></div>
-    <div class="metric-card"><div class="metric-label">Net Kâr (₺)</div><div class="metric-value green" id="mKarTry">-</div></div>
-  </div>
-  <div class="card" style="margin-bottom:1rem;">
-    <div style="display:flex;gap:20px;font-size:13px;">
-      <span>📢 Reklam: <strong id="rReklam">-</strong></span>
-      <span>💵 Dolar Kuru: <strong id="rKur">-</strong></span>
-      <span>🪙 Altın: <strong id="rAltin">-</strong></span>
-    </div>
-  </div>
-  <div class="card" style="margin-bottom:1rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-      <div style="font-weight:700;font-size:14px;">📊 Tüm Aylar Karşılaştırma</div>
-      <select id="gecmisFiltrePlatform" class="form-control" onchange="renderGecmisTablo()" style="width:160px;font-size:12px;">
-        <option value="">Tüm Platformlar</option>
-        <option value="essos_etsy">Essos Etsy</option>
-        <option value="alfred_etsy">Alfred Etsy</option>
-        <option value="amazon">Amazon</option>
-        <option value="ebay">Ebay</option>
-        <option value="baileys">Bailey's Store</option>
-        <option value="bella">Bella Store</option>
-        <option value="buse">Buse Jewelry</option>
-        <option value="yuppion">Yuppion</option>
-        <option value="alfred_com">alfred.com</option>
-        <option value="trendyol">Trendyol</option>
-        <option value="kilicoglugold">kilicoglugold.com</option>
-      </select>
-    </div>
-    <div style="overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;font-size:12px;">
-        <thead><tr style="background:var(--bg2);">
-          <th style="padding:8px;text-align:left;white-space:nowrap;">Ay</th>
-          <th style="padding:8px;text-align:left;white-space:nowrap;">Platform</th>
-          <th style="padding:8px;text-align:right;white-space:nowrap;">Adet</th>
-          <th style="padding:8px;text-align:right;white-space:nowrap;">Gram</th>
-          <th style="padding:8px;text-align:right;white-space:nowrap;">Ciro $</th>
-          <th style="padding:8px;text-align:right;white-space:nowrap;">Maliyet $</th>
-          <th style="padding:8px;text-align:right;white-space:nowrap;">Kargo $</th>
-          <th style="padding:8px;text-align:right;white-space:nowrap;">Reklam $</th>
-          <th style="padding:8px;text-align:right;white-space:nowrap;">Kâr $</th>
-          <th style="padding:8px;text-align:center;">İşlem</th>
-        </tr></thead>
-        <tbody id="gecmisTablo"><tr><td colspan="10" style="text-align:center;padding:20px;color:var(--text3);">Geçmiş veri yok. Ekle butonunu kullanın.</td></tr></tbody>
-        <tfoot id="gecmisToplam"></tfoot>
-      </table>
-    </div>
+    <div class="metric-card"><div class="metric-label">Satış Adet</div><div class="metric-value gold" id="mAdet">-</div></div>
+    <div class="metric-card"><div class="metric-label">Satış Gr</div><div class="metric-value" id="mGram">-</div></div>
+    <div class="metric-card"><div class="metric-label">Taş Gr</div><div class="metric-value" id="mTasGr">-</div></div>
+    <div class="metric-card"><div class="metric-label">Reklam Giderleri</div><div class="metric-value" id="mReklamGider">-</div></div>
+    <div class="metric-card" style="background:var(--green-bg);border-color:var(--green);"><div class="metric-label">Net Kâr</div><div class="metric-value green" id="mKarBirlesik" style="font-size:22px;">-</div></div>
   </div>
   <div class="card" style="overflow-x:auto;">
     <div style="font-weight:700;font-size:14px;margin-bottom:12px;">🏪 Mağaza Bazlı Özet</div>
@@ -1456,7 +1410,7 @@ function showPage(page) {
         if ([...selRA.options].some(o => o.value === guncelAy)) selRA.value = guncelAy;
       }
     }
-    loadRapor(); loadGecmisVeriler();
+    loadRapor();
   }
   if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
@@ -2573,8 +2527,6 @@ async function loadRapor() {
     try { ypSip = await api(`yuppion_siparisler?tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`); } catch(e) { ypSip = []; }
     const p = params && params.length ? params[0] : { dolar_kuru:0, altin_fiyati_usd:0, reklam_usd:0 };
     const kur = Number(p.dolar_kuru) || 0;
-    document.getElementById('rKur').textContent = Number(p.dolar_kuru).toFixed(2) + ' ₺';
-    document.getElementById('rAltin').textContent = '$' + Number(p.altin_fiyati_usd).toFixed(2) + '/gr';
 
     // ---- Mağaza bazlı gruplama ----
     const gruplar = {};
@@ -2640,33 +2592,15 @@ async function loadRapor() {
     </tr>`;
 
     document.getElementById('raporPlatformTablo').innerHTML = satirlarHtml + toplamHtml;
-    document.getElementById('rReklam').textContent = '$' + fmtTLTam(toplamReklam);
 
-    // ---- Üstteki 5 özet kart (Satış / Maliyet / Kargo+Kom. eski sistemle uyumlu, Net Kâr yeni reklam toplamıyla) ----
-    let topSatis=0, topMaliyet=0, topGider=0;
-    siparisler.forEach(s => {
-      topSatis += (s.satis_fiyati_usd||0)*s.adet;
-      topMaliyet += s.urun_maliyeti_usd||0;
-      topGider += (s.kargo_usd||0) + (s.komisyon_usd||0);
-    });
-    platformSatirlar.forEach(s => {
-      const n = normalizePlatformSatirGetir(s, kur);
-      topSatis    += n.satisUsd;
-      topMaliyet  += n.maliyetUsd;
-      topGider    += n.kargoUsd + n.komisyonUsd;
-    });
-    const topKarUsd = toplamNetKarUsd;
-    const topKarTry = toplamNetKarTry;
-
-    document.getElementById('mSatis').textContent = '$' + fmtTLTam(topSatis);
-    document.getElementById('mMaliyet').textContent = '$' + fmtTLTam(topMaliyet);
-    document.getElementById('mGider').textContent = '$' + fmtTLTam(topGider);
-    const ku = document.getElementById('mKarUsd');
-    ku.textContent = '$' + fmtTLTam(topKarUsd);
-    ku.className = 'metric-value ' + (topKarUsd>=0?'green':'red');
-    const kt = document.getElementById('mKarTry');
-    kt.textContent = fmtTLTam(topKarTry) + ' ₺';
-    kt.className = 'metric-value ' + (topKarTry>=0?'green':'red');
+    // ---- Üstteki özet kartlar ----
+    document.getElementById('mAdet').textContent = toplamAdet.toFixed(0);
+    document.getElementById('mGram').textContent = toplamGram.toFixed(2) + ' gr';
+    document.getElementById('mTasGr').textContent = toplamTasGr.toFixed(2) + ' gr';
+    document.getElementById('mReklamGider').textContent = '$' + fmtTLTam(toplamReklam);
+    const kb = document.getElementById('mKarBirlesik');
+    kb.textContent = '$' + fmtTLTam(toplamNetKarUsd) + '  /  ' + fmtTLTam(toplamNetKarTry) + ' ₺';
+    kb.className = 'metric-value ' + (toplamNetKarUsd>=0?'green':'red');
   } catch(e) { document.getElementById('raporPlatformTablo').innerHTML = '<tr><td colspan="8">Hata: '+e.message+'</td></tr>'; }
 }
 
@@ -4758,64 +4692,6 @@ function applyColPrefs() {
     if (prefs[col] === false) { cb.checked = false; toggleCol(cb); }
   });
 }
-// ===== GECMiS OZET =====
-let gecmisVeriler = [];
-const TR_AYLAR = ['','OCAK','SUBAT','MART','NISAN','MAYIS','HAZIRAN','TEMMUZ','AGUSTOS','EYLUL','EKIM','KASIM','ARALIK'];
-function formatAy(ay) { if(!ay)return''; const p=ay.split('-'); return p[1]+' - '+(TR_AYLAR[parseInt(p[1])]||'')+' '+p[0]; }
-function fmtDolar(v) { const n=parseFloat(v)||0; return '$'+n.toLocaleString('tr-TR',{minimumFractionDigits:0,maximumFractionDigits:2}); }
-const PLATFORM_ADI = {'essos_etsy':'Essos Etsy','alfred_etsy':'Alfred Etsy','amazon':'Amazon','ebay':'Ebay','baileys':"Bailey's",'bella':'Bella','buse':'Buse','yuppion':'Yuppion','alfred_com':'alfred.com','trendyol':'Trendyol','kilicoglugold':'kilicoglugold.com'};
-async function loadGecmisVeriler() {
-  try { gecmisVeriler = await api('gecmis_ozet?order=ay.desc,platform.asc','GET'); renderGecmisTablo(); } catch(e) { console.error('Gecmis yuklenemedi:',e); }
-}
-function openGecmisModal() {
-  const now = new Date();
-  document.getElementById('gAy').value = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  ['gAdet','gGram','gCiro','gMaliyet','gKargo','gReklam','gKar','gTasGr','gNot'].forEach(id => { document.getElementById(id).value=''; });
-  gecmisDuzenlemeId=null; document.getElementById('gecmisModal').style.display='flex';
-}
-async function saveGecmis() {
-  const ay=document.getElementById('gAy').value, platform=document.getElementById('gPlatform').value;
-  if(!ay||!platform){showToast('Ay ve platform gerekli');return;}
-  const data={ay,platform,ciro_usd:parseFloat(document.getElementById('gCiro').value)||0,maliyet_usd:parseFloat(document.getElementById('gMaliyet').value)||0,kargo_usd:parseFloat(document.getElementById('gKargo').value)||0,kar_usd:parseFloat(document.getElementById('gKar').value)||0,toplam_gram:parseFloat(document.getElementById('gGram').value)||0,toplam_adet:parseInt(document.getElementById('gAdet').value)||0,reklam_usd:parseFloat(document.getElementById('gReklam').value)||0,tas_gr:parseFloat(document.getElementById('gTasGr').value)||0,notlar:document.getElementById('gNot').value.trim()};
-  try { await api('gecmis_ozet','POST',data); await loadGecmisVeriler(); closeModal('gecmisModal'); showToast('Kaydedildi'); } catch(e){showToast('Hata: '+e.message);}
-}
-let gecmisDuzenlemeId = null;
-function editGecmis(id) {
-  const r = gecmisVeriler.find(x => x.id === id);
-  if (!r) return;
-  gecmisDuzenlemeId = id;
-  document.getElementById('gAy').value = r.ay || '';
-  document.getElementById('gPlatform').value = r.platform || 'essos_etsy';
-  document.getElementById('gAdet').value = r.toplam_adet || '';
-  document.getElementById('gGram').value = r.toplam_gram || '';
-  document.getElementById('gCiro').value = r.ciro_usd || '';
-  document.getElementById('gMaliyet').value = r.maliyet_usd || '';
-  document.getElementById('gKargo').value = r.kargo_usd || '';
-  document.getElementById('gReklam').value = r.reklam_usd || '';
-  document.getElementById('gKar').value = r.kar_usd || '';
-  document.getElementById('gTasGr').value = r.tas_gr || '';
-  document.getElementById('gNot').value = r.notlar || '';
-  document.getElementById('gecmisModal').style.display = 'flex';
-}
-
-async function deleteGecmis(id) {
-  if(!confirm('Silinsin mi?'))return;
-  try{await api('gecmis_ozet?id=eq.'+id,'DELETE');await loadGecmisVeriler();}catch(e){showToast('Silinemedi');}
-}
-function renderGecmisTablo() {
-  const tbody=document.getElementById('gecmisTablo'),tfoot=document.getElementById('gecmisToplam');
-  if(!tbody)return;
-  const filtre=(document.getElementById('gecmisFiltrePlatform')||{}).value||'';
-  const liste=filtre?gecmisVeriler.filter(x=>x.platform===filtre):gecmisVeriler;
-  if(!liste.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;padding:20px;color:var(--text3);">Geçmiş veri yok.</td></tr>';tfoot.innerHTML='';return;}
-  let tC=0,tM=0,tK=0,tR=0,tKar=0,tG=0,tA=0;
-  tbody.innerHTML=liste.map((r,i)=>{
-    tC+=r.ciro_usd||0;tM+=r.maliyet_usd||0;tK+=r.kargo_usd||0;tR+=r.reklam_usd||0;tKar+=r.kar_usd||0;tG+=r.toplam_gram||0;tA+=r.toplam_adet||0;
-    const kR=(r.kar_usd||0)>=0?'#1B7A4A':'#C0392B',bg=i%2===0?'':'background:var(--bg2);';
-    return '<tr style="'+bg+'"><td style="padding:7px 8px;">'+formatAy(r.ay)+'</td><td style="padding:7px 8px;">'+(PLATFORM_ADI[r.platform]||r.platform)+'</td><td style="padding:7px 8px;text-align:right;">'+(r.toplam_adet||0)+'</td><td style="padding:7px 8px;text-align:right;">'+Number(r.toplam_gram||0).toFixed(3)+'</td><td style="padding:7px 8px;text-align:right;font-weight:600;">'+fmtDolar(r.ciro_usd)+'</td><td style="padding:7px 8px;text-align:right;">'+fmtDolar(r.maliyet_usd)+'</td><td style="padding:7px 8px;text-align:right;">'+fmtDolar(r.kargo_usd)+'</td><td style="padding:7px 8px;text-align:right;">'+fmtDolar(r.reklam_usd)+'</td><td style="padding:7px 8px;text-align:right;font-weight:700;color:'+kR+';">'+fmtDolar(r.kar_usd)+'</td><td style="padding:7px 8px;text-align:center;"><button onclick="editGecmis(\''+r.id+'\')" style="background:none;border:1px solid var(--gold);color:var(--gold-dark);border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;margin-right:4px;">Düz</button><button onclick="deleteGecmis(\''+r.id+'\')" style="background:none;border:1px solid #C0392B;color:#C0392B;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;">Sil</button></td></tr>';
-  }).join('');
-  tfoot.innerHTML='<tr style="background:var(--gold-light,#FEF3C7);font-weight:700;"><td colspan="2" style="padding:8px;">TOPLAM</td><td style="padding:8px;text-align:right;">'+tA+'</td><td style="padding:8px;text-align:right;">'+tG.toFixed(3)+'</td><td style="padding:8px;text-align:right;">'+fmtDolar(tC)+'</td><td style="padding:8px;text-align:right;">'+fmtDolar(tM)+'</td><td style="padding:8px;text-align:right;">'+fmtDolar(tK)+'</td><td style="padding:8px;text-align:right;">'+fmtDolar(tR)+'</td><td style="padding:8px;text-align:right;color:'+(tKar>=0?'#1B7A4A':'#C0392B')+';">'+fmtDolar(tKar)+'</td><td></td></tr>';
-}
 // ===== KLAVYE KISAYOLLARI (modifier tuşu yok, direkt harfe basılır, her harf tek bir işe atanmış) =====
 document.addEventListener('keydown', function(e) {
   const tag = (e.target && e.target.tagName || '').toLowerCase();
@@ -5788,57 +5664,6 @@ async function deleteGider(id) {
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('baModal')">İptal</button>
       <button class="btn btn-primary" onclick="baKaydet()">Kaydet ↵</button>
-    </div>
-  </div>
-</div>
-<div id="gecmisModal" class="modal-overlay" style="display:none;">
-  <div class="modal modal-wide">
-    <div class="modal-header">
-      <div class="modal-title">📥 Geçmiş Ay Verisi Ekle</div>
-      <button class="modal-close" onclick="document.getElementById('gecmisModal').style.display='none'">×</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Ay</label><input type="month" class="form-control" id="gAy"></div>
-        <div class="form-group"><label class="form-label">Platform</label>
-          <select class="form-control" id="gPlatform">
-            <option value="essos_etsy">Essos Etsy</option>
-            <option value="alfred_etsy">Alfred Etsy</option>
-            <option value="amazon">Amazon</option>
-            <option value="ebay">Ebay</option>
-            <option value="baileys">Bailey's Store</option>
-            <option value="bella">Bella Store</option>
-            <option value="buse">Buse Jewelry</option>
-            <option value="yuppion">Yuppion</option>
-            <option value="alfred_com">alfred.com</option>
-            <option value="trendyol">Trendyol</option>
-            <option value="kilicoglugold">kilicoglugold.com</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Toplam Adet</label><input type="number" class="form-control" id="gAdet" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">Toplam Gram</label><input type="number" class="form-control" id="gGram" step="0.001" placeholder="0.000"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Ciro ($)</label><input type="number" class="form-control" id="gCiro" step="0.01" placeholder="0.00"></div>
-        <div class="form-group"><label class="form-label">Maliyet ($)</label><input type="number" class="form-control" id="gMaliyet" step="0.01" placeholder="0.00"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Kargo ($)</label><input type="number" class="form-control" id="gKargo" step="0.01" placeholder="0.00"></div>
-        <div class="form-group"><label class="form-label">Reklam ($)</label><input type="number" class="form-control" id="gReklam" step="0.01" placeholder="0.00"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Net Kâr ($)</label><input type="number" class="form-control" id="gKar" step="0.01" placeholder="0.00"></div>
-        <div class="form-group"><label class="form-label">Toplam Taş Gr</label><input type="number" class="form-control" id="gTasGr" step="0.001" placeholder="0.000"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">Not</label><input type="text" class="form-control" id="gNot" placeholder="İsteğe bağlı"></div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="document.getElementById('gecmisModal').style.display='none'">İptal</button>
-      <button class="btn btn-primary" onclick="saveGecmis()">Kaydet ↵</button>
     </div>
   </div>
 </div>
