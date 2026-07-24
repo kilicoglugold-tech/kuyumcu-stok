@@ -1387,6 +1387,10 @@ function fmtPara(val) {
   if (dec === 0) return Math.round(n).toLocaleString('tr-TR');
   return n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+function fmtTL(val) {
+  const n = parseFloat(val) || 0;
+  return Math.round(n).toLocaleString('tr-TR');
+}
 function parseTasGr(notlar) {
   const m = (notlar || '').match(/TAŞ:([\d.]+)/);
   return m ? parseFloat(m[1]) : 0;
@@ -2573,7 +2577,7 @@ async function loadRapor() {
     ku.textContent = '$' + topKarUsd.toFixed(2);
     ku.className = 'metric-value ' + (topKarUsd>=0?'green':'red');
     const kt = document.getElementById('mKarTry');
-    kt.textContent = topKarTry.toFixed(2) + ' ₺';
+    kt.textContent = fmtTL(topKarTry) + ' ₺';
     kt.className = 'metric-value ' + (topKarTry>=0?'green':'red');
 
     const tbody = document.getElementById('raporTablo');
@@ -2987,7 +2991,7 @@ function renderPlatTablo() {
 function tlAlti(usdVal, kur) {
   kur = parseFloat(kur) || 0;
   if (!kur) return '';
-  return `<div style="font-size:11px;color:var(--text3);font-weight:500;margin-top:2px;">₺${fmtPara(usdVal * kur)}</div>`;
+  return `<div style="font-size:11px;color:var(--text3);font-weight:500;margin-top:2px;">₺${fmtTL(usdVal * kur)}</div>`;
 }
 
 function updatePlatOzet() {
@@ -3681,13 +3685,13 @@ function updateGrupCOzet() {
     topKargoGC += parseFloat(isTl?s.kargo_try:s.kargo_usd)||0;
   });
   const gcKur = parseFloat(grupcAylikParam?.dolar_kuru) || 0;
-  document.getElementById('gcTopSatis').innerHTML   = sym + fmtPara(ts) + (isTl ? '' : tlAlti(ts, gcKur));
-  document.getElementById('gcTopMaliyet').innerHTML = sym + fmtPara(tm) + (isTl ? '' : tlAlti(tm, gcKur));
-  document.getElementById('gcTopKom').innerHTML     = sym + fmtPara(tk) + (isTl ? '' : tlAlti(tk, gcKur));
+  document.getElementById('gcTopSatis').innerHTML   = sym + (isTl ? fmtTL(ts) : fmtPara(ts) + tlAlti(ts, gcKur));
+  document.getElementById('gcTopMaliyet').innerHTML = sym + (isTl ? fmtTL(tm) : fmtPara(tm) + tlAlti(tm, gcKur));
+  document.getElementById('gcTopKom').innerHTML     = sym + (isTl ? fmtTL(tk) : fmtPara(tk) + tlAlti(tk, gcKur));
   document.getElementById('gcTopGram').textContent    = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('gcTopTasGr').textContent   = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   const el = document.getElementById('gcTopKar');
-  el.innerHTML = sym + fmtPara(tkar) + (isTl ? '' : tlAlti(tkar, gcKur));
+  el.innerHTML = sym + (isTl ? fmtTL(tkar) : fmtPara(tkar) + tlAlti(tkar, gcKur));
   el.className = 'metric-value ' + (tkar >= 0 ? 'green' : 'red');
   const bdgGC = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
   const gc = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = bdgGC(v); };
