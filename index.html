@@ -2514,17 +2514,30 @@ function initRaporAylar() {
   sel.innerHTML = opts.map(o=>`<option value="${o.value}">${o.label}</option>`).join('');
 }
 
+function normalizePlatformSatirGetir(s, kur) {
+  const satisUsd    = parseFloat(s.satis_fiyati_usd) || parseFloat(s.satis_usd) || (kur && parseFloat(s.satis_try) ? parseFloat(s.satis_try) / kur : 0) || 0;
+  const maliyetUsd  = parseFloat(s.maliyet_usd) || (kur && parseFloat(s.maliyet_try) ? parseFloat(s.maliyet_try) / kur : 0) || 0;
+  const kargoUsd    = parseFloat(s.kargo_usd) || (kur && parseFloat(s.kargo_try) ? parseFloat(s.kargo_try) / kur : 0) || 0;
+  const komisyonUsd = parseFloat(s.komisyon_usd) || (kur && parseFloat(s.komisyon_try) ? parseFloat(s.komisyon_try) / kur : 0) || 0;
+  const karUsd      = parseFloat(s.kar_usd) || (kur && parseFloat(s.kar_try) ? parseFloat(s.kar_try) / kur : 0) || 0;
+  return { satisUsd, maliyetUsd, kargoUsd, komisyonUsd, karUsd };
+}
+
 async function loadRapor() {
   const ay = document.getElementById('raporAy').value;
   const bas = ay+'-01';
   const bit = new Date(ay+'-01'); bit.setMonth(bit.getMonth()+1);
   const bitStr = bit.toISOString().slice(0,10);
   try {
-    const [siparisler, params] = await Promise.all([
+    const [siparisler, params, platSip] = await Promise.all([
       api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&order=tarih.desc`),
-      api(`aylik_parametreler?ay=eq.${ay}&limit=1`)
+      api(`aylik_parametreler?ay=eq.${ay}&limit=1`),
+      api(`platform_siparisler?ay=eq.${ay}&order=tarih.desc`)
     ]);
+    let ypSip = [];
+    try { ypSip = await api(`yuppion_siparisler?ay=eq.${ay}&order=tarih.desc`); } catch(e) { ypSip = []; }
     const p = params && params.length ? params[0] : { dolar_kuru:0, altin_fiyati_usd:0, reklam_usd:0 };
+    const kur = Number(p.dolar_kuru) || 0;
     document.getElementById('rReklam').textContent = '$' + Number(p.reklam_usd).toFixed(2);
     document.getElementById('rKur').textContent = Number(p.dolar_kuru).toFixed(2) + ' ₺';
     document.getElementById('rAltin').textContent = '$' + Number(p.altin_fiyati_usd).toFixed(2) + '/gr';
@@ -2537,6 +2550,18 @@ async function loadRapor() {
       topKarUsd += s.net_kar_usd||0;
       topKarTry += s.net_kar_try||0;
     });
+
+    // Platform Siparişleri (Essos Etsy, Grup B/C platformları) ve Yuppion satışlarını da dahil et
+    const platformSatirlar = [...(platSip||[]), ...(ypSip||[])];
+    platformSatirlar.forEach(s => {
+      const n = normalizePlatformSatirGetir(s, kur);
+      topSatis    += n.satisUsd;
+      topMaliyet  += n.maliyetUsd;
+      topGider    += n.kargoUsd + n.komisyonUsd;
+      topKarUsd   += n.karUsd;
+      topKarTry   += n.karUsd * kur;
+    });
+
     // reklam düş
     topKarUsd -= Number(p.reklam_usd);
     topKarTry -= Number(p.reklam_usd) * Number(p.dolar_kuru);
@@ -2552,8 +2577,10 @@ async function loadRapor() {
     kt.className = 'metric-value ' + (topKarTry>=0?'green':'red');
 
     const tbody = document.getElementById('raporTablo');
-    if (!siparisler.length) { tbody.innerHTML = '<tr><td colspan="13" class="empty">Bu ay sipariş yok</td></tr>'; return; }
-    tbody.innerHTML = siparisler.map((s,i)=>{
+    const satirSayisi = siparisler.length + platformSatirlar.length;
+    if (!satirSayisi) { tbody.innerHTML = '<tr><td colspan="13" class="empty">Bu ay sipariş yok</td></tr>'; return; }
+
+    const eskiSatirlarHtml = siparisler.map((s,i)=>{
       const kar = s.net_kar_usd||0;
       const v = s.varyantlar;
       return `<tr>
@@ -2572,6 +2599,28 @@ async function loadRapor() {
         <td style="font-weight:500;color:${kar>=0?'var(--green)':'var(--red)'}">${Number(s.net_kar_try||0).toFixed(2)} ₺</td>
       </tr>`;
     }).join('');
+
+    const platformSatirlarHtml = platformSatirlar.map((s,i)=>{
+      const n = normalizePlatformSatirGetir(s, kur);
+      const platAd = PLATFORM_LABELS[s.platform] || s.platform || '-';
+      return `<tr>
+        <td style="color:#000;font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
+        <td>${s.tarih||'-'}</td>
+        <td>${s.musteri_adi||'-'}</td>
+        <td>${s.urun_adi||'-'} <span style="font-size:10px;color:var(--text3)">(${platAd})</span></td>
+        <td>${s.adet||1}</td>
+        <td>${Number(s.gram||0).toFixed(3)}</td>
+        <td>${Number(s.milyem||0).toFixed(3)}</td>
+        <td>$${n.maliyetUsd.toFixed(2)}</td>
+        <td>$${n.satisUsd.toFixed(2)}</td>
+        <td>$${n.kargoUsd.toFixed(2)}</td>
+        <td>$${n.komisyonUsd.toFixed(2)}</td>
+        <td style="font-weight:500;color:${n.karUsd>=0?'var(--green)':'var(--red)'}">$${n.karUsd.toFixed(2)}</td>
+        <td style="font-weight:500;color:${n.karUsd>=0?'var(--green)':'var(--red)'}">${(n.karUsd*kur).toFixed(2)} ₺</td>
+      </tr>`;
+    }).join('');
+
+    tbody.innerHTML = eskiSatirlarHtml + platformSatirlarHtml;
   } catch(e) { document.getElementById('raporTablo').innerHTML = '<tr><td colspan="13">Hata: '+e.message+'</td></tr>'; }
 }
 
@@ -2935,6 +2984,12 @@ function renderPlatTablo() {
   }).join('');
 }
 
+function tlAlti(usdVal, kur) {
+  kur = parseFloat(kur) || 0;
+  if (!kur) return '';
+  return `<div style="font-size:11px;color:var(--text3);font-weight:500;margin-top:2px;">₺${fmtPara(usdVal * kur)}</div>`;
+}
+
 function updatePlatOzet() {
   const ay = document.getElementById('platAy').value;
   let topSatis=0, topMaliyet=0, topKargo=0, topKar=0, topGram=0, topTasGr=0, topAdet=0;
@@ -2963,16 +3018,17 @@ function updatePlatOzet() {
       reklamUsd = parseFloat(rekData.reklam_usd)||0;
     }
   }
-  document.getElementById('platTopSatis').textContent    = '$' + fmtPara(topSatis);
-  document.getElementById('platTopMaliyet').textContent  = '$' + fmtPara(topMaliyet);
-  document.getElementById('platTopKargo').textContent    = '$' + fmtPara(topKargo);
-  document.getElementById('platTopReklam').textContent   = '$' + fmtPara(reklamUsd);
+  const platKur = parseFloat(platAylikParam?.dolar_kuru) || 0;
+  document.getElementById('platTopSatis').innerHTML    = '$' + fmtPara(topSatis) + tlAlti(topSatis, platKur);
+  document.getElementById('platTopMaliyet').innerHTML  = '$' + fmtPara(topMaliyet) + tlAlti(topMaliyet, platKur);
+  document.getElementById('platTopKargo').innerHTML    = '$' + fmtPara(topKargo) + tlAlti(topKargo, platKur);
+  document.getElementById('platTopReklam').innerHTML   = '$' + fmtPara(reklamUsd) + tlAlti(reklamUsd, platKur);
   document.getElementById('platTopGram').textContent     = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('platTopTasGr').textContent    = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   document.getElementById('platTopAdet').textContent     = topAdet + ' adet';
   const netKar = topKar - reklamUsd;
   const karEl = document.getElementById('platTopKar');
-  karEl.textContent = '$' + fmtPara(netKar);
+  karEl.innerHTML = '$' + fmtPara(netKar) + tlAlti(netKar, platKur);
   karEl.className = 'metric-value ' + (netKar >= 0 ? 'green' : 'red');
   const avgMilyem = topMilyemCntPT > 0 ? topMilyemSum / topMilyemCntPT : 0;
   const bdg = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
@@ -3273,8 +3329,9 @@ function updateGrupBOzet() {
   document.getElementById('gbTopHasKar').textContent     = hk.toFixed(2);
   document.getElementById('gbTopGram').textContent       = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('gbTopTasGr').textContent      = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
+  const gbKur = parseFloat(grupbAylikParam?.dolar_kuru) || 0;
   const el = document.getElementById('gbTopKarUsd');
-  el.textContent = '$' + fmtPara(ku);
+  el.innerHTML = '$' + fmtPara(ku) + tlAlti(ku, gbKur);
   el.className = 'metric-value ' + (ku >= 0 ? 'green' : 'red');
   const bdgGB = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
   const gb = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = bdgGB(v); };
@@ -3623,13 +3680,14 @@ function updateGrupCOzet() {
     topHasGC   += (parseFloat(s.has)||0) * adet;
     topKargoGC += parseFloat(isTl?s.kargo_try:s.kargo_usd)||0;
   });
-  document.getElementById('gcTopSatis').textContent   = sym + fmtPara(ts);
-  document.getElementById('gcTopMaliyet').textContent = sym + fmtPara(tm);
-  document.getElementById('gcTopKom').textContent     = sym + fmtPara(tk);
+  const gcKur = parseFloat(grupcAylikParam?.dolar_kuru) || 0;
+  document.getElementById('gcTopSatis').innerHTML   = sym + fmtPara(ts) + (isTl ? '' : tlAlti(ts, gcKur));
+  document.getElementById('gcTopMaliyet').innerHTML = sym + fmtPara(tm) + (isTl ? '' : tlAlti(tm, gcKur));
+  document.getElementById('gcTopKom').innerHTML     = sym + fmtPara(tk) + (isTl ? '' : tlAlti(tk, gcKur));
   document.getElementById('gcTopGram').textContent    = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('gcTopTasGr').textContent   = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   const el = document.getElementById('gcTopKar');
-  el.textContent = sym + fmtPara(tkar);
+  el.innerHTML = sym + fmtPara(tkar) + (isTl ? '' : tlAlti(tkar, gcKur));
   el.className = 'metric-value ' + (tkar >= 0 ? 'green' : 'red');
   const bdgGC = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
   const gc = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = bdgGC(v); };
@@ -3883,13 +3941,14 @@ function updateYuppionOzet() {
     topTasGr += parseTasGr(s.notlar);
     topHasYP += (parseFloat(s.has)||0) * adet;
   });
-  document.getElementById('ypTopSatis').textContent   = '$' + fmtPara(ts);
-  document.getElementById('ypTopMaliyet').textContent = '$' + fmtPara(tm);
-  document.getElementById('ypTopKargo').textContent   = '$' + fmtPara(tk);
+  const ypKur = parseFloat(yuppionAylikParam?.dolar_kuru) || 0;
+  document.getElementById('ypTopSatis').innerHTML   = '$' + fmtPara(ts) + tlAlti(ts, ypKur);
+  document.getElementById('ypTopMaliyet').innerHTML = '$' + fmtPara(tm) + tlAlti(tm, ypKur);
+  document.getElementById('ypTopKargo').innerHTML   = '$' + fmtPara(tk) + tlAlti(tk, ypKur);
   document.getElementById('ypTopGram').textContent    = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('ypTopTasGr').textContent   = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   const el = document.getElementById('ypTopKar');
-  el.textContent = '$' + fmtPara(tkar);
+  el.innerHTML = '$' + fmtPara(tkar) + tlAlti(tkar, ypKur);
   el.className = 'metric-value ' + (tkar >= 0 ? 'green' : 'red');
   const bdgYP = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
   const yp = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = bdgYP(v); };
