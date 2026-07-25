@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V39-MAAS-CIFT-SAYIM-DUZELTME-CALISAN-SUPABASE --><!DOCTYPE html>
+﻿<!-- SURUM-V40-RAPOR-GIDER-CIFT-SAYIM-DUZELTME --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -2561,6 +2561,7 @@ async function loadRapor() {
     ]);
     let ypSip = [];
     try { ypSip = await api(`yuppion_siparisler?tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`); } catch(e) { ypSip = []; }
+    if (!calisanlarYuklendi) await loadCalisanlarCache();
     const p = params && params.length ? params[0] : { dolar_kuru:0, altin_fiyati_usd:0, reklam_usd:0 };
     const kur = Number(p.dolar_kuru) || 0;
 
@@ -2630,9 +2631,12 @@ async function loadRapor() {
     document.getElementById('raporPlatformTablo').innerHTML = satirlarHtml + toplamHtml;
 
     // ---- Bu ayki genel giderler (Giderler sayfası: sabit + maaş + değişken, TL) ----
-    const giderlerToplamTry = (giderKayitlari||[])
-      .filter(d => ['sabit','maas','degisken'].includes(d.kategori))
-      .reduce((s,d) => s + (parseFloat(d.tutar)||0), 0);
+    const giderListesi = giderKayitlari || [];
+    const sabitAdlari = [...new Set(giderListesi.filter(d => d.kategori==='sabit').map(d => d.ad))];
+    const sabitToplam = sabitAdlari.reduce((s,ad) => { const k = giderListesi.find(d => d.kategori==='sabit' && d.ad===ad); return s + (k ? (parseFloat(k.tutar)||0) : 0); }, 0);
+    const maasToplam = calisanlar.reduce((s,c) => { const k = giderListesi.find(d => d.kategori==='maas' && d.ad===c.ad); return s + (k ? (parseFloat(k.tutar)||0) : 0); }, 0);
+    const degiskenToplam = giderListesi.filter(d => d.kategori==='degisken').reduce((s,d) => s + (parseFloat(d.tutar)||0), 0);
+    const giderlerToplamTry = sabitToplam + maasToplam + degiskenToplam;
 
     // ---- Üstteki özet kartlar ----
     document.getElementById('mAdet').textContent = toplamAdet.toFixed(0);
