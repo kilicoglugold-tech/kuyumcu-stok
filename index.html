@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V38-PLATFORMLAR-TUM-KARTLAR-KURUSSUZ --><!DOCTYPE html>
+﻿<!-- SURUM-V39-MAAS-CIFT-SAYIM-DUZELTME-CALISAN-SUPABASE --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1133,6 +1133,15 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <button class="btn" onclick="migrateLocalGorevlerToSupabase()">Bu Tarayıcıdaki Görevleri Taşı</button>
     </div>
   </div>
+
+  <!-- BİR KERELİK: yerel calisan listesini Supabase'e tasi - sadece admin -->
+  <div id="calisanMigratePanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel">
+      <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">📤 Çalışan Listesini Ortak Veritabanına Taşı</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Giderler sayfasındaki çalışan listesi artık Supabase'te (herkeste ortak) tutuluyor. Bu tarayıcıda Supabase'de olmayan bir çalışan varsa, bir kereliğine buraya basarak Supabase'e kopyalayabilirsiniz.</div>
+      <button class="btn" onclick="migrateLocalCalisanlarToSupabase()">Bu Tarayıcıdaki Çalışanları Taşı</button>
+    </div>
+  </div>
 </div>
 
 </main>
@@ -1418,7 +1427,7 @@ function showPage(page) {
     }
     loadRapor();
   }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
+  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); baRender(); }
@@ -2347,6 +2356,26 @@ async function migrateLocalGorevlerToSupabase() {
   await loadGorevCache();
   asGorevRender();
   alert(rows.length + ' görev Supabase\'e taşındı. Şimdi tüm kullanıcılar bu görevleri görecek.');
+}
+
+async function migrateLocalCalisanlarToSupabase() {
+  if (!confirm('Bu tarayıcıdaki çalışan listesini ortak veritabanına (Supabase) kopyalamak üzeresiniz. Zaten Supabase\'de kayıtlı olan çalışanlar atlanacak. Devam edilsin mi?')) return;
+  let liste = [];
+  try { liste = JSON.parse(localStorage.getItem('calisanlar') || '[]'); } catch(e) {}
+  if (!liste.length) { alert('Bu tarayıcıda taşınacak çalışan bulunamadı.'); return; }
+  if (!calisanlarYuklendi) await loadCalisanlarCache();
+  const mevcutAdlar = calisanlar.map(c => c.ad.toLowerCase());
+  const yeniler = liste.filter(c => !mevcutAdlar.includes((c.ad||'').toLowerCase()));
+  if (!yeniler.length) { alert('Taşınacak yeni çalışan yok, hepsi zaten Supabase\'de.'); return; }
+  try {
+    await api('calisanlar', 'POST', yeniler.map(c => ({ id: c.id, ad: c.ad })));
+  } catch(e) {
+    alert('Taşıma hatası: ' + e.message);
+    return;
+  }
+  calisanlarYuklendi = false;
+  await loadGiderler();
+  alert(yeniler.length + ' çalışan Supabase\'e taşındı. Şimdi tüm kullanıcılar bu çalışanları görecek.');
 }
 
 function tasSizToggle() {
@@ -5126,10 +5155,19 @@ document.addEventListener('keydown', function(e) {
 <script>
 // ===== GİDERLER =====
 let giderKalemleri = JSON.parse(localStorage.getItem('giderKalemleri') || '[]');
-let calisanlar = JSON.parse(localStorage.getItem('calisanlar') || '[]');
-if (!calisanlar.length) {
-  calisanlar = [{id:'burak', ad:'Burak'}, {id:'furkan', ad:'Furkan'}];
-  localStorage.setItem('calisanlar', JSON.stringify(calisanlar));
+let calisanlar = [];
+let calisanlarYuklendi = false;
+async function loadCalisanlarCache() {
+  try {
+    calisanlar = await api('calisanlar?order=olusturma.asc');
+  } catch(e) { calisanlar = []; }
+  if (!calisanlar.length) {
+    // Supabase'de hic calisan yoksa (ilk kurulum) varsayilanlari olustur
+    const varsayilan = [{id:'burak', ad:'Burak'}, {id:'furkan', ad:'Furkan'}];
+    for (const c of varsayilan) { try { await api('calisanlar', 'POST', c); } catch(e) {} }
+    calisanlar = varsayilan;
+  }
+  calisanlarYuklendi = true;
 }
 let secilenGiderKalem = null;
 let avansEkleCalisan = '';
@@ -5144,6 +5182,7 @@ let maasGuncelleId = '';
 let giderlerCache = {};
 
 async function loadGiderler() {
+  if (!calisanlarYuklendi) await loadCalisanlarCache();
   const ay = document.getElementById('giderAy').value;
   if (!ay) return;
   const cacheKey = 'gider:' + ay;
@@ -5165,7 +5204,7 @@ function fmtTL(v) { return Number(v||0).toLocaleString('tr-TR',{minimumFractionD
 
 function renderGiderOzet(data) {
   const sabit    = data.filter(d => d.kategori==='sabit').reduce((s,d) => s+(parseFloat(d.tutar)||0), 0);
-  const maas     = data.filter(d => d.kategori==='maas').reduce((s,d) => s+(parseFloat(d.tutar)||0), 0);
+  const maas     = calisanlar.reduce((s,c) => { const k = data.find(d => d.kategori==='maas' && d.ad===c.ad); return s + (k ? (parseFloat(k.tutar)||0) : 0); }, 0);
   const degisken = data.filter(d => d.kategori==='degisken').reduce((s,d) => s+(parseFloat(d.tutar)||0), 0);
   const toplam   = sabit + maas + degisken;
   document.getElementById('ozSabit').textContent    = fmtTL(sabit);
@@ -5317,8 +5356,9 @@ async function saveCalisanEkle() {
   const ay = document.getElementById('giderAy').value;
   if (!ad) { alert('Çalışan adı zorunludur!'); document.getElementById('ceAd').focus(); return; }
   if (calisanlar.find(c => c.ad.toLowerCase() === ad.toLowerCase())) { alert('Bu çalışan zaten mevcut!'); return; }
-  calisanlar.push({ id: ad.toLowerCase().replace(/\s+/g,'-') + '-' + Date.now(), ad });
-  localStorage.setItem('calisanlar', JSON.stringify(calisanlar));
+  const yeniCalisan = { id: ad.toLowerCase().replace(/\s+/g,'-') + '-' + Date.now(), ad };
+  calisanlar.push(yeniCalisan);
+  try { await api('calisanlar', 'POST', yeniCalisan); } catch(e) { alert('Çalışan kaydedilemedi: ' + e.message); calisanlar.pop(); return; }
   if (tutar && ay) {
     try { await api('giderler', 'POST', { ay, kategori: 'maas', ad, tutar, para_birimi: 'TL' }); } catch(e) {}
     delete giderlerCache['gider:' + ay];
@@ -5337,8 +5377,8 @@ async function deleteCalisan(id) {
     await api('giderler?kategori=eq.maas&ad=eq.' + encodeURIComponent(c.ad), 'DELETE');
     await api('giderler?kategori=eq.avans&ad=eq.' + encodeURIComponent(c.ad), 'DELETE');
   } catch(e) {}
+  try { await api('calisanlar?id=eq.' + encodeURIComponent(id), 'DELETE'); } catch(e) {}
   calisanlar = calisanlar.filter(x => x.id !== id);
-  localStorage.setItem('calisanlar', JSON.stringify(calisanlar));
   loadGiderler();
 }
 // ── Maaş Güncelle ────────────────────────────────────────────────────
