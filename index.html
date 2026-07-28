@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V40-RAPOR-GIDER-CIFT-SAYIM-DUZELTME --><!DOCTYPE html>
+﻿<!-- SURUM-V41-EMIR-GOREV-KOLONU --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -221,7 +221,7 @@ tbody tr:nth-child(even) td { background: var(--bg2); } tbody tr:nth-child(odd) 
 .as-tarih { font-family:'DM Serif Display',serif; font-size:22px; color:var(--gold-dark); }
 .as-tarih-sub { font-size:12px; color:var(--text3); margin-top:2px; }
 .as-btn-group { display:flex; gap:8px; }
-.gorev-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:1.5rem; }
+.gorev-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:16px; margin-bottom:1.5rem; }
 .gorev-kolon { background:var(--card); border:0.5px solid var(--border); border-radius:var(--radius); padding:1rem; min-height:140px; max-height:280px; overflow-y:auto; }
 .gorev-kolon-baslik { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; color:var(--gold-dark); margin-bottom:10px; padding-bottom:8px; border-bottom:1.5px solid var(--gold-light); }
 .gorev-item { display:flex; align-items:flex-start; gap:8px; padding:7px 0; border-bottom:0.5px solid var(--border); }
@@ -400,6 +400,16 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       </div>
       <div id="gk-mehmet"></div>
     </div>
+    <div class="gorev-kolon">
+      <div class="gorev-kolon-baslik" style="display:flex;align-items:center;justify-content:space-between;">
+        <span>👤 Emir (E)</span>
+        <button class="btn btn-sm" onclick="asGorevHizliAc('emir')" style="padding:2px 9px;">+</button>
+      </div>
+      <div id="gkHizliWrap-emir" style="display:none;margin:6px 0;">
+        <input id="gkHizliInput-emir" class="form-control" style="font-size:12px;padding:6px 8px;" placeholder="Görev yaz, Enter'a bas..." onkeydown="if(event.key==='Enter')asGorevHizliKaydet('emir');if(event.key==='Escape')asGorevHizliKapat('emir')">
+      </div>
+      <div id="gk-emir"></div>
+    </div>
   </div>
 
   <!-- HATIRLATMALAR -->
@@ -516,6 +526,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
           <option value="burak">👤 Burak</option>
           <option value="furkan">👤 Furkan</option>
           <option value="mehmet">👤 Mehmet</option>
+          <option value="emir">👤 Emir</option>
         </select>
       </div>
     </div>
@@ -4230,7 +4241,7 @@ async function asGorevSil(id) {
 function asGorevRender() {
   // 5 günden eski tamamlananları görünümden gizle (veritabanından silmiyoruz, sadece listede göstermiyoruz)
   const simdi = Date.now();
-  ['ortak','burak','furkan','mehmet'].forEach(kime => {
+  ['ortak','burak','furkan','mehmet','emir'].forEach(kime => {
     const el = document.getElementById('gk-' + kime);
     if (!el) return;
     let kolonList = gorevCache.filter(g => {
@@ -4755,7 +4766,7 @@ document.addEventListener('keydown', function(e) {
 
   // Ana Sayfa'ya özel kısayollar (sadece Ana Sayfa'dayken anlamlı)
   if (anaSayfadaMi) {
-    const gorevMap = { 'T': 'ortak', 'U': 'burak', 'F': 'furkan', 'M': 'mehmet' };
+    const gorevMap = { 'T': 'ortak', 'U': 'burak', 'F': 'furkan', 'M': 'mehmet', 'E': 'emir' };
     if (gorevMap[harf]) { e.preventDefault(); asGorevHizliAc(gorevMap[harf]); return; }
     if (harf === 'Ö') { e.preventDefault(); asHatirlatmaAc(); return; }
     if (harf === 'K') { e.preventDefault(); kkListeEkleAc('kuyumcukent'); return; }
