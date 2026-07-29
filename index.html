@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V41-EMIR-GOREV-KOLONU --><!DOCTYPE html>
+﻿<!-- SURUM-V51-ETSY-PDF-OTO-DOLDUR --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -271,6 +271,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .col-panel-wrap { position:relative;display:inline-block; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 body.gizli-mod .metric-value,
 body.gizli-mod #ozSabit,
@@ -330,7 +331,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="nav-tab" onclick="showPage('rapor')">Rapor (O)</button>
     <button class="nav-tab" onclick="showPage('platformlar')">🏪 Platformlar (P)</button>
     <button class="nav-tab" onclick="showPage('giderler')">💸 Giderler (G)</button>
-    <button class="nav-tab" onclick="showPage('borcalacak')">⚖️ Borç/Alacak (B)</button><button class="nav-tab" onclick="showPage('parametreler')">⚙ Parametreler (Y)</button>
+    <button class="nav-tab" onclick="showPage('borcalacak')">⚖️ Borç/Alacak (B)</button><button class="nav-tab" onclick="showPage('parametreler')">⚙ Parametreler (Y)</button><button class="nav-tab" onclick="showPage('sayim')">📋 Sayım (S)</button>
   </div>
   <div class="nav-right">
   </div>
@@ -1154,7 +1155,147 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     </div>
   </div>
 </div>
+</div>
 
+<!-- SAYIM RAPORU -->
+<div class="page" id="page-sayim">
+  <div class="page-header">
+    <div style="display:flex;align-items:center;gap:8px;"><div class="page-title">📋 Sayım Raporu</div><button class="gizli-btn" onclick="toggleGizliMod()" title="Rakamları gizle">👁️</button></div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-size:13px;font-weight:600;color:var(--text2);">Tarih Seç:</span>
+      <select class="form-control" id="sayimAy" onchange="sayimAyDegisti()" style="width:auto;"></select>
+      <button class="btn btn-primary" onclick="saveSayimTumGramlar()">💾 Kaydet</button>
+      <span id="sayimKayitDurum" style="font-size:12px;font-weight:600;"></span>
+      <span style="font-size:13px;font-weight:600;color:var(--text2);margin-left:10px;">📜 Geçmiş Raporlar:</span>
+      <select class="form-control" id="sayimGecmisRapor" onchange="sayimGecmisSec()" style="width:auto;">
+        <option value="">— sadece girilmiş aylar —</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Bu ay için Dolar Kuru / Altın Fiyatı: sayım raporuna özel, elle girilir, Parametreler'deki genel değerlerden bağımsız -->
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:1rem;font-size:12px;color:var(--text2);">
+    <span style="font-weight:600;">Bu Ayın Kurları:</span>
+    <span style="display:flex;align-items:center;gap:5px;">Dolar Kuru (₺)
+      <input type="number" step="0.01" id="syDolarKuruGirdi" placeholder="0" style="width:70px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;" onchange="saveSayimParametre()">
+    </span>
+    <span style="display:flex;align-items:center;gap:5px;">Altın Fiyatı ($/gr)
+      <input type="number" step="0.01" id="syAltinGirdi" placeholder="0" style="width:70px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;" onchange="saveSayimParametre()">
+    </span>
+    <span>Has Karşılığı: <strong id="syHasTL">-</strong></span>
+  </div>
+
+  <!-- ÖZET: en üstte, ortada (Rapor sayfasındaki Net Kâr ile aynı mantık) -->
+  <div style="text-align:center;margin-bottom:1rem;">
+    <div class="card" style="text-align:center;background:var(--gold-light);border-color:var(--gold-dark);padding:1.25rem 2rem;display:inline-block;">
+      <div class="metric-label" style="text-align:center;color:var(--gold-dark);">SON DURUM</div>
+      <div style="font-size:30px;font-weight:700;color:var(--gold-dark);white-space:nowrap;" id="sySonDurum">-</div>
+    </div>
+  </div>
+  <div class="rapor-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:1.5rem;">
+    <div class="metric-card"><div class="metric-label">Alacaklar</div><div class="metric-value" style="color:var(--green);" id="syToplamAlacak">-</div></div>
+    <div class="metric-card"><div class="metric-label">Borçlar</div><div class="metric-value red" id="syToplamBorc">-</div></div>
+    <div class="metric-card"><div class="metric-label">Burak Payı</div><div class="metric-value gold" id="syBurakPay">-</div></div>
+    <div class="metric-card"><div class="metric-label">Furkan Payı</div><div class="metric-value gold" id="syFurkanPay">-</div></div>
+  </div>
+
+  <div class="sayim-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start;">
+
+    <!-- KOLON 1: KASA -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="card" style="overflow-x:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:13px;background:var(--gold-light);padding:4px 10px;border-radius:6px;display:inline-block;">💰 Kasa</div>
+        <button class="btn btn-sm" style="border:1px solid var(--border);font-size:11px;padding:3px 8px;" onclick="openSayimKalemEkleModal('kasa')">+ Kalem Ekle</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+        <thead><tr style="background:var(--bg2);">
+          <th style="padding:6px 8px;text-align:center;white-space:nowrap;width:26px;">No</th>
+          <th style="padding:6px 8px;text-align:left;white-space:nowrap;">Kutunun Adı</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Gr</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Milyem</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Has</th>
+          <th style="padding:6px 8px;width:26px;"></th>
+        </tr></thead>
+        <tbody id="sayimTablo_kasa"><tr><td colspan="6" class="loading">Yükleniyor...</td></tr></tbody>
+      </table>
+    </div>
+    </div>
+
+    <!-- KOLON 2: ATÖLYE + YURT DIŞINDAKİ İADELER -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="card" style="overflow-x:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:13px;background:var(--bg2);padding:4px 10px;border-radius:6px;display:inline-block;">🔨 Atölye</div>
+        <button class="btn btn-sm" style="border:1px solid var(--border);font-size:11px;padding:3px 8px;" onclick="openSayimKalemEkleModal('atolye')">+ Kalem Ekle</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+        <thead><tr style="background:var(--bg2);">
+          <th style="padding:6px 8px;text-align:center;white-space:nowrap;width:26px;">No</th>
+          <th style="padding:6px 8px;text-align:left;white-space:nowrap;">Kutunun Adı</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Gr</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Milyem</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Has</th>
+          <th style="padding:6px 8px;width:26px;"></th>
+        </tr></thead>
+        <tbody id="sayimTablo_atolye"><tr><td colspan="6" class="loading">Yükleniyor...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card" style="overflow-x:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:13px;background:var(--bg2);padding:4px 10px;border-radius:6px;display:inline-block;">✈️ Yurt Dışındaki İadeler</div>
+        <button class="btn btn-sm" style="border:1px solid var(--border);font-size:11px;padding:3px 8px;" onclick="openSayimKalemEkleModal('yurtdisi')">+ Kalem Ekle</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+        <thead><tr style="background:var(--bg2);">
+          <th style="padding:6px 8px;text-align:center;white-space:nowrap;width:26px;">No</th>
+          <th style="padding:6px 8px;text-align:left;white-space:nowrap;">Kutunun Adı</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Gr</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Milyem</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Has</th>
+          <th style="padding:6px 8px;width:26px;"></th>
+        </tr></thead>
+        <tbody id="sayimTablo_yurtdisi"><tr><td colspan="6" class="loading">Yükleniyor...</td></tr></tbody>
+      </table>
+    </div>
+    </div>
+
+    <!-- KOLON 3: ALACAKLAR + BORÇLAR -->
+    <div style="display:flex;flex-direction:column;gap:14px;">
+    <div class="card" style="overflow-x:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:13px;background:var(--green-bg);color:var(--green);padding:4px 10px;border-radius:6px;display:inline-block;">📗 Alacaklar</div>
+        <button class="btn btn-sm" style="border:1px solid var(--border);font-size:11px;padding:3px 8px;" onclick="openSayimSatirEkleModal('alacak')">+ Satır Ekle</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+        <thead><tr style="background:var(--bg2);">
+          <th style="padding:6px 8px;text-align:left;white-space:nowrap;">Ad</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Gr</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Tutar</th>
+          <th style="padding:6px 8px;width:26px;"></th>
+        </tr></thead>
+        <tbody id="sayimTablo_alacak"><tr><td colspan="4" class="loading">Yükleniyor...</td></tr></tbody>
+      </table>
+    </div>
+    <div class="card" style="overflow-x:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:13px;background:var(--red-bg);color:var(--red);padding:4px 10px;border-radius:6px;display:inline-block;">📕 Borçlar</div>
+        <button class="btn btn-sm" style="border:1px solid var(--border);font-size:11px;padding:3px 8px;" onclick="openSayimSatirEkleModal('borc')">+ Satır Ekle</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+        <thead><tr style="background:var(--bg2);">
+          <th style="padding:6px 8px;text-align:left;white-space:nowrap;">Ad</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Gr</th>
+          <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Tutar</th>
+          <th style="padding:6px 8px;width:26px;"></th>
+        </tr></thead>
+        <tbody id="sayimTablo_borc"><tr><td colspan="4" class="loading">Yükleniyor...</td></tr></tbody>
+      </table>
+    </div>
+    </div>
+
+  </div>
+</div>
 </main>
 
 <!-- ÜRÜN MODAL -->
@@ -1415,7 +1556,7 @@ async function uploadFoto(file) {
 // NAV
 let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
-  const pages = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler'];
+  const pages = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler','sayim'];
   const idx = pages.indexOf(page);
   // Ana Sayfa'daki kısayol kartları, alt menüler vb. üzerinden de olsa,
   // yetkisi olmayan bir role sayfa açtırma (sadece üst menüyü gizlemek yetmiyordu).
@@ -1442,6 +1583,7 @@ function showPage(page) {
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); baRender(); }
+  if (page === 'sayim') { fillAySec('sayimAy'); loadSayim(); loadSayimGecmisRaporlar(); }
 }
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
@@ -1567,7 +1709,7 @@ async function sifreSifirlaEmail(email) {
 
 const ROL_IZIN_ETIKETLERI = {
   anasayfa: 'Ana Sayfa', urunler: 'Ürünler', rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
-  borcalacak: 'Borç/Alacak', parametreler: 'Parametreler (kullanıcı/kur yönetimi)'
+  borcalacak: 'Borç/Alacak', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu'
 };
 async function loadRolIzinPanel() {
   if (!isAdmin()) return;
@@ -2389,6 +2531,444 @@ async function migrateLocalCalisanlarToSupabase() {
   alert(yeniler.length + ' çalışan Supabase\'e taşındı. Şimdi tüm kullanıcılar bu çalışanları görecek.');
 }
 
+// ===== SAYIM RAPORU =====
+let sayimKalemleri = [];
+let sayimKalemleriYuklendi = false;
+let sayimGramCache = {};
+let sayimAlacaklar = [];
+let sayimBorclar = [];
+let sayimEkleBolum = null;
+let sayimEkleTip = null;
+let sayimKirli = false;
+let sayimAySwitchGuard = false;
+let sayimParametreCache = { dolar_kuru: null, altin_fiyati_usd: null };
+const SAYIM_BOLUM_ADI = { kasa: 'Kasa', atolye: 'Atölye', yurtdisi: 'Yurt Dışındaki İadeler' };
+
+const SAYIM_VARSAYILAN_KALEMLER = [
+  // KASA (Excel'deki isim ve milyemler)
+  { bolum:'kasa', ad:'Renkli Taşlı Bileklik', milyem:0.70 },
+  { bolum:'kasa', ad:'Diğer Ürün', milyem:0.70 },
+  { bolum:'kasa', ad:'Nazar Kalp Ürünler', milyem:0.70 },
+  { bolum:'kasa', ad:'Renkli Taş Kolye', milyem:0.70 },
+  { bolum:'kasa', ad:'Zincir ve Hayvan', milyem:0.70 },
+  { bolum:'kasa', ad:'Karışık', milyem:0.70 },
+  { bolum:'kasa', ad:'Fotoğraf Ürünler', milyem:0.70 },
+  { bolum:'kasa', ad:'Alex Kelepçe', milyem:0.62 },
+  { bolum:'kasa', ad:'Rayna Kelepçe', milyem:0.70 },
+  { bolum:'kasa', ad:'8 Ayarlar', milyem:0.33 },
+  { bolum:'kasa', ad:'Yıldız ve Güneşler', milyem:0.70 },
+  { bolum:'kasa', ad:'Hayvanlar', milyem:0.70 },
+  { bolum:'kasa', ad:'Su Hayvanları', milyem:0.70 },
+  { bolum:'kasa', ad:'Sembol Ürünler', milyem:0.70 },
+  { bolum:'kasa', ad:'Harf Ürünler', milyem:0.70 },
+  { bolum:'kasa', ad:'Nazar Ürünler', milyem:0.70 },
+  { bolum:'kasa', ad:'Küpeler', milyem:0.70 },
+  { bolum:'kasa', ad:'Yeni Ürünler', milyem:0.70 },
+  { bolum:'kasa', ad:'Yüzükler', milyem:0.70 },
+  { bolum:'kasa', ad:'Damla Taşlar', milyem:0.59 },
+  { bolum:'kasa', ad:'Kasa Üstünde Zincir', milyem:0.70 },
+  { bolum:'kasa', ad:'Su yolları', milyem:0.59 },
+  { bolum:'kasa', ad:'Ürünler', milyem:0.70 },
+  { bolum:'kasa', ad:'Tragus', milyem:1.10 },
+  { bolum:'kasa', ad:'Pırlanta', milyem:0 },
+  { bolum:'kasa', ad:'Mor Kutu', milyem:0.70 },
+  { bolum:'kasa', ad:'Küp Bileklik', milyem:0.70 },
+  // ATÖLYE
+  { bolum:'atolye', ad:'Uzun Zincirler', milyem:0.65 },
+  { bolum:'atolye', ad:'Büyük Kilit', milyem:0.65 },
+  { bolum:'atolye', ad:'Damgalar', milyem:0.65 },
+  { bolum:'atolye', ad:'Küpe Halkası', milyem:0.65 },
+  { bolum:'atolye', ad:'Kısa Zincirler', milyem:0.65 },
+  { bolum:'atolye', ad:'Uzatma Zinciri', milyem:0.65 },
+  { bolum:'atolye', ad:'Dorika Toplar', milyem:0.58 },
+  { bolum:'atolye', ad:'Cila Yapılacaklar', milyem:0.65 },
+  { bolum:'atolye', ad:'Nazar Boncuğu', milyem:0.65 },
+  { bolum:'atolye', ad:'Küçük Kilit', milyem:0.65 },
+  { bolum:'atolye', ad:'Tepelik', milyem:0.65 },
+  { bolum:'atolye', ad:'Altın Kaynak', milyem:0.65 },
+  { bolum:'atolye', ad:'Hazır Uzatmalar', milyem:0.65 },
+  { bolum:'atolye', ad:'Büyük Halka', milyem:0.65 },
+  { bolum:'atolye', ad:'Küçük Halka', milyem:0.65 },
+  { bolum:'atolye', ad:'Hurdalar', milyem:0.65 },
+  { bolum:'atolye', ad:'Diğer Kutular', milyem:0.65 },
+  { bolum:'atolye', ad:'İncirler Ve Ortamdakiler', milyem:0.65 },
+  // YURT DIŞINDAKİ İADELER
+  { bolum:'yurtdisi', ad:'Amerika', milyem:0.65 },
+  { bolum:'yurtdisi', ad:'Fransa', milyem:0.65 }
+];
+
+async function loadSayimKalemleriCache() {
+  try {
+    sayimKalemleri = await api('sayim_kalemleri?order=bolum.asc,sira.asc');
+  } catch(e) {
+    sayimKalemleri = [];
+    alert('Sayım kalemleri okunamadı: ' + e.message + '\n\nSupabase\'de "sayim_kalemleri" tablosu henüz oluşturulmamış olabilir. sayim-supabase.sql dosyasını Supabase > SQL Editor\'de çalıştırdığından emin ol.');
+    return; // sayimKalemleriYuklendi=true YAPMA: tablo oluşturulunca sekmeye tekrar girince yeniden denesin
+  }
+  if (!sayimKalemleri.length) {
+    const siralar = { kasa:0, atolye:0, yurtdisi:0 };
+    const yeniler = SAYIM_VARSAYILAN_KALEMLER.map((k, i) => ({
+      id: Date.now() + i,
+      bolum: k.bolum,
+      sira: siralar[k.bolum]++,
+      ad: k.ad,
+      milyem: k.milyem
+    }));
+    try {
+      await api('sayim_kalemleri', 'POST', yeniler);
+      sayimKalemleri = yeniler;
+    } catch(e) {
+      sayimKalemleri = [];
+      alert('Varsayılan kalemler kaydedilemedi: ' + e.message);
+      return;
+    }
+  }
+  sayimKalemleriYuklendi = true;
+}
+
+function sayimAyDegisti() {
+  if (sayimKirli && !sayimAySwitchGuard) {
+    if (!confirm('Bu aydaki kaydedilmemiş gram değişiklikleri var. Kaydetmeden ay değiştirirsen kaybolur. Yine de devam edilsin mi?')) {
+      sayimAySwitchGuard = true;
+      // önceki seçime geri dön (kalıcı ay bilgisi loadSayim çağrısı öncesinde saklanmıyor,
+      // basitçe kullanıcıyı uyarmış olduk; devam etmek istemezse seçimini kendisi düzeltir)
+      sayimAySwitchGuard = false;
+      return;
+    }
+  }
+  loadSayim();
+}
+
+async function loadSayim() {
+  const sel = document.getElementById('sayimAy');
+  const ay = sel ? sel.value : '';
+  if (!ay) return;
+  sayimKirli = false;
+  const durum = document.getElementById('sayimKayitDurum');
+  if (durum) durum.textContent = '';
+  if (!sayimKalemleriYuklendi) await loadSayimKalemleriCache();
+  try {
+    const gramlar = await api('sayim_gramlar?ay=eq.' + ay);
+    sayimGramCache = {};
+    (gramlar || []).forEach(g => { sayimGramCache[g.kalem_id] = g.gram; });
+  } catch(e) { sayimGramCache = {}; }
+  try { sayimAlacaklar = await api('sayim_alacaklar?ay=eq.' + ay + '&order=sira.asc'); } catch(e) { sayimAlacaklar = []; }
+  try { sayimBorclar = await api('sayim_borclar?ay=eq.' + ay + '&order=sira.asc'); } catch(e) { sayimBorclar = []; }
+  try {
+    const p = await api('sayim_parametre?ay=eq.' + ay + '&limit=1');
+    sayimParametreCache = (p && p.length) ? p[0] : { dolar_kuru: null, altin_fiyati_usd: null };
+  } catch(e) { sayimParametreCache = { dolar_kuru: null, altin_fiyati_usd: null }; }
+  const dkEl = document.getElementById('syDolarKuruGirdi');
+  const agEl = document.getElementById('syAltinGirdi');
+  if (dkEl) dkEl.value = sayimParametreCache.dolar_kuru != null ? sayimParametreCache.dolar_kuru : '';
+  if (agEl) agEl.value = sayimParametreCache.altin_fiyati_usd != null ? sayimParametreCache.altin_fiyati_usd : '';
+  renderSayimBolum('kasa');
+  renderSayimBolum('atolye');
+  renderSayimBolum('yurtdisi');
+  renderSayimSatirlar('alacak');
+  renderSayimSatirlar('borc');
+  await hesaplaSayimOzet();
+}
+
+// "Geçmiş Raporlar": sadece daha önce sayım girilmiş ayları listeler
+// (sayim_gramlar, sayim_alacaklar, sayim_borclar tablolarındaki tüm farklı "ay" değerlerinin birleşimi).
+async function loadSayimGecmisRaporlar() {
+  const sel = document.getElementById('sayimGecmisRapor');
+  if (!sel) return;
+  const aySet = new Set();
+  try {
+    const g = await api('sayim_gramlar?select=ay');
+    (g || []).forEach(r => { if (r.ay) aySet.add(r.ay); });
+  } catch(e) {}
+  try {
+    const a = await api('sayim_alacaklar?select=ay');
+    (a || []).forEach(r => { if (r.ay) aySet.add(r.ay); });
+  } catch(e) {}
+  try {
+    const b = await api('sayim_borclar?select=ay');
+    (b || []).forEach(r => { if (r.ay) aySet.add(r.ay); });
+  } catch(e) {}
+  const aylar = [...aySet].sort().reverse();
+  sel.innerHTML = '<option value="">— sadece girilmiş aylar —</option>' +
+    aylar.map(ay => `<option value="${ay}">${new Date(ay + '-01').toLocaleDateString('tr-TR', {month:'long', year:'numeric'})}</option>`).join('');
+}
+
+function sayimGecmisSec() {
+  const gecmisSel = document.getElementById('sayimGecmisRapor');
+  const ay = gecmisSel ? gecmisSel.value : '';
+  if (!ay) return;
+  if (sayimKirli && !confirm('Kaydedilmemiş gram değişikliklerin var, kaybolacak. Yine de geçmiş rapora geçilsin mi?')) {
+    gecmisSel.value = '';
+    return;
+  }
+  const anaSel = document.getElementById('sayimAy');
+  if (anaSel) {
+    if (![...anaSel.options].some(o => o.value === ay)) {
+      const opt = document.createElement('option');
+      opt.value = ay;
+      opt.textContent = new Date(ay + '-01').toLocaleDateString('tr-TR', {month:'long', year:'numeric'});
+      anaSel.appendChild(opt);
+    }
+    anaSel.value = ay;
+  }
+  loadSayim();
+}
+
+function sayimHasHesapla(bolum) {
+  const kalemler = sayimKalemleri.filter(k => k.bolum === bolum);
+  let toplam = 0;
+  kalemler.forEach(k => {
+    const gram = parseFloat(sayimGramCache[k.id]) || 0;
+    const milyem = parseFloat(k.milyem) || 0;
+    toplam += gram * milyem;
+  });
+  return toplam;
+}
+
+function sayimGramEnterGec(inputEl) {
+  const tr = inputEl.closest('tr');
+  const nextTr = tr ? tr.nextElementSibling : null;
+  if (nextTr) {
+    const nextInput = nextTr.querySelector('input[data-sayim-gram]');
+    if (nextInput) { nextInput.focus(); nextInput.select(); return; }
+  }
+  inputEl.blur();
+}
+
+function sayimGramLocalGuncelle(id, inputEl) {
+  const gram = parseFloat(inputEl.value) || 0;
+  sayimGramCache[id] = gram;
+  sayimKirli = true;
+  const durum = document.getElementById('sayimKayitDurum');
+  if (durum) { durum.textContent = '● Kaydedilmedi'; durum.style.color = 'var(--red)'; }
+  const k = sayimKalemleri.find(x => x.id === id);
+  if (k) renderSayimBolum(k.bolum);
+  hesaplaSayimOzet();
+}
+
+function renderSayimBolum(bolum) {
+  const tbody = document.getElementById('sayimTablo_' + bolum);
+  if (!tbody) return;
+  const kalemler = sayimKalemleri.filter(k => k.bolum === bolum);
+  if (!kalemler.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Henüz kalem yok. "+ Kalem Ekle" ile ekleyin.</td></tr>';
+    return;
+  }
+  let toplamHas = 0, toplamGr = 0;
+  const esc = (s) => (s || '').toString().replace(/"/g, '&quot;');
+  let rows = kalemler.map((k, i) => {
+    const gram = parseFloat(sayimGramCache[k.id]) || 0;
+    const milyem = parseFloat(k.milyem) || 0;
+    const has = gram * milyem;
+    toplamHas += has;
+    toplamGr += gram;
+    return `<tr>
+      <td style="padding:6px 8px;text-align:center;color:var(--text3);">${i + 1}</td>
+      <td style="padding:6px 8px;"><input type="text" value="${esc(k.ad)}" style="border:none;background:transparent;padding:2px 4px;font-size:12.5px;width:100%;font-family:inherit;" onchange="saveSayimKalemAlan(${k.id},'ad',this.value)"></td>
+      <td style="padding:6px 8px;text-align:right;"><input type="number" step="0.01" data-sayim-gram value="${gram || ''}" style="border:1px solid var(--border);border-radius:6px;padding:3px 5px;font-size:12.5px;text-align:right;width:80px;font-family:inherit;" onchange="sayimGramLocalGuncelle(${k.id},this)" onkeydown="if(event.key==='Enter'){event.preventDefault();sayimGramLocalGuncelle(${k.id},this);sayimGramEnterGec(this);}"></td>
+      <td style="padding:6px 8px;text-align:right;"><input type="number" step="1" value="${milyem || ''}" style="border:none;background:transparent;padding:2px 4px;font-size:12.5px;text-align:right;width:60px;font-family:inherit;" onchange="saveSayimKalemAlan(${k.id},'milyem',this.value)"></td>
+      <td style="padding:6px 8px;text-align:right;font-weight:600;">${has.toFixed(2)}</td>
+      <td style="padding:6px 8px;text-align:center;"><button style="color:var(--red);border:none;background:none;font-size:15px;padding:0 4px;cursor:pointer;" onclick="deleteSayimKalem(${k.id})" title="Kalemi sil">×</button></td>
+    </tr>`;
+  }).join('');
+  const toplamSatir = `<tr style="background:var(--bg2);font-weight:700;"><td colspan="2" style="padding:8px;text-align:right;">TOPLAM</td><td style="padding:8px;text-align:right;">${toplamGr.toFixed(2)}</td><td></td><td style="padding:8px;text-align:right;">${toplamHas.toFixed(2)}</td><td></td></tr>`;
+  tbody.innerHTML = toplamSatir + rows;
+}
+
+function renderSayimSatirlar(tip) {
+  const tbody = document.getElementById('sayimTablo_' + tip);
+  if (!tbody) return;
+  const liste = tip === 'alacak' ? sayimAlacaklar : sayimBorclar;
+  if (!liste.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">Henüz satır yok. "+ Satır Ekle" ile ekleyin.</td></tr>';
+    return;
+  }
+  const esc = (s) => (s || '').toString().replace(/"/g, '&quot;');
+  const toplamGr = liste.reduce((s, r) => s + (parseFloat(r.gram) || 0), 0);
+  let rows = `<tr style="background:var(--bg2);font-weight:700;"><td style="padding:8px;text-align:right;">TOPLAM</td><td style="padding:8px;text-align:right;">${toplamGr.toFixed(2)}</td><td></td><td></td></tr>`;
+  rows += liste.map(r => `<tr>
+    <td style="padding:6px 8px;"><input type="text" value="${esc(r.ad)}" style="border:none;background:transparent;padding:2px 4px;font-size:12.5px;width:100%;font-family:inherit;" onchange="saveSayimSatirAlan('${tip}',${r.id},'ad',this.value)"></td>
+    <td style="padding:6px 8px;text-align:right;"><input type="number" step="0.01" value="${r.gram != null ? r.gram : ''}" style="border:1px solid var(--border);border-radius:6px;padding:3px 5px;font-size:12.5px;text-align:right;width:75px;font-family:inherit;" onchange="saveSayimSatirAlan('${tip}',${r.id},'gram',this.value)"></td>
+    <td style="padding:6px 8px;text-align:right;"><input type="text" value="${esc(r.tutar_metin)}" style="border:none;background:transparent;padding:2px 4px;font-size:12.5px;text-align:right;width:120px;font-family:inherit;" onchange="saveSayimSatirAlan('${tip}',${r.id},'tutar_metin',this.value)" placeholder="örn: 2.000 usd"></td>
+    <td style="padding:6px 8px;text-align:center;"><button style="color:var(--red);border:none;background:none;font-size:15px;padding:0 4px;cursor:pointer;" onclick="deleteSayimSatir('${tip}',${r.id})" title="Satırı sil">×</button></td>
+  </tr>`).join('');
+  tbody.innerHTML = rows;
+}
+
+// Not: Excel'deki sayfanda Alacaklar/Borçlar tablosundaki "Gr" sütunu asıl toplanan
+// değer (Borçlar'daki TOPLAM tam olarak bu sütunun toplamıyla eşleşiyor); "Tutar" sütunu
+// ise sadece orijinal para birimi/notu hatırlamak için serbest metin, hesaba katılmıyor.
+// Son Durum = Toplam Alacak (Gr) − Toplam Borç (Gr); Has, sadece bilgi amaçlı gösteriliyor
+// (Excel'deki gibi Son Durum'a dahil edilmiyor).
+function hesaplaSayimOzet() {
+  const kur = parseFloat(sayimParametreCache?.dolar_kuru) || 0;
+  const altin = parseFloat(sayimParametreCache?.altin_fiyati_usd) || 0;
+  const toplamHas = sayimHasHesapla('kasa') + sayimHasHesapla('atolye') + sayimHasHesapla('yurtdisi');
+  const hasTLKarsilik = toplamHas * altin * kur;
+  const toplamAlacak = sayimAlacaklar.reduce((s, r) => s + (parseFloat(r.gram) || 0), 0);
+  const toplamBorc = sayimBorclar.reduce((s, r) => s + (parseFloat(r.gram) || 0), 0);
+  const sonDurum = toplamAlacak - toplamBorc;
+  const burakPay = sonDurum / 2;
+  const furkanPay = sonDurum / 2;
+  document.getElementById('syHasTL').textContent = (kur && altin) ? (fmtTLTam(hasTLKarsilik) + ' ₺') : '- (kur/altın girilmedi)';
+  document.getElementById('syToplamAlacak').textContent = toplamAlacak.toFixed(2);
+  document.getElementById('syToplamBorc').textContent = toplamBorc.toFixed(2);
+  document.getElementById('sySonDurum').textContent = sonDurum.toFixed(2);
+  document.getElementById('syBurakPay').textContent = burakPay.toFixed(2);
+  document.getElementById('syFurkanPay').textContent = furkanPay.toFixed(2);
+}
+
+// Bu ayın Dolar Kuru / Altın Fiyatı girdisini kaydet (sayim_parametre tablosu)
+async function saveSayimParametre() {
+  const ay = document.getElementById('sayimAy')?.value;
+  if (!ay) return;
+  const dolar_kuru = parseFloat(document.getElementById('syDolarKuruGirdi')?.value) || null;
+  const altin_fiyati_usd = parseFloat(document.getElementById('syAltinGirdi')?.value) || null;
+  sayimParametreCache = { dolar_kuru, altin_fiyati_usd };
+  hesaplaSayimOzet();
+  try {
+    const mevcut = await api('sayim_parametre?ay=eq.' + ay);
+    if (mevcut && mevcut.length) {
+      await api('sayim_parametre?ay=eq.' + ay, 'PATCH', { dolar_kuru, altin_fiyati_usd, guncelleme_tarihi: new Date().toISOString() });
+    } else {
+      await api('sayim_parametre', 'POST', { ay, dolar_kuru, altin_fiyati_usd });
+    }
+  } catch(e) { alert('Kur/Altın kaydedilemedi: ' + e.message); }
+}
+
+// -- Kalem (Kasa/Atölye/Yurtdışı şablon) CRUD --
+function openSayimKalemEkleModal(bolum) {
+  sayimEkleBolum = bolum;
+  document.getElementById('skeAd').value = '';
+  document.getElementById('skeMilyem').value = '';
+  openModal('sayimKalemEkleModal');
+  setTimeout(() => document.getElementById('skeAd').focus(), 100);
+}
+
+async function saveSayimKalemEkle() {
+  const ad = document.getElementById('skeAd').value.trim();
+  const milyem = parseFloat(document.getElementById('skeMilyem').value) || 0;
+  if (!ad) { alert('Ürün adı zorunludur!'); return; }
+  const bolum = sayimEkleBolum;
+  const sira = sayimKalemleri.filter(k => k.bolum === bolum).length;
+  const id = Date.now();
+  const yeni = { id, bolum, sira, ad, milyem };
+  sayimKalemleri.push(yeni);
+  try { await api('sayim_kalemleri', 'POST', yeni); } catch(e) { alert('Kaydedilemedi: ' + e.message); sayimKalemleri.pop(); return; }
+  closeModal('sayimKalemEkleModal');
+  renderSayimBolum(bolum);
+  await hesaplaSayimOzet();
+}
+
+async function saveSayimKalemAlan(id, alan, deger) {
+  const k = sayimKalemleri.find(x => x.id === id);
+  if (!k) return;
+  const val = alan === 'milyem' ? (parseFloat(deger) || 0) : deger.trim();
+  k[alan] = val;
+  try { await api('sayim_kalemleri?id=eq.' + id, 'PATCH', { [alan]: val }); } catch(e) { alert('Güncellenemedi: ' + e.message); return; }
+  renderSayimBolum(k.bolum);
+  await hesaplaSayimOzet();
+}
+
+async function deleteSayimKalem(id) {
+  const k = sayimKalemleri.find(x => x.id === id);
+  if (!k) return;
+  if (!confirm(k.ad + ' kalemi ve tüm geçmiş ay gram kayıtları silinecek. Emin misiniz?')) return;
+  try { await api('sayim_kalemleri?id=eq.' + id, 'DELETE'); } catch(e) { alert('Silinemedi: ' + e.message); return; }
+  const bolum = k.bolum;
+  sayimKalemleri = sayimKalemleri.filter(x => x.id !== id);
+  delete sayimGramCache[id];
+  renderSayimBolum(bolum);
+  await hesaplaSayimOzet();
+}
+
+// "💾 Kaydet" butonu: ekrandaki tüm gram değerlerini seçili aya tek seferde yazar.
+async function saveSayimTumGramlar() {
+  const ay = document.getElementById('sayimAy')?.value;
+  if (!ay) return;
+  const durum = document.getElementById('sayimKayitDurum');
+  if (durum) { durum.textContent = 'Kaydediliyor...'; durum.style.color = 'var(--text3)'; }
+  try {
+    let mevcutlar = [];
+    try { mevcutlar = await api('sayim_gramlar?ay=eq.' + ay); } catch(e) { mevcutlar = []; }
+    const mevcutMap = {};
+    (mevcutlar || []).forEach(g => { mevcutMap[g.kalem_id] = g; });
+    for (const k of sayimKalemleri) {
+      const gram = parseFloat(sayimGramCache[k.id]) || 0;
+      const mevcut = mevcutMap[k.id];
+      if (mevcut) {
+        if (parseFloat(mevcut.gram) !== gram) {
+          await api('sayim_gramlar?ay=eq.' + ay + '&kalem_id=eq.' + k.id, 'PATCH', { gram });
+        }
+      } else if (gram) {
+        await api('sayim_gramlar', 'POST', { id: Date.now() + Math.floor(Math.random()*1000), ay, kalem_id: k.id, gram });
+      }
+    }
+    sayimKirli = false;
+    if (durum) {
+      durum.textContent = '✓ Kaydedildi';
+      durum.style.color = 'var(--green)';
+      setTimeout(() => { if (durum.textContent === '✓ Kaydedildi') durum.textContent = ''; }, 3000);
+    }
+  } catch(e) {
+    if (durum) { durum.textContent = '✗ Hata'; durum.style.color = 'var(--red)'; }
+    alert('Kaydedilemedi: ' + e.message);
+  }
+}
+
+// -- Alacak/Borç satır CRUD --
+function openSayimSatirEkleModal(tip) {
+  sayimEkleTip = tip;
+  document.getElementById('sseBaslik').textContent = tip === 'alacak' ? 'Alacak Satırı Ekle' : 'Borç Satırı Ekle';
+  document.getElementById('sseAd').value = '';
+  document.getElementById('sseGram').value = '';
+  document.getElementById('sseTutar').value = '';
+  openModal('sayimSatirEkleModal');
+  setTimeout(() => document.getElementById('sseAd').focus(), 100);
+}
+
+async function saveSayimSatirEkle() {
+  const ad = document.getElementById('sseAd').value.trim();
+  const gramVal = document.getElementById('sseGram').value;
+  const gram = gramVal !== '' ? parseFloat(gramVal) : null;
+  const tutar_metin = document.getElementById('sseTutar').value.trim();
+  if (!ad) { alert('Açıklama zorunludur!'); return; }
+  const tip = sayimEkleTip;
+  const tablo = tip === 'alacak' ? 'sayim_alacaklar' : 'sayim_borclar';
+  const liste = tip === 'alacak' ? sayimAlacaklar : sayimBorclar;
+  const ay = document.getElementById('sayimAy')?.value;
+  const sira = liste.length;
+  const id = Date.now();
+  const yeni = { id, ay, sira, ad, gram, tutar_metin };
+  liste.push(yeni);
+  try { await api(tablo, 'POST', yeni); } catch(e) { alert('Kaydedilemedi: ' + e.message); liste.pop(); return; }
+  closeModal('sayimSatirEkleModal');
+  renderSayimSatirlar(tip);
+  await hesaplaSayimOzet();
+}
+
+async function saveSayimSatirAlan(tip, id, alan, deger) {
+  const liste = tip === 'alacak' ? sayimAlacaklar : sayimBorclar;
+  const tablo = tip === 'alacak' ? 'sayim_alacaklar' : 'sayim_borclar';
+  const r = liste.find(x => x.id === id);
+  if (!r) return;
+  const val = alan === 'gram' ? (deger === '' ? null : parseFloat(deger)) : deger.trim();
+  r[alan] = val;
+  try { await api(tablo + '?id=eq.' + id, 'PATCH', { [alan]: val }); } catch(e) { alert('Güncellenemedi: ' + e.message); return; }
+  renderSayimSatirlar(tip);
+  await hesaplaSayimOzet();
+}
+
+async function deleteSayimSatir(tip, id) {
+  if (!confirm('Bu satır silinecek. Emin misiniz?')) return;
+  const tablo = tip === 'alacak' ? 'sayim_alacaklar' : 'sayim_borclar';
+  try { await api(tablo + '?id=eq.' + id, 'DELETE'); } catch(e) { alert('Silinemedi: ' + e.message); return; }
+  if (tip === 'alacak') sayimAlacaklar = sayimAlacaklar.filter(x => x.id !== id);
+  else sayimBorclar = sayimBorclar.filter(x => x.id !== id);
+  renderSayimSatirlar(tip);
+  await hesaplaSayimOzet();
+}
+
 function tasSizToggle() {
   const siz = document.getElementById('tasSiz').checked;
   document.getElementById('tasAlanlari').style.display = siz ? 'none' : '';
@@ -2729,8 +3309,8 @@ async function doLogin() {
 // Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Giderler(4), Borç/Alacak(5), Parametreler(6)
 // Hepsi rol_izinleri tablosundan (admin > Parametreler > Rol İzinleri panelinden) ayarlanır.
 // admin her zaman hepsini görür ve buradan kısıtlanamaz (kilitlenmeyi önlemek için).
-const SEKME_INDEX = { anasayfa:0, urunler:1, rapor:2, platformlar:3, giderler:4, borcalacak:5, parametreler:6 };
-const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler'];
+const SEKME_INDEX = { anasayfa:0, urunler:1, rapor:2, platformlar:3, giderler:4, borcalacak:5, parametreler:6, sayim:7 };
+const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler','sayim'];
 let rolIzinleriCache = null;
 
 async function loadRolIzinleri() {
@@ -2743,7 +3323,7 @@ async function loadRolIzinleri() {
   }
 }
 function rolSekmeleri() {
-  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6];
+  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7];
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
   return izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
 }
@@ -3109,8 +3689,9 @@ function openPlatSiparisModal() {
   document.getElementById('psNot').value = '';
   document.getElementById('psTasGr').value = '0';
   const psAdresSec = document.getElementById('psAdresSection');
-  if (psAdresSec) psAdresSec.style.display = aktifPlatform === 'essos_etsy' ? '' : 'none';
+  if (psAdresSec) psAdresSec.style.display = (aktifPlatform === 'essos_etsy' || aktifPlatform === 'alfred_etsy') ? '' : 'none';
   document.getElementById('psAdres').value = '';
+  const psPdfDurum1 = document.getElementById('psEtsyPdfDurum'); if (psPdfDurum1) psPdfDurum1.textContent = '';
   resetPsHesap();
   openModal('platSiparisModal');
   setTimeout(() => document.getElementById('psSiparisNo').focus(), 100);
@@ -3200,7 +3781,7 @@ async function savePlatSiparis() {
     kar_usd: kar,
     musteri_adi: document.getElementById('psSiparisNo').value || '',
     notlar: notlarWithTas(document.getElementById('psNot').value, parseFloat(document.getElementById('psTasGr').value)||0),
-    adres: aktifPlatform === 'essos_etsy' ? psAdresFormatla(document.getElementById('psAdres').value.trim(), satis) : '',
+    adres: (aktifPlatform === 'essos_etsy' || aktifPlatform === 'alfred_etsy') ? psAdresFormatla(document.getElementById('psAdres').value.trim(), satis) : '',
     fatura_kur: aktifPlatform === 'essos_etsy' ? (parseFloat(document.getElementById('essosFaturaKur').value)||0) : 0,
     fatura_tl: aktifPlatform === 'essos_etsy' ? (satis * (parseFloat(document.getElementById('essosFaturaKur').value)||0)) : 0,
     fatura_kesildi: editId ? (platSiparisler.find(x=>x.id===editId)?.fatura_kesildi||false) : false
@@ -3237,7 +3818,8 @@ async function editPlatSiparis(id) {
   document.getElementById('psNot').value = (s.notlar || '').replace(/\|?TAŞ:[\d.]+/, '').trim();
   document.getElementById('psTasGr').value = parseTasGr(s.notlar) || 0;
   const psAdresSec2 = document.getElementById('psAdresSection');
-  if (psAdresSec2) psAdresSec2.style.display = aktifPlatform === 'essos_etsy' ? '' : 'none';
+  if (psAdresSec2) psAdresSec2.style.display = (aktifPlatform === 'essos_etsy' || aktifPlatform === 'alfred_etsy') ? '' : 'none';
+  const psPdfDurum2 = document.getElementById('psEtsyPdfDurum'); if (psPdfDurum2) psPdfDurum2.textContent = '';
   document.getElementById('psAdres').value = s.adres || '';
   psHesapla();
   openModal('platSiparisModal');
@@ -4774,7 +5356,7 @@ document.addEventListener('keydown', function(e) {
   }
 
   // Üst menü kısayolları — her sayfada (Ana Sayfa dahil) çalışır, harfler yukarıdakilerle çakışmıyor
-  const navMap = { 'A': 'anasayfa', 'Ü': 'urunler', 'U': 'urunler', 'O': 'rapor', 'P': 'platformlar', 'G': 'giderler', 'B': 'borcalacak', 'Y': 'parametreler' };
+  const navMap = { 'A': 'anasayfa', 'Ü': 'urunler', 'U': 'urunler', 'O': 'rapor', 'P': 'platformlar', 'G': 'giderler', 'B': 'borcalacak', 'Y': 'parametreler', 'S': 'sayim' };
   if (navMap[harf]) { e.preventDefault(); showPage(navMap[harf]); return; }
 });
 
@@ -4843,7 +5425,15 @@ document.addEventListener('DOMContentLoaded', () => { asInit(); dokumRenderListe
         <div class="form-group"><label class="form-label">Taş Gr</label><input type="number" class="form-control" id="psTasGr" step="0.001" value="0" placeholder="0.000"></div>
       </div>
     </div>
-      <div id="psAdresSection" style="margin-top:12px;display:none;"><div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 8px;">📦 Adres</div>
+      <div id="psAdresSection" style="margin-top:12px;display:none;">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 8px;">📦 Adres</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+          <label class="btn btn-sm" style="border:1px solid var(--border);font-size:12px;cursor:pointer;margin:0;">
+            📄 Etsy Faturasından Doldur
+            <input type="file" accept="application/pdf" id="psEtsyPdfInput" style="display:none;" onchange="handleEtsyPdfSec(this)">
+          </label>
+          <span id="psEtsyPdfDurum" style="font-size:12px;color:var(--text3);"></span>
+        </div>
         <div class="form-group"><label class="form-label">Teslimat Adresi</label><textarea id="psAdres" class="form-control" rows="3" placeholder="Adresi yapıştırın..." style="resize:vertical;" onpaste="psAdresPaste(event,this)"></textarea></div>
       </div>
     <div class="modal-footer">
@@ -5125,7 +5715,9 @@ function acBakiyeDetayModal() {
     'yuppionOdemeModal':  function() { saveYuppionOdeme(); },
     'calisanEkleModal':   function() { saveCalisanEkle(); },
     'sabitGiderEkleModal':function() { saveSabitGiderEkle(); },
-    'maasGuncelleModal':  function() { saveMaasGuncelle(); }
+    'maasGuncelleModal':  function() { saveMaasGuncelle(); },
+    'sayimKalemEkleModal':function() { saveSayimKalemEkle(); },
+    'sayimSatirEkleModal':function() { saveSayimSatirEkle(); }
   };
 
   document.addEventListener('keydown', function(e) {
@@ -5456,6 +6048,88 @@ function psAdresPaste(e, el) {
     el.value = psAdresFormatla(pasted, satis);
   }, 20);
 }
+
+// ===== ETSY PDF'DEN OTOMATİK DOLDUR =====
+let _pdfjsHazir = false;
+function pdfjsHazirla() {
+  if (_pdfjsHazir) return true;
+  if (typeof pdfjsLib === 'undefined') return false;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  _pdfjsHazir = true;
+  return true;
+}
+
+async function handleEtsyPdfSec(inputEl) {
+  const file = inputEl.files && inputEl.files[0];
+  const durum = document.getElementById('psEtsyPdfDurum');
+  if (!file) return;
+  if (durum) { durum.textContent = 'Okunuyor...'; durum.style.color = 'var(--text3)'; }
+  try {
+    if (!pdfjsHazirla()) throw new Error('PDF kütüphanesi yüklenemedi (internet bağlantısını kontrol edin)');
+    const buf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    const page = await pdf.getPage(1);
+    const content = await page.getTextContent();
+    const tamMetin = content.items.map(it => it.str).join('\n');
+    etsyPdfDoldur(tamMetin, durum);
+  } catch(e) {
+    if (durum) { durum.textContent = '✗ ' + e.message; durum.style.color = 'var(--red)'; }
+  } finally {
+    inputEl.value = '';
+  }
+}
+
+// Etsy'nin "Order" PDF'inden (paket etiketi/fatura) Sipariş No, Ürün Adı, Satış Fiyatı
+// (vergi hariç = Subtotal) ve Adres bilgilerini çıkarıp forma doldurur. Gram alanına
+// kasıtlı olarak dokunulmaz — Burak tartıp elle giriyor.
+function etsyPdfDoldur(metin, durum) {
+  const dolduruldu = [];
+  const eksik = [];
+
+  // Sipariş No: "Private notes" içindeki "*AY XX. SATIS*" satırından
+  const siparisM = metin.match(/(\d+)\s*\.\s*SAT/i);
+  if (siparisM) {
+    document.getElementById('psSiparisNo').value = siparisM[1];
+    dolduruldu.push('Sipariş No');
+  } else eksik.push('Sipariş No');
+
+  // Ürün Adı (bonus)
+  const urunM = metin.match(/\d+\s*items?\s*\n([\s\S]*?)\n\s*SKU\s*:/i);
+  if (urunM) {
+    const urunAdi = urunM[1].replace(/\s*\n\s*/g, ' ').trim();
+    if (urunAdi) { document.getElementById('psUrun').value = urunAdi; dolduruldu.push('Ürün Adı'); }
+  }
+
+  // Satış Fiyatı: Subtotal (indirim uygulanmış, vergi hariç tutar)
+  const subM = metin.match(/Subtotal\s*\$?\s*([\d,]+\.\d{2})/i);
+  let satisVal = 0;
+  if (subM) {
+    satisVal = parseFloat(subM[1].replace(/,/g, ''));
+    document.getElementById('psSatisFiyat').value = satisVal;
+    dolduruldu.push('Satış Fiyatı');
+  } else eksik.push('Satış Fiyatı');
+
+  // Adres: "Ship to" bloğu
+  const adresM = metin.match(/Ship to\s*\n([\s\S]*?)\n\s*(Scheduled to ship by|Shop|Order date|Payment method)/i);
+  if (adresM) {
+    const adresMetni = adresM[1].split('\n').map(s => s.trim()).filter(Boolean).join('\n');
+    const psAdresEl = document.getElementById('psAdres');
+    if (psAdresEl) psAdresEl.value = psAdresFormatla(adresMetni, satisVal);
+    dolduruldu.push('Adres');
+  } else eksik.push('Adres');
+
+  psHesapla();
+
+  if (durum) {
+    if (dolduruldu.length) {
+      durum.textContent = '✓ Dolduruldu: ' + dolduruldu.join(', ') + (eksik.length ? ' | Bulunamadı: ' + eksik.join(', ') : '');
+      durum.style.color = eksik.length ? 'var(--gold-dark)' : 'var(--green)';
+    } else {
+      durum.textContent = '✗ Hiçbir alan bulunamadı, PDF formatı farklı olabilir.';
+      durum.style.color = 'var(--red)';
+    }
+  }
+}
 async function essosFaturaUygula() {
   const kur = parseFloat(document.getElementById('essosFaturaKur').value) || 0;
   if (!kur) { showToast('Önce kur giriniz'); return; }
@@ -5632,6 +6306,43 @@ async function deleteGider(id) {
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('calisanEkleModal')">İptal</button>
       <button class="btn btn-primary" onclick="saveCalisanEkle()">Kaydet ↵</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAYIM: KALEM EKLE MODAL -->
+<div class="modal-overlay" id="sayimKalemEkleModal">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header">
+      <div class="modal-title">Kalem Ekle</div>
+      <button class="modal-close" onclick="closeModal('sayimKalemEkleModal')">×</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="form-group"><label class="form-label">Ürün Adı *</label><input type="text" class="form-control" id="skeAd" placeholder="Örn: 22 Ayar Bilezik"></div>
+      <div class="form-group"><label class="form-label">Milyem</label><input type="number" step="1" class="form-control" id="skeMilyem" placeholder="Örn: 916"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('sayimKalemEkleModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveSayimKalemEkle()">Kaydet ↵</button>
+    </div>
+  </div>
+</div>
+
+<!-- SAYIM: SATIR EKLE MODAL (Alacak/Borç) -->
+<div class="modal-overlay" id="sayimSatirEkleModal">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-header">
+      <div class="modal-title" id="sseBaslik">Satır Ekle</div>
+      <button class="modal-close" onclick="closeModal('sayimSatirEkleModal')">×</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:12px;">
+      <div class="form-group"><label class="form-label">Açıklama *</label><input type="text" class="form-control" id="sseAd" placeholder="Kimden/kime, ne için..."></div>
+      <div class="form-group"><label class="form-label">Gram (opsiyonel)</label><input type="number" step="0.01" class="form-control" id="sseGram" placeholder="0"></div>
+      <div class="form-group"><label class="form-label">Tutar *</label><input type="text" class="form-control" id="sseTutar" placeholder="Örn: 2.000 usd veya 50.000 TL" onkeydown="if(event.key==='Enter'){event.preventDefault();saveSayimSatirEkle()}"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('sayimSatirEkleModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveSayimSatirEkle()">Kaydet ↵</button>
     </div>
   </div>
 </div>
