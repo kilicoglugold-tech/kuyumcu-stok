@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V57-MILYEM-HAS-SATIR --><!DOCTYPE html>
+﻿<!-- SURUM-V61-BURAK-KART-GRID-KOPYALA-KREDIKARTI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -332,7 +332,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="nav-tab" onclick="showPage('rapor')">Rapor (O)</button>
     <button class="nav-tab" onclick="showPage('platformlar')">🏪 Platformlar (P)</button>
     <button class="nav-tab" onclick="showPage('giderler')">💸 Giderler (G)</button>
-    <button class="nav-tab" onclick="showPage('borcalacak')">⚖️ Borç/Alacak (B)</button><button class="nav-tab" onclick="showPage('parametreler')">⚙ Parametreler (Y)</button><button class="nav-tab" onclick="showPage('sayim')">📋 Sayım (S)</button>
+    <button class="nav-tab" onclick="showPage('borcalacak')">⚖️ Borç/Alacak (B)</button><button class="nav-tab" onclick="showPage('parametreler')">⚙ Parametreler (Y)</button><button class="nav-tab" onclick="showPage('sayim')">📋 Sayım (S)</button><button class="nav-tab" onclick="showPage('burak_ozel')">🔒 Burak</button>
   </div>
   <div class="nav-right">
   </div>
@@ -563,6 +563,34 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('asHatirlatmaModal')">İptal</button>
       <button class="btn btn-primary" onclick="asHatirlatmaKaydet()">Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<!-- BURAK - BAĞIMSIZ ÖDEME HATIRLATMA EKLE MODAL -->
+<div class="modal-overlay" id="bozHatirlatmaModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <div class="modal-title">🔔 Ödeme Hatırlatma Ekle</div>
+      <button class="modal-close" onclick="closeModal('bozHatirlatmaModal')">×</button>
+    </div>
+    <div class="modal-body" style="display:flex;flex-direction:column;gap:14px;">
+      <div class="form-group"><label class="form-label">İsim *</label><input id="bozHIsim" class="form-control" placeholder="Ödeme adı"></div>
+      <div class="form-group"><label class="form-label">Açıklama</label><textarea id="bozHAciklama" class="form-control" style="height:60px;resize:none;"></textarea></div>
+      <div class="form-group"><label class="form-label">Tarih *</label><input id="bozHTarih" type="date" class="form-control"></div>
+      <div class="form-group">
+        <label class="form-label">Tekrar</label>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="radio" name="bozHTekrar" value="yok" checked style="accent-color:var(--gold)"> Tekrar yok</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="radio" name="bozHTekrar" value="hafta" style="accent-color:var(--gold)"> Her hafta</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="radio" name="bozHTekrar" value="ay" style="accent-color:var(--gold)"> Her ay</label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;"><input type="radio" name="bozHTekrar" value="yil" style="accent-color:var(--gold)"> Her yıl</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('bozHatirlatmaModal')">İptal</button>
+      <button class="btn btn-primary" onclick="bozHatirlatmaKaydet()">Kaydet</button>
     </div>
   </div>
 </div>
@@ -1368,6 +1396,135 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 
   </div>
 </div>
+
+<!-- BURAK (SADECE ADMIN'E ÖZEL) -->
+<div class="page" id="page-burak_ozel">
+  <div class="page-header">
+    <div><div class="page-title">🔒 Burak</div><div class="page-sub">Sadece sana özel — başka hiçbir rol bu sekmeyi göremez</div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start;">
+    <!-- SOL MENÜ -->
+    <div class="card" style="padding:10px;">
+      <div id="bozKategoriMenu" style="display:flex;flex-direction:column;gap:4px;">
+        <button class="ayar-tab active" style="text-align:left;width:100%;box-sizing:border-box;" onclick="bozKategoriSec('genel', this)">🏠 Genel</button>
+        <button class="ayar-tab" style="text-align:left;width:100%;box-sizing:border-box;" onclick="bozKategoriSec('adresler', this)">📍 Adresler</button>
+        <button class="ayar-tab" style="text-align:left;width:100%;box-sizing:border-box;" onclick="bozKategoriSec('kartlar', this)">💳 Kredi Kartları</button>
+        <button class="ayar-tab" style="text-align:left;width:100%;box-sizing:border-box;" onclick="bozKategoriSec('sifreler', this)">🔑 Şifreler</button>
+        <button class="ayar-tab" style="text-align:left;width:100%;box-sizing:border-box;" onclick="bozKategoriSec('odemeler', this)">💰 Ödemeler</button>
+        <button class="ayar-tab" style="text-align:left;width:100%;box-sizing:border-box;" onclick="bozKategoriSec('uzun_vadeli', this)">📅 Uzun Vadeli Görevler</button>
+        <button class="ayar-tab" style="text-align:left;width:100%;box-sizing:border-box;" onclick="bozKategoriSec('hatirlatma', this)">🔔 Ödeme Hatırlatma</button>
+      </div>
+    </div>
+    <!-- SAĞ İÇERİK -->
+    <div>
+      <!-- GENEL -->
+      <div id="bozGenelPanel">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="as-tarih" id="bozTarih">—</div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <div style="font-weight:600;font-size:14px;margin-bottom:12px;">🔔 Ödeme Hatırlatmaları</div>
+          <div class="hatirlatma-liste" id="bozGenelHatirlatmaListe"><div style="color:var(--text3);font-size:13px;">Henüz hatırlatma yok.</div></div>
+          <div style="margin-top:10px;text-align:right;">
+            <button class="btn btn-sm" onclick="bozHOpenModal()">+ Ödeme Hatırlatma Ekle</button>
+          </div>
+        </div>
+        <div class="gorev-kolon" style="margin-bottom:16px;max-width:340px;">
+          <div class="gorev-kolon-baslik" style="display:flex;align-items:center;justify-content:space-between;">
+            <span>👤 Görevlerim</span>
+            <button class="btn btn-sm" onclick="bozGorevHizliAc()" style="padding:2px 9px;">+</button>
+          </div>
+          <div id="gkHizliWrap-burak-boz" style="display:none;margin:6px 0;">
+            <input id="gkHizliInput-burak-boz" class="form-control" style="font-size:12px;padding:6px 8px;" placeholder="Görev yaz, Enter'a bas..." onkeydown="if(event.key==='Enter')bozGorevHizliKaydet();if(event.key==='Escape')bozGorevHizliKapat()">
+          </div>
+          <div id="gk-burak-boz"></div>
+        </div>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="font-weight:600;font-size:14px;">⏰ Alarm Kur</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+            <input type="date" id="bozAlarmTarih" class="form-control" style="max-width:150px;">
+            <input type="time" id="bozAlarmSaat" class="form-control" style="max-width:110px;">
+            <select id="bozAlarmTekrar" class="form-control" style="max-width:130px;">
+              <option value="yok">Tekrar yok</option>
+              <option value="hafta">Her hafta</option>
+              <option value="ay">Her ay</option>
+              <option value="yil">Her yıl</option>
+            </select>
+            <input type="text" id="bozAlarmEtiket" class="form-control" style="flex:1;min-width:140px;" placeholder="Ne için? (opsiyonel)" onkeydown="if(event.key==='Enter')bozAlarmEkle()">
+            <button class="btn btn-primary btn-sm" onclick="bozAlarmEkle()">Ekle</button>
+          </div>
+          <div id="bozAlarmListe"></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:10px;line-height:1.5;">⚠️ Bu alarmın çalması için bu sayfanın tarayıcıda (bir sekmede) açık olması gerekir — telefon kilitliyken veya uygulama tamamen kapalıyken bildirim göndermez. Saat geldiğinde hem sesli uyarı hem tarayıcı bildirimi (izin verirsen) ile hatırlatılırsın.</div>
+        </div>
+      </div>
+      <!-- NOTLAR: Adresler / Şifreler / Ödemeler -->
+      <div id="bozNotPanel" class="card" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-weight:700;font-size:15px;" id="bozBaslik">📍 Adresler</div>
+          <button class="btn btn-sm btn-primary" onclick="bozEkleAc()">+ Ekle</button>
+        </div>
+        <div id="bozEkleWrap" style="display:none;margin-bottom:12px;background:var(--bg2);padding:12px;border-radius:8px;">
+          <div class="form-group"><label class="form-label">Başlık</label><input class="form-control" id="bozBaslikInput" placeholder="Örn: Ev adresi / Ziraat Bankası / Gmail..."></div>
+          <div class="form-group"><label class="form-label">Detay</label><textarea class="form-control" id="bozIcerikInput" rows="3" placeholder="Detayları yaz..."></textarea></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary btn-sm" onclick="bozKaydet()">Kaydet</button>
+            <button class="btn btn-sm" onclick="bozEkleKapat()">İptal</button>
+          </div>
+        </div>
+        <div id="bozListe" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;"></div>
+      </div>
+      <!-- KREDİ KARTLARI -->
+      <div id="bozKartPanel" class="card" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-weight:700;font-size:15px;">💳 Kredi Kartları</div>
+          <button class="btn btn-sm btn-primary" onclick="bozKartEkleAc()">+ Ekle</button>
+        </div>
+        <div id="bozKartEkleWrap" style="display:none;margin-bottom:12px;background:var(--bg2);padding:12px;border-radius:8px;">
+          <div class="form-group"><label class="form-label">Kart Adı</label><input class="form-control" id="bozKartBaslikInput" placeholder="Örn: İş Bankası Kredi Kartı"></div>
+          <div class="form-group"><label class="form-label">Kart Numarası</label><input class="form-control" id="bozKartNoInput" placeholder="0000 0000 0000 0000"></div>
+          <div style="display:flex;gap:10px;">
+            <div class="form-group" style="flex:1;"><label class="form-label">Son Kullanma Tarihi</label><input class="form-control" id="bozKartSktInput" placeholder="AA/YY"></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">CVV</label><input class="form-control" id="bozKartCvvInput" placeholder="000"></div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <div class="form-group" style="flex:1;"><label class="form-label">Son Ödeme Tarihi</label><input type="date" class="form-control" id="bozKartSonOdemeInput"></div>
+            <div class="form-group" style="flex:1;"><label class="form-label">Ekstre Kesim Tarihi</label><input type="date" class="form-control" id="bozKartEkstreInput"></div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary btn-sm" onclick="bozKartKaydet()">Kaydet</button>
+            <button class="btn btn-sm" onclick="bozKartEkleKapat()">İptal</button>
+          </div>
+        </div>
+        <div id="bozKartListe" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
+      </div>
+      <!-- UZUN VADELİ GÖREVLER -->
+      <div id="bozUzunPanel" class="card" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-weight:700;font-size:15px;">📅 Uzun Vadeli Görevler</div>
+          <button class="btn btn-sm btn-primary" onclick="bozUzunEkleAc()">+ Ekle</button>
+        </div>
+        <div id="bozUzunEkleWrap" style="display:none;margin-bottom:12px;background:var(--bg2);padding:12px;border-radius:8px;">
+          <div class="form-group"><input class="form-control" id="bozUzunInput" placeholder="Uzun vadeli görev yaz..." onkeydown="if(event.key==='Enter')bozUzunKaydet()"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary btn-sm" onclick="bozUzunKaydet()">Kaydet</button>
+            <button class="btn btn-sm" onclick="bozUzunEkleKapat()">İptal</button>
+          </div>
+        </div>
+        <div id="bozUzunListe"></div>
+      </div>
+      <!-- ÖDEME HATIRLATMA (bağımsız) -->
+      <div id="bozHatirlatmaPanel" class="card" style="display:none;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-weight:700;font-size:15px;">🔔 Ödeme Hatırlatma</div>
+          <button class="btn btn-sm btn-primary" onclick="bozHOpenModal()">+ Ekle</button>
+        </div>
+        <div class="hatirlatma-liste" id="bozHatirlatmaListe" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
 </main>
 
 <!-- ÜRÜN MODAL -->
@@ -1628,7 +1785,7 @@ async function uploadFoto(file) {
 // NAV
 let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
-  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim'];
+  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel'];
   const idx = pages.indexOf(page);
   // Ana Sayfa'daki kısayol kartları, alt menüler vb. üzerinden de olsa,
   // yetkisi olmayan bir role sayfa açtırma (sadece üst menüyü gizlemek yetmiyordu).
@@ -1657,6 +1814,7 @@ function showPage(page) {
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); baRender(); }
   if (page === 'sayim') { fillAySec('sayimAy'); loadSayim(); loadSayimGecmisRaporlar(); }
+  if (page === 'burak_ozel') { bozInit(); }
 }
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
@@ -3332,6 +3490,9 @@ async function showMainApp() {
   initParamAy();
   initRaporAylar();
   loadAylikParam().then(() => loadUrunler());
+  if (currentUser.rol === 'admin' && typeof bozAlarmYukle === 'function') {
+    bozAlarmYukle().then(bozAlarmBaslat);
+  }
 }
 
 function checkOtomatikGiris() {
@@ -3382,7 +3543,7 @@ async function doLogin() {
 // Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Giderler(4), Borç/Alacak(5), Parametreler(6)
 // Hepsi rol_izinleri tablosundan (admin > Parametreler > Rol İzinleri panelinden) ayarlanır.
 // admin her zaman hepsini görür ve buradan kısıtlanamaz (kilitlenmeyi önlemek için).
-const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8 };
+const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8, burak_ozel:9 };
 const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim'];
 let rolIzinleriCache = null;
 
@@ -3396,7 +3557,7 @@ async function loadRolIzinleri() {
   }
 }
 function rolSekmeleri() {
-  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8];
+  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9];
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
   return izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
 }
@@ -5040,6 +5201,7 @@ function asGorevRender() {
         <button onclick="asGorevSil(${g.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 2px;line-height:1;">🗑</button>
       </div>`).join('');
   });
+  if (typeof bozGorevRender === 'function') bozGorevRender();
 }
 
 // ---- GÖREV HIZLI EKLEME (kolon üzerinden, kısayol destekli) ----
@@ -5281,6 +5443,607 @@ function kkWhatsApp(key) {
   const satirlar = liste.map(item => `${item.tiklendi ? '✅' : '⬜'} ${item.metin}`).join('\n');
   const metin = encodeURIComponent(`${baslik}\n\n${satirlar}`);
   window.open('https://wa.me/?text=' + metin, '_blank');
+}
+
+// ===== BURAK (SADECE ADMIN'E ÖZEL NOTLAR) =====
+let bozCache = { adresler: [], kartlar: [], sifreler: [], odemeler: [] };
+let bozAktifKategori = 'genel';
+let bozYuklendi = false;
+const BOZ_NOT_KATEGORILERI = ['adresler','sifreler','odemeler'];
+const BOZ_BASLIKLAR = {
+  adresler: '📍 Adresler',
+  sifreler: '🔑 Şifreler',
+  odemeler: '💰 Ödemeler'
+};
+
+async function bozYukle() {
+  try {
+    const rows = await api('burak_notlar?select=*&order=olusturma.desc');
+    const yeni = { adresler: [], kartlar: [], sifreler: [], odemeler: [] };
+    (rows || []).forEach(r => { if (yeni[r.kategori]) yeni[r.kategori].push(r); });
+    bozCache = yeni;
+  } catch(e) { /* yetkisiz veya giriş öncesi olabilir, sessiz geç */ }
+  bozYuklendi = true;
+}
+
+async function bozInit() {
+  if (!bozYuklendi) await bozYukle();
+  await loadGorevCache();
+  bozGorevRender();
+  const bg = new Date();
+  const bugunISO = bg.toISOString().slice(0, 10);
+  const bt = document.getElementById('bozTarih');
+  if (bt) bt.textContent = AS_GUNLER[bg.getDay()] + ', ' + bg.getDate() + ' ' + AS_AYLAR[bg.getMonth()] + ' ' + bg.getFullYear();
+  const at = document.getElementById('bozAlarmTarih');
+  if (at && !at.value) at.value = bugunISO;
+  if (!bozAlarmYuklendi) { await bozAlarmYukle(); bozAlarmBaslat(); }
+  bozAlarmRender();
+  // Ödeme Hatırlatma verisi "Genel" sayfasındaki özet kart için her zaman yüklü olmalı,
+  // hangi kategori açık olursa olsun.
+  if (!bozHatirlatmaYuklendi) await bozHatirlatmaYukle();
+  bozHatirlatmaRender();
+  if (BOZ_NOT_KATEGORILERI.includes(bozAktifKategori)) bozRenderListe();
+  else if (bozAktifKategori === 'kartlar') bozKartRenderListe();
+  else if (bozAktifKategori === 'uzun_vadeli') { if (!bozUzunYuklendi) await bozUzunYukle(); bozUzunRenderListe(); }
+}
+
+function bozKategoriSec(kat, btn) {
+  bozAktifKategori = kat;
+  document.querySelectorAll('#bozKategoriMenu .ayar-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('bozGenelPanel').style.display = kat === 'genel' ? '' : 'none';
+  document.getElementById('bozNotPanel').style.display = BOZ_NOT_KATEGORILERI.includes(kat) ? '' : 'none';
+  document.getElementById('bozKartPanel').style.display = kat === 'kartlar' ? '' : 'none';
+  document.getElementById('bozUzunPanel').style.display = kat === 'uzun_vadeli' ? '' : 'none';
+  document.getElementById('bozHatirlatmaPanel').style.display = kat === 'hatirlatma' ? '' : 'none';
+  if (BOZ_BASLIKLAR[kat]) document.getElementById('bozBaslik').textContent = BOZ_BASLIKLAR[kat];
+  bozEkleKapat();
+  bozKartEkleKapat();
+  if (BOZ_NOT_KATEGORILERI.includes(kat)) {
+    bozRenderListe();
+  } else if (kat === 'kartlar') {
+    bozKartRenderListe();
+  } else if (kat === 'uzun_vadeli') {
+    if (!bozUzunYuklendi) bozUzunYukle().then(bozUzunRenderListe); else bozUzunRenderListe();
+  } else if (kat === 'hatirlatma') {
+    if (!bozHatirlatmaYuklendi) bozHatirlatmaYukle().then(bozHatirlatmaRender); else bozHatirlatmaRender();
+  }
+}
+
+// ---- GENEL: Burak'a atanan görevler (ortak gorevler tablosu, kime='burak') ----
+function bozGorevHizliAc() {
+  const wrap = document.getElementById('gkHizliWrap-burak-boz');
+  if (!wrap) return;
+  const open = wrap.style.display === 'none';
+  wrap.style.display = open ? '' : 'none';
+  if (open) setTimeout(() => document.getElementById('gkHizliInput-burak-boz').focus(), 50);
+}
+function bozGorevHizliKapat() {
+  const wrap = document.getElementById('gkHizliWrap-burak-boz');
+  if (wrap) wrap.style.display = 'none';
+}
+async function bozGorevHizliKaydet() {
+  const input = document.getElementById('gkHizliInput-burak-boz');
+  if (!input) return;
+  const isim = input.value.trim();
+  if (!isim) return;
+  const id = Date.now();
+  gorevCache.push({ id, isim, aciklama: '', kime: 'burak', tamamlandi: false, tamamlandi_zaman: null });
+  input.value = '';
+  bozGorevHizliKapat();
+  asGorevRender();
+  try {
+    await api('gorevler', 'POST', { id, isim, aciklama: '', kime: 'burak', tamamlandi: false });
+  } catch(e) {
+    showToast('Kaydedilemedi: ' + e.message);
+  }
+}
+function bozGorevRender() {
+  const el = document.getElementById('gk-burak-boz');
+  if (!el) return;
+  const simdi = Date.now();
+  let liste = gorevCache.filter(g => {
+    if (g.kime !== 'burak') return false;
+    if (g.tamamlandi && g.tamamlandi_zaman && (simdi - new Date(g.tamamlandi_zaman).getTime()) > 5 * 864e5) return false;
+    return true;
+  });
+  liste.sort((a, b) => (a.tamamlandi ? 1 : 0) - (b.tamamlandi ? 1 : 0));
+  if (!liste.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0;">Görev yok</div>'; return; }
+  el.innerHTML = liste.map(g => `
+    <div class="gorev-item">
+      <input type="checkbox" ${g.tamamlandi ? 'checked' : ''} onclick="asGorevToggle(${g.id})">
+      <div class="gorev-item-text${g.tamamlandi ? ' tamamlandi' : ''}" style="flex:1">${g.isim}${g.aciklama ? '<div class="gorev-item-aciklama">' + g.aciklama + '</div>' : ''}</div>
+      <button onclick="asGorevSil(${g.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:13px;padding:0 2px;line-height:1;">🗑</button>
+    </div>`).join('');
+}
+
+// ---- GENEL: Alarm Kur (sekme açıkken periyodik kontrol + ses/bildirim) ----
+let bozAlarmCache = [];
+let bozAlarmYuklendi = false;
+let bozAlarmSonCalinan = {};
+let bozAlarmIntervalId = null;
+
+async function bozAlarmYukle() {
+  try { bozAlarmCache = await api('burak_alarmlar?select=*&order=tarih.asc,saat.asc'); }
+  catch(e) { bozAlarmCache = []; }
+  bozAlarmYuklendi = true;
+}
+function bozAlarmBaslat() {
+  if (bozAlarmIntervalId) return;
+  if ('Notification' in window && Notification.permission === 'default') {
+    try { Notification.requestPermission(); } catch(e) {}
+  }
+  bozAlarmIntervalId = setInterval(bozAlarmKontrolEt, 20000);
+  bozAlarmKontrolEt();
+}
+function bozAlarmKontrolEt() {
+  if (!bozAlarmCache || !bozAlarmCache.length) return;
+  const simdi = new Date();
+  const hhmm = String(simdi.getHours()).padStart(2, '0') + ':' + String(simdi.getMinutes()).padStart(2, '0');
+  const bugun = simdi.toISOString().slice(0, 10);
+  bozAlarmCache.slice().forEach(a => {
+    if (a.aktif === false) return;
+    const aSaat = (a.saat || '').slice(0, 5);
+    const aTarih = a.tarih || bugun;
+    if (aTarih === bugun && aSaat === hhmm && bozAlarmSonCalinan[a.id] !== bugun) {
+      bozAlarmSonCalinan[a.id] = bugun;
+      bozAlarmCal(a);
+      bozAlarmSonrasi(a);
+    }
+  });
+}
+function bozAlarmCal(a) {
+  const mesaj = a.etiket ? a.etiket : 'Alarm zamanı geldi';
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('⏰ ' + mesaj, { body: (a.saat || '').slice(0, 5) });
+    }
+  } catch(e) {}
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new Ctx();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 880; g.gain.value = 0.2;
+    o.start(); setTimeout(() => { o.stop(); ctx.close(); }, 700);
+  } catch(e) {}
+  showToast('⏰ ' + mesaj);
+}
+// Alarm çaldıktan sonra: tekrarı yoksa listeden kaldır, tekrarı varsa tarihi bir sonraki
+// döneme ilerlet (Ödeme Hatırlatma'daki tekrar mantığıyla aynı).
+async function bozAlarmSonrasi(a) {
+  if (!a.tekrar || a.tekrar === 'yok') {
+    bozAlarmCache = bozAlarmCache.filter(x => x.id !== a.id);
+    bozAlarmRender();
+    try { await api('burak_alarmlar?id=eq.' + a.id, 'DELETE'); } catch(e) {}
+  } else {
+    const t = new Date(a.tarih);
+    if (a.tekrar === 'hafta') t.setDate(t.getDate() + 7);
+    else if (a.tekrar === 'ay') t.setMonth(t.getMonth() + 1);
+    else if (a.tekrar === 'yil') t.setFullYear(t.getFullYear() + 1);
+    const yeniTarih = t.toISOString().slice(0, 10);
+    a.tarih = yeniTarih;
+    bozAlarmRender();
+    try { await api('burak_alarmlar?id=eq.' + a.id, 'PATCH', { tarih: yeniTarih }); } catch(e) {}
+  }
+}
+async function bozAlarmEkle() {
+  const tarih = document.getElementById('bozAlarmTarih').value;
+  const saat = document.getElementById('bozAlarmSaat').value;
+  const tekrar = document.getElementById('bozAlarmTekrar').value;
+  const etiketEl = document.getElementById('bozAlarmEtiket');
+  const etiket = etiketEl.value.trim();
+  if (!tarih || !saat) { alert('Önce tarih ve saat seç.'); return; }
+  const id = Date.now();
+  bozAlarmCache.push({ id, tarih, saat, etiket, tekrar, aktif: true });
+  etiketEl.value = '';
+  bozAlarmRender();
+  try {
+    await api('burak_alarmlar', 'POST', { id, tarih, saat, etiket, tekrar, aktif: true });
+  } catch(e) {
+    bozAlarmCache = bozAlarmCache.filter(x => x.id !== id);
+    bozAlarmRender();
+    showToast('Kaydedilemedi: ' + e.message);
+  }
+}
+async function bozAlarmSil(id) {
+  const onceki = bozAlarmCache;
+  bozAlarmCache = bozAlarmCache.filter(x => x.id !== id);
+  bozAlarmRender();
+  try {
+    await api('burak_alarmlar?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    bozAlarmCache = onceki;
+    bozAlarmRender();
+    showToast('Silinemedi: ' + e.message);
+  }
+}
+function bozAlarmRender() {
+  const el = document.getElementById('bozAlarmListe');
+  if (!el) return;
+  if (!bozAlarmCache.length) { el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0;">Kurulu alarm yok.</div>'; return; }
+  const tekrarEtiket = { yok: '', hafta: 'Her hafta', ay: 'Her ay', yil: 'Her yıl' };
+  const liste = bozAlarmCache.slice().sort((a, b) => ((a.tarih || '') + 'T' + (a.saat || '')).localeCompare((b.tarih || '') + 'T' + (b.saat || '')));
+  el.innerHTML = liste.map(a => {
+    const badge = a.tekrar && a.tekrar !== 'yok' ? '<span class="hatirlatma-tekrar">' + tekrarEtiket[a.tekrar] + '</span>' : '';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--border);">
+      <div style="font-weight:600;font-size:13px;white-space:nowrap;">${a.tarih || ''} ${(a.saat || '').slice(0,5)}</div>
+      <div style="flex:1;font-size:13px;color:var(--text2);">${a.etiket || ''} ${badge}</div>
+      <button onclick="bozAlarmSil(${a.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;line-height:1;">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+// ---- UZUN VADELİ GÖREVLER (bağımsız, tik atılabilir liste) ----
+let bozUzunCache = [];
+let bozUzunYuklendi = false;
+
+async function bozUzunYukle() {
+  try { bozUzunCache = await api('burak_uzun_vadeli?select=*&order=tamamlandi.asc,olusturma.desc'); }
+  catch(e) { bozUzunCache = []; }
+  bozUzunYuklendi = true;
+}
+function bozUzunEkleAc() {
+  document.getElementById('bozUzunInput').value = '';
+  document.getElementById('bozUzunEkleWrap').style.display = 'block';
+  setTimeout(() => document.getElementById('bozUzunInput').focus(), 50);
+}
+function bozUzunEkleKapat() {
+  document.getElementById('bozUzunEkleWrap').style.display = 'none';
+}
+async function bozUzunKaydet() {
+  const input = document.getElementById('bozUzunInput');
+  const isim = input.value.trim();
+  if (!isim) { alert('Görev boş olamaz.'); return; }
+  const id = Date.now();
+  bozUzunCache.unshift({ id, isim, tamamlandi: false });
+  bozUzunEkleKapat();
+  bozUzunRenderListe();
+  try {
+    await api('burak_uzun_vadeli', 'POST', { id, isim, tamamlandi: false });
+  } catch(e) {
+    bozUzunCache = bozUzunCache.filter(x => x.id !== id);
+    bozUzunRenderListe();
+    showToast('Kaydedilemedi: ' + e.message);
+  }
+}
+async function bozUzunToggle(id) {
+  const g = bozUzunCache.find(x => x.id === id);
+  if (!g) return;
+  g.tamamlandi = !g.tamamlandi;
+  bozUzunRenderListe();
+  try {
+    await api('burak_uzun_vadeli?id=eq.' + id, 'PATCH', { tamamlandi: g.tamamlandi });
+  } catch(e) {
+    g.tamamlandi = !g.tamamlandi;
+    bozUzunRenderListe();
+    showToast('Kaydedilemedi: ' + e.message);
+  }
+}
+async function bozUzunSil(id) {
+  const onceki = bozUzunCache;
+  bozUzunCache = bozUzunCache.filter(x => x.id !== id);
+  bozUzunRenderListe();
+  try {
+    await api('burak_uzun_vadeli?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    bozUzunCache = onceki;
+    bozUzunRenderListe();
+    showToast('Silinemedi: ' + e.message);
+  }
+}
+function bozUzunRenderListe() {
+  const el = document.getElementById('bozUzunListe');
+  if (!el) return;
+  if (!bozUzunCache.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;">Henüz uzun vadeli görev yok.</div>'; return; }
+  const liste = bozUzunCache.slice().sort((a, b) => (a.tamamlandi ? 1 : 0) - (b.tamamlandi ? 1 : 0));
+  el.innerHTML = liste.map(g => `
+    <div class="gorev-item">
+      <input type="checkbox" ${g.tamamlandi ? 'checked' : ''} onclick="bozUzunToggle(${g.id})">
+      <div class="gorev-item-text${g.tamamlandi ? ' tamamlandi' : ''}" style="flex:1">${g.isim}</div>
+      <button onclick="bozUzunSil(${g.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;line-height:1;">🗑</button>
+    </div>`).join('');
+}
+
+// ---- ÖDEME HATIRLATMA (bağımsız, Ana Sayfa'dan tamamen ayrı tablo) ----
+let bozHatirlatmaCache = [];
+let bozHatirlatmaYuklendi = false;
+
+async function bozHatirlatmaYukle() {
+  try { bozHatirlatmaCache = await api('burak_hatirlatmalar?select=*&order=tarih.asc'); }
+  catch(e) { bozHatirlatmaCache = []; }
+  bozHatirlatmaYuklendi = true;
+}
+function bozHOpenModal() {
+  document.getElementById('bozHIsim').value = '';
+  document.getElementById('bozHAciklama').value = '';
+  document.getElementById('bozHTarih').value = new Date().toISOString().slice(0, 10);
+  document.querySelector('input[name="bozHTekrar"][value="yok"]').checked = true;
+  openModal('bozHatirlatmaModal');
+}
+async function bozHatirlatmaKaydet() {
+  const isim = document.getElementById('bozHIsim').value.trim();
+  const tarih = document.getElementById('bozHTarih').value;
+  if (!isim || !tarih) { alert('İsim ve tarih zorunludur.'); return; }
+  const tekrar = document.querySelector('input[name="bozHTekrar"]:checked')?.value || 'yok';
+  const aciklama = document.getElementById('bozHAciklama').value.trim();
+  const id = Date.now();
+  bozHatirlatmaCache.push({ id, isim, aciklama, tarih, tekrar });
+  closeModal('bozHatirlatmaModal');
+  bozHatirlatmaRender();
+  try {
+    await api('burak_hatirlatmalar', 'POST', { id, isim, aciklama, tarih, tekrar });
+  } catch(e) {
+    bozHatirlatmaCache = bozHatirlatmaCache.filter(x => x.id !== id);
+    bozHatirlatmaRender();
+    showToast('Kaydedilemedi: ' + e.message);
+  }
+}
+async function bozHatirlatmaOdendi(id) {
+  const h = bozHatirlatmaCache.find(x => x.id === id);
+  if (!h) return;
+  if (!h.tekrar || h.tekrar === 'yok') {
+    const onceki = bozHatirlatmaCache;
+    bozHatirlatmaCache = bozHatirlatmaCache.filter(x => x.id !== id);
+    bozHatirlatmaRender();
+    try {
+      await api('burak_hatirlatmalar?id=eq.' + id, 'DELETE');
+    } catch(e) {
+      bozHatirlatmaCache = onceki;
+      bozHatirlatmaRender();
+      showToast('Kaydedilemedi: ' + e.message);
+    }
+  } else {
+    const t = new Date(h.tarih);
+    if (h.tekrar === 'hafta') t.setDate(t.getDate() + 7);
+    else if (h.tekrar === 'ay') t.setMonth(t.getMonth() + 1);
+    else if (h.tekrar === 'yil') t.setFullYear(t.getFullYear() + 1);
+    const yeniTarih = t.toISOString().slice(0, 10);
+    const eskiTarih = h.tarih;
+    h.tarih = yeniTarih;
+    bozHatirlatmaRender();
+    try {
+      await api('burak_hatirlatmalar?id=eq.' + id, 'PATCH', { tarih: yeniTarih });
+    } catch(e) {
+      h.tarih = eskiTarih;
+      bozHatirlatmaRender();
+      showToast('Kaydedilemedi: ' + e.message);
+    }
+  }
+}
+async function bozHatirlatmaSil(id) {
+  const onceki = bozHatirlatmaCache;
+  bozHatirlatmaCache = bozHatirlatmaCache.filter(x => x.id !== id);
+  bozHatirlatmaRender();
+  try {
+    await api('burak_hatirlatmalar?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    bozHatirlatmaCache = onceki;
+    bozHatirlatmaRender();
+    showToast('Silinemedi: ' + e.message);
+  }
+}
+function bozHatirlatmaSatirHtml(h) {
+  const bugun = new Date(); bugun.setHours(0, 0, 0, 0);
+  const tekrarEtiket = { yok: '', hafta: 'Her hafta', ay: 'Her ay', yil: 'Her yıl' };
+  const t = new Date(h.tarih); t.setHours(0, 0, 0, 0);
+  const fark = Math.round((t - bugun) / 864e5);
+  const cls = fark < 0 ? 'gecmis' : fark === 0 ? 'bugun' : '';
+  const etiket = fark < 0 ? Math.abs(fark) + ' gün geçti' : fark === 0 ? 'Bugün' : fark + ' gün kaldı';
+  const badge = h.tekrar && h.tekrar !== 'yok' ? '<span class="hatirlatma-tekrar">' + tekrarEtiket[h.tekrar] + '</span>' : '';
+  return `<div class="hatirlatma-item ${cls}">
+      <div style="flex:1">
+        <div class="hatirlatma-bilgi">${h.isim} <span style="font-size:11px;color:var(--text3)">${etiket}</span></div>
+        ${h.aciklama ? '<div class="hatirlatma-tarih">' + h.aciklama + '</div>' : ''}
+        <div class="hatirlatma-tarih">${h.tarih} ${badge}</div>
+      </div>
+      <div style="display:flex;gap:4px;align-items:center">
+        <button onclick="bozHatirlatmaOdendi(${h.id})" title="Ödendi" style="background:none;border:none;cursor:pointer;font-size:18px;padding:2px;">✅</button>
+        <button onclick="bozHatirlatmaSil(${h.id})" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:2px;">🗑</button>
+      </div>
+    </div>`;
+}
+// "Ödeme Hatırlatma" kategori sayfasındaki tam liste (hepsi, tarihe göre sıralı).
+function bozHatirlatmaRenderTumu() {
+  const el = document.getElementById('bozHatirlatmaListe');
+  if (!el) return;
+  if (!bozHatirlatmaCache.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;">Henüz hatırlatma yok.</div>'; return; }
+  const liste = bozHatirlatmaCache.slice().sort((a, b) => a.tarih.localeCompare(b.tarih));
+  el.innerHTML = liste.map(bozHatirlatmaSatirHtml).join('');
+}
+// "Genel" sayfasındaki özet kart: Ana Sayfa'daki gibi sadece yaklaşan (2 gün içindeki) ödemeler.
+function bozHatirlatmaRenderYakin() {
+  const el = document.getElementById('bozGenelHatirlatmaListe');
+  if (!el) return;
+  if (!bozHatirlatmaCache.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;">Henüz hatırlatma yok.</div>'; return; }
+  const bugun = new Date(); bugun.setHours(0, 0, 0, 0);
+  const gorunen = bozHatirlatmaCache.filter(h => {
+    const t = new Date(h.tarih); t.setHours(0, 0, 0, 0);
+    return Math.round((t - bugun) / 864e5) <= 2;
+  }).sort((a, b) => a.tarih.localeCompare(b.tarih));
+  if (!gorunen.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;">Yaklaşan ödeme yok.</div>'; return; }
+  el.innerHTML = gorunen.map(bozHatirlatmaSatirHtml).join('');
+}
+function bozHatirlatmaRender() {
+  bozHatirlatmaRenderTumu();
+  bozHatirlatmaRenderYakin();
+}
+
+function bozEkleAc() {
+  document.getElementById('bozBaslikInput').value = '';
+  document.getElementById('bozIcerikInput').value = '';
+  document.getElementById('bozEkleWrap').style.display = 'block';
+  setTimeout(() => document.getElementById('bozBaslikInput').focus(), 50);
+}
+
+function bozEkleKapat() {
+  document.getElementById('bozEkleWrap').style.display = 'none';
+}
+
+async function bozKaydet() {
+  const baslik = document.getElementById('bozBaslikInput').value.trim();
+  const icerik = document.getElementById('bozIcerikInput').value.trim();
+  if (!baslik) { alert('Başlık zorunludur.'); return; }
+  const kategori = bozAktifKategori;
+  const id = Date.now();
+  const yeni = { id, kategori, baslik, icerik, olusturma: new Date().toISOString() };
+  bozCache[kategori].unshift(yeni);
+  bozEkleKapat();
+  bozRenderListe();
+  try {
+    await api('burak_notlar', 'POST', { id, kategori, baslik, icerik });
+  } catch(e) {
+    bozCache[kategori] = bozCache[kategori].filter(x => x.id !== id);
+    bozRenderListe();
+    alert('Kaydedilemedi: ' + e.message);
+  }
+}
+
+async function bozSil(kategori, id) {
+  if (!confirm('Bu not silinecek. Emin misin?')) return;
+  const onceki = bozCache[kategori];
+  bozCache[kategori] = onceki.filter(x => x.id !== id);
+  bozRenderListe();
+  try {
+    await api('burak_notlar?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    bozCache[kategori] = onceki;
+    bozRenderListe();
+    alert('Silinemedi: ' + e.message);
+  }
+}
+
+function bozEsc(s) { return (s || '').toString().replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+// Panoya kopyala: not kartlarındaki ve kredi kartı alanlarındaki 📋 ikonu için ortak yardımcı.
+async function bozPanoyaKopyala(metin, basariMesaji) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(metin);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = metin;
+      ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    showToast(basariMesaji || '📋 Kopyalandı');
+  } catch(e) {
+    showToast('Kopyalanamadı');
+  }
+}
+
+function bozKopyala(kategori, id) {
+  const item = (bozCache[kategori] || []).find(x => x.id === id);
+  if (!item) return;
+  const metin = item.icerik ? (item.baslik + '\n' + item.icerik) : item.baslik;
+  bozPanoyaKopyala(metin, '📋 Kopyalandı: ' + item.baslik);
+}
+
+function bozRenderListe() {
+  const el = document.getElementById('bozListe');
+  if (!el) return;
+  const liste = bozCache[bozAktifKategori] || [];
+  if (!liste.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;grid-column:1/-1;">Henüz not yok. "+ Ekle" ile ekleyebilirsin.</div>';
+    return;
+  }
+  el.innerHTML = liste.map(item => `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:12px 14px;background:var(--card);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="font-weight:700;font-size:14.5px;">${bozEsc(item.baslik)}</div>
+        <div style="display:flex;gap:2px;flex-shrink:0;">
+          <button onclick="bozKopyala('${bozAktifKategori}',${item.id})" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;">📋</button>
+          <button onclick="bozSil('${bozAktifKategori}',${item.id})" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 3px;line-height:1;">🗑</button>
+        </div>
+      </div>
+      ${item.icerik ? `<div style="font-size:12.5px;color:var(--text2);white-space:pre-wrap;margin-top:6px;">${bozEsc(item.icerik)}</div>` : ''}
+    </div>`).join('');
+}
+
+// ---- KREDİ KARTLARI (aynı burak_notlar tablosu, kategori='kartlar' + kart alanları) ----
+function bozKartEkleAc() {
+  ['bozKartBaslikInput','bozKartNoInput','bozKartSktInput','bozKartCvvInput','bozKartSonOdemeInput','bozKartEkstreInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('bozKartEkleWrap').style.display = 'block';
+  setTimeout(() => document.getElementById('bozKartBaslikInput').focus(), 50);
+}
+function bozKartEkleKapat() {
+  const wrap = document.getElementById('bozKartEkleWrap');
+  if (wrap) wrap.style.display = 'none';
+}
+async function bozKartKaydet() {
+  const baslik = document.getElementById('bozKartBaslikInput').value.trim();
+  const kart_no = document.getElementById('bozKartNoInput').value.trim();
+  const son_kullanma = document.getElementById('bozKartSktInput').value.trim();
+  const cvv = document.getElementById('bozKartCvvInput').value.trim();
+  const son_odeme_tarihi = document.getElementById('bozKartSonOdemeInput').value || null;
+  const ekstre_kesim_tarihi = document.getElementById('bozKartEkstreInput').value || null;
+  if (!baslik) { alert('Kart adı zorunludur.'); return; }
+  const id = Date.now();
+  const yeni = { id, kategori: 'kartlar', baslik, icerik: '', kart_no, son_kullanma, cvv, son_odeme_tarihi, ekstre_kesim_tarihi, olusturma: new Date().toISOString() };
+  bozCache.kartlar.unshift(yeni);
+  bozKartEkleKapat();
+  bozKartRenderListe();
+  try {
+    await api('burak_notlar', 'POST', { id, kategori: 'kartlar', baslik, icerik: '', kart_no, son_kullanma, cvv, son_odeme_tarihi, ekstre_kesim_tarihi });
+  } catch(e) {
+    bozCache.kartlar = bozCache.kartlar.filter(x => x.id !== id);
+    bozKartRenderListe();
+    alert('Kaydedilemedi: ' + e.message);
+  }
+}
+async function bozKartSil(id) {
+  if (!confirm('Bu kart silinecek. Emin misin?')) return;
+  const onceki = bozCache.kartlar;
+  bozCache.kartlar = onceki.filter(x => x.id !== id);
+  bozKartRenderListe();
+  try {
+    await api('burak_notlar?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    bozCache.kartlar = onceki;
+    bozKartRenderListe();
+    alert('Silinemedi: ' + e.message);
+  }
+}
+function bozKartKopyala(id) {
+  const item = (bozCache.kartlar || []).find(x => x.id === id);
+  if (!item || !item.kart_no) { showToast('Kart numarası yok'); return; }
+  bozPanoyaKopyala(item.kart_no, '📋 Kart numarası kopyalandı');
+}
+function bozKartRenderListe() {
+  const el = document.getElementById('bozKartListe');
+  if (!el) return;
+  const liste = bozCache.kartlar || [];
+  if (!liste.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;grid-column:1/-1;">Henüz kart yok. "+ Ekle" ile ekleyebilirsin.</div>';
+    return;
+  }
+  el.innerHTML = liste.map(item => `
+    <div>
+      <div style="background:linear-gradient(135deg,#3a3a3a,#181818);border-radius:14px;padding:16px 18px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div style="font-weight:700;font-size:14.5px;">${bozEsc(item.baslik)}</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button onclick="bozKartKopyala(${item.id})" title="Kart numarasını kopyala" style="background:rgba(255,255,255,.18);border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;padding:4px 7px;">📋</button>
+            <button onclick="bozKartSil(${item.id})" title="Sil" style="background:rgba(255,255,255,.18);border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;padding:4px 7px;">🗑</button>
+          </div>
+        </div>
+        <div style="font-family:monospace;font-size:17px;letter-spacing:2px;margin-top:20px;">${bozEsc(item.kart_no) || '•••• •••• •••• ••••'}</div>
+        <div style="display:flex;justify-content:space-between;margin-top:16px;">
+          <div><div style="font-size:10.5px;font-weight:700;opacity:.65;letter-spacing:.5px;">SON KULLANMA</div><div style="font-size:13.5px;margin-top:2px;">${bozEsc(item.son_kullanma) || '--/--'}</div></div>
+          <div><div style="font-size:10.5px;font-weight:700;opacity:.65;letter-spacing:.5px;">CVV</div><div style="font-size:13.5px;margin-top:2px;">${bozEsc(item.cvv) || '---'}</div></div>
+        </div>
+      </div>
+      <div style="border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:10px 16px;background:var(--bg2);display:flex;gap:20px;flex-wrap:wrap;">
+        <div><div style="font-weight:700;font-size:11.5px;">Son Ödeme Tarihi</div><div style="font-size:13px;margin-top:2px;color:var(--text2);">${item.son_odeme_tarihi || '—'}</div></div>
+        <div><div style="font-weight:700;font-size:11.5px;">Ekstre Kesim Tarihi</div><div style="font-size:13px;margin-top:2px;color:var(--text2);">${item.ekstre_kesim_tarihi || '—'}</div></div>
+      </div>
+    </div>`).join('');
 }
 
 // ===== TOAST =====
