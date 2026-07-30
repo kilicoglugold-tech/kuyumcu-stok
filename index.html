@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V51-ETSY-PDF-OTO-DOLDUR --><!DOCTYPE html>
+﻿<!-- SURUM-V57-MILYEM-HAS-SATIR --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -328,6 +328,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('anasayfa')">Ana Sayfa (A)</button>
     <button class="nav-tab" onclick="showPage('urunler')">Ürünler (Ü)</button>
+    <button class="nav-tab" onclick="showPage('fiyat_hesaplama')">💰 Fiyat Hesaplama (F)</button>
     <button class="nav-tab" onclick="showPage('rapor')">Rapor (O)</button>
     <button class="nav-tab" onclick="showPage('platformlar')">🏪 Platformlar (P)</button>
     <button class="nav-tab" onclick="showPage('giderler')">💸 Giderler (G)</button>
@@ -613,7 +614,78 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div class="urun-grid" id="urunGrid"><div class="loading">Yükleniyor...</div></div>
 </div>
 
+<!-- FİYAT HESAPLAMA -->
+<div class="page" id="page-fiyat_hesaplama">
+  <div class="page-header">
+    <div><div class="page-title">💰 Fiyat Hesaplama</div><div class="page-sub">Mecra, gram ve giderleri gir; satış fiyatı ve indirimli liste fiyatı önerisi otomatik çıksın</div></div>
+  </div>
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div class="form-row-3">
+      <div class="form-group"><label class="form-label">Mecra</label>
+        <select class="form-control" id="fhMecra" onchange="fhMecraDegis()">
+          <option value="etsy">Etsy</option>
+          <option value="trendyol">Trendyol</option>
+          <option value="site">İnternet Sitesi</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Ürünün Gramı</label><input type="number" class="form-control" id="fhGram" step="0.01" placeholder="0.00" oninput="fhHesapla()"></div>
+      <div class="form-group"><label class="form-label">Milyem</label><input type="number" class="form-control" id="fhMilyem" step="0.0001" value="0.6500" oninput="fhHesapla()"></div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group"><label class="form-label" id="fhHasLabel">Has ($)</label><input type="number" class="form-control" id="fhHas" step="0.01" placeholder="0.00" oninput="fhHesapla()"></div>
+      <div class="form-group"><label class="form-label" id="fhKargoLabel">Kargo ($)</label><input type="number" class="form-control" id="fhKargo" step="0.01" placeholder="0.00" oninput="fhHesapla()"></div>
+      <div class="form-group"><label class="form-label" id="fhGiderLabel">Genel Gider ($)</label><input type="number" class="form-control" id="fhGenelGider" step="0.01" placeholder="0.00" oninput="fhHesapla()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label" id="fhKarLabel" style="color:var(--green);">Kâr ($)</label><input type="number" class="form-control" id="fhKar" step="0.01" placeholder="0.00" oninput="fhHesapla()" style="border-color:var(--green);color:var(--green);font-weight:600;"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-top:8px;align-items:start;">
+      <div class="hesap-box">
+        <div class="hesap-row"><span class="hesap-label">Ürün Maliyeti <span style="color:var(--text3);font-size:10px">(Gram × Milyem × Has — otomatik)</span></span><span class="hesap-val" id="fhMaliyet">-</span></div>
+        <div class="hesap-row"><span class="hesap-label">Kargo</span><span class="hesap-val" id="fhOzetKargo">-</span></div>
+        <div class="hesap-row"><span class="hesap-label">Genel Gider</span><span class="hesap-val" id="fhOzetGider">-</span></div>
+        <div class="hesap-row"><span class="hesap-label">Kâr</span><span class="hesap-val" id="fhOzetKar">-</span></div>
+        <div class="hesap-row"><span class="hesap-label">Komisyon <span style="color:var(--text3);font-size:10px" id="fhKomisyonOran">(%20 — otomatik)</span></span><span class="hesap-val" id="fhKomisyon">-</span></div>
+        <div class="hesap-row toplam"><span class="hesap-label">SATIŞ FİYATI</span><span class="hesap-val" id="fhSatisFiyat" style="font-size:18px;color:var(--gold-dark);">-</span></div>
+      </div>
+      <div class="hesap-box" style="background:var(--gold-light);">
+        <div style="font-size:11px;font-weight:600;color:var(--gold-dark);margin-bottom:6px;">İNDİRİMLİ LİSTE FİYATI ÖNERİSİ</div>
+        <div style="font-size:10.5px;color:var(--text3);margin-bottom:8px;">Bu yüzdelerle indirim yapsan bile Satış Fiyatı'na ulaşman için ürünü şu fiyattan listelemen lazım:</div>
+        <div class="hesap-row"><span class="hesap-label">%25 indirim</span><span class="hesap-val" id="fhIndirim25">-</span></div>
+        <div class="hesap-row"><span class="hesap-label">%30 indirim</span><span class="hesap-val" id="fhIndirim30">-</span></div>
+        <div class="hesap-row"><span class="hesap-label">%35 indirim</span><span class="hesap-val" id="fhIndirim35">-</span></div>
+        <div class="hesap-row"><span class="hesap-label">%40 indirim</span><span class="hesap-val" id="fhIndirim40">-</span></div>
+      </div>
+    </div>
+  </div>
 
+  <!-- MİLYEM HESAPLAMA -->
+  <div class="card" style="margin-bottom:1.5rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div style="font-weight:600;font-size:14px;">⚖️ Milyem Hesaplama</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-sm" style="border:1px solid var(--border);" onclick="mhSatirEkle()">+ Parça Ekle</button>
+        <button class="btn btn-sm" style="border:1px solid var(--border);" onclick="mhTemizle()">Temizle</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px;">Ürünün parçalarının (kilit, zincir, halka vb.) gramını ve milyemini gir; ağırlıklı ortalamayla ürünün toplam kaç milyem geldiğini hesaplar.</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:var(--bg2);">
+        <th style="padding:6px 8px;text-align:left;">Parça Adı</th>
+        <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Gram</th>
+        <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Milyem</th>
+        <th style="padding:6px 8px;text-align:right;white-space:nowrap;">Has</th>
+        <th style="padding:6px 8px;width:26px;"></th>
+      </tr></thead>
+      <tbody id="mhTablo"></tbody>
+    </table>
+    <div class="hesap-box" style="margin-top:10px;">
+      <div class="hesap-row"><span class="hesap-label">Toplam Gram</span><span class="hesap-val" id="mhToplamGram">-</span></div>
+      <div class="hesap-row"><span class="hesap-label">Toplam Has</span><span class="hesap-val" id="mhToplamHas">-</span></div>
+      <div class="hesap-row toplam"><span class="hesap-label">ORTALAMA MİLYEM</span><span class="hesap-val" id="mhOrtalamaMilyem" style="font-size:18px;color:var(--gold-dark);">-</span></div>
+    </div>
+  </div>
+</div>
 
 <!-- RAPOR -->
 <div class="page" id="page-rapor">
@@ -1556,7 +1628,7 @@ async function uploadFoto(file) {
 // NAV
 let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
-  const pages = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler','sayim'];
+  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim'];
   const idx = pages.indexOf(page);
   // Ana Sayfa'daki kısayol kartları, alt menüler vb. üzerinden de olsa,
   // yetkisi olmayan bir role sayfa açtırma (sadece üst menüyü gizlemek yetmiyordu).
@@ -1568,6 +1640,7 @@ function showPage(page) {
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
   if (page === 'anasayfa') { asInit(); }
+  if (page === 'fiyat_hesaplama') { fhMecraDegis(); mhRender(); }
   if (page === 'rapor') {
     if (!raporAyIlkZorlamaYapildi) {
       raporAyIlkZorlamaYapildi = true;
@@ -1708,7 +1781,7 @@ async function sifreSifirlaEmail(email) {
 }
 
 const ROL_IZIN_ETIKETLERI = {
-  anasayfa: 'Ana Sayfa', urunler: 'Ürünler', rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
+  anasayfa: 'Ana Sayfa', urunler: 'Ürünler', fiyat_hesaplama: 'Fiyat Hesaplama', rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
   borcalacak: 'Borç/Alacak', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu'
 };
 async function loadRolIzinPanel() {
@@ -3309,8 +3382,8 @@ async function doLogin() {
 // Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Giderler(4), Borç/Alacak(5), Parametreler(6)
 // Hepsi rol_izinleri tablosundan (admin > Parametreler > Rol İzinleri panelinden) ayarlanır.
 // admin her zaman hepsini görür ve buradan kısıtlanamaz (kilitlenmeyi önlemek için).
-const SEKME_INDEX = { anasayfa:0, urunler:1, rapor:2, platformlar:3, giderler:4, borcalacak:5, parametreler:6, sayim:7 };
-const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','rapor','platformlar','giderler','borcalacak','parametreler','sayim'];
+const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8 };
+const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim'];
 let rolIzinleriCache = null;
 
 async function loadRolIzinleri() {
@@ -3323,7 +3396,7 @@ async function loadRolIzinleri() {
   }
 }
 function rolSekmeleri() {
-  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7];
+  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8];
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
   return izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
 }
@@ -3336,7 +3409,7 @@ function applyRol() {
   const gorunur = rolSekmeleri();
   const tabs = document.querySelectorAll('.nav-tab');
   tabs.forEach((tab, i) => { tab.style.display = gorunur.includes(i) ? '' : 'none'; });
-  if (!gorunur.includes(6)) {
+  if (!gorunur.includes(7)) {
     document.getElementById('mainParamBar').style.display = 'none';
   }
   if (!isAdminRol) {
@@ -4758,6 +4831,133 @@ async function asInit() {
   kkListeRender('kapalicarsi');
 }
 
+// ===== FİYAT HESAPLAMA (Ana Sayfa) =====
+// Not: bu sadece anlık bir hesap makinesi, hiçbir veri kaydedilmiyor.
+// Komisyon oranları: Etsy %20, Trendyol %20, İnternet Sitesi %3.
+function fhMecraDegis() {
+  const mecra = document.getElementById('fhMecra').value;
+  const usdMecra = (mecra === 'etsy');
+  const sym = usdMecra ? '$' : '₺';
+  document.getElementById('fhHasLabel').textContent = 'Has (' + sym + '/gr)';
+  document.getElementById('fhKargoLabel').textContent = 'Kargo (' + sym + ')';
+  document.getElementById('fhGiderLabel').textContent = 'Genel Gider (' + sym + ')';
+  document.getElementById('fhKarLabel').textContent = 'Kâr (' + sym + ')';
+  const oran = mecra === 'site' ? 3 : 20;
+  document.getElementById('fhKomisyonOran').textContent = '(%' + oran + ' — otomatik)';
+  // Has (gr başına altın fiyatı) kur/altın değiştiğinde o anki güncel değerle doldurulur,
+  // ama Burak dilediği zaman elle değiştirebilir — Ürün Maliyeti hesabı buradaki değeri baz alır.
+  const altinUsd = parseFloat(aylikParam?.altin_fiyati_usd) || 0;
+  const kur = parseFloat(aylikParam?.dolar_kuru) || 0;
+  const varsayilanHas = usdMecra ? altinUsd : (altinUsd * kur);
+  document.getElementById('fhHas').value = varsayilanHas ? varsayilanHas.toFixed(2) : '';
+  fhHesapla();
+}
+
+function fhFmt(val, usdMecra) {
+  const n = parseFloat(val) || 0;
+  return usdMecra ? ('$' + n.toFixed(2)) : (fmtTLTam(n) + ' ₺');
+}
+
+function fhHesapla() {
+  const mecra = document.getElementById('fhMecra').value;
+  const usdMecra = (mecra === 'etsy');
+  const komisyonOran = mecra === 'site' ? 0.03 : 0.20;
+
+  const gram = parseFloat(document.getElementById('fhGram').value) || 0;
+  const milyem = parseFloat(document.getElementById('fhMilyem').value) || 0;
+  const kargo = parseFloat(document.getElementById('fhKargo').value) || 0;
+  const genelGider = parseFloat(document.getElementById('fhGenelGider').value) || 0;
+  const kar = parseFloat(document.getElementById('fhKar').value) || 0;
+
+  const has = parseFloat(document.getElementById('fhHas').value) || 0;
+  const maliyet = gram * milyem * has;
+
+  const anaFiyat = (maliyet + kargo + genelGider + kar) / (1 - komisyonOran);
+  const komisyonTutar = anaFiyat * komisyonOran;
+
+  document.getElementById('fhMaliyet').textContent = fhFmt(maliyet, usdMecra);
+  document.getElementById('fhOzetKargo').textContent = fhFmt(kargo, usdMecra);
+  document.getElementById('fhOzetGider').textContent = fhFmt(genelGider, usdMecra);
+  document.getElementById('fhOzetKar').textContent = fhFmt(kar, usdMecra);
+  document.getElementById('fhKomisyon').textContent = fhFmt(komisyonTutar, usdMecra);
+  document.getElementById('fhSatisFiyat').textContent = fhFmt(anaFiyat, usdMecra);
+
+  [25, 30, 35, 40].forEach(function(pct) {
+    const listeFiyat = anaFiyat / (1 - pct / 100);
+    document.getElementById('fhIndirim' + pct).textContent = fhFmt(listeFiyat, usdMecra);
+  });
+}
+
+// ===== MİLYEM HESAPLAMA (ağırlıklı ortalama) =====
+let mhSatirlar = [
+  { ad: '', gram: '', milyem: '' },
+  { ad: '', gram: '', milyem: '' }
+];
+
+function mhSatirEkle() {
+  mhSatirlar.push({ ad: '', gram: '', milyem: '' });
+  mhRender();
+}
+
+function mhSatirSil(idx) {
+  mhSatirlar.splice(idx, 1);
+  if (!mhSatirlar.length) mhSatirlar.push({ ad: '', gram: '', milyem: '' });
+  mhRender();
+}
+
+function mhAlanGuncelle(idx, alan, deger) {
+  if (!mhSatirlar[idx]) return;
+  mhSatirlar[idx][alan] = deger;
+  // Satırı yeniden çizmeden (odak/imleç kaybolmasın diye) sadece o satırın Has hücresini güncelle
+  const hasEl = document.getElementById('mhHas_' + idx);
+  if (hasEl) {
+    const gram = parseFloat(mhSatirlar[idx].gram) || 0;
+    const milyem = parseFloat(mhSatirlar[idx].milyem) || 0;
+    hasEl.textContent = (gram * milyem).toFixed(4);
+  }
+  mhHesapla();
+}
+
+function mhTemizle() {
+  mhSatirlar = [
+    { ad: '', gram: '', milyem: '' },
+    { ad: '', gram: '', milyem: '' }
+  ];
+  mhRender();
+}
+
+function mhRender() {
+  const tbody = document.getElementById('mhTablo');
+  if (!tbody) return;
+  const esc = (s) => (s || '').toString().replace(/"/g, '&quot;');
+  tbody.innerHTML = mhSatirlar.map((s, i) => {
+    const gram0 = parseFloat(s.gram) || 0;
+    const milyem0 = parseFloat(s.milyem) || 0;
+    return `<tr>
+    <td style="padding:6px 8px;"><input type="text" value="${esc(s.ad)}" placeholder="Örn: Kilit" style="border:none;background:transparent;padding:2px 4px;font-size:13px;width:100%;font-family:inherit;" onchange="mhAlanGuncelle(${i},'ad',this.value)"></td>
+    <td style="padding:6px 8px;text-align:right;"><input type="number" step="0.01" value="${s.gram}" placeholder="0.00" style="border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px;text-align:right;width:80px;font-family:inherit;" oninput="mhAlanGuncelle(${i},'gram',this.value)"></td>
+    <td style="padding:6px 8px;text-align:right;"><input type="number" step="0.0001" value="${s.milyem}" placeholder="0.0000" style="border:1px solid var(--border);border-radius:6px;padding:4px 6px;font-size:13px;text-align:right;width:80px;font-family:inherit;" oninput="mhAlanGuncelle(${i},'milyem',this.value)"></td>
+    <td style="padding:6px 8px;text-align:right;font-weight:600;" id="mhHas_${i}">${(gram0*milyem0).toFixed(4)}</td>
+    <td style="padding:6px 8px;text-align:center;"><button style="color:var(--red);border:none;background:none;font-size:15px;padding:0 4px;cursor:pointer;" onclick="mhSatirSil(${i})" title="Satırı sil">×</button></td>
+  </tr>`;
+  }).join('');
+  mhHesapla();
+}
+
+function mhHesapla() {
+  let toplamGram = 0, toplamGramMilyem = 0;
+  mhSatirlar.forEach(s => {
+    const gram = parseFloat(s.gram) || 0;
+    const milyem = parseFloat(s.milyem) || 0;
+    toplamGram += gram;
+    toplamGramMilyem += gram * milyem;
+  });
+  const ortalamaMilyem = toplamGram ? (toplamGramMilyem / toplamGram) : 0;
+  document.getElementById('mhToplamGram').textContent = toplamGram ? toplamGram.toFixed(2) + ' gr' : '-';
+  document.getElementById('mhToplamHas').textContent = toplamGram ? toplamGramMilyem.toFixed(4) : '-';
+  document.getElementById('mhOrtalamaMilyem').textContent = toplamGram ? ortalamaMilyem.toFixed(4) : '-';
+}
+
 // ---- GÖREVLER (Supabase - herkeste ortak) ----
 let gorevCache = [];
 
@@ -5356,7 +5556,7 @@ document.addEventListener('keydown', function(e) {
   }
 
   // Üst menü kısayolları — her sayfada (Ana Sayfa dahil) çalışır, harfler yukarıdakilerle çakışmıyor
-  const navMap = { 'A': 'anasayfa', 'Ü': 'urunler', 'U': 'urunler', 'O': 'rapor', 'P': 'platformlar', 'G': 'giderler', 'B': 'borcalacak', 'Y': 'parametreler', 'S': 'sayim' };
+  const navMap = { 'A': 'anasayfa', 'Ü': 'urunler', 'U': 'urunler', 'F': 'fiyat_hesaplama', 'O': 'rapor', 'P': 'platformlar', 'G': 'giderler', 'B': 'borcalacak', 'Y': 'parametreler', 'S': 'sayim' };
   if (navMap[harf]) { e.preventDefault(); showPage(navMap[harf]); return; }
 });
 
