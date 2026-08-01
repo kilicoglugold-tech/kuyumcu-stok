@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V61-BURAK-KART-GRID-KOPYALA-KREDIKARTI --><!DOCTYPE html>
+﻿<!-- SURUM-V62-PLATFORM-GECEN-AY-SIPARIS-FIX --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -3984,9 +3984,15 @@ async function savePlatSiparis() {
   const siparisNo = document.getElementById('psSiparisNo').value;
   if (!siparisNo || siparisNo.trim() === '') { alert('Sipariş No zorunludur!'); document.getElementById('psSiparisNo').focus(); return; }
   const editId = document.getElementById('platSipId').value;
+  const tarih = document.getElementById('psTarih').value;
+  if (!tarih) { alert('Tarih zorunludur.'); return; }
+  const ay = tarih.slice(0,7);
   if (siparisNo) {
-    const dup = platSiparisler.find(s => s.musteri_adi == siparisNo && s.id !== editId);
-    if (dup) { alert('Bu sipariş numarası zaten kayıtlı!'); return; }
+    // Sipariş No'lar aya özel sayılır (her ay 1'den başlar), o yüzden çakışma kontrolü
+    // sadece AYNI ay içindeki siparişlere bakmalı — geçen aydan eksik kalan bir siparişi
+    // bugün girerken, bu ayki aynı numaralı siparişle yanlışlıkla çakışma sanılmasın.
+    const dup = platSiparisler.find(s => s.musteri_adi == siparisNo && s.id !== editId && s.tarih?.startsWith(ay));
+    if (dup) { alert('Bu sipariş numarası ' + ay + ' ayında zaten kayıtlı!'); return; }
   }
 
   const gram = parseFloat(document.getElementById('psGram').value) || 0;
@@ -3997,8 +4003,6 @@ async function savePlatSiparis() {
   const adet = parseInt(document.getElementById('psAdet').value) || 1;
   const ayar = document.getElementById('psAyar').value;
   const ulke = document.getElementById('psUlke').value;
-  const tarih = document.getElementById('psTarih').value;
-  const ay = tarih.slice(0,7);
 
   const has = gram * milyem;
   const maliyet = has * altin;
@@ -4030,7 +4034,18 @@ async function savePlatSiparis() {
 
   closeModal('platSiparisModal');
   delete _cache['sipA:' + aktifPlatform];
+
+  // Sipariş, seçtiğin Tarih'e göre HANGİ AYA aitse o aya kaydedildi. Şu an ekranda
+  // farklı bir ay açıksa (örn. geçen ayın eksik siparişini bugün gireceksin diye
+  // bu ayı görüyorsan), listede "kayboldu" sanmayasın diye görünümü otomatik o aya çeviriyoruz.
+  const aySel = document.getElementById('platAy');
+  const gorunenAyDegisti = aySel && aySel.value !== ay;
+  if (gorunenAyDegisti) aySel.value = ay;
   await loadPlatformData();
+  if (typeof showToast === 'function') {
+    const ayEtiket = new Date(ay + '-01').toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+    showToast((gorunenAyDegisti ? '↪ ' + ayEtiket + ' ayına geçildi — ' : '') + '✅ Sipariş ' + ayEtiket + ' ayına kaydedildi');
+  }
 }
 
 async function editPlatSiparis(id) {
