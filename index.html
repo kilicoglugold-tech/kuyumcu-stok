@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V62-PLATFORM-GECEN-AY-SIPARIS-FIX --><!DOCTYPE html>
+﻿<!-- SURUM-V63-KART-DUZENLE-TARIH-TERS --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1482,6 +1482,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
           <button class="btn btn-sm btn-primary" onclick="bozKartEkleAc()">+ Ekle</button>
         </div>
         <div id="bozKartEkleWrap" style="display:none;margin-bottom:12px;background:var(--bg2);padding:12px;border-radius:8px;">
+          <input type="hidden" id="bozKartEditId">
           <div class="form-group"><label class="form-label">Kart Adı</label><input class="form-control" id="bozKartBaslikInput" placeholder="Örn: İş Bankası Kredi Kartı"></div>
           <div class="form-group"><label class="form-label">Kart Numarası</label><input class="form-control" id="bozKartNoInput" placeholder="0000 0000 0000 0000"></div>
           <div style="display:flex;gap:10px;">
@@ -5979,11 +5980,32 @@ function bozRenderListe() {
 }
 
 // ---- KREDİ KARTLARI (aynı burak_notlar tablosu, kategori='kartlar' + kart alanları) ----
+// "YYYY-MM-DD" (date input formatı) -> "GG.AA.YYYY" (Türkçe, ters sıralı görünüm).
+function bozTarihTersCevir(iso) {
+  if (!iso) return '';
+  const p = iso.split('-');
+  if (p.length !== 3) return iso;
+  return p[2] + '.' + p[1] + '.' + p[0];
+}
 function bozKartEkleAc() {
+  document.getElementById('bozKartEditId').value = '';
   ['bozKartBaslikInput','bozKartNoInput','bozKartSktInput','bozKartCvvInput','bozKartSonOdemeInput','bozKartEkstreInput'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  document.getElementById('bozKartEkleWrap').style.display = 'block';
+  setTimeout(() => document.getElementById('bozKartBaslikInput').focus(), 50);
+}
+function bozKartDuzenle(id) {
+  const item = (bozCache.kartlar || []).find(x => x.id === id);
+  if (!item) return;
+  document.getElementById('bozKartEditId').value = id;
+  document.getElementById('bozKartBaslikInput').value = item.baslik || '';
+  document.getElementById('bozKartNoInput').value = item.kart_no || '';
+  document.getElementById('bozKartSktInput').value = item.son_kullanma || '';
+  document.getElementById('bozKartCvvInput').value = item.cvv || '';
+  document.getElementById('bozKartSonOdemeInput').value = item.son_odeme_tarihi || '';
+  document.getElementById('bozKartEkstreInput').value = item.ekstre_kesim_tarihi || '';
   document.getElementById('bozKartEkleWrap').style.display = 'block';
   setTimeout(() => document.getElementById('bozKartBaslikInput').focus(), 50);
 }
@@ -5992,6 +6014,7 @@ function bozKartEkleKapat() {
   if (wrap) wrap.style.display = 'none';
 }
 async function bozKartKaydet() {
+  const editId = document.getElementById('bozKartEditId').value;
   const baslik = document.getElementById('bozKartBaslikInput').value.trim();
   const kart_no = document.getElementById('bozKartNoInput').value.trim();
   const son_kullanma = document.getElementById('bozKartSktInput').value.trim();
@@ -5999,6 +6022,24 @@ async function bozKartKaydet() {
   const son_odeme_tarihi = document.getElementById('bozKartSonOdemeInput').value || null;
   const ekstre_kesim_tarihi = document.getElementById('bozKartEkstreInput').value || null;
   if (!baslik) { alert('Kart adı zorunludur.'); return; }
+
+  if (editId) {
+    const item = bozCache.kartlar.find(x => String(x.id) === String(editId));
+    if (!item) { bozKartEkleKapat(); return; }
+    const onceki = { ...item };
+    Object.assign(item, { baslik, kart_no, son_kullanma, cvv, son_odeme_tarihi, ekstre_kesim_tarihi });
+    bozKartEkleKapat();
+    bozKartRenderListe();
+    try {
+      await api('burak_notlar?id=eq.' + editId, 'PATCH', { baslik, kart_no, son_kullanma, cvv, son_odeme_tarihi, ekstre_kesim_tarihi });
+    } catch(e) {
+      Object.assign(item, onceki);
+      bozKartRenderListe();
+      alert('Kaydedilemedi: ' + e.message);
+    }
+    return;
+  }
+
   const id = Date.now();
   const yeni = { id, kategori: 'kartlar', baslik, icerik: '', kart_no, son_kullanma, cvv, son_odeme_tarihi, ekstre_kesim_tarihi, olusturma: new Date().toISOString() };
   bozCache.kartlar.unshift(yeni);
@@ -6044,6 +6085,7 @@ function bozKartRenderListe() {
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
           <div style="font-weight:700;font-size:14.5px;">${bozEsc(item.baslik)}</div>
           <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button onclick="bozKartDuzenle(${item.id})" title="Düzenle" style="background:rgba(255,255,255,.18);border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;padding:4px 7px;">✏️</button>
             <button onclick="bozKartKopyala(${item.id})" title="Kart numarasını kopyala" style="background:rgba(255,255,255,.18);border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;padding:4px 7px;">📋</button>
             <button onclick="bozKartSil(${item.id})" title="Sil" style="background:rgba(255,255,255,.18);border:none;border-radius:6px;cursor:pointer;color:#fff;font-size:12px;padding:4px 7px;">🗑</button>
           </div>
@@ -6055,8 +6097,8 @@ function bozKartRenderListe() {
         </div>
       </div>
       <div style="border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:10px 16px;background:var(--bg2);display:flex;gap:20px;flex-wrap:wrap;">
-        <div><div style="font-weight:700;font-size:11.5px;">Son Ödeme Tarihi</div><div style="font-size:13px;margin-top:2px;color:var(--text2);">${item.son_odeme_tarihi || '—'}</div></div>
-        <div><div style="font-weight:700;font-size:11.5px;">Ekstre Kesim Tarihi</div><div style="font-size:13px;margin-top:2px;color:var(--text2);">${item.ekstre_kesim_tarihi || '—'}</div></div>
+        <div><div style="font-weight:700;font-size:11.5px;">Son Ödeme Tarihi</div><div style="font-size:13px;margin-top:2px;color:var(--text2);">${item.son_odeme_tarihi ? bozTarihTersCevir(item.son_odeme_tarihi) : '—'}</div></div>
+        <div><div style="font-weight:700;font-size:11.5px;">Ekstre Kesim Tarihi</div><div style="font-size:13px;margin-top:2px;color:var(--text2);">${item.ekstre_kesim_tarihi ? bozTarihTersCevir(item.ekstre_kesim_tarihi) : '—'}</div></div>
       </div>
     </div>`).join('');
 }
