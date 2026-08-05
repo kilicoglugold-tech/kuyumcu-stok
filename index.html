@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V63-KART-DUZENLE-TARIH-TERS --><!DOCTYPE html>
+﻿<!-- SURUM-V64-URUN-PENDANT-GRAM-KUTUSU --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1609,6 +1609,13 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
         </div>
       </div>
       <div class="section-title">Ayar & Varyantlar</div>
+      <div style="background:var(--bg2);border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;">🔗 Sarkaç (Pendant) Gramı — zincirsiz, sadece ucun kendi ağırlığı</div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">10K Pendant</label><input type="number" class="form-control" id="pendantGram10" step="0.001" placeholder="gr" oninput="pendantGramGuncelle('10')"></div>
+          <div class="form-group"><label class="form-label">14K Pendant</label><input type="number" class="form-control" id="pendantGram14" step="0.001" placeholder="gr" oninput="pendantGramGuncelle('14')"></div>
+        </div>
+      </div>
       <div id="varyantEditor925"></div>
       <div id="varyantEditor10"></div>
       <div id="varyantEditor14"></div>
@@ -2546,6 +2553,30 @@ function collectVaryants(ayar) {
   return varyants;
 }
 
+// Üstteki hızlı "10K/14K Pendant" kutuları, altta zaten var olan "Kolye - Pendant"
+// varyant alanına yazıyor — aynı veri, sadece daha görünür bir yerden giriliyor.
+// Değer girildiğinde kayıt sırasında yakalanması için gerekli checkbox'ları (ayar,
+// Kolye tipi, Pendant alt seçeneği) otomatik işaretler; değer silinirse sadece
+// Pendant seçeneğinin işaretini kaldırır (diğer zincir uzunlukları etkilenmez).
+function pendantGramGuncelle(ayar) {
+  const val = document.getElementById('pendantGram' + ayar).value;
+  _vSetVal(`gram_${ayar}_Kolye_Pendant`, val);
+  const g = parseFloat(val) || 0;
+  if (g > 0) {
+    const ayarCb = document.getElementById('cb' + ayar);
+    if (ayarCb && !ayarCb.checked) {
+      ayarCb.checked = true;
+      document.getElementById('body' + ayar).classList.add('open');
+      document.getElementById('toggle' + ayar + 'Icon').textContent = '▲';
+    }
+    _vSetTip(ayar, 'Kolye');
+    _vSetSub(ayar, 'Kolye', 'Pendant');
+  } else {
+    const subCb = document.getElementById(`cb_${ayar}_Kolye_Pendant`);
+    if (subCb && subCb.checked) { subCb.checked = false; vSubToggle(ayar, 'Kolye', 'Pendant'); }
+  }
+}
+
 function _vSetTip(ayar, tipKey) {
   const cb = document.getElementById(`cb_${ayar}_${tipKey}`);
   if (cb && !cb.checked) { cb.checked = true; vTipToggle(ayar, tipKey); }
@@ -3254,6 +3285,8 @@ function openUrunModal() {
   resetDurumMecra();
   resetTasBilgisi();
   initVaryantEditors();
+  document.getElementById('pendantGram10').value = '';
+  document.getElementById('pendantGram14').value = '';
   openModal('urunModal');
 }
 
@@ -3274,9 +3307,15 @@ async function editUrun(urunId) {
   restoreDurumMecra(u);
   restoreTasBilgisi(getUrunMeta(u.id));
   initVaryantEditors();
+  document.getElementById('pendantGram10').value = '';
+  document.getElementById('pendantGram14').value = '';
   ['925','10','14'].forEach(a => {
     const avars = vars.filter(v=>v.ayar===a);
     if (avars.length) restoreVaryantState(a, avars);
+  });
+  ['10','14'].forEach(a => {
+    const el = document.getElementById(`gram_${a}_Kolye_Pendant`);
+    if (el && el.value) document.getElementById('pendantGram' + a).value = el.value;
   });
   openModal('urunModal');
 }
