@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V65-ZINCIR-FORMULLERI-OTOMATIK-DOLDUR --><!DOCTYPE html>
+﻿<!-- SURUM-V66-ZINCIR-EDIT-ACINCA-OTOMATIK-DOLDUR --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -3373,6 +3373,7 @@ function openUrunModal() {
   initVaryantEditors();
   document.getElementById('pendantGram10').value = '';
   document.getElementById('pendantGram14').value = '';
+  if (!zincirFormulYuklendi) loadZincirFormulleri();
   openModal('urunModal');
 }
 
@@ -3402,6 +3403,14 @@ async function editUrun(urunId) {
   ['10','14'].forEach(a => {
     const el = document.getElementById(`gram_${a}_Kolye_Pendant`);
     if (el && el.value) document.getElementById('pendantGram' + a).value = el.value;
+  });
+  // Zincir Formülleri henüz yüklenmediyse (örn. sayfa yeni açıldıysa) burada bekle,
+  // sonra bu ürünün girilmiş pendant gramları için zincir uzunluklarını otomatik hesapla —
+  // ürün daha önce (bu özellik yokken) eklenmiş olsa bile artık burada da dolsun.
+  if (!zincirFormulYuklendi) await loadZincirFormulleri();
+  ['10','14'].forEach(a => {
+    const g = parseFloat(document.getElementById('pendantGram' + a).value) || 0;
+    if (g > 0) zincirOtomatikDoldur(a, g);
   });
   openModal('urunModal');
 }
