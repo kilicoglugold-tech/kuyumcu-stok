@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V64-URUN-PENDANT-GRAM-KUTUSU --><!DOCTYPE html>
+﻿<!-- SURUM-V65-ZINCIR-FORMULLERI-OTOMATIK-DOLDUR --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1192,6 +1192,28 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     </div>
   </div>
 
+  <!-- ZİNCİR FORMÜLLERİ -->
+  <div class="param-panel" style="margin-top:1.5rem;">
+    <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">🔗 Zincir Formülleri (Kolye)</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Her zincir uzunluğunun kendi gramını gir. Ürün eklerken bir Pendant gramı girdiğinde, sistem buradaki uzunluk gramlarını otomatik ekleyip her uzunluk için toplam gramı kendisi dolduracak.</div>
+    <table>
+      <thead><tr><th>Uzunluk</th><th>10K (gr)</th><th>14K (gr)</th></tr></thead>
+      <tbody>
+        <tr><td>14 inç</td><td><input type="number" class="form-control" id="zincir_10_14inc" step="0.001" placeholder="0.000"></td><td><input type="number" class="form-control" id="zincir_14_14inc" step="0.001" placeholder="0.000"></td></tr>
+        <tr><td>15 inç</td><td><input type="number" class="form-control" id="zincir_10_15inc" step="0.001" placeholder="0.000"></td><td><input type="number" class="form-control" id="zincir_14_15inc" step="0.001" placeholder="0.000"></td></tr>
+        <tr><td>16 inç</td><td><input type="number" class="form-control" id="zincir_10_16inc" step="0.001" placeholder="0.000"></td><td><input type="number" class="form-control" id="zincir_14_16inc" step="0.001" placeholder="0.000"></td></tr>
+        <tr><td>17 inç</td><td><input type="number" class="form-control" id="zincir_10_17inc" step="0.001" placeholder="0.000"></td><td><input type="number" class="form-control" id="zincir_14_17inc" step="0.001" placeholder="0.000"></td></tr>
+        <tr><td>18 inç</td><td><input type="number" class="form-control" id="zincir_10_18inc" step="0.001" placeholder="0.000"></td><td><input type="number" class="form-control" id="zincir_14_18inc" step="0.001" placeholder="0.000"></td></tr>
+        <tr><td>20 inç</td><td><input type="number" class="form-control" id="zincir_10_20inc" step="0.001" placeholder="0.000"></td><td><input type="number" class="form-control" id="zincir_14_20inc" step="0.001" placeholder="0.000"></td></tr>
+        <tr><td>22 inç</td><td><input type="number" class="form-control" id="zincir_10_22inc" step="0.001" placeholder="0.000"></td><td><input type="number" class="form-control" id="zincir_14_22inc" step="0.001" placeholder="0.000"></td></tr>
+      </tbody>
+    </table>
+    <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
+      <button class="btn btn-primary" onclick="saveZincirFormulleri()">Kaydet ↵</button>
+      <span id="zincirMsg" style="font-size:13px;color:var(--green);display:none;">✓ Kaydedildi!</span>
+    </div>
+  </div>
+
   <!-- ŞİFRE YÖNETİMİ - sadece admin -->
   <div id="sifreYonetimPanel" style="display:none;margin-top:1.5rem;">
     <div class="param-panel">
@@ -1817,7 +1839,7 @@ function showPage(page) {
     }
     loadRapor();
   }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
+  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); baRender(); }
@@ -2457,6 +2479,69 @@ const V_BILEKLIK_OPTS = [
   {lbl:'6.5 inç', key:'65inc'}, {lbl:'7 inç',   key:'7inc'},
   {lbl:'7.5 inç', key:'75inc'}, {lbl:'8 inç',   key:'8inc'},
 ];
+// Kolye zincir uzunlukları (Pendant hariç) — V_KOLYE_OPTS ile aynı key'leri kullanır,
+// Parametreler > Zincir Formülleri panelindeki gram girişleriyle eşleşsin diye.
+const ZINCIR_UZUNLUKLAR = V_KOLYE_OPTS.filter(o => o.key !== 'Pendant');
+
+// ---- ZİNCİR FORMÜLLERİ (Parametreler'de girilir, ürün eklerken pendant gramına otomatik eklenir) ----
+let zincirFormulCache = { '10': {}, '14': {} };
+let zincirFormulYuklendi = false;
+
+async function loadZincirFormulleri() {
+  try {
+    const rows = await api('zincir_gramlari?select=*');
+    zincirFormulCache = { '10': {}, '14': {} };
+    (rows || []).forEach(r => {
+      if (zincirFormulCache[r.ayar]) zincirFormulCache[r.ayar][r.uzunluk_key] = parseFloat(r.gram) || 0;
+    });
+  } catch(e) { /* yetkisiz veya giriş öncesi olabilir, sessiz geç */ }
+  zincirFormulYuklendi = true;
+  ['10','14'].forEach(ayar => {
+    ZINCIR_UZUNLUKLAR.forEach(s => {
+      const el = document.getElementById(`zincir_${ayar}_${s.key}`);
+      if (el) el.value = zincirFormulCache[ayar][s.key] || '';
+    });
+  });
+}
+
+async function saveZincirFormulleri() {
+  const rows = [];
+  let sira = 0;
+  ['10','14'].forEach(ayar => {
+    ZINCIR_UZUNLUKLAR.forEach(s => {
+      const el = document.getElementById(`zincir_${ayar}_${s.key}`);
+      const gram = parseFloat(el?.value) || 0;
+      if (gram > 0) rows.push({ id: Date.now() + (sira++), ayar, uzunluk_key: s.key, gram });
+    });
+  });
+  try {
+    await api('zincir_gramlari?ayar=eq.10', 'DELETE');
+    await api('zincir_gramlari?ayar=eq.14', 'DELETE');
+    if (rows.length) await api('zincir_gramlari', 'POST', rows);
+    zincirFormulCache = { '10': {}, '14': {} };
+    rows.forEach(r => { zincirFormulCache[r.ayar][r.uzunluk_key] = r.gram; });
+    const msg = document.getElementById('zincirMsg');
+    msg.style.display = 'inline';
+    setTimeout(() => msg.style.display = 'none', 2000);
+  } catch(e) {
+    alert('Kaydedilemedi: ' + e.message);
+  }
+}
+
+// Pendant gramı üstünden, girilmiş her zincir uzunluğu formülünü kullanarak o uzunluğun
+// TOPLAM gramını (pendant + zincir) otomatik hesaplayıp ilgili alanlara doldurur ve
+// kaydedilirken yakalanması için checkbox'larını işaretler. Formülü olmayan uzunluklara dokunmaz.
+function zincirOtomatikDoldur(ayar, pendantGram) {
+  const formuller = zincirFormulCache[ayar] || {};
+  ZINCIR_UZUNLUKLAR.forEach(s => {
+    const zincirGram = formuller[s.key];
+    if (!zincirGram) return; // bu uzunluk için formül girilmemiş, dokunma
+    const toplam = (parseFloat(pendantGram) || 0) + zincirGram;
+    _vSetVal(`gram_${ayar}_Kolye_${s.key}`, toplam.toFixed(3));
+    _vSetTip(ayar, 'Kolye');
+    _vSetSub(ayar, 'Kolye', s.key);
+  });
+}
 
 function _gramInp(id, lbl) {
   return `<div class="v-gram-inline"><span style="font-size:13px;color:var(--text2);min-width:72px">${lbl}</span><input type="number" class="form-control" id="${id}" step="0.001" placeholder="gr" style="width:90px;height:34px;font-size:14px;"></div>`;
@@ -2571,6 +2656,7 @@ function pendantGramGuncelle(ayar) {
     }
     _vSetTip(ayar, 'Kolye');
     _vSetSub(ayar, 'Kolye', 'Pendant');
+    zincirOtomatikDoldur(ayar, g);
   } else {
     const subCb = document.getElementById(`cb_${ayar}_Kolye_Pendant`);
     if (subCb && subCb.checked) { subCb.checked = false; vSubToggle(ayar, 'Kolye', 'Pendant'); }
@@ -3530,6 +3616,7 @@ async function showMainApp() {
   initParamAy();
   initRaporAylar();
   loadAylikParam().then(() => loadUrunler());
+  if (typeof loadZincirFormulleri === 'function') loadZincirFormulleri();
   if (currentUser.rol === 'admin' && typeof bozAlarmYukle === 'function') {
     bozAlarmYukle().then(bozAlarmBaslat);
   }
