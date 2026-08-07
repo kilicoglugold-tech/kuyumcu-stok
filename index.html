@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V67-BAILEYS-GRAM-OTOMATIK-MILYEM --><!DOCTYPE html>
+﻿<!-- SURUM-V68-BAILEYS-MALIYET-SABIT-FIX --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -4502,7 +4502,6 @@ function updateGrupBBakiye() {
 let editingGrupBId = null;
 function openGrupBModal(id) {
   editingGrupBId = id || null;
-  gbTipDokunuldu = false; // her yeni açılışta otomatik milyem kuralı tekrar devrede
   document.getElementById('gbModalBaslik').textContent = PLATFORM_LABELS[aktifPlatformB] + (id ? ' — Düzenle' : ' — Yeni Satış');
   if (id) {
     const s = grupbSiparisler.find(x => x.id === id);
@@ -4531,27 +4530,23 @@ function openGrupBModal(id) {
 
 function editGrupBSiparis(id) { openGrupBModal(id); }
 
-// Gram girildiğinde Ürün Tipi'ni otomatik ayarlar: 0-1 gr arası "Kolye 14K" (0.745 milyem),
-// 1 gr üstü "Su Yolu 14K" (0.725 milyem). Sadece admin Ürün Tipi'ni bu modal açıkken elle
-// değiştirmediyse çalışır — elle "Damla", "İşçiliksiz" vb. seçildiyse dokunmaz.
-let gbTipDokunuldu = false;
-function gbTipOtomatikSec() {
-  if (gbTipDokunuldu) return;
-  const gram = parseFloat(document.getElementById('gbGram').value) || 0;
-  if (gram <= 0) return;
-  const otomatikTip = gram <= 1 ? 'kolye14' : 'suyolu14';
-  const sel = document.getElementById('gbTip');
-  if (sel && sel.value !== otomatikTip) {
-    sel.value = otomatikTip;
-    gbTipRenkle(sel);
+// "Kolye 14K" seçiliyken satış milyemi grama göre otomatik ayarlanır: 0-1 gr arası 0.745,
+// 1 gr üstü 0.725 — ama maliyet milyemi HER İKİSİNDE DE 0.615'te sabit kalır (Su Yolu'nun
+// kendi maliyeti 0.585 farklı olduğu için Su Yolu'ya geçmiyoruz, sadece satış milyemini
+// değiştiriyoruz). Diğer tipler (Su Yolu, Damla, Kolye 10K, İşçiliksiz...) elle seçildiğinde
+// bu kuraldan etkilenmez, kendi sabit S/M değerleriyle hesaplanır.
+function gbEfektifMilyem(tip, gram) {
+  if (tip === 'kolye14') {
+    return { satis: gram > 1 ? 0.725 : 0.745, maliyet: 0.615 };
   }
+  return GRUPB_TIPLER[tip] || { satis: 0, maliyet: 0 };
 }
 
 function gbHesapla() {
   const gram   = parseFloat(document.getElementById('gbGram').value) || 0;
   const tip    = document.getElementById('gbTip').value;
   const altin  = parseFloat(grupbAylikParam?.altin_fiyati_usd) || 0;
-  const t      = GRUPB_TIPLER[tip] || { satis: 0, maliyet: 0 };
+  const t      = gbEfektifMilyem(tip, gram);
   const satHas = gram * t.satis;
   const malHas = gram * t.maliyet;
   const hasKar = satHas - malHas;
@@ -4562,6 +4557,12 @@ function gbHesapla() {
   const el = document.getElementById('gbKarUsdDisp');
   el.textContent = '$' + karUsd.toFixed(2);
   el.className = 'hesap-val ' + (karUsd >= 0 ? 'kar-pozitif' : 'kar-negatif');
+  const not = document.getElementById('gbMilyemNot');
+  if (not) {
+    not.textContent = (tip === 'kolye14')
+      ? `Uygulanan: Satış ${t.satis.toFixed(3)} milyem / Maliyet ${t.maliyet.toFixed(3)} milyem${gram > 1 ? ' (1 gr üstü — otomatik 0.725)' : ''}`
+      : '';
+  }
 }
 
 async function saveGrupBSiparis() {
@@ -4576,7 +4577,7 @@ async function saveGrupBSiparis() {
   const tip   = document.getElementById('gbTip').value;
   const altin = parseFloat(grupbAylikParam?.altin_fiyati_usd) || 0;
   const tarih = document.getElementById('gbTarih').value;
-  const t     = GRUPB_TIPLER[tip] || { satis: 0, maliyet: 0 };
+  const t     = gbEfektifMilyem(tip, gram);
   const satHas = gram * t.satis;
   const malHas = gram * t.maliyet;
   const hasKar = satHas - malHas;
@@ -6655,16 +6656,17 @@ document.addEventListener('DOMContentLoaded', () => { asInit(); dokumRenderListe
         <div class="form-group" style="grid-column:1/-1"><label class="form-label">Ürün Adı *</label><input class="form-control" id="gbUrun" placeholder="Ürün adı..."></div>
       </div>
       <div class="form-row">
-        <div class="form-group"><label class="form-label">Gram</label><input type="number" class="form-control" id="gbGram" step="0.001" placeholder="0.000" oninput="gbTipOtomatikSec();gbHesapla()"></div>
+        <div class="form-group"><label class="form-label">Gram</label><input type="number" class="form-control" id="gbGram" step="0.001" placeholder="0.000" oninput="gbHesapla()"></div>
         <div class="form-group"><label class="form-label">Ürün Tipi</label>
-          <select class="form-control" id="gbTip" onchange="gbTipDokunuldu=true;gbHesapla();gbTipRenkle(this)">
-            <option value="kolye14"      style="background:#D1FAE5;color:#065F46;font-weight:600;">Kolye 14K (S:0.745 / M:0.615)</option>
+          <select class="form-control" id="gbTip" onchange="gbHesapla();gbTipRenkle(this)">
+            <option value="kolye14"      style="background:#D1FAE5;color:#065F46;font-weight:600;">Kolye 14K (S:0.745, 1gr üstü 0.725 / M:0.615)</option>
             <option value="suyolu14"     style="background:#BAE6FD;color:#0C4A6E;font-weight:600;">Su Yolu 14K (S:0.725 / M:0.585)</option>
             <option value="damla14"      style="background:#EDE9FE;color:#5B21B6;font-weight:600;">Damla 14K (S:0.685 / M:0.485)</option>
             <option value="kolye10"      style="background:#DBEAFE;color:#1E3A8A;font-weight:600;">Kolye 10K (S:0.577 / M:0.447)</option>
             <option value="isciliksis14" style="background:#FEE2E2;color:#991B1B;font-weight:600;">İşçiliksiz 14K (S:0.585 / M:0.600)</option>
             <option value="isciliksis10" style="background:#FFEDD5;color:#9A3412;font-weight:600;">İşçiliksiz 10K (S:0.417 / M:0.427)</option>
           </select>
+          <div id="gbMilyemNot" style="font-size:11px;color:var(--text3);margin-top:4px;"></div>
         </div>
       </div>
       <div class="form-group" style="margin-top:8px"><label class="form-label">Taş Gr</label><input type="number" class="form-control" id="gbTasGr" step="0.001" value="0" placeholder="0.000"></div>
