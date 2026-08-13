@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V69-PAYLASILAN-SIFRELER --><!DOCTYPE html>
+﻿<!-- SURUM-V70-SIFRELER-UUID-FIX --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -6315,10 +6315,10 @@ async function sfpKullanicilarYukleVeCiz(seciliIdler) {
   }
   const el = document.getElementById('sfpKullaniciListe');
   if (!el) return;
-  const secili = (seciliIdler || []).map(x => Number(x));
+  const secili = (seciliIdler || []).map(x => String(x));
   el.innerHTML = sfpKullanicilarCache.map(u => `
     <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-      <input type="checkbox" class="sfp-izin-cb" value="${u.id}" ${secili.includes(Number(u.id)) ? 'checked' : ''} style="accent-color:var(--gold);width:15px;height:15px;cursor:pointer;">
+      <input type="checkbox" class="sfp-izin-cb" value="${u.id}" ${secili.includes(String(u.id)) ? 'checked' : ''} style="accent-color:var(--gold);width:15px;height:15px;cursor:pointer;">
       ${bozEsc(sfpKullaniciAdi(u))} <span style="color:var(--text3);font-size:11px;">(${u.rol})</span>
     </label>`).join('') || '<div style="color:var(--text3);font-size:13px;">Kullanıcı bulunamadı.</div>';
 }
@@ -6355,7 +6355,7 @@ async function sfpKaydet() {
   const baslik = document.getElementById('sfpBaslikInput').value.trim();
   const kullanici_bilgisi = document.getElementById('sfpKullaniciInput').value.trim();
   const sifre = document.getElementById('sfpSifreInput').value;
-  const izinli_kullanicilar = [...document.querySelectorAll('.sfp-izin-cb:checked')].map(cb => parseInt(cb.value));
+  const izinli_kullanicilar = [...document.querySelectorAll('.sfp-izin-cb:checked')].map(cb => cb.value);
   if (!baslik) { alert('Başlık zorunludur.'); return; }
 
   if (editId) {
