@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V71-SIFRELER-ADRES-IBAN-HEPSI --><!DOCTYPE html>
+﻿<!-- SURUM-V72-IBAN-ISIM-SOYISIM --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1566,7 +1566,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div class="form-group"><label class="form-label">Başlık</label><input class="form-control" id="sfpBaslikInput" placeholder="Örn: Trendyol Mağaza Paneli"></div>
     <div class="form-row">
       <div class="form-group" id="sfpKullaniciGrup"><label class="form-label" id="sfpKullaniciLabel">Kullanıcı Adı / Mail</label><input class="form-control" id="sfpKullaniciInput" placeholder="kullanici@mail.com"></div>
-      <div class="form-group" id="sfpSifreGrup"><label class="form-label">Şifre</label><input class="form-control" id="sfpSifreInput" placeholder="Şifre"></div>
+      <div class="form-group" id="sfpSifreGrup"><label class="form-label" id="sfpSifreLabel">Şifre</label><input class="form-control" id="sfpSifreInput" placeholder="Şifre"></div>
     </div>
     <div class="form-group" id="sfpIcerikGrup" style="display:none;">
       <label class="form-label" id="sfpIcerikLabel">Adres</label>
@@ -6335,6 +6335,8 @@ function sfpFormAlanlariGuncelle() {
   const kullaniciLabel = document.getElementById('sfpKullaniciLabel');
   const kullaniciInput = document.getElementById('sfpKullaniciInput');
   const sifreGrup = document.getElementById('sfpSifreGrup');
+  const sifreLabel = document.getElementById('sfpSifreLabel');
+  const sifreInput = document.getElementById('sfpSifreInput');
   const icerikGrup = document.getElementById('sfpIcerikGrup');
   const icerikLabel = document.getElementById('sfpIcerikLabel');
   const icerikInput = document.getElementById('sfpIcerikInput');
@@ -6348,7 +6350,9 @@ function sfpFormAlanlariGuncelle() {
     kullaniciGrup.style.display = '';
     kullaniciLabel.textContent = 'IBAN';
     kullaniciInput.placeholder = 'TR00 0000 0000 0000 0000 0000 00';
-    sifreGrup.style.display = 'none';
+    sifreGrup.style.display = '';
+    sifreLabel.textContent = 'İsim Soyisim';
+    sifreInput.placeholder = 'Ad Soyad';
     icerikGrup.style.display = 'block';
     icerikLabel.textContent = 'Banka / Açıklama (opsiyonel)';
     icerikInput.placeholder = 'Örn: Ziraat Bankası';
@@ -6357,6 +6361,8 @@ function sfpFormAlanlariGuncelle() {
     kullaniciLabel.textContent = 'Kullanıcı Adı / Mail';
     kullaniciInput.placeholder = 'kullanici@mail.com';
     sifreGrup.style.display = '';
+    sifreLabel.textContent = 'Şifre';
+    sifreInput.placeholder = 'Şifre';
     icerikGrup.style.display = 'none';
   }
 }
@@ -6424,7 +6430,7 @@ async function sfpKaydet() {
   const editId = document.getElementById('sfpEditId').value;
   const baslik = document.getElementById('sfpBaslikInput').value.trim();
   const kullanici_bilgisi = sfpAktifKategori === 'adresler' ? '' : document.getElementById('sfpKullaniciInput').value.trim();
-  const sifre = sfpAktifKategori === 'sifreler' ? document.getElementById('sfpSifreInput').value : '';
+  const sifre = sfpAktifKategori === 'adresler' ? '' : document.getElementById('sfpSifreInput').value.trim();
   const icerik = sfpAktifKategori === 'sifreler' ? '' : document.getElementById('sfpIcerikInput').value.trim();
   const izinli_kullanicilar = [...document.querySelectorAll('.sfp-izin-cb:checked')].map(cb => cb.value);
   if (!baslik) { alert('Başlık zorunludur.'); return; }
@@ -6479,7 +6485,7 @@ function sfpKopyala(id, alan) {
   const item = sfpCache.find(x => String(x.id) === String(id));
   if (!item) return;
   const metinler = { sifre: item.sifre, kullanici: item.kullanici_bilgisi, icerik: item.icerik };
-  const mesajlar = { sifre: '📋 Şifre kopyalandı', kullanici: (item.kategori === 'ibanlar' ? '📋 IBAN kopyalandı' : '📋 Kullanıcı adı/mail kopyalandı'), icerik: (item.kategori === 'adresler' ? '📋 Adres kopyalandı' : '📋 Kopyalandı') };
+  const mesajlar = { sifre: (item.kategori === 'ibanlar' ? '📋 İsim Soyisim kopyalandı' : '📋 Şifre kopyalandı'), kullanici: (item.kategori === 'ibanlar' ? '📋 IBAN kopyalandı' : '📋 Kullanıcı adı/mail kopyalandı'), icerik: (item.kategori === 'adresler' ? '📋 Adres kopyalandı' : '📋 Kopyalandı') };
   bozPanoyaKopyala(metinler[alan] || '', mesajlar[alan] || '📋 Kopyalandı');
 }
 
@@ -6513,15 +6519,17 @@ function sfpRenderListe() {
       return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--card);">
         ${baslikSatiri}
         <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">IBAN</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:${item.icerik ? '10px' : '0'};">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
           <div style="font-size:13px;font-family:monospace;word-break:break-all;">${bozEsc(item.kullanici_bilgisi) || '—'}</div>
           <button onclick="sfpKopyala(${item.id},'kullanici')" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;flex-shrink:0;">📋</button>
         </div>
-        ${item.icerik ? `<div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Banka / Açıklama</div>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
-          <div style="font-size:13px;color:var(--text2);">${bozEsc(item.icerik)}</div>
-          <button onclick="sfpKopyala(${item.id},'icerik')" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;flex-shrink:0;">📋</button>
+        ${item.sifre ? `<div style="font-size:11px;color:var(--text3);margin-bottom:2px;">İsim Soyisim</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:${item.icerik ? '10px' : '0'};">
+          <div style="font-size:13px;word-break:break-all;">${bozEsc(item.sifre)}</div>
+          <button onclick="sfpKopyala(${item.id},'sifre')" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;flex-shrink:0;">📋</button>
         </div>` : ''}
+        ${item.icerik ? `<div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Banka / Açıklama</div>
+        <div style="font-size:13px;color:var(--text2);">${bozEsc(item.icerik)}</div>` : ''}
       </div>`;
     }
     return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--card);">
