@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V68-BAILEYS-MALIYET-SABIT-FIX --><!DOCTYPE html>
+﻿<!-- SURUM-V69-PAYLASILAN-SIFRELER --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -332,7 +332,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="nav-tab" onclick="showPage('rapor')">Rapor (O)</button>
     <button class="nav-tab" onclick="showPage('platformlar')">🏪 Platformlar (P)</button>
     <button class="nav-tab" onclick="showPage('giderler')">💸 Giderler (G)</button>
-    <button class="nav-tab" onclick="showPage('borcalacak')">⚖️ Borç/Alacak (B)</button><button class="nav-tab" onclick="showPage('parametreler')">⚙ Parametreler (Y)</button><button class="nav-tab" onclick="showPage('sayim')">📋 Sayım (S)</button><button class="nav-tab" onclick="showPage('burak_ozel')">🔒 Burak</button>
+    <button class="nav-tab" onclick="showPage('borcalacak')">⚖️ Borç/Alacak (B)</button><button class="nav-tab" onclick="showPage('parametreler')">⚙ Parametreler (Y)</button><button class="nav-tab" onclick="showPage('sayim')">📋 Sayım (S)</button><button class="nav-tab" onclick="showPage('burak_ozel')">🔒 Burak</button><button class="nav-tab" onclick="showPage('sifreler_ortak')">🔑 Şifreler</button>
   </div>
   <div class="nav-right">
   </div>
@@ -1550,6 +1550,31 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 </div>
 </main>
 
+<!-- ŞİFRELER (PAYLAŞILAN) -->
+<div class="page" id="page-sifreler_ortak">
+  <div class="page-header">
+    <div><div class="page-title">🔑 Paylaşılan Şifreler</div><div class="page-sub">Yetki verdiğin kişiler görebilir — kayıt eklemek/düzenlemek/silmek sadece sana özel</div></div>
+    <button class="btn btn-primary" id="sfpEkleBtn" onclick="sfpEkleAc()" style="display:none;">+ Ekle</button>
+  </div>
+  <div id="sfpEkleWrap" class="card" style="display:none;margin-bottom:16px;">
+    <input type="hidden" id="sfpEditId">
+    <div class="form-group"><label class="form-label">Başlık</label><input class="form-control" id="sfpBaslikInput" placeholder="Örn: Trendyol Mağaza Paneli"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Kullanıcı Adı / Mail</label><input class="form-control" id="sfpKullaniciInput" placeholder="kullanici@mail.com"></div>
+      <div class="form-group"><label class="form-label">Şifre</label><input class="form-control" id="sfpSifreInput" placeholder="Şifre"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Yetki Ver — bu kaydı kimler görebilsin?</label>
+      <div id="sfpKullaniciListe" style="display:flex;flex-wrap:wrap;gap:10px;padding:10px;background:var(--bg2);border-radius:8px;"></div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-primary btn-sm" onclick="sfpKaydet()">Kaydet</button>
+      <button class="btn btn-sm" onclick="sfpEkleKapat()">İptal</button>
+    </div>
+  </div>
+  <div id="sfpListe" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
+</div>
+
 <!-- ÜRÜN MODAL -->
 <div class="modal-overlay" id="urunModal">
   <div class="modal modal-wide">
@@ -1815,7 +1840,7 @@ async function uploadFoto(file) {
 // NAV
 let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
-  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel'];
+  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel','sifreler_ortak'];
   const idx = pages.indexOf(page);
   // Ana Sayfa'daki kısayol kartları, alt menüler vb. üzerinden de olsa,
   // yetkisi olmayan bir role sayfa açtırma (sadece üst menüyü gizlemek yetmiyordu).
@@ -1845,6 +1870,7 @@ function showPage(page) {
   if (page === 'borcalacak') { baInit(); baRender(); }
   if (page === 'sayim') { fillAySec('sayimAy'); loadSayim(); loadSayimGecmisRaporlar(); }
   if (page === 'burak_ozel') { bozInit(); }
+  if (page === 'sifreler_ortak') { sfpInit(); }
 }
 
 function openModal(id) { document.getElementById(id).classList.add('open'); }
@@ -1970,7 +1996,7 @@ async function sifreSifirlaEmail(email) {
 
 const ROL_IZIN_ETIKETLERI = {
   anasayfa: 'Ana Sayfa', urunler: 'Ürünler', fiyat_hesaplama: 'Fiyat Hesaplama', rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
-  borcalacak: 'Borç/Alacak', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu'
+  borcalacak: 'Borç/Alacak', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu', sifreler_ortak: 'Şifreler (Paylaşılan)'
 };
 async function loadRolIzinPanel() {
   if (!isAdmin()) return;
@@ -3679,8 +3705,8 @@ async function doLogin() {
 // Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Giderler(4), Borç/Alacak(5), Parametreler(6)
 // Hepsi rol_izinleri tablosundan (admin > Parametreler > Rol İzinleri panelinden) ayarlanır.
 // admin her zaman hepsini görür ve buradan kısıtlanamaz (kilitlenmeyi önlemek için).
-const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8, burak_ozel:9 };
-const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim'];
+const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8, burak_ozel:9, sifreler_ortak:10 };
+const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','sifreler_ortak'];
 let rolIzinleriCache = null;
 
 async function loadRolIzinleri() {
@@ -3693,7 +3719,7 @@ async function loadRolIzinleri() {
   }
 }
 function rolSekmeleri() {
-  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9];
+  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9,10];
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
   return izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
 }
@@ -6252,6 +6278,164 @@ function bozKartRenderListe() {
       <div style="border:1px solid var(--border);border-top:none;border-radius:0 0 10px 10px;padding:10px 16px;background:var(--bg2);display:flex;gap:20px;flex-wrap:wrap;">
         <div><div style="font-weight:700;font-size:11.5px;">Son Ödeme Tarihi</div><div style="font-size:13px;margin-top:2px;color:var(--text2);">${item.son_odeme_tarihi ? bozTarihTersCevir(item.son_odeme_tarihi) : '—'}</div></div>
         <div><div style="font-weight:700;font-size:11.5px;">Ekstre Kesim Tarihi</div><div style="font-size:13px;margin-top:2px;color:var(--text2);">${item.ekstre_kesim_tarihi ? bozTarihTersCevir(item.ekstre_kesim_tarihi) : '—'}</div></div>
+      </div>
+    </div>`).join('');
+}
+
+// ===== PAYLAŞILAN ŞİFRELER (herkese açık sekme, kayıt bazlı yetki) =====
+let sfpCache = [];
+let sfpYuklendi = false;
+let sfpKullanicilarCache = [];
+let sfpKullanicilarYuklendi = false;
+
+async function sfpInit() {
+  const btn = document.getElementById('sfpEkleBtn');
+  if (btn) btn.style.display = isAdmin() ? '' : 'none';
+  if (!sfpYuklendi) await sfpYukle();
+  sfpRenderListe();
+}
+
+async function sfpYukle() {
+  try {
+    const data = await api('paylasilan_sifreler?select=*&order=olusturma.desc');
+    sfpCache = data || [];
+    sfpYuklendi = true;
+  } catch(e) { sfpCache = []; }
+}
+
+function sfpKullaniciAdi(u) { return (u.ad_soyad && u.ad_soyad.trim()) || u.kullanici_adi; }
+
+async function sfpKullanicilarYukleVeCiz(seciliIdler) {
+  if (!sfpKullanicilarYuklendi) {
+    try {
+      const data = await api('kullanicilar?select=id,kullanici_adi,ad_soyad,rol&order=ad_soyad.asc');
+      sfpKullanicilarCache = data || [];
+      sfpKullanicilarYuklendi = true;
+    } catch(e) { sfpKullanicilarCache = []; }
+  }
+  const el = document.getElementById('sfpKullaniciListe');
+  if (!el) return;
+  const secili = (seciliIdler || []).map(x => Number(x));
+  el.innerHTML = sfpKullanicilarCache.map(u => `
+    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+      <input type="checkbox" class="sfp-izin-cb" value="${u.id}" ${secili.includes(Number(u.id)) ? 'checked' : ''} style="accent-color:var(--gold);width:15px;height:15px;cursor:pointer;">
+      ${bozEsc(sfpKullaniciAdi(u))} <span style="color:var(--text3);font-size:11px;">(${u.rol})</span>
+    </label>`).join('') || '<div style="color:var(--text3);font-size:13px;">Kullanıcı bulunamadı.</div>';
+}
+
+async function sfpEkleAc() {
+  if (!isAdmin()) return;
+  document.getElementById('sfpEditId').value = '';
+  ['sfpBaslikInput','sfpKullaniciInput','sfpSifreInput'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('sfpEkleWrap').style.display = 'block';
+  await sfpKullanicilarYukleVeCiz([]);
+  setTimeout(() => document.getElementById('sfpBaslikInput').focus(), 50);
+}
+
+function sfpEkleKapat() {
+  const wrap = document.getElementById('sfpEkleWrap');
+  if (wrap) wrap.style.display = 'none';
+}
+
+async function sfpDuzenle(id) {
+  if (!isAdmin()) return;
+  const item = sfpCache.find(x => String(x.id) === String(id));
+  if (!item) return;
+  document.getElementById('sfpEditId').value = item.id;
+  document.getElementById('sfpBaslikInput').value = item.baslik || '';
+  document.getElementById('sfpKullaniciInput').value = item.kullanici_bilgisi || '';
+  document.getElementById('sfpSifreInput').value = item.sifre || '';
+  document.getElementById('sfpEkleWrap').style.display = 'block';
+  await sfpKullanicilarYukleVeCiz(item.izinli_kullanicilar || []);
+  setTimeout(() => document.getElementById('sfpBaslikInput').focus(), 50);
+}
+
+async function sfpKaydet() {
+  const editId = document.getElementById('sfpEditId').value;
+  const baslik = document.getElementById('sfpBaslikInput').value.trim();
+  const kullanici_bilgisi = document.getElementById('sfpKullaniciInput').value.trim();
+  const sifre = document.getElementById('sfpSifreInput').value;
+  const izinli_kullanicilar = [...document.querySelectorAll('.sfp-izin-cb:checked')].map(cb => parseInt(cb.value));
+  if (!baslik) { alert('Başlık zorunludur.'); return; }
+
+  if (editId) {
+    const item = sfpCache.find(x => String(x.id) === String(editId));
+    if (!item) { sfpEkleKapat(); return; }
+    const onceki = { ...item };
+    Object.assign(item, { baslik, kullanici_bilgisi, sifre, izinli_kullanicilar });
+    sfpEkleKapat();
+    sfpRenderListe();
+    try {
+      await api('paylasilan_sifreler?id=eq.' + editId, 'PATCH', { baslik, kullanici_bilgisi, sifre, izinli_kullanicilar });
+    } catch(e) {
+      Object.assign(item, onceki);
+      sfpRenderListe();
+      alert('Kaydedilemedi: ' + e.message);
+    }
+    return;
+  }
+
+  const id = Date.now();
+  const yeni = { id, baslik, kullanici_bilgisi, sifre, izinli_kullanicilar, olusturma: new Date().toISOString() };
+  sfpCache.unshift(yeni);
+  sfpEkleKapat();
+  sfpRenderListe();
+  try {
+    await api('paylasilan_sifreler', 'POST', yeni);
+  } catch(e) {
+    sfpCache = sfpCache.filter(x => x.id !== id);
+    sfpRenderListe();
+    alert('Kaydedilemedi: ' + e.message);
+  }
+}
+
+async function sfpSil(id) {
+  if (!isAdmin()) return;
+  if (!confirm('Bu kaydı silmek istediğine emin misin?')) return;
+  const onceki = sfpCache;
+  sfpCache = sfpCache.filter(x => String(x.id) !== String(id));
+  sfpRenderListe();
+  try {
+    await api('paylasilan_sifreler?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    sfpCache = onceki;
+    sfpRenderListe();
+    alert('Silinemedi: ' + e.message);
+  }
+}
+
+function sfpKopyala(id, alan) {
+  const item = sfpCache.find(x => String(x.id) === String(id));
+  if (!item) return;
+  const metin = alan === 'sifre' ? (item.sifre || '') : (item.kullanici_bilgisi || '');
+  bozPanoyaKopyala(metin, alan === 'sifre' ? '📋 Şifre kopyalandı' : '📋 Kullanıcı adı/mail kopyalandı');
+}
+
+function sfpRenderListe() {
+  const el = document.getElementById('sfpListe');
+  if (!el) return;
+  if (!sfpCache.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;grid-column:1/-1;">Henüz kayıt yok' + (isAdmin() ? '. "+ Ekle" ile ekleyebilirsin.' : ', ya da görme yetkin olan bir kayıt bulunmuyor.') + '</div>';
+    return;
+  }
+  el.innerHTML = sfpCache.map(item => `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--card);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:14.5px;">${bozEsc(item.baslik)}</div>
+        ${isAdmin() ? `<div style="display:flex;gap:2px;flex-shrink:0;">
+          <button onclick="sfpDuzenle(${item.id})" title="Düzenle" style="background:none;border:none;cursor:pointer;font-size:13px;padding:0 3px;line-height:1;">✏️</button>
+          <button onclick="sfpSil(${item.id})" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 3px;line-height:1;">🗑</button>
+        </div>` : ''}
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Kullanıcı Adı / Mail</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="font-size:13px;word-break:break-all;">${bozEsc(item.kullanici_bilgisi) || '—'}</div>
+        <button onclick="sfpKopyala(${item.id},'kullanici')" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;flex-shrink:0;">📋</button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Şifre</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+        <div style="font-size:13px;font-family:monospace;word-break:break-all;">${bozEsc(item.sifre) || '—'}</div>
+        <button onclick="sfpKopyala(${item.id},'sifre')" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;flex-shrink:0;">📋</button>
       </div>
     </div>`).join('');
 }
