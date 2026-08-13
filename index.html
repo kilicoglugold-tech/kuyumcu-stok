@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V70-SIFRELER-UUID-FIX --><!DOCTYPE html>
+﻿<!-- SURUM-V71-SIFRELER-ADRES-IBAN-HEPSI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1556,15 +1556,30 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div><div class="page-title">🔑 Paylaşılan Şifreler</div><div class="page-sub">Yetki verdiğin kişiler görebilir — kayıt eklemek/düzenlemek/silmek sadece sana özel</div></div>
     <button class="btn btn-primary" id="sfpEkleBtn" onclick="sfpEkleAc()" style="display:none;">+ Ekle</button>
   </div>
+  <div style="display:flex;gap:6px;margin-bottom:16px;">
+    <button class="ayar-tab active" id="sfpKatBtn-sifreler" onclick="sfpKategoriSec('sifreler', this)">🔑 Şifreler</button>
+    <button class="ayar-tab" id="sfpKatBtn-adresler" onclick="sfpKategoriSec('adresler', this)">📍 Adresler</button>
+    <button class="ayar-tab" id="sfpKatBtn-ibanlar" onclick="sfpKategoriSec('ibanlar', this)">🏦 İbanlar</button>
+  </div>
   <div id="sfpEkleWrap" class="card" style="display:none;margin-bottom:16px;">
     <input type="hidden" id="sfpEditId">
     <div class="form-group"><label class="form-label">Başlık</label><input class="form-control" id="sfpBaslikInput" placeholder="Örn: Trendyol Mağaza Paneli"></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Kullanıcı Adı / Mail</label><input class="form-control" id="sfpKullaniciInput" placeholder="kullanici@mail.com"></div>
-      <div class="form-group"><label class="form-label">Şifre</label><input class="form-control" id="sfpSifreInput" placeholder="Şifre"></div>
+      <div class="form-group" id="sfpKullaniciGrup"><label class="form-label" id="sfpKullaniciLabel">Kullanıcı Adı / Mail</label><input class="form-control" id="sfpKullaniciInput" placeholder="kullanici@mail.com"></div>
+      <div class="form-group" id="sfpSifreGrup"><label class="form-label">Şifre</label><input class="form-control" id="sfpSifreInput" placeholder="Şifre"></div>
+    </div>
+    <div class="form-group" id="sfpIcerikGrup" style="display:none;">
+      <label class="form-label" id="sfpIcerikLabel">Adres</label>
+      <textarea class="form-control" id="sfpIcerikInput" rows="3" placeholder="Detayları yaz..."></textarea>
     </div>
     <div class="form-group">
       <label class="form-label">Yetki Ver — bu kaydı kimler görebilsin?</label>
+      <div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border);">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;cursor:pointer;">
+          <input type="checkbox" id="sfpIzinHepsiCb" onchange="sfpIzinHepsiToggle(this)" style="accent-color:var(--gold);width:15px;height:15px;cursor:pointer;">
+          Hepsi — tek seferde herkese aç
+        </label>
+      </div>
       <div id="sfpKullaniciListe" style="display:flex;flex-wrap:wrap;gap:10px;padding:10px;background:var(--bg2);border-radius:8px;"></div>
     </div>
     <div style="display:flex;gap:8px;">
@@ -6282,11 +6297,14 @@ function bozKartRenderListe() {
     </div>`).join('');
 }
 
-// ===== PAYLAŞILAN ŞİFRELER (herkese açık sekme, kayıt bazlı yetki) =====
+// ===== PAYLAŞILAN ŞİFRELER / ADRESLER / İBANLAR (herkese açık sekme, kayıt bazlı yetki) =====
 let sfpCache = [];
 let sfpYuklendi = false;
 let sfpKullanicilarCache = [];
 let sfpKullanicilarYuklendi = false;
+let sfpAktifKategori = 'sifreler';
+
+const SFP_KATEGORI_ETIKET = { sifreler: 'Şifreler', adresler: 'Adresler', ibanlar: 'İbanlar' };
 
 async function sfpInit() {
   const btn = document.getElementById('sfpEkleBtn');
@@ -6303,6 +6321,46 @@ async function sfpYukle() {
   } catch(e) { sfpCache = []; }
 }
 
+function sfpKategoriSec(kat, btn) {
+  sfpAktifKategori = kat;
+  document.querySelectorAll('#page-sifreler_ortak .ayar-tab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  sfpEkleKapat();
+  sfpFormAlanlariGuncelle();
+  sfpRenderListe();
+}
+
+function sfpFormAlanlariGuncelle() {
+  const kullaniciGrup = document.getElementById('sfpKullaniciGrup');
+  const kullaniciLabel = document.getElementById('sfpKullaniciLabel');
+  const kullaniciInput = document.getElementById('sfpKullaniciInput');
+  const sifreGrup = document.getElementById('sfpSifreGrup');
+  const icerikGrup = document.getElementById('sfpIcerikGrup');
+  const icerikLabel = document.getElementById('sfpIcerikLabel');
+  const icerikInput = document.getElementById('sfpIcerikInput');
+  if (sfpAktifKategori === 'adresler') {
+    kullaniciGrup.style.display = 'none';
+    sifreGrup.style.display = 'none';
+    icerikGrup.style.display = 'block';
+    icerikLabel.textContent = 'Adres';
+    icerikInput.placeholder = 'Adres detaylarını yaz...';
+  } else if (sfpAktifKategori === 'ibanlar') {
+    kullaniciGrup.style.display = '';
+    kullaniciLabel.textContent = 'IBAN';
+    kullaniciInput.placeholder = 'TR00 0000 0000 0000 0000 0000 00';
+    sifreGrup.style.display = 'none';
+    icerikGrup.style.display = 'block';
+    icerikLabel.textContent = 'Banka / Açıklama (opsiyonel)';
+    icerikInput.placeholder = 'Örn: Ziraat Bankası';
+  } else {
+    kullaniciGrup.style.display = '';
+    kullaniciLabel.textContent = 'Kullanıcı Adı / Mail';
+    kullaniciInput.placeholder = 'kullanici@mail.com';
+    sifreGrup.style.display = '';
+    icerikGrup.style.display = 'none';
+  }
+}
+
 function sfpKullaniciAdi(u) { return (u.ad_soyad && u.ad_soyad.trim()) || u.kullanici_adi; }
 
 async function sfpKullanicilarYukleVeCiz(seciliIdler) {
@@ -6314,6 +6372,8 @@ async function sfpKullanicilarYukleVeCiz(seciliIdler) {
     } catch(e) { sfpKullanicilarCache = []; }
   }
   const el = document.getElementById('sfpKullaniciListe');
+  const hepsiCb = document.getElementById('sfpIzinHepsiCb');
+  if (hepsiCb) hepsiCb.checked = false;
   if (!el) return;
   const secili = (seciliIdler || []).map(x => String(x));
   el.innerHTML = sfpKullanicilarCache.map(u => `
@@ -6321,12 +6381,20 @@ async function sfpKullanicilarYukleVeCiz(seciliIdler) {
       <input type="checkbox" class="sfp-izin-cb" value="${u.id}" ${secili.includes(String(u.id)) ? 'checked' : ''} style="accent-color:var(--gold);width:15px;height:15px;cursor:pointer;">
       ${bozEsc(sfpKullaniciAdi(u))} <span style="color:var(--text3);font-size:11px;">(${u.rol})</span>
     </label>`).join('') || '<div style="color:var(--text3);font-size:13px;">Kullanıcı bulunamadı.</div>';
+  if (hepsiCb && sfpKullanicilarCache.length && secili.length >= sfpKullanicilarCache.length) {
+    hepsiCb.checked = sfpKullanicilarCache.every(u => secili.includes(String(u.id)));
+  }
+}
+
+function sfpIzinHepsiToggle(cb) {
+  document.querySelectorAll('.sfp-izin-cb').forEach(c => { c.checked = cb.checked; });
 }
 
 async function sfpEkleAc() {
   if (!isAdmin()) return;
   document.getElementById('sfpEditId').value = '';
-  ['sfpBaslikInput','sfpKullaniciInput','sfpSifreInput'].forEach(id => { document.getElementById(id).value = ''; });
+  ['sfpBaslikInput','sfpKullaniciInput','sfpSifreInput','sfpIcerikInput'].forEach(id => { document.getElementById(id).value = ''; });
+  sfpFormAlanlariGuncelle();
   document.getElementById('sfpEkleWrap').style.display = 'block';
   await sfpKullanicilarYukleVeCiz([]);
   setTimeout(() => document.getElementById('sfpBaslikInput').focus(), 50);
@@ -6345,6 +6413,8 @@ async function sfpDuzenle(id) {
   document.getElementById('sfpBaslikInput').value = item.baslik || '';
   document.getElementById('sfpKullaniciInput').value = item.kullanici_bilgisi || '';
   document.getElementById('sfpSifreInput').value = item.sifre || '';
+  document.getElementById('sfpIcerikInput').value = item.icerik || '';
+  sfpFormAlanlariGuncelle();
   document.getElementById('sfpEkleWrap').style.display = 'block';
   await sfpKullanicilarYukleVeCiz(item.izinli_kullanicilar || []);
   setTimeout(() => document.getElementById('sfpBaslikInput').focus(), 50);
@@ -6353,8 +6423,9 @@ async function sfpDuzenle(id) {
 async function sfpKaydet() {
   const editId = document.getElementById('sfpEditId').value;
   const baslik = document.getElementById('sfpBaslikInput').value.trim();
-  const kullanici_bilgisi = document.getElementById('sfpKullaniciInput').value.trim();
-  const sifre = document.getElementById('sfpSifreInput').value;
+  const kullanici_bilgisi = sfpAktifKategori === 'adresler' ? '' : document.getElementById('sfpKullaniciInput').value.trim();
+  const sifre = sfpAktifKategori === 'sifreler' ? document.getElementById('sfpSifreInput').value : '';
+  const icerik = sfpAktifKategori === 'sifreler' ? '' : document.getElementById('sfpIcerikInput').value.trim();
   const izinli_kullanicilar = [...document.querySelectorAll('.sfp-izin-cb:checked')].map(cb => cb.value);
   if (!baslik) { alert('Başlık zorunludur.'); return; }
 
@@ -6362,11 +6433,11 @@ async function sfpKaydet() {
     const item = sfpCache.find(x => String(x.id) === String(editId));
     if (!item) { sfpEkleKapat(); return; }
     const onceki = { ...item };
-    Object.assign(item, { baslik, kullanici_bilgisi, sifre, izinli_kullanicilar });
+    Object.assign(item, { baslik, kullanici_bilgisi, sifre, icerik, izinli_kullanicilar });
     sfpEkleKapat();
     sfpRenderListe();
     try {
-      await api('paylasilan_sifreler?id=eq.' + editId, 'PATCH', { baslik, kullanici_bilgisi, sifre, izinli_kullanicilar });
+      await api('paylasilan_sifreler?id=eq.' + editId, 'PATCH', { baslik, kullanici_bilgisi, sifre, icerik, izinli_kullanicilar });
     } catch(e) {
       Object.assign(item, onceki);
       sfpRenderListe();
@@ -6376,7 +6447,7 @@ async function sfpKaydet() {
   }
 
   const id = Date.now();
-  const yeni = { id, baslik, kullanici_bilgisi, sifre, izinli_kullanicilar, olusturma: new Date().toISOString() };
+  const yeni = { id, kategori: sfpAktifKategori, baslik, kullanici_bilgisi, sifre, icerik, izinli_kullanicilar, olusturma: new Date().toISOString() };
   sfpCache.unshift(yeni);
   sfpEkleKapat();
   sfpRenderListe();
@@ -6407,26 +6478,54 @@ async function sfpSil(id) {
 function sfpKopyala(id, alan) {
   const item = sfpCache.find(x => String(x.id) === String(id));
   if (!item) return;
-  const metin = alan === 'sifre' ? (item.sifre || '') : (item.kullanici_bilgisi || '');
-  bozPanoyaKopyala(metin, alan === 'sifre' ? '📋 Şifre kopyalandı' : '📋 Kullanıcı adı/mail kopyalandı');
+  const metinler = { sifre: item.sifre, kullanici: item.kullanici_bilgisi, icerik: item.icerik };
+  const mesajlar = { sifre: '📋 Şifre kopyalandı', kullanici: (item.kategori === 'ibanlar' ? '📋 IBAN kopyalandı' : '📋 Kullanıcı adı/mail kopyalandı'), icerik: (item.kategori === 'adresler' ? '📋 Adres kopyalandı' : '📋 Kopyalandı') };
+  bozPanoyaKopyala(metinler[alan] || '', mesajlar[alan] || '📋 Kopyalandı');
 }
 
 function sfpRenderListe() {
   const el = document.getElementById('sfpListe');
   if (!el) return;
-  if (!sfpCache.length) {
-    el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;grid-column:1/-1;">Henüz kayıt yok' + (isAdmin() ? '. "+ Ekle" ile ekleyebilirsin.' : ', ya da görme yetkin olan bir kayıt bulunmuyor.') + '</div>';
+  const liste = sfpCache.filter(x => (x.kategori || 'sifreler') === sfpAktifKategori);
+  if (!liste.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:8px 0;grid-column:1/-1;">Bu bölümde henüz kayıt yok' + (isAdmin() ? '. "+ Ekle" ile ekleyebilirsin.' : ', ya da görme yetkin olan bir kayıt bulunmuyor.') + '</div>';
     return;
   }
-  el.innerHTML = sfpCache.map(item => `
-    <div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--card);">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;">
-        <div style="font-weight:700;font-size:14.5px;">${bozEsc(item.baslik)}</div>
-        ${isAdmin() ? `<div style="display:flex;gap:2px;flex-shrink:0;">
+  el.innerHTML = liste.map(item => {
+    const aksiyonlar = isAdmin() ? `<div style="display:flex;gap:2px;flex-shrink:0;">
           <button onclick="sfpDuzenle(${item.id})" title="Düzenle" style="background:none;border:none;cursor:pointer;font-size:13px;padding:0 3px;line-height:1;">✏️</button>
           <button onclick="sfpSil(${item.id})" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;padding:0 3px;line-height:1;">🗑</button>
+        </div>` : '';
+    const baslikSatiri = `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;">
+        <div style="font-weight:700;font-size:14.5px;">${bozEsc(item.baslik)}</div>
+        ${aksiyonlar}
+      </div>`;
+    if (item.kategori === 'adresler') {
+      return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--card);">
+        ${baslikSatiri}
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div style="font-size:13px;color:var(--text2);white-space:pre-wrap;">${bozEsc(item.icerik) || '—'}</div>
+          <button onclick="sfpKopyala(${item.id},'icerik')" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;flex-shrink:0;">📋</button>
+        </div>
+      </div>`;
+    }
+    if (item.kategori === 'ibanlar') {
+      return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--card);">
+        ${baslikSatiri}
+        <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">IBAN</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:${item.icerik ? '10px' : '0'};">
+          <div style="font-size:13px;font-family:monospace;word-break:break-all;">${bozEsc(item.kullanici_bilgisi) || '—'}</div>
+          <button onclick="sfpKopyala(${item.id},'kullanici')" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;flex-shrink:0;">📋</button>
+        </div>
+        ${item.icerik ? `<div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Banka / Açıklama</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <div style="font-size:13px;color:var(--text2);">${bozEsc(item.icerik)}</div>
+          <button onclick="sfpKopyala(${item.id},'icerik')" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;flex-shrink:0;">📋</button>
         </div>` : ''}
-      </div>
+      </div>`;
+    }
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px 16px;background:var(--card);">
+      ${baslikSatiri}
       <div style="font-size:11px;color:var(--text3);margin-bottom:2px;">Kullanıcı Adı / Mail</div>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;">
         <div style="font-size:13px;word-break:break-all;">${bozEsc(item.kullanici_bilgisi) || '—'}</div>
@@ -6437,7 +6536,8 @@ function sfpRenderListe() {
         <div style="font-size:13px;font-family:monospace;word-break:break-all;">${bozEsc(item.sifre) || '—'}</div>
         <button onclick="sfpKopyala(${item.id},'sifre')" title="Kopyala" style="background:none;border:none;cursor:pointer;font-size:14px;padding:0 3px;line-height:1;flex-shrink:0;">📋</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ===== TOAST =====
