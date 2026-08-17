@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V80-LOGO-SIGDIRMA-FIX --><!DOCTYPE html>
+﻿<!-- SURUM-V81-SABIT-MAAS-AY-TASIMA --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -7374,6 +7374,42 @@ let maasGuncelleCalisan = '';
 let maasGuncelleId = '';
 let giderlerCache = {};
 
+// Sabit Giderler ve Maaşlar: yeni bir ayda henüz kayıt yoksa, bir önceki
+// mevcut kayıttaki tutarı otomatik olarak bu aya kopyalar (gerçek bir satır
+// olarak Supabase'e yazılır) — Burak değiştirene kadar aynı rakam her ay
+// kendiliğinden devam eder. Değişken giderler/avanslar bu mantığın dışında,
+// onlar hâlâ her ay manuel/tek seferlik girilir.
+async function giderCarryForward(ay, data) {
+  let tipler = [];
+  try { tipler = JSON.parse(localStorage.getItem('sabitGiderTipleri') || '[]'); } catch(e) {}
+  if (!tipler.length) tipler = ['Kira','Elektrik','Su','Internet','Muhasebe','Kirtasiye','Sadaka'];
+  const sabitAdlari = new Set(tipler);
+  data.filter(d => d.kategori === 'sabit').forEach(d => sabitAdlari.add(d.ad));
+
+  for (const ad of sabitAdlari) {
+    if (data.find(d => d.kategori === 'sabit' && d.ad === ad)) continue;
+    try {
+      const onceki = await api('giderler?kategori=eq.sabit&ad=eq.' + encodeURIComponent(ad) + '&ay=lt.' + ay + '&order=ay.desc&limit=1');
+      if (onceki && onceki.length && parseFloat(onceki[0].tutar) > 0) {
+        const r = await api('giderler', 'POST', { ay, kategori: 'sabit', ad, tutar: onceki[0].tutar, para_birimi: onceki[0].para_birimi || 'TL' });
+        if (r && r[0]) data.push(r[0]);
+      }
+    } catch(e) {}
+  }
+
+  if (!calisanlarYuklendi) await loadCalisanlarCache();
+  for (const c of calisanlar) {
+    if (data.find(d => d.kategori === 'maas' && d.ad === c.ad)) continue;
+    try {
+      const onceki = await api('giderler?kategori=eq.maas&ad=eq.' + encodeURIComponent(c.ad) + '&ay=lt.' + ay + '&order=ay.desc&limit=1');
+      if (onceki && onceki.length && parseFloat(onceki[0].tutar) > 0) {
+        const r = await api('giderler', 'POST', { ay, kategori: 'maas', ad: c.ad, tutar: onceki[0].tutar, para_birimi: onceki[0].para_birimi || 'TL' });
+        if (r && r[0]) data.push(r[0]);
+      }
+    } catch(e) {}
+  }
+}
+
 async function loadGiderler() {
   if (!calisanlarYuklendi) await loadCalisanlarCache();
   const ay = document.getElementById('giderAy').value;
@@ -7384,6 +7420,7 @@ async function loadGiderler() {
       const r = await api('giderler?ay=eq.' + ay + '&order=kategori.asc,ad.asc');
       giderlerCache[cacheKey] = r || [];
     } catch(e) { giderlerCache[cacheKey] = []; }
+    await giderCarryForward(ay, giderlerCache[cacheKey]);
   }
   const data = giderlerCache[cacheKey];
   renderGiderOzet(data);
