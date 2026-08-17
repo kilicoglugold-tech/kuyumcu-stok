@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V77-TUM-PLATFORM-LOGOLARI --><!DOCTYPE html>
+﻿<!-- SURUM-V80-LOGO-SIGDIRMA-FIX --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -126,7 +126,7 @@ main { max-width: 100%; padding: 1.5rem; }
 .ayar-tab { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border2); background: none; color: var(--text2); transition: all .15s; }
 .ayar-tab.active { background: var(--gold-light); color: var(--gold-dark); border-color: var(--gold); }
 .plat-rozet { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 5px; color: #fff; font-size: 9px; font-weight: 800; letter-spacing: .2px; vertical-align: -4px; margin-right: 2px; }
-.plat-rozet-img { height: 18px; max-width: 42px; width: auto; object-fit: contain; vertical-align: -5px; margin-right: 4px; }
+.plat-rozet-img { max-height: 20px; max-width: 60px; width: auto; height: auto; object-fit: contain; vertical-align: -6px; margin-right: 4px; }
 .tur-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 1rem; }
 .tur-kart { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 10px; cursor: pointer; transition: all .15s; text-align: center; background: var(--card); }
 .tur-kart:hover { border-color: var(--gold); background: var(--gold-light); }
@@ -3898,8 +3898,8 @@ function platAktifLogoGuncelle(platform) {
   const r = PLATFORM_ROZET[platform];
   if (!r) { el.innerHTML = ''; return; }
   const gorselHtml = r.gorsel
-    ? `<img src="${r.gorsel}" style="width:56px;height:56px;border-radius:12px;object-fit:cover;box-shadow:0 2px 8px rgba(0,0,0,.15);">`
-    : `<div style="width:56px;height:56px;border-radius:12px;background:${r.renk};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;box-shadow:0 2px 8px rgba(0,0,0,.15);">${r.harf}</div>`;
+    ? `<div style="width:64px;height:56px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;"><img src="${r.gorsel}" style="max-width:56px;max-height:48px;width:auto;height:auto;object-fit:contain;"></div>`
+    : `<div style="width:56px;height:56px;border-radius:12px;background:${r.renk};color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:19px;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;">${r.harf}</div>`;
   el.innerHTML = `<div style="display:flex;align-items:center;gap:12px;">${gorselHtml}<div style="font-weight:700;font-size:17px;color:var(--text);">${r.isim || ''}</div></div>`;
 }
 
@@ -4065,7 +4065,7 @@ function renderPlatTablo() {
       <td>$${fmtPara(s.maliyet_usd)}</td>
       <td>$${fmtPara(s.satis_fiyati_usd)}</td>
       <td>$${fmtPara(s.komisyon_usd)}</td>
-      <td><span style="display:inline-block;padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${karBg};color:${karRenk}">$${fmtPara(kar)}</span></td>
+      <td><span class="gizle-rakam" style="display:inline-block;padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${karBg};color:${karRenk}">$${fmtPara(kar)}</span></td>
       ${isEssosA ? `
         <td style="max-width:140px;"><span style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:100px;vertical-align:middle;">${(s.adres||'').slice(0,28)}${(s.adres||'').length>28?'…':''}</span>${s.adres ? ` <button onclick="navigator.clipboard.writeText(this.dataset.v);this.textContent='✓';setTimeout(()=>this.textContent='📋',1500)" data-v="${(s.adres||'').replace(/"/g,'')}" style="background:none;border:none;cursor:pointer;font-size:12px;padding:0 2px;vertical-align:middle;">📋</button>` : ''}</td>
         <td style="font-size:12px;white-space:nowrap;">${(() => { const k = s.fatura_kur || platToolbarKur; if (!k) return "—"; const tl = fmtPara((parseFloat(s.satis_fiyati_usd)||0) * k); const v = Math.round((parseFloat(s.satis_fiyati_usd)||0)*k); return "₺" + tl + " <button onclick=\"navigator.clipboard.writeText(this.dataset.v);this.textContent=\x27✓\x27;setTimeout(()=>this.textContent=\x27📋\x27,1500)\" data-v=\"" + v + "\" style=\"background:none;border:none;cursor:pointer;font-size:11px;padding:0 2px;vertical-align:middle;\">📋</button>"; })()}</td>
@@ -4414,8 +4414,8 @@ function renderGrupBTablo() {
       <td>${parseFloat(s.milyem||0).toString()}</td>
       <td>${satisHas.toFixed(2)}</td>
       <td>${maliyetHas.toFixed(2)}</td>
-      <td>${hasKar.toFixed(2)}</td>
-      <td><span style="padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${bg};color:${renk}">$${fmtPara(kar)}</span></td>
+      <td class="gizle-rakam">${hasKar.toFixed(2)}</td>
+      <td><span class="gizle-rakam" style="padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${bg};color:${renk}">$${fmtPara(kar)}</span></td>
       <td><button class="btn btn-sm" onclick="editGrupBSiparis('${s.id}')" style="margin-right:4px">Düz</button><button class="btn btn-sm btn-danger" onclick="deleteGrupBSiparis('${s.id}')">Sil</button></td>
     </tr>`;
   }).join('');
@@ -4784,7 +4784,7 @@ function renderGrupCTablo() {
       <td>${sym}${fmtPara(isTl?s.maliyet_try:s.maliyet_usd)}</td>
       <td>${sym}${fmtPara(isTl?s.satis_try:s.satis_usd)}</td>
       <td>${sym}${fmtPara(isTl?s.komisyon_try:s.komisyon_usd)}</td>
-      <td><span style="padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${bg};color:${renk}">${sym}${fmtPara(kar)}</span></td>
+      <td><span class="gizle-rakam" style="padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${bg};color:${renk}">${sym}${fmtPara(kar)}</span></td>
       ${isEssos ? `
         <td style="max-width:140px;"><span style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:100px;vertical-align:middle;">${(s.adres||'').slice(0,28)}${(s.adres||'').length>28?'…':''}</span>${s.adres ? ` <button onclick="navigator.clipboard.writeText(this.dataset.v);this.textContent='✓';setTimeout(()=>this.textContent='📋',1500)" data-v="${(s.adres||'').replace(/"/g,'')}" style="background:none;border:none;cursor:pointer;font-size:12px;padding:0 2px;vertical-align:middle;">📋</button>` : ''}</td>
         <td style="font-size:12px;white-space:nowrap;">${s.fatura_kur ? '₺' + fmtPara((parseFloat(s.satis_usd)||0) * s.fatura_kur) : '—'}</td>
@@ -5053,7 +5053,7 @@ function renderYuppionTablo() {
       <td>$${fmtPara(s.kargo_usd)}</td>
       <td>$${fmtPara(s.maliyet_usd)}</td>
       <td>$${fmtPara(s.satis_usd)}</td>
-      <td><span style="padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${bg};color:${renk}">$${fmtPara(kar)}</span></td>
+      <td><span class="gizle-rakam" style="padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${bg};color:${renk}">$${fmtPara(kar)}</span></td>
       <td><button class="btn btn-sm" onclick="editYuppionSiparis('${s.id}')" style="margin-right:4px">Düz</button><button class="btn btn-sm btn-danger" onclick="deleteYuppionSiparis('${s.id}')">Sil</button></td>
     </tr>`;
   }).join('');
