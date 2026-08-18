@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V81-SABIT-MAAS-AY-TASIMA --><!DOCTYPE html>
+﻿<!-- SURUM-V82-URUN-TUR-ETIKETLERI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1667,6 +1667,13 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
         <div class="form-group"><label class="form-label">Taş Ölçüleri</label><input class="form-control" id="tasOlculeri" placeholder="örn: 3x5mm, 2mm round"></div>
         <div class="form-group"><label class="form-label">Taş Gr</label><input type="number" class="form-control" id="tasGram" step="0.001" placeholder="0.000"></div>
       </div>
+      <div class="section-title">Ürün Türü</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:14px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="tur_kolye" style="accent-color:var(--gold)"> Kolye</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="tur_bileklik" style="accent-color:var(--gold)"> Bileklik</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="tur_kupe_igne" style="accent-color:var(--gold)"> Küpe İğne</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="tur_kupe_halka" style="accent-color:var(--gold)"> Küpe Halka</label>
+      </div>
       <div class="section-title">Durum</div>
       <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:4px;">
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="dur_ana_kalip" style="accent-color:var(--gold)"> Ana Kalıp</label>
@@ -2116,6 +2123,10 @@ function renderUrunGrid(urunler) {
     const ayarlar = [...new Set(vars.map(v => v.ayar))];
     const meta = getUrunMeta(u.id);
     const durum = meta.durum || [];
+    const tur = meta.tur || [];
+    const turHtml = tur.length
+      ? `<div style="display:flex;gap:4px;flex-wrap:wrap;padding:4px 4px 0;">${tur.map(lbl => `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#1B7A4A;">✓ ${lbl}</span>`).join('')}</div>`
+      : '';
     const badge = (lbl) => {
       const var_ = durum.includes(lbl);
       const bg  = var_ ? '#D1FAE5' : '#FDF0EE';
@@ -2131,6 +2142,7 @@ function renderUrunGrid(urunler) {
         <button onclick="event.stopPropagation();toggleUrunFlag('${u.id}','mumBitti')" style="background:${meta.mumBitti?'#C0392B':'#F1F0EC'};color:${meta.mumBitti?'#fff':'#6B6960'};border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">🕯️ Mumu Bitti${meta.mumBitti?' ✓':''}</button>
       </div>
       <div style="position:absolute;top:6px;right:6px;z-index:2;display:flex;flex-direction:column;gap:3px;"><button onclick="event.stopPropagation();dokumSiparisVer('${u.id}','10K',this)" style="background:#3B82F6;color:#fff;border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">10K + Döküm</button><button onclick="event.stopPropagation();dokumSiparisVer('${u.id}','14K',this)" style="background:#D97706;color:#fff;border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">14K + Döküm</button></div>
+      ${turHtml}
       ${u.fotograf_url ? `<div class="urun-card-foto"><img src="${u.fotograf_url}" loading="lazy"></div>` : `<div class="urun-card-foto-placeholder">💍</div>`}
       <div class="urun-card-body">
         <div class="urun-card-kod">${u.kod}</div>
@@ -2771,6 +2783,28 @@ function restoreVaryantState(ayar, avars) {
   });
 }
 
+// Ürün türü (Kolye/Bileklik/Küpe İğne/Küpe Halka) — ürün kartında fotoğrafın
+// üstünde yeşil etiket olarak gösterilir.
+const TUR_IDS = [
+  { id: 'tur_kolye',      lbl: 'Kolye' },
+  { id: 'tur_bileklik',   lbl: 'Bileklik' },
+  { id: 'tur_kupe_igne',  lbl: 'Küpe İğne' },
+  { id: 'tur_kupe_halka', lbl: 'Küpe Halka' },
+];
+function getTurValues() {
+  return TUR_IDS.filter(t => document.getElementById(t.id)?.checked).map(t => t.lbl);
+}
+function resetTur() {
+  TUR_IDS.forEach(t => { const el = document.getElementById(t.id); if (el) el.checked = false; });
+}
+function restoreTur(meta) {
+  const tur = meta.tur || [];
+  tur.forEach(lbl => {
+    const t = TUR_IDS.find(x => x.lbl === lbl);
+    if (t) { const el = document.getElementById(t.id); if (el) el.checked = true; }
+  });
+}
+
 // Durum ve mecra sabitleri
 const DURUM_IDS = [
   { id: 'dur_ana_kalip',   lbl: 'Ana Kalıp' },
@@ -2810,12 +2844,14 @@ function getMecraValues() {
 function resetDurumMecra() {
   DURUM_IDS.forEach(d => { const el = document.getElementById(d.id); if (el) el.checked = false; });
   MECRA_CONFIG.forEach(g => g.items.forEach(i => { const el = document.getElementById(i.id); if (el) el.checked = false; }));
+  resetTur();
 }
 let urunMetaCache = {};
 function metaToRow(urunId, meta) {
   return {
     urun_id: urunId,
     durum: meta.durum || [],
+    tur: meta.tur || [],
     kategori: meta.kategori || '',
     mecralar: meta.mecralar || {},
     tas: meta.tas || {},
@@ -2847,6 +2883,7 @@ async function loadUrunMetaCache() {
     (rows || []).forEach(r => {
       urunMetaCache[r.urun_id] = {
         durum: r.durum || [],
+        tur: r.tur || [],
         kategori: r.kategori || '',
         mecralar: r.mecralar || {},
         tas: r.tas || {},
@@ -3426,6 +3463,7 @@ function restoreDurumMecra(u) {
     const secili = mecralar[g.grup] || [];
     g.items.forEach(i => { if (secili.includes(i.lbl)) { const el = document.getElementById(i.id); if (el) el.checked = true; } });
   });
+  restoreTur(meta);
 }
 
 function openUrunModal() {
@@ -3512,7 +3550,7 @@ async function saveUrun() {
   let urunId = id;
   if (id) { await api('urunler?id=eq.'+id, 'PATCH', urunData); }
   else { const res = await api('urunler', 'POST', urunData); urunId = res[0].id; }
-  setUrunMeta(urunId, { durum: getDurumValues(), mecralar: getMecraValues(), tas: getTasBilgisi(), kategori: document.getElementById('urunKategori').value || '' });
+  setUrunMeta(urunId, { durum: getDurumValues(), tur: getTurValues(), mecralar: getMecraValues(), tas: getTasBilgisi(), kategori: document.getElementById('urunKategori').value || '' });
   if (id) await api('varyantlar?urun_id=eq.'+id, 'DELETE');
   const tumVaryantlar = [];
   for (const ayar of ['925','10','14']) {
