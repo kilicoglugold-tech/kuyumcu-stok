@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V83-TUR-ETIKET-KONUM-FIX --><!DOCTYPE html>
+﻿<!-- SURUM-V88-URUN-OLCULERI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -297,6 +297,13 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .col-panel-wrap { position:relative;display:inline-block; }
 #platTable th { white-space:nowrap; padding:8px 10px; font-size:12px; }
 #platTable td { white-space:nowrap; padding:8px 10px; font-size:12px; }
+#a4PrintArea { display:none; }
+@page { size: A4 portrait; margin: 10mm; }
+@media print {
+  body * { visibility: hidden; }
+  #a4PrintArea, #a4PrintArea * { visibility: visible; }
+  #a4PrintArea { display:block; position: absolute; top: 0; left: 0; width: 190mm; }
+}
 </style>
 </head>
 <body>
@@ -606,6 +613,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="btn" id="secModBtn" onclick="toggleSecimModu()" style="display:none;">☑ Seç</button>
     <button class="btn" id="kopyaBulBtn" onclick="olasiKopyalariBul()" style="display:none;">🔍 Olası Kopyaları Bul</button>
     <button class="btn btn-danger" id="topluSilBtn" onclick="topluSilSecilenler()" style="display:none;">🗑 Seçilenleri Sil (<span id="topluSilSayi">0</span>)</button>
+    <button class="btn btn-primary" id="a4YazdirBtn" onclick="openA4YazdirModal()" style="display:none;">🖨️ A4 Yazdır (<span id="a4YazdirSayi">0</span>)</button>
   </div>
   <div class="search-bar">
     <input class="search-input" type="text" id="urunArama" placeholder="Ürün adı veya kodu ara..." oninput="filterUrunler()">
@@ -1680,6 +1688,13 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="dur_yesil_mum" style="accent-color:var(--gold)"> Yeşil Mum</label>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="dur_3d_project" style="accent-color:var(--gold)"> 3D Project</label>
       </div>
+      <div class="section-title">Ölçüler (mm)</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px;">
+        <div class="form-group"><label class="form-label">En</label><input type="number" class="form-control" id="olcuEn" step="0.1" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Boy</label><input type="number" class="form-control" id="olcuBoy" step="0.1" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Yükseklik</label><input type="number" class="form-control" id="olcuYukseklik" step="0.1" placeholder="0"></div>
+        <div class="form-group"><label class="form-label">Kalınlık</label><input type="number" class="form-control" id="olcuKalinlik" step="0.1" placeholder="0"></div>
+      </div>
       <div class="section-title" style="margin-top:14px;">Satıldığı Mecralar</div>
       <div class="mecra-cb-group">
         <div class="mecra-cb-group-label">Kılıçoğlu</div>
@@ -1721,6 +1736,28 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('urunModal')">İptal</button>
       <button class="btn btn-primary" onclick="saveUrun()">Kaydet ↵</button>
+    </div>
+  </div>
+</div>
+
+<!-- A4 YAZDIR MODAL -->
+<div class="modal-overlay" id="a4YazdirModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">A4 Etiket Yazdır</div>
+      <button class="modal-close" onclick="closeModal('a4YazdirModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:12px;" id="a4YazdirBilgi">Seçili ürünler için fotoğraf boyutunu belirle, altına ürün kodu otomatik eklenecek.</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Genişlik (cm)</label><input type="number" class="form-control" id="a4Genislik" step="0.1" value="3.8" min="1" oninput="a4OlcuOnizle()"></div>
+        <div class="form-group"><label class="form-label">Yükseklik (cm)</label><input type="number" class="form-control" id="a4Yukseklik" step="0.1" value="5.5" min="1" oninput="a4OlcuOnizle()"></div>
+      </div>
+      <div style="font-size:12px;color:var(--gold-dark);font-weight:600;background:var(--bg2);border-radius:8px;padding:8px 12px;" id="a4OlcuBilgi">—</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('a4YazdirModal')">İptal</button>
+      <button class="btn btn-primary" onclick="printA4Etiketler()">🖨️ Yazdır</button>
     </div>
   </div>
 </div>
@@ -2187,6 +2224,61 @@ function updateTopluSilUI() {
   const sayi = seciliUrunler.size;
   document.getElementById('topluSilSayi').textContent = sayi;
   document.getElementById('topluSilBtn').style.display = (secimModuAktif && sayi > 0) ? '' : 'none';
+  document.getElementById('a4YazdirSayi').textContent = sayi;
+  document.getElementById('a4YazdirBtn').style.display = (secimModuAktif && sayi > 0) ? '' : 'none';
+}
+
+// ===== A4 ETİKET YAZDIRMA =====
+// A4 kullanılabilir alan (297x210mm sayfa, @page kuralındaki 10mm kenar boşluğu düşülmüş)
+const A4_USABLE_W_MM = 210 - 20;
+const A4_USABLE_H_MM = 297 - 20;
+function a4GridHesapla(genislikCm, yukseklikCm) {
+  const wMm = Math.max(1, genislikCm) * 10;
+  const hMm = Math.max(1, yukseklikCm) * 10;
+  const cols = Math.max(1, Math.floor(A4_USABLE_W_MM / wMm));
+  const rows = Math.max(1, Math.floor(A4_USABLE_H_MM / hMm));
+  return { cols, rows, perPage: cols * rows };
+}
+function a4OlcuOnizle() {
+  const genislik = parseFloat(document.getElementById('a4Genislik').value) || 4;
+  const yukseklik = parseFloat(document.getElementById('a4Yukseklik').value) || 4;
+  const { cols, rows, perPage } = a4GridHesapla(genislik, yukseklik);
+  document.getElementById('a4OlcuBilgi').textContent = `Bu ölçüyle bir A4 sayfaya ${cols} sütun × ${rows} satır = ${perPage} ürün sığar.`;
+}
+function openA4YazdirModal() {
+  if (!seciliUrunler.size) { alert('Önce "Seç" modundan yazdırmak istediğin ürünleri işaretle.'); return; }
+  document.getElementById('a4YazdirBilgi').textContent = seciliUrunler.size + ' ürün seçili. Fotoğraf boyutunu belirle, altına ürün kodu otomatik eklenecek.';
+  a4OlcuOnizle();
+  openModal('a4YazdirModal');
+}
+function a4Hucre(u, genislik, yukseklik) {
+  // Mutlak cm yerine oran (aspect-ratio) kullanılıyor: hücre genişliği grid sütunundan
+  // (1fr, yani sayfanın tam genişliğinden pay alarak) geliyor, yükseklik de o genişliğe
+  // orantılı hesaplanıyor — böylece tarayıcı/yazıcı ayarı ne olursa olsun sayfa tam dolar.
+  return `<div style="aspect-ratio:${genislik}/${yukseklik};box-sizing:border-box;border:1px dashed #333;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:2mm;overflow:hidden;">
+    <div style="flex:1;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+      ${u.fotograf_url ? `<img src="${u.fotograf_url}" style="max-width:100%;max-height:100%;object-fit:contain;">` : `<div style="font-size:24px;">💍</div>`}
+    </div>
+    <div style="font-family:Georgia,'Times New Roman',serif;font-weight:800;font-size:13pt;margin-top:1mm;text-align:center;">${u.kod}</div>
+  </div>`;
+}
+function printA4Etiketler() {
+  const genislik = parseFloat(document.getElementById('a4Genislik').value) || 4;
+  const yukseklik = parseFloat(document.getElementById('a4Yukseklik').value) || 4;
+  const ids = Array.from(seciliUrunler);
+  const urunler = ids.map(id => allUrunler.find(u => u.id === id)).filter(Boolean);
+  if (!urunler.length) { alert('Seçili ürün bulunamadı.'); return; }
+  const { cols, rows, perPage } = a4GridHesapla(genislik, yukseklik);
+  const sayfalar = [];
+  for (let i = 0; i < urunler.length; i += perPage) sayfalar.push(urunler.slice(i, i + perPage));
+  const sayfaHtml = sayfalar.map((sayfaUrunler, i) => {
+    const hucreler = sayfaUrunler.map(u => a4Hucre(u, genislik, yukseklik)).join('');
+    const sonSayfa = i === sayfalar.length - 1;
+    return `<div style="display:grid;grid-template-columns:repeat(${cols}, 1fr);grid-template-rows:repeat(${rows}, 1fr);width:190mm;height:277mm;${sonSayfa ? '' : 'page-break-after:always;'}">${hucreler}</div>`;
+  }).join('');
+  document.getElementById('a4PrintArea').innerHTML = sayfaHtml;
+  closeModal('a4YazdirModal');
+  setTimeout(() => window.print(), 150);
 }
 
 function normalizeUrunAdi(ad) {
@@ -2504,6 +2596,17 @@ function openDetay(urunId) {
        </div>`
     : '';
 
+  const olcu = meta.olcu || {};
+  const olcuHtml = (olcu.en || olcu.boy || olcu.yukseklik || olcu.kalinlik)
+    ? `<div class="detay-section-label" style="margin-top:10px">Ölçüler (mm)</div>
+       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">
+         ${olcu.en ? `<span class="tas-badge">En: ${olcu.en}</span>` : ''}
+         ${olcu.boy ? `<span class="tas-badge">Boy: ${olcu.boy}</span>` : ''}
+         ${olcu.yukseklik ? `<span class="tas-badge">Yükseklik: ${olcu.yukseklik}</span>` : ''}
+         ${olcu.kalinlik ? `<span class="tas-badge">Kalınlık: ${olcu.kalinlik}</span>` : ''}
+       </div>`
+    : '';
+
   const fotoHtml = `<div class="detay-foto-kart">${
     u.fotograf_url
       ? `<img src="${u.fotograf_url}">`
@@ -2527,7 +2630,7 @@ function openDetay(urunId) {
         <div class="detay-kod-badge">${u.kod}</div>
         <div class="detay-info-ad">${u.ad}</div>
         ${u.aciklama ? `<div style="font-size:13px;color:var(--text2);margin-bottom:10px;line-height:1.5">${u.aciklama}</div>` : ''}
-        ${durumHtml}${mecraHtml}${tasHtml}
+        ${durumHtml}${mecraHtml}${tasHtml}${olcuHtml}
       </div>
     </div>
     ${vars.length ? ayarlar.map(buildAyarBlok).join('') : '<div style="color:var(--text3);font-size:13px;margin-bottom:1rem;">Henüz varyant eklenmemiş.</div>'}
@@ -2854,6 +2957,7 @@ function metaToRow(urunId, meta) {
     kategori: meta.kategori || '',
     mecralar: meta.mecralar || {},
     tas: meta.tas || {},
+    olcu: meta.olcu || {},
     tas_bitti: !!meta.tasBitti,
     mum_bitti: !!meta.mumBitti,
     foto_yuklendi: !!meta.fotoYuklendi
@@ -2886,6 +2990,7 @@ async function loadUrunMetaCache() {
         kategori: r.kategori || '',
         mecralar: r.mecralar || {},
         tas: r.tas || {},
+        olcu: r.olcu || {},
         tasBitti: !!r.tas_bitti,
         mumBitti: !!r.mum_bitti,
         fotoYuklendi: !!r.foto_yuklendi
@@ -3449,6 +3554,26 @@ function getTasBilgisi() {
   return { tasSiz: siz, olculer: siz ? '' : (document.getElementById('tasOlculeri').value.trim()), gram: siz ? '' : (document.getElementById('tasGram').value) };
 }
 
+// Ürünün kendi fiziksel ölçüleri (mm) — En/Boy/Yükseklik/Kalınlık
+function resetOlcuBilgisi() {
+  ['olcuEn','olcuBoy','olcuYukseklik','olcuKalinlik'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+function restoreOlcuBilgisi(meta) {
+  const o = meta.olcu || {};
+  document.getElementById('olcuEn').value = o.en || '';
+  document.getElementById('olcuBoy').value = o.boy || '';
+  document.getElementById('olcuYukseklik').value = o.yukseklik || '';
+  document.getElementById('olcuKalinlik').value = o.kalinlik || '';
+}
+function getOlcuBilgisi() {
+  return {
+    en: document.getElementById('olcuEn').value,
+    boy: document.getElementById('olcuBoy').value,
+    yukseklik: document.getElementById('olcuYukseklik').value,
+    kalinlik: document.getElementById('olcuKalinlik').value
+  };
+}
+
 function restoreDurumMecra(u) {
   resetDurumMecra();
   const meta = getUrunMeta(u.id);
@@ -3477,6 +3602,7 @@ function openUrunModal() {
   currentFotoFile = null;
   resetDurumMecra();
   resetTasBilgisi();
+  resetOlcuBilgisi();
   initVaryantEditors();
   document.getElementById('pendantGram10').value = '';
   document.getElementById('pendantGram14').value = '';
@@ -3500,6 +3626,7 @@ async function editUrun(urunId) {
   }
   restoreDurumMecra(u);
   restoreTasBilgisi(getUrunMeta(u.id));
+  restoreOlcuBilgisi(getUrunMeta(u.id));
   initVaryantEditors();
   document.getElementById('pendantGram10').value = '';
   document.getElementById('pendantGram14').value = '';
@@ -3549,7 +3676,7 @@ async function saveUrun() {
   let urunId = id;
   if (id) { await api('urunler?id=eq.'+id, 'PATCH', urunData); }
   else { const res = await api('urunler', 'POST', urunData); urunId = res[0].id; }
-  setUrunMeta(urunId, { durum: getDurumValues(), tur: getTurValues(), mecralar: getMecraValues(), tas: getTasBilgisi(), kategori: document.getElementById('urunKategori').value || '' });
+  setUrunMeta(urunId, { durum: getDurumValues(), tur: getTurValues(), mecralar: getMecraValues(), tas: getTasBilgisi(), olcu: getOlcuBilgisi(), kategori: document.getElementById('urunKategori').value || '' });
   if (id) await api('varyantlar?urun_id=eq.'+id, 'DELETE');
   const tumVaryantlar = [];
   for (const ayar of ['925','10','14']) {
@@ -8109,6 +8236,9 @@ async function deleteGider(id) {
     </div>
   </div>
 </div>
+
+<!-- A4 ETİKET YAZDIRMA ALANI: normalde gizli, sadece yazdırma sırasında görünür -->
+<div id="a4PrintArea"></div>
 </body>
 </html>
 
