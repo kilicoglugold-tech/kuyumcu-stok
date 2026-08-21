@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V88-URUN-OLCULERI --><!DOCTYPE html>
+﻿<!-- SURUM-V91-OLCU-FOTOGRAFTA-CIZGI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -2164,6 +2164,22 @@ function renderUrunGrid(urunler) {
     const turHtml = tur.length
       ? `<div style="position:absolute;bottom:6px;left:6px;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:3px;">${tur.map(lbl => `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#1B7A4A;background:rgba(255,255,255,.94);padding:2px 8px;border-radius:20px;box-shadow:0 1px 3px rgba(0,0,0,.18);">✓ ${lbl}</span>`).join('')}</div>`
       : '';
+    const olcuKartHtml = (() => {
+      const o = meta.olcu || {};
+      if (!o.en && !o.boy) return '';
+      const tick = 'position:absolute;width:5px;height:5px;border:solid #fff;filter:drop-shadow(0 0 1px rgba(0,0,0,.7));';
+      const enHtml = o.en ? `
+        <div style="position:absolute;left:16%;right:16%;bottom:30px;height:1px;background:#fff;box-shadow:0 0 2px rgba(0,0,0,.7);"></div>
+        <div style="${tick}left:16%;bottom:28px;border-width:0 0 1px 1px;"></div>
+        <div style="${tick}right:16%;bottom:28px;border-width:0 1px 1px 0;"></div>
+        <div style="position:absolute;left:0;right:0;bottom:34px;text-align:center;font-size:9px;font-weight:700;color:#1a1a1a;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;">↔ En: ${o.en} mm</div>` : '';
+      const boyHtml = o.boy ? `
+        <div style="position:absolute;top:24%;bottom:24%;right:10px;width:1px;background:#fff;box-shadow:0 0 2px rgba(0,0,0,.7);"></div>
+        <div style="${tick}top:24%;right:8px;border-width:1px 1px 0 0;"></div>
+        <div style="${tick}bottom:24%;right:8px;border-width:0 1px 1px 0;"></div>
+        <div style="position:absolute;top:50%;right:16px;transform:translateY(-50%) rotate(-90deg);font-size:9px;font-weight:700;color:#1a1a1a;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;white-space:nowrap;">↕ Boy: ${o.boy} mm</div>` : '';
+      return `<div style="position:absolute;inset:0;z-index:1;pointer-events:none;">${enHtml}${boyHtml}</div>`;
+    })();
     const badge = (lbl) => {
       const var_ = durum.includes(lbl);
       const bg  = var_ ? '#D1FAE5' : '#FDF0EE';
@@ -2179,7 +2195,7 @@ function renderUrunGrid(urunler) {
         <button onclick="event.stopPropagation();toggleUrunFlag('${u.id}','mumBitti')" style="background:${meta.mumBitti?'#C0392B':'#F1F0EC'};color:${meta.mumBitti?'#fff':'#6B6960'};border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">🕯️ Mumu Bitti${meta.mumBitti?' ✓':''}</button>
       </div>
       <div style="position:absolute;top:6px;right:6px;z-index:2;display:flex;flex-direction:column;gap:3px;"><button onclick="event.stopPropagation();dokumSiparisVer('${u.id}','10K',this)" style="background:#3B82F6;color:#fff;border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">10K + Döküm</button><button onclick="event.stopPropagation();dokumSiparisVer('${u.id}','14K',this)" style="background:#D97706;color:#fff;border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">14K + Döküm</button></div>
-      ${u.fotograf_url ? `<div class="urun-card-foto" style="position:relative;">${turHtml}<img src="${u.fotograf_url}" loading="lazy"></div>` : `<div class="urun-card-foto-placeholder" style="position:relative;">${turHtml}💍</div>`}
+      ${u.fotograf_url ? `<div class="urun-card-foto" style="position:relative;">${turHtml}${olcuKartHtml}<img src="${u.fotograf_url}" loading="lazy"></div>` : `<div class="urun-card-foto-placeholder" style="position:relative;">${turHtml}${olcuKartHtml}💍</div>`}
       <div class="urun-card-body">
         <div class="urun-card-kod">${u.kod}</div>
         <div class="urun-card-ad">${u.ad}</div>
@@ -2607,11 +2623,26 @@ function openDetay(urunId) {
        </div>`
     : '';
 
-  const fotoHtml = `<div class="detay-foto-kart">${
-    u.fotograf_url
-      ? `<img src="${u.fotograf_url}">`
-      : `<div class="detay-foto-placeholder-inner">💍</div>`
-  }</div>`;
+  const olcuCizgiTick = 'position:absolute;width:6px;height:6px;border:solid #333;';
+  const olcuEnCizgiHtml = olcu.en ? `
+    <div style="position:absolute;left:0;right:0;bottom:-8px;height:1px;background:#333;"></div>
+    <div style="${olcuCizgiTick}left:0;bottom:-11px;border-width:0 0 1px 1px;"></div>
+    <div style="${olcuCizgiTick}right:0;bottom:-11px;border-width:0 1px 1px 0;"></div>
+    <div style="position:absolute;left:0;right:0;bottom:-30px;text-align:center;font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;">↔ En: ${olcu.en} mm</div>` : '';
+  const olcuBoyCizgiHtml = olcu.boy ? `
+    <div style="position:absolute;top:0;bottom:0;right:-8px;width:1px;background:#333;"></div>
+    <div style="${olcuCizgiTick}top:0;right:-11px;border-width:1px 1px 0 0;"></div>
+    <div style="${olcuCizgiTick}bottom:0;right:-11px;border-width:0 1px 1px 0;"></div>
+    <div style="position:absolute;top:50%;right:-60px;transform:translateY(-50%) rotate(90deg);font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;">↕ Boy: ${olcu.boy} mm</div>` : '';
+  const olcuCizgiVarMi = !!(olcu.en || olcu.boy);
+  const fotoHtml = `<div class="detay-foto-kart" style="${olcuCizgiVarMi ? 'margin:0 90px 40px 0;' : ''}">
+    <div style="position:relative;display:inline-block;">
+      ${u.fotograf_url
+        ? `<img src="${u.fotograf_url}">`
+        : `<div class="detay-foto-placeholder-inner">💍</div>`}
+      ${olcuEnCizgiHtml}${olcuBoyCizgiHtml}
+    </div>
+  </div>`;
 
   const kolyeUcuDetayHtml = (() => {
     const g10 = kolyeUcuGram(u.id, '10');
