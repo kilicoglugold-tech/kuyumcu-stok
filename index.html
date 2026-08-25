@@ -1689,9 +1689,8 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="checkbox" id="dur_3d_project" style="accent-color:var(--gold)"> 3D Project</label>
       </div>
       <div class="section-title">Ölçüler (mm)</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:4px;">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:4px;">
         <div class="form-group"><label class="form-label">En</label><input type="number" class="form-control" id="olcuEn" step="0.1" placeholder="0"></div>
-        <div class="form-group"><label class="form-label">Boy</label><input type="number" class="form-control" id="olcuBoy" step="0.1" placeholder="0"></div>
         <div class="form-group"><label class="form-label">Yükseklik</label><input type="number" class="form-control" id="olcuYukseklik" step="0.1" placeholder="0"></div>
         <div class="form-group"><label class="form-label">Kalınlık</label><input type="number" class="form-control" id="olcuKalinlik" step="0.1" placeholder="0"></div>
       </div>
@@ -2166,19 +2165,20 @@ function renderUrunGrid(urunler) {
       : '';
     const olcuKartHtml = (() => {
       const o = meta.olcu || {};
-      if (!o.en && !o.boy) return '';
+      const oYukseklik = o.yukseklik || o.boy;
+      if (!o.en && !oYukseklik) return '';
       const tick = 'position:absolute;width:5px;height:5px;border:solid #fff;filter:drop-shadow(0 0 1px rgba(0,0,0,.7));';
       const enHtml = o.en ? `
         <div style="position:absolute;left:16%;right:16%;bottom:30px;height:1px;background:#fff;box-shadow:0 0 2px rgba(0,0,0,.7);"></div>
         <div style="${tick}left:16%;bottom:28px;border-width:0 0 1px 1px;"></div>
         <div style="${tick}right:16%;bottom:28px;border-width:0 1px 1px 0;"></div>
         <div style="position:absolute;left:0;right:0;bottom:34px;text-align:center;font-size:9px;font-weight:700;color:#1a1a1a;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;">↔ En: ${o.en} mm</div>` : '';
-      const boyHtml = o.boy ? `
+      const yukseklikHtml = oYukseklik ? `
         <div style="position:absolute;top:24%;bottom:24%;right:10px;width:1px;background:#fff;box-shadow:0 0 2px rgba(0,0,0,.7);"></div>
         <div style="${tick}top:24%;right:8px;border-width:1px 1px 0 0;"></div>
         <div style="${tick}bottom:24%;right:8px;border-width:0 1px 1px 0;"></div>
-        <div style="position:absolute;top:50%;right:16px;transform:translateY(-50%) rotate(-90deg);font-size:9px;font-weight:700;color:#1a1a1a;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;white-space:nowrap;">↕ Boy: ${o.boy} mm</div>` : '';
-      return `<div style="position:absolute;inset:0;z-index:1;pointer-events:none;">${enHtml}${boyHtml}</div>`;
+        <div style="position:absolute;top:50%;right:16px;transform:translateY(-50%) rotate(-90deg);font-size:9px;font-weight:700;color:#1a1a1a;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;white-space:nowrap;">↕ Yükseklik: ${oYukseklik} mm</div>` : '';
+      return `<div style="position:absolute;inset:0;z-index:1;pointer-events:none;">${enHtml}${yukseklikHtml}</div>`;
     })();
     const badge = (lbl) => {
       const var_ = durum.includes(lbl);
@@ -2613,12 +2613,12 @@ function openDetay(urunId) {
     : '';
 
   const olcu = meta.olcu || {};
-  const olcuHtml = (olcu.en || olcu.boy || olcu.yukseklik || olcu.kalinlik)
+  const olcuYukseklikVal = olcu.yukseklik || olcu.boy;
+  const olcuHtml = (olcu.en || olcuYukseklikVal || olcu.kalinlik)
     ? `<div class="detay-section-label" style="margin-top:10px">Ölçüler (mm)</div>
        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">
          ${olcu.en ? `<span class="tas-badge">En: ${olcu.en}</span>` : ''}
-         ${olcu.boy ? `<span class="tas-badge">Boy: ${olcu.boy}</span>` : ''}
-         ${olcu.yukseklik ? `<span class="tas-badge">Yükseklik: ${olcu.yukseklik}</span>` : ''}
+         ${olcuYukseklikVal ? `<span class="tas-badge">Yükseklik: ${olcuYukseklikVal}</span>` : ''}
          ${olcu.kalinlik ? `<span class="tas-badge">Kalınlık: ${olcu.kalinlik}</span>` : ''}
        </div>`
     : '';
@@ -2629,18 +2629,18 @@ function openDetay(urunId) {
     <div style="${olcuCizgiTick}left:0;bottom:-11px;border-width:0 0 1px 1px;"></div>
     <div style="${olcuCizgiTick}right:0;bottom:-11px;border-width:0 1px 1px 0;"></div>
     <div style="position:absolute;left:0;right:0;bottom:-30px;text-align:center;font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;">↔ En: ${olcu.en} mm</div>` : '';
-  const olcuBoyCizgiHtml = olcu.boy ? `
+  const olcuYukseklikCizgiHtml = olcuYukseklikVal ? `
     <div style="position:absolute;top:0;bottom:0;right:-8px;width:1px;background:#333;"></div>
     <div style="${olcuCizgiTick}top:0;right:-11px;border-width:1px 1px 0 0;"></div>
     <div style="${olcuCizgiTick}bottom:0;right:-11px;border-width:0 1px 1px 0;"></div>
-    <div style="position:absolute;top:50%;right:-60px;transform:translateY(-50%) rotate(90deg);font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;">↕ Boy: ${olcu.boy} mm</div>` : '';
-  const olcuCizgiVarMi = !!(olcu.en || olcu.boy);
+    <div style="position:absolute;top:50%;right:-60px;transform:translateY(-50%) rotate(90deg);font-size:11px;font-weight:700;color:var(--text2);white-space:nowrap;">↕ Yükseklik: ${olcuYukseklikVal} mm</div>` : '';
+  const olcuCizgiVarMi = !!(olcu.en || olcuYukseklikVal);
   const fotoHtml = `<div class="detay-foto-kart" style="${olcuCizgiVarMi ? 'margin:0 90px 40px 0;' : ''}">
     <div style="position:relative;display:inline-block;">
       ${u.fotograf_url
         ? `<img src="${u.fotograf_url}">`
         : `<div class="detay-foto-placeholder-inner">💍</div>`}
-      ${olcuEnCizgiHtml}${olcuBoyCizgiHtml}
+      ${olcuEnCizgiHtml}${olcuYukseklikCizgiHtml}
     </div>
   </div>`;
 
@@ -3585,21 +3585,19 @@ function getTasBilgisi() {
   return { tasSiz: siz, olculer: siz ? '' : (document.getElementById('tasOlculeri').value.trim()), gram: siz ? '' : (document.getElementById('tasGram').value) };
 }
 
-// Ürünün kendi fiziksel ölçüleri (mm) — En/Boy/Yükseklik/Kalınlık
+// Ürünün kendi fiziksel ölçüleri (mm) — En/Yükseklik/Kalınlık
 function resetOlcuBilgisi() {
-  ['olcuEn','olcuBoy','olcuYukseklik','olcuKalinlik'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['olcuEn','olcuYukseklik','olcuKalinlik'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 }
 function restoreOlcuBilgisi(meta) {
   const o = meta.olcu || {};
   document.getElementById('olcuEn').value = o.en || '';
-  document.getElementById('olcuBoy').value = o.boy || '';
-  document.getElementById('olcuYukseklik').value = o.yukseklik || '';
+  document.getElementById('olcuYukseklik').value = o.yukseklik || o.boy || '';
   document.getElementById('olcuKalinlik').value = o.kalinlik || '';
 }
 function getOlcuBilgisi() {
   return {
     en: document.getElementById('olcuEn').value,
-    boy: document.getElementById('olcuBoy').value,
     yukseklik: document.getElementById('olcuYukseklik').value,
     kalinlik: document.getElementById('olcuKalinlik').value
   };
