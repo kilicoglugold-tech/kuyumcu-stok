@@ -1289,6 +1289,24 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <button class="btn" onclick="migrateLocalCalisanlarToSupabase()">Bu Tarayıcıdaki Çalışanları Taşı</button>
     </div>
   </div>
+
+  <!-- BİR KERELİK: yerel borç/alacak listesini Supabase'e tasi - sadece admin -->
+  <div id="baMigratePanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel">
+      <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">📤 Borç/Alacak Kayıtlarını Ortak Veritabanına Taşı</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Borç/Alacak sayfası artık Supabase'te (herkeste ortak) tutuluyor. Bu tarayıcıda daha önce girilmiş kayıt varsa, bir kereliğine buraya basarak Supabase'e kopyalayabilirsiniz. Sadece verinin gerçekten bulunduğu tarayıcıdan bir kez çalıştırmanız yeterli.</div>
+      <button class="btn" onclick="migrateLocalBorcAlacakToSupabase()">Bu Tarayıcıdaki Borç/Alacak Kayıtlarını Taşı</button>
+    </div>
+  </div>
+
+  <!-- BİR KERELİK: yerel döküm siparişlerini Supabase'e tasi - sadece admin -->
+  <div id="dokumMigratePanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel">
+      <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">📤 Döküm Siparişlerini Ortak Veritabanına Taşı</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Ana Sayfa'daki Döküm Siparişi listesi artık Supabase'te (herkeste ortak) tutuluyor. Bu tarayıcıda daha önce girilmiş sipariş varsa, bir kereliğine buraya basarak Supabase'e kopyalayabilirsiniz. Sadece verinin gerçekten bulunduğu tarayıcıdan bir kez çalıştırmanız yeterli.</div>
+      <button class="btn" onclick="migrateLocalDokumToSupabase()">Bu Tarayıcıdaki Döküm Siparişlerini Taşı</button>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -1951,10 +1969,10 @@ function showPage(page) {
     }
     loadRapor();
   }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
+  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
-  if (page === 'borcalacak') { baInit(); baRender(); }
+  if (page === 'borcalacak') { baInit(); if (!baYuklendi) { baRender(); baYukle().then(baRender); } else { baRender(); } }
   if (page === 'sayim') { fillAySec('sayimAy'); loadSayim(); loadSayimGecmisRaporlar(); }
   if (page === 'burak_ozel') { bozInit(); }
   if (page === 'sifreler_ortak') { sfpInit(); }
@@ -3888,6 +3906,7 @@ async function showMainApp() {
   initParamAy();
   initRaporAylar();
   loadAylikParam().then(() => loadUrunler());
+  dokumYukle().then(dokumRenderListe);
   if (typeof loadZincirFormulleri === 'function') loadZincirFormulleri();
   if (currentUser.rol === 'admin' && typeof bozAlarmYukle === 'function') {
     bozAlarmYukle().then(bozAlarmBaslat);
@@ -6957,17 +6976,20 @@ function showToast(mesaj) {
 }
 
 // ===== DÖKÜM SİPARİŞ =====
-const DOKUM_KEY = 'kkgold_dokum_siparis';
+let dokumCache = [];
+let dokumYuklendi = false;
 
-function dokumGetListe() {
-  try { return JSON.parse(localStorage.getItem(DOKUM_KEY) || '[]'); } catch(e) { return []; }
+async function dokumYukle() {
+  try {
+    const rows = await api('dokum_siparisleri?select=*&order=olusturma.desc');
+    dokumCache = (rows || []).map(r => ({ ...r, has3D: r.has3d }));
+  } catch(e) { dokumCache = []; }
+  dokumYuklendi = true;
 }
-function dokumSetListe(liste) {
-  localStorage.setItem(DOKUM_KEY, JSON.stringify(liste));
-}
+function dokumGetListe() { return dokumCache; }
 
-function dokumEkleVeGoster(btn, urunId) {
-  dokumSiparisVer(urunId);
+async function dokumEkleVeGoster(btn, urunId) {
+  await dokumSiparisVer(urunId);
   btn.textContent = '✓ Eklendi';
   btn.style.background = '#16A34A';
   btn.disabled = true;
@@ -6980,25 +7002,24 @@ function dokumEkleVeGoster(btn, urunId) {
   showToast('✓ ' + (u ? u.ad : 'Ürün') + ' döküm listesine eklendi');
 }
 
-function dokumSiparisVer(urunId, ayar, btn) {
+async function dokumSiparisVer(urunId, ayar, btn) {
   const u = allUrunler.find(x => x.id === urunId);
   if (!u) return;
   const meta = getUrunMeta(urunId);
   const durum = meta.durum || [];
   const tas = meta.tas || {};
-  const liste = dokumGetListe();
-  liste.push({
+  const yeni = {
     id: Date.now(),
     urun_id: urunId,
     kod: u.kod,
     ad: u.ad,
     fotograf_url: u.fotograf_url || '',
     tas_gram: (!tas.tasSiz && tas.gram) ? tas.gram : '',
-    has3D: durum.includes('3D Project'),
+    has3d: durum.includes('3D Project'),
     tiklendi: false,
     ayar: ayar || ''
-  });
-  dokumSetListe(liste);
+  };
+  dokumCache.unshift({ ...yeni, has3D: yeni.has3d });
   dokumRenderListe();
   if (btn) {
     const orig = btn.textContent;
@@ -7008,25 +7029,76 @@ function dokumSiparisVer(urunId, ayar, btn) {
     btn.disabled = true;
     setTimeout(() => { btn.textContent = orig; btn.style.background = origBg; btn.disabled = false; }, 1500);
   }
+  try {
+    await api('dokum_siparisleri', 'POST', yeni);
+  } catch(e) {
+    dokumCache = dokumCache.filter(x => x.id !== yeni.id);
+    dokumRenderListe();
+    showToast('Kaydedilemedi: ' + e.message);
+  }
 }
 
-function dokumToggle(id) {
-  const liste = dokumGetListe();
-  const item = liste.find(x => x.id === id);
-  if (item) item.tiklendi = !item.tiklendi;
-  dokumSetListe(liste);
+async function dokumToggle(id) {
+  const item = dokumCache.find(x => x.id === id);
+  if (!item) return;
+  const onceki = item.tiklendi;
+  item.tiklendi = !item.tiklendi;
   dokumRenderListe();
+  try {
+    await api('dokum_siparisleri?id=eq.' + id, 'PATCH', { tiklendi: item.tiklendi });
+  } catch(e) {
+    item.tiklendi = onceki;
+    dokumRenderListe();
+    showToast('Güncellenemedi: ' + e.message);
+  }
 }
 
-function dokumSil(id) {
-  dokumSetListe(dokumGetListe().filter(x => x.id !== id));
+async function dokumSil(id) {
+  const onceki = dokumCache;
+  dokumCache = dokumCache.filter(x => x.id !== id);
   dokumRenderListe();
+  try {
+    await api('dokum_siparisleri?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    dokumCache = onceki;
+    dokumRenderListe();
+    showToast('Silinemedi: ' + e.message);
+  }
 }
 
-function dokumTemizle() {
+async function dokumTemizle() {
   if (!confirm('Tüm döküm siparişleri silinsin mi?')) return;
-  dokumSetListe([]);
+  const onceki = dokumCache;
+  const idler = dokumCache.map(x => x.id);
+  dokumCache = [];
   dokumRenderListe();
+  try {
+    await Promise.all(idler.map(id => api('dokum_siparisleri?id=eq.' + id, 'DELETE')));
+  } catch(e) {
+    dokumCache = onceki;
+    dokumRenderListe();
+    showToast('Silinemedi: ' + e.message);
+  }
+}
+
+async function migrateLocalDokumToSupabase() {
+  if (!confirm('Bu tarayıcıdaki Döküm Siparişlerini ortak veritabanına (Supabase) kopyalamak üzeresiniz. Bu işlemi sadece BİR KERE, verinin gerçekten bulunduğu tarayıcıdan çalıştırın. Devam edilsin mi?')) return;
+  let liste = [];
+  try { liste = JSON.parse(localStorage.getItem('kkgold_dokum_siparis') || '[]'); } catch(e) {}
+  if (!liste.length) { alert('Bu tarayıcıda taşınacak döküm siparişi bulunamadı.'); return; }
+  const rows = liste.map(x => ({
+    id: x.id, urun_id: x.urun_id, kod: x.kod, ad: x.ad, fotograf_url: x.fotograf_url || '',
+    tas_gram: x.tas_gram || '', has3d: !!x.has3D, tiklendi: !!x.tiklendi, ayar: x.ayar || ''
+  }));
+  try {
+    await api('dokum_siparisleri', 'POST', rows);
+  } catch(e) {
+    alert('Taşıma hatası: ' + e.message);
+    return;
+  }
+  await dokumYukle();
+  dokumRenderListe();
+  alert(rows.length + ' döküm siparişi Supabase\'e taşındı. Şimdi tüm kullanıcılar bu listeyi görecek.');
 }
 
 function dokumRenderListe() {
@@ -7062,10 +7134,16 @@ function dokumRenderListe() {
 
 // Ana sayfa ilk yüklenişinde init
 // ===== BORC / ALACAK =====
-const BA_KEY = 'kkgold_borcalacak';
-let baYeniTipi = 'borc';
-function baGetListe() { return JSON.parse(localStorage.getItem(BA_KEY) || '[]'); }
-function baSetListe(l) { localStorage.setItem(BA_KEY, JSON.stringify(l)); }
+let baCache = [];
+let baYuklendi = false;
+async function baYukle() {
+  try {
+    const rows = await api('borc_alacak?select=*&order=tarih.desc');
+    baCache = (rows || []).map(r => ({ ...r, tutar_tl: Number(r.tutar_tl), kur: Number(r.kur), gram: Number(r.gram) }));
+  } catch(e) { baCache = []; }
+  baYuklendi = true;
+}
+function baGetListe() { return baCache; }
 function baInit() {
   var today = new Date().toISOString().slice(0,10);
   var el = document.getElementById('baYeniTarih'); if (el) el.value = today;
@@ -7102,7 +7180,7 @@ function baYeniHesapla() {
   if (tutar > 0 && kur > 0) s.textContent = tip==='tl' ? (tutar/kur).toFixed(3)+' gr' : fmtTL(tutar*kur);
   else s.textContent = '—';
 }
-function baKaydet() {
+async function baKaydet() {
   var ad = document.getElementById('baYeniAd').value.trim();
   if (!ad) { showToast('Musteri adi gerekli'); return; }
   var tip = document.getElementById('baYeniGirisTip').value;
@@ -7112,21 +7190,60 @@ function baKaydet() {
   var gram = tip==='tl' ? tutar/kur : tutar;
   var tutarTL = tip==='tl' ? tutar : tutar*kur;
   var tarih = document.getElementById('baYeniTarih').value || new Date().toISOString().slice(0,10);
-  var liste = baGetListe();
-  liste.unshift({ id: Date.now(), tip: baYeniTipi, ad: ad, aciklama: document.getElementById('baYeniAciklama').value.trim(), giris_tipi: tip, tutar_tl: parseFloat(tutarTL.toFixed(2)), kur: kur, gram: parseFloat(gram.toFixed(4)), tarih: tarih, odendi: false });
-  baSetListe(liste);
+  var yeni = { id: Date.now(), tip: baYeniTipi, ad: ad, aciklama: document.getElementById('baYeniAciklama').value.trim(), giris_tipi: tip, tutar_tl: parseFloat(tutarTL.toFixed(2)), kur: kur, gram: parseFloat(gram.toFixed(4)), tarih: tarih, odendi: false };
+  baCache.unshift(yeni);
   document.getElementById('baYeniAd').value = ''; document.getElementById('baYeniAciklama').value = '';
   document.getElementById('baYeniTutar').value = ''; document.getElementById('baYeniSonuc').textContent = '—';
   baRender(); showToast('Kaydedildi');
+  try {
+    await api('borc_alacak', 'POST', yeni);
+  } catch(e) {
+    baCache = baCache.filter(x => x.id !== yeni.id);
+    baRender();
+    showToast('Kaydedilemedi: ' + e.message);
+  }
 }
-function baOdendi(id) {
-  var l = baGetListe(), item = l.find(function(x) { return x.id===id; });
-  if (item) item.odendi = !item.odendi;
-  baSetListe(l); baRender();
+async function baOdendi(id) {
+  var item = baCache.find(function(x) { return x.id===id; });
+  if (!item) return;
+  var onceki = item.odendi;
+  item.odendi = !item.odendi;
+  baRender();
+  try {
+    await api('borc_alacak?id=eq.' + id, 'PATCH', { odendi: item.odendi });
+  } catch(e) {
+    item.odendi = onceki;
+    baRender();
+    showToast('Güncellenemedi: ' + e.message);
+  }
 }
-function baSil(id) {
+async function baSil(id) {
   if (!confirm('Silinsin mi?')) return;
-  baSetListe(baGetListe().filter(function(x) { return x.id!==id; })); baRender();
+  var onceki = baCache;
+  baCache = baCache.filter(function(x) { return x.id!==id; });
+  baRender();
+  try {
+    await api('borc_alacak?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    baCache = onceki;
+    baRender();
+    showToast('Silinemedi: ' + e.message);
+  }
+}
+async function migrateLocalBorcAlacakToSupabase() {
+  if (!confirm('Bu tarayıcıdaki Borç/Alacak kayıtlarını ortak veritabanına (Supabase) kopyalamak üzeresiniz. Bu işlemi sadece BİR KERE, verinin gerçekten bulunduğu tarayıcıdan çalıştırın. Devam edilsin mi?')) return;
+  let liste = [];
+  try { liste = JSON.parse(localStorage.getItem('kkgold_borcalacak') || '[]'); } catch(e) {}
+  if (!liste.length) { alert('Bu tarayıcıda taşınacak Borç/Alacak kaydı bulunamadı.'); return; }
+  try {
+    await api('borc_alacak', 'POST', liste);
+  } catch(e) {
+    alert('Taşıma hatası: ' + e.message);
+    return;
+  }
+  await baYukle();
+  baRender();
+  alert(liste.length + ' kayıt Supabase\'e taşındı. Şimdi tüm kullanıcılar bu kayıtları görecek.');
 }
 function baRender() {
   var el = document.getElementById('baListe'); if (!el) return;
@@ -7213,7 +7330,7 @@ document.addEventListener('keydown', function(e) {
   if (navMap[harf]) { e.preventDefault(); showPage(navMap[harf]); return; }
 });
 
-document.addEventListener('DOMContentLoaded', () => { asInit(); dokumRenderListe(); setTimeout(applyColPrefs, 500); });
+document.addEventListener('DOMContentLoaded', () => { asInit(); setTimeout(applyColPrefs, 500); });
 
 </script>
 
