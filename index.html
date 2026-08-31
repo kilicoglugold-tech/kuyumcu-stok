@@ -1325,6 +1325,15 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <button class="btn" onclick="migrateLocalGrupBOdemeToSupabase()">Bu Tarayıcıdaki Grup B Ödemelerini Taşı</button>
     </div>
   </div>
+
+  <!-- BİR KERELİK: yerel gider kalemleri/tiplerini Supabase'e tasi - sadece admin -->
+  <div id="giderAyarMigratePanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel">
+      <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">📤 Gider Kalemleri / Sabit Gider Tiplerini Ortak Veritabanına Taşı</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Giderler sayfasındaki değişken gider kalemleri ve sabit gider kategorileri artık Supabase'te (herkeste ortak) tutuluyor. Bu tarayıcıda daha önce tanımlanmış kalem/tip varsa, bir kereliğine buraya basarak Supabase'e kopyalayabilirsiniz. Sadece verinin gerçekten bulunduğu tarayıcıdan bir kez çalıştırmanız yeterli.</div>
+      <button class="btn" onclick="migrateLocalGiderAyarlariToSupabase()">Bu Tarayıcıdaki Gider Kalemleri/Tiplerini Taşı</button>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -1987,7 +1996,7 @@ function showPage(page) {
     }
     loadRapor();
   }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('hatirlatmaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('grupBOdemeMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
+  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('hatirlatmaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('grupBOdemeMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('giderAyarMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); if (!baYuklendi) { baRender(); baYukle().then(baRender); } else { baRender(); } }
@@ -7854,7 +7863,47 @@ document.addEventListener('keydown', function(e) {
 </script>
 <script>
 // ===== GİDERLER =====
-let giderKalemleri = JSON.parse(localStorage.getItem('giderKalemleri') || '[]');
+// ===== GİDER KALEMLERİ / SABİT GİDER TİPLERİ (Supabase - herkeste ortak) =====
+let giderKalemleri = [];
+let giderKalemleriYuklendi = false;
+async function giderKalemleriYukle() {
+  try {
+    const rows = await api('gider_kalemleri?select=*&order=ad.asc');
+    giderKalemleri = rows || [];
+  } catch(e) { giderKalemleri = []; }
+  giderKalemleriYuklendi = true;
+}
+
+let sabitGiderTipleriCache = null; // null = henüz yüklenmedi
+const SABIT_GIDER_VARSAYILAN = ['Kira','Elektrik','Su','Internet','Muhasebe','Kirtasiye','Sadaka'];
+async function sabitGiderTipleriYukle() {
+  try {
+    const rows = await api('gider_tipleri?select=*&order=ad.asc');
+    sabitGiderTipleriCache = (rows && rows.length) ? rows.map(r => r.ad) : SABIT_GIDER_VARSAYILAN.slice();
+  } catch(e) {
+    sabitGiderTipleriCache = SABIT_GIDER_VARSAYILAN.slice();
+  }
+}
+
+async function migrateLocalGiderAyarlariToSupabase() {
+  if (!confirm('Bu tarayıcıdaki Gider Kalemlerini ve Sabit Gider Tiplerini ortak veritabanına (Supabase) kopyalamak üzeresiniz. Bu işlemi sadece BİR KERE, verinin gerçekten bulunduğu tarayıcıdan çalıştırın. Devam edilsin mi?')) return;
+  let kalemler = [];
+  try { kalemler = JSON.parse(localStorage.getItem('giderKalemleri') || '[]'); } catch(e) {}
+  let tipler = [];
+  try { tipler = JSON.parse(localStorage.getItem('sabitGiderTipleri') || '[]'); } catch(e) {}
+  if (!kalemler.length && !tipler.length) { alert('Bu tarayıcıda taşınacak gider ayarı bulunamadı.'); return; }
+  try {
+    if (kalemler.length) await api('gider_kalemleri', 'POST', kalemler.map(k => ({ id: String(k.id), ad: k.ad, aciklama: k.aciklama || '' })));
+    if (tipler.length) await api('gider_tipleri', 'POST', tipler.map((ad, i) => ({ id: Date.now() + i, ad })));
+  } catch(e) {
+    alert('Taşıma hatası: ' + e.message);
+    return;
+  }
+  giderKalemleriYuklendi = false;
+  sabitGiderTipleriCache = null;
+  await loadGiderler();
+  alert('Gider kalemleri ve sabit gider tipleri Supabase\'e taşındı. Şimdi tüm kullanıcılar bunları görecek.');
+}
 let calisanlar = [];
 let calisanlarYuklendi = false;
 async function loadCalisanlarCache() {
@@ -7887,9 +7936,7 @@ let giderlerCache = {};
 // kendiliğinden devam eder. Değişken giderler/avanslar bu mantığın dışında,
 // onlar hâlâ her ay manuel/tek seferlik girilir.
 async function giderCarryForward(ay, data) {
-  let tipler = [];
-  try { tipler = JSON.parse(localStorage.getItem('sabitGiderTipleri') || '[]'); } catch(e) {}
-  if (!tipler.length) tipler = ['Kira','Elektrik','Su','Internet','Muhasebe','Kirtasiye','Sadaka'];
+  const tipler = (sabitGiderTipleriCache && sabitGiderTipleriCache.length) ? sabitGiderTipleriCache : SABIT_GIDER_VARSAYILAN;
   const sabitAdlari = new Set(tipler);
   data.filter(d => d.kategori === 'sabit').forEach(d => sabitAdlari.add(d.ad));
 
@@ -7919,6 +7966,8 @@ async function giderCarryForward(ay, data) {
 
 async function loadGiderler() {
   if (!calisanlarYuklendi) await loadCalisanlarCache();
+  if (!giderKalemleriYuklendi) await giderKalemleriYukle();
+  if (sabitGiderTipleriCache === null) await sabitGiderTipleriYukle();
   const ay = document.getElementById('giderAy').value;
   if (!ay) return;
   const cacheKey = 'gider:' + ay;
@@ -7951,11 +8000,7 @@ function renderGiderOzet(data) {
 }
 
 function renderSabitGiderler(data) {
-  let tipler = JSON.parse(localStorage.getItem('sabitGiderTipleri') || '[]');
-  if (!tipler.length) {
-    tipler = ['Kira','Elektrik','Su','Internet','Muhasebe','Kirtasiye','Sadaka'];
-    localStorage.setItem('sabitGiderTipleri', JSON.stringify(tipler));
-  }
+  let tipler = (sabitGiderTipleriCache || SABIT_GIDER_VARSAYILAN).slice();
   // Supabase'de olup listede olmayan tipleri de ekle
   data.filter(d => d.kategori==='sabit').forEach(d => {
     if (!tipler.includes(d.ad)) tipler.push(d.ad);
@@ -8277,9 +8322,10 @@ async function essosFaturaUygula() {
   showToast(kayitlar.length + ' kayıt güncellendi ✓');
 }
 // ── Gider Kalemi (localStorage) ──────────────────────────────────────
-function openGiderKalemiModal() {
+async function openGiderKalemiModal() {
   document.getElementById('gkAd').value = '';
   document.getElementById('gkAciklama').value = '';
+  if (!giderKalemleriYuklendi) await giderKalemleriYukle();
   renderGiderKalemiYonetim();
   openModal('giderKalemiModal');
   setTimeout(() => document.getElementById('gkAd').focus(), 100);
@@ -8295,24 +8341,40 @@ function renderGiderKalemiYonetim() {
   ).join('');
 }
 
-function saveGiderKalemi() {
+async function saveGiderKalemi() {
   const ad = document.getElementById('gkAd').value.trim();
   const aciklama = document.getElementById('gkAciklama').value.trim();
   if (!ad) { alert('Kalem adı zorunludur!'); document.getElementById('gkAd').focus(); return; }
   if (giderKalemleri.find(k => k.ad.toLowerCase() === ad.toLowerCase())) { alert('Bu kalem zaten mevcut!'); return; }
-  giderKalemleri.push({ id: Date.now().toString(), ad, aciklama });
-  localStorage.setItem('giderKalemleri', JSON.stringify(giderKalemleri));
+  const yeni = { id: String(Date.now()), ad, aciklama };
+  giderKalemleri.push(yeni);
   document.getElementById('gkAd').value = '';
   document.getElementById('gkAciklama').value = '';
   renderGiderKalemiYonetim();
   filterGiderKalemleri(document.getElementById('giderKalemiAra').value);
+  try {
+    await api('gider_kalemleri', 'POST', yeni);
+  } catch(e) {
+    giderKalemleri = giderKalemleri.filter(k => k.id !== yeni.id);
+    renderGiderKalemiYonetim();
+    filterGiderKalemleri(document.getElementById('giderKalemiAra').value);
+    alert('Kaydedilemedi: ' + e.message);
+  }
 }
 
-function deleteGiderKalemi(id) {
+async function deleteGiderKalemi(id) {
+  const onceki = giderKalemleri;
   giderKalemleri = giderKalemleri.filter(k => k.id !== id);
-  localStorage.setItem('giderKalemleri', JSON.stringify(giderKalemleri));
   renderGiderKalemiYonetim();
   filterGiderKalemleri(document.getElementById('giderKalemiAra').value);
+  try {
+    await api('gider_kalemleri?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    giderKalemleri = onceki;
+    renderGiderKalemiYonetim();
+    filterGiderKalemleri(document.getElementById('giderKalemiAra').value);
+    alert('Silinemedi: ' + e.message);
+  }
 }
 
 function filterGiderKalemleri(q) {
@@ -8364,15 +8426,23 @@ function openSabitGiderEkleModal() {
   setTimeout(() => document.getElementById('sgeAd').focus(), 100);
 }
 
-function saveSabitGiderEkle() {
+async function saveSabitGiderEkle() {
   const ad = document.getElementById('sgeAd').value.trim();
   if (!ad) { alert('Gider adı zorunludur!'); document.getElementById('sgeAd').focus(); return; }
-  let tipler = JSON.parse(localStorage.getItem('sabitGiderTipleri') || '[]');
+  const tipler = sabitGiderTipleriCache || [];
   if (tipler.find(t => t.toLowerCase() === ad.toLowerCase())) { alert('Bu gider zaten mevcut!'); return; }
+  const yeni = { id: Date.now(), ad };
   tipler.push(ad);
-  localStorage.setItem('sabitGiderTipleri', JSON.stringify(tipler));
+  sabitGiderTipleriCache = tipler;
   closeModal('sabitGiderEkleModal');
   loadGiderler();
+  try {
+    await api('gider_tipleri', 'POST', yeni);
+  } catch(e) {
+    sabitGiderTipleriCache = sabitGiderTipleriCache.filter(t => t !== ad);
+    loadGiderler();
+    alert('Kaydedilemedi: ' + e.message);
+  }
 }
 
 async function deleteSabitGiderTipi(ad, kayitId) {
@@ -8382,9 +8452,10 @@ async function deleteSabitGiderTipi(ad, kayitId) {
     const ay = document.getElementById('giderAy').value;
     delete giderlerCache['gider:' + ay];
   }
-  let tipler = JSON.parse(localStorage.getItem('sabitGiderTipleri') || '[]');
-  tipler = tipler.filter(t => t !== ad);
-  localStorage.setItem('sabitGiderTipleri', JSON.stringify(tipler));
+  sabitGiderTipleriCache = (sabitGiderTipleriCache || []).filter(t => t !== ad);
+  try {
+    await api('gider_tipleri?ad=eq.' + encodeURIComponent(ad), 'DELETE');
+  } catch(e) {}
   await loadGiderler();
 }
 // ── Sil ──────────────────────────────────────────────────────────────
