@@ -1316,6 +1316,15 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <button class="btn" onclick="migrateLocalHatirlatmaToSupabase()">Bu Tarayıcıdaki Hatırlatmaları Taşı</button>
     </div>
   </div>
+
+  <!-- BİR KERELİK: yerel Grup B ödemelerini Supabase'e tasi - sadece admin -->
+  <div id="grupBOdemeMigratePanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel">
+      <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">📤 Grup B Toptan Ödemelerini Ortak Veritabanına Taşı</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Platformlar sayfasındaki Bailey's/Bella/Buse ödeme kayıtları artık Supabase'te (herkeste ortak) tutuluyor. Bu tarayıcıda daha önce girilmiş ödeme varsa, bir kereliğine buraya basarak Supabase'e kopyalayabilirsiniz. Sadece verinin gerçekten bulunduğu tarayıcıdan bir kez çalıştırmanız yeterli.</div>
+      <button class="btn" onclick="migrateLocalGrupBOdemeToSupabase()">Bu Tarayıcıdaki Grup B Ödemelerini Taşı</button>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -1978,7 +1987,7 @@ function showPage(page) {
     }
     loadRapor();
   }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('hatirlatmaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
+  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('hatirlatmaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('grupBOdemeMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); if (!baYuklendi) { baRender(); baYukle().then(baRender); } else { baRender(); } }
@@ -4608,6 +4617,11 @@ async function loadGrupBData() {
     } catch(e) { _cache[sipKey] = []; }
   }
   grupbSiparisler = (_cache[sipKey] || []).slice().sort((a,b) => (parseInt(a.musteri_adi)||9999) - (parseInt(b.musteri_adi)||9999));
+  const odemeKey = 'odemeB:' + aktifPlatformB + ':' + ay;
+  if (!_cache[odemeKey]) {
+    try { _cache[odemeKey] = await api(`grupb_odemeler?platform=eq.${aktifPlatformB}&ay=eq.${ay}&order=tarih.asc`);
+    } catch(e) { _cache[odemeKey] = []; }
+  }
   renderGrupBTablo();
   updateGrupBOzet();
 }
@@ -4680,10 +4694,7 @@ function updateGrupBOzet() {
 
 // ===== GRUP B ÖDEME =====
 function gbOdemeGetList(platform, ay) {
-  try { return JSON.parse(localStorage.getItem(`kkgold_odeme_${platform}_${ay}`) || '[]'); } catch(e) { return []; }
-}
-function gbOdemeSetList(platform, ay, list) {
-  localStorage.setItem(`kkgold_odeme_${platform}_${ay}`, JSON.stringify(list));
+  return _cache['odemeB:' + platform + ':' + ay] || [];
 }
 function renderGrupBOdemeListesi(containerEl, platform, ay) {
   const list = gbOdemeGetList(platform, ay);
@@ -4699,14 +4710,23 @@ function renderGrupBOdemeListesi(containerEl, platform, ay) {
       <button onclick="deleteGrupBOdeme(${o.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:0 2px;line-height:1;flex-shrink:0;">🗑</button>
     </div>`).join('');
 }
-function deleteGrupBOdeme(id) {
+async function deleteGrupBOdeme(id) {
   if (!confirm('Bu ödeme silinsin mi?')) return;
   const ay = document.getElementById('gbAy').value;
-  const list = gbOdemeGetList(aktifPlatformB, ay).filter(o => o.id !== id);
-  gbOdemeSetList(aktifPlatformB, ay, list);
+  const key = 'odemeB:' + aktifPlatformB + ':' + ay;
+  const onceki = _cache[key] || [];
+  _cache[key] = onceki.filter(o => o.id !== id);
   updateGrupBBakiye();
   const modalEl = document.getElementById('gbOdemeModalListesi');
   if (modalEl) renderGrupBOdemeListesi(modalEl, aktifPlatformB, ay);
+  try {
+    await api('grupb_odemeler?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    _cache[key] = onceki;
+    updateGrupBBakiye();
+    if (modalEl) renderGrupBOdemeListesi(modalEl, aktifPlatformB, ay);
+    showToast('Silinemedi: ' + e.message);
+  }
 }
 async function gbJpgIndir() {
   if (!grupbSiparisler.length) { alert('Gösterilecek sipariş yok.'); return; }
@@ -4790,19 +4810,57 @@ function openGrupBOdemeModal() {
   if (modalEl) renderGrupBOdemeListesi(modalEl, aktifPlatformB, ay);
   openModal('grupBOdemeModal');
 }
-function saveGrupBOdeme() {
+async function saveGrupBOdeme() {
   const has = parseFloat(document.getElementById('gbOdemeHas').value);
   if (!has || has <= 0) { alert('Geçerli bir has miktarı giriniz.'); return; }
   const aciklama = document.getElementById('gbOdemeAciklama').value.trim();
   const ay = document.getElementById('gbAy').value;
-  const list = gbOdemeGetList(aktifPlatformB, ay);
-  list.push({ id: Date.now(), has, aciklama, tarih: new Date().toISOString().slice(0, 10) });
-  gbOdemeSetList(aktifPlatformB, ay, list);
+  const key = 'odemeB:' + aktifPlatformB + ':' + ay;
+  const yeni = { id: Date.now(), platform: aktifPlatformB, ay, has, aciklama, tarih: new Date().toISOString().slice(0, 10) };
+  if (!_cache[key]) _cache[key] = [];
+  _cache[key].push(yeni);
   closeModal('grupBOdemeModal');
   updateGrupBBakiye();
   const modalEl = document.getElementById('gbOdemeModalListesi');
   if (modalEl) renderGrupBOdemeListesi(modalEl, aktifPlatformB, ay);
+  try {
+    await api('grupb_odemeler', 'POST', yeni);
+  } catch(e) {
+    _cache[key] = _cache[key].filter(o => o.id !== yeni.id);
+    updateGrupBBakiye();
+    if (modalEl) renderGrupBOdemeListesi(modalEl, aktifPlatformB, ay);
+    showToast('Kaydedilemedi: ' + e.message);
+  }
 }
+async function migrateLocalGrupBOdemeToSupabase() {
+  if (!confirm('Bu tarayıcıdaki TÜM Grup B (Bailey\'s/Bella/Buse) toptan ödemelerini ortak veritabanına (Supabase) kopyalamak üzeresiniz. Bu işlemi sadece BİR KERE, verinin gerçekten bulunduğu tarayıcıdan çalıştırın. Devam edilsin mi?')) return;
+  const rows = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith('kkgold_odeme_')) continue;
+    const kalan = key.slice('kkgold_odeme_'.length); // "platform_YYYY-MM"
+    const altCizgi = kalan.indexOf('_');
+    if (altCizgi === -1) continue;
+    const platform = kalan.slice(0, altCizgi);
+    const ay = kalan.slice(altCizgi + 1);
+    let liste = [];
+    try { liste = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e) { continue; }
+    liste.forEach(o => rows.push({ id: o.id, platform, ay, has: o.has, aciklama: o.aciklama || '', tarih: o.tarih }));
+  }
+  if (!rows.length) { alert('Bu tarayıcıda taşınacak Grup B ödemesi bulunamadı.'); return; }
+  try {
+    await api('grupb_odemeler', 'POST', rows);
+  } catch(e) {
+    alert('Taşıma hatası: ' + e.message);
+    return;
+  }
+  // Görünen platform/ay için önbelleği temizle ki taze veri çekilsin
+  Object.keys(_cache).forEach(k => { if (k.startsWith('odemeB:')) delete _cache[k]; });
+  const ay = document.getElementById('gbAy') ? document.getElementById('gbAy').value : null;
+  if (ay) await loadGrupBData();
+  alert(rows.length + ' Grup B ödemesi Supabase\'e taşındı. Şimdi tüm kullanıcılar bu listeyi görecek.');
+}
+
 function updateGrupBBakiye() {
   const ay = document.getElementById('gbAy').value;
   const degerEl  = document.getElementById('gbBakiyeDeger');
