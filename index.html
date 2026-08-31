@@ -1307,6 +1307,15 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <button class="btn" onclick="migrateLocalDokumToSupabase()">Bu Tarayıcıdaki Döküm Siparişlerini Taşı</button>
     </div>
   </div>
+
+  <!-- BİR KERELİK: yerel ödeme hatırlatmalarını Supabase'e tasi - sadece admin -->
+  <div id="hatirlatmaMigratePanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel">
+      <div style="font-size:15px;font-weight:500;margin-bottom:0.25rem;">📤 Ödeme Hatırlatmalarını Ortak Veritabanına Taşı</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Ana Sayfa'daki Ödeme Hatırlatmaları artık Supabase'te (herkeste ortak) tutuluyor. Bu tarayıcıda daha önce girilmiş hatırlatma varsa, bir kereliğine buraya basarak Supabase'e kopyalayabilirsiniz. Sadece verinin gerçekten bulunduğu tarayıcıdan bir kez çalıştırmanız yeterli.</div>
+      <button class="btn" onclick="migrateLocalHatirlatmaToSupabase()">Bu Tarayıcıdaki Hatırlatmaları Taşı</button>
+    </div>
+  </div>
 </div>
 </div>
 
@@ -1969,7 +1978,7 @@ function showPage(page) {
     }
     loadRapor();
   }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
+  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('hatirlatmaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { baInit(); if (!baYuklendi) { baRender(); baYukle().then(baRender); } else { baRender(); } }
@@ -5466,6 +5475,7 @@ async function asInit() {
   if (el) el.textContent = AS_GUNLER[g.getDay()] + ', ' + g.getDate() + ' ' + AS_AYLAR[g.getMonth()] + ' ' + g.getFullYear();
   await loadGorevCache();
   asGorevRender();
+  await asHatirlatmaYukle();
   asHatirlatmaRender();
   await loadKkListeCache();
   kkListeRender('kuyumcukent');
@@ -5714,6 +5724,17 @@ async function asGorevHizliKaydet(kime) {
 }
 
 // ---- HATIRLATMALAR ----
+let hatirlatmaCache = [];
+let hatirlatmaYuklendi = false;
+
+async function asHatirlatmaYukle() {
+  try {
+    const rows = await api('odeme_hatirlatmalari?select=*&order=tarih.asc');
+    hatirlatmaCache = rows || [];
+  } catch(e) { hatirlatmaCache = []; }
+  hatirlatmaYuklendi = true;
+}
+
 function asHatirlatmaAc() {
   document.getElementById('asHIsim').value = '';
   document.getElementById('asHAciklama').value = '';
@@ -5722,46 +5743,72 @@ function asHatirlatmaAc() {
   openModal('asHatirlatmaModal');
 }
 
-function asHatirlatmaKaydet() {
+async function asHatirlatmaKaydet() {
   const isim = document.getElementById('asHIsim').value.trim();
   const tarih = document.getElementById('asHTarih').value;
   if (!isim || !tarih) { alert('İsim ve tarih zorunludur.'); return; }
   const tekrar = document.querySelector('input[name="asHTekrar"]:checked')?.value || 'yok';
-  const list = JSON.parse(localStorage.getItem('kkgold_hatirlatmalar') || '[]');
-  list.push({ id: Date.now(), isim, aciklama: document.getElementById('asHAciklama').value.trim(), tarih, tekrar });
-  localStorage.setItem('kkgold_hatirlatmalar', JSON.stringify(list));
+  const yeni = { id: Date.now(), isim, aciklama: document.getElementById('asHAciklama').value.trim(), tarih, tekrar };
+  hatirlatmaCache.push(yeni);
   closeModal('asHatirlatmaModal');
   asHatirlatmaRender();
-}
-
-function asHatirlatmaOdendi(id) {
-  let list = JSON.parse(localStorage.getItem('kkgold_hatirlatmalar') || '[]');
-  const h = list.find(x => x.id === id);
-  if (!h) return;
-  if (!h.tekrar || h.tekrar === 'yok') {
-    list = list.filter(x => x.id !== id);
-  } else {
-    const t = new Date(h.tarih);
-    if (h.tekrar === 'hafta') t.setDate(t.getDate() + 7);
-    else if (h.tekrar === 'ay') t.setMonth(t.getMonth() + 1);
-    else if (h.tekrar === 'yil') t.setFullYear(t.getFullYear() + 1);
-    h.tarih = t.toISOString().slice(0, 10);
+  try {
+    await api('odeme_hatirlatmalari', 'POST', yeni);
+  } catch(e) {
+    hatirlatmaCache = hatirlatmaCache.filter(x => x.id !== yeni.id);
+    asHatirlatmaRender();
+    showToast('Kaydedilemedi: ' + e.message);
   }
-  localStorage.setItem('kkgold_hatirlatmalar', JSON.stringify(list));
-  asHatirlatmaRender();
 }
 
-function asHatirlatmaSil(id) {
-  let list = JSON.parse(localStorage.getItem('kkgold_hatirlatmalar') || '[]');
-  list = list.filter(x => x.id !== id);
-  localStorage.setItem('kkgold_hatirlatmalar', JSON.stringify(list));
+async function asHatirlatmaOdendi(id) {
+  const h = hatirlatmaCache.find(x => x.id === id);
+  if (!h) return;
+  const onceki = { ...h };
+  if (!h.tekrar || h.tekrar === 'yok') {
+    hatirlatmaCache = hatirlatmaCache.filter(x => x.id !== id);
+    asHatirlatmaRender();
+    try {
+      await api('odeme_hatirlatmalari?id=eq.' + id, 'DELETE');
+    } catch(e) {
+      hatirlatmaCache.push(onceki);
+      asHatirlatmaRender();
+      showToast('Güncellenemedi: ' + e.message);
+    }
+    return;
+  }
+  const t = new Date(h.tarih);
+  if (h.tekrar === 'hafta') t.setDate(t.getDate() + 7);
+  else if (h.tekrar === 'ay') t.setMonth(t.getMonth() + 1);
+  else if (h.tekrar === 'yil') t.setFullYear(t.getFullYear() + 1);
+  h.tarih = t.toISOString().slice(0, 10);
   asHatirlatmaRender();
+  try {
+    await api('odeme_hatirlatmalari?id=eq.' + id, 'PATCH', { tarih: h.tarih });
+  } catch(e) {
+    h.tarih = onceki.tarih;
+    asHatirlatmaRender();
+    showToast('Güncellenemedi: ' + e.message);
+  }
+}
+
+async function asHatirlatmaSil(id) {
+  const onceki = hatirlatmaCache;
+  hatirlatmaCache = hatirlatmaCache.filter(x => x.id !== id);
+  asHatirlatmaRender();
+  try {
+    await api('odeme_hatirlatmalari?id=eq.' + id, 'DELETE');
+  } catch(e) {
+    hatirlatmaCache = onceki;
+    asHatirlatmaRender();
+    showToast('Silinemedi: ' + e.message);
+  }
 }
 
 function asHatirlatmaRender() {
   const el = document.getElementById('asHatirlatmaListe');
   if (!el) return;
-  const list = JSON.parse(localStorage.getItem('kkgold_hatirlatmalar') || '[]');
+  const list = hatirlatmaCache;
   if (!list.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;">Henüz hatırlatma yok.</div>'; return; }
   const bugun = new Date(); bugun.setHours(0, 0, 0, 0);
   const tekrarEtiket = { yok: '', hafta: 'Her hafta', ay: 'Her ay', yil: 'Her yıl' };
@@ -5793,7 +5840,7 @@ function asHatirlatmaRender() {
 
 function asTumOdemelerAc() {
   const el = document.getElementById('asTumOdemelerListe');
-  const list = JSON.parse(localStorage.getItem('kkgold_hatirlatmalar') || '[]');
+  const list = hatirlatmaCache;
   if (!list.length) { el.innerHTML = '<div style="color:var(--text3);font-size:13px;">Henüz hatırlatma yok.</div>'; openModal('asTumOdemelerModal'); return; }
   const bugun = new Date(); bugun.setHours(0,0,0,0);
   const tekrarEtiket = { yok:'', hafta:'Her hafta', ay:'Her ay', yil:'Her yıl' };
@@ -5821,12 +5868,29 @@ function asTumOdemelerAc() {
 
 function asTumOdemeOdendi(id) {
   asHatirlatmaOdendi(id);
-  asTumOdemelerAc();
+  setTimeout(asTumOdemelerAc, 300);
 }
 
 function asTumOdemeSil(id) {
   asHatirlatmaSil(id);
-  asTumOdemelerAc();
+  setTimeout(asTumOdemelerAc, 300);
+}
+
+async function migrateLocalHatirlatmaToSupabase() {
+  if (!confirm('Bu tarayıcıdaki Ödeme Hatırlatmalarını ortak veritabanına (Supabase) kopyalamak üzeresiniz. Bu işlemi sadece BİR KERE, verinin gerçekten bulunduğu tarayıcıdan çalıştırın. Devam edilsin mi?')) return;
+  let liste = [];
+  try { liste = JSON.parse(localStorage.getItem('kkgold_hatirlatmalar') || '[]'); } catch(e) {}
+  if (!liste.length) { alert('Bu tarayıcıda taşınacak hatırlatma bulunamadı.'); return; }
+  const rows = liste.map(x => ({ id: x.id, isim: x.isim, aciklama: x.aciklama || '', tarih: x.tarih, tekrar: x.tekrar || 'yok' }));
+  try {
+    await api('odeme_hatirlatmalari', 'POST', rows);
+  } catch(e) {
+    alert('Taşıma hatası: ' + e.message);
+    return;
+  }
+  await asHatirlatmaYukle();
+  asHatirlatmaRender();
+  alert(rows.length + ' hatırlatma Supabase\'e taşındı. Şimdi tüm kullanıcılar bu listeyi görecek.');
 }
 
 // ===== ALIŞVERİŞ LİSTELERİ (Supabase - herkeste ortak) =====
