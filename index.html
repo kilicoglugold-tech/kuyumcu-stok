@@ -5906,6 +5906,57 @@ function kkWhatsApp(key) {
   window.open('https://wa.me/?text=' + metin, '_blank');
 }
 
+// ===== KART / ŞİFRE ALANLARI İÇİN İSTEMCİ TARAFLI ŞİFRELEME (AES-GCM) =====
+// Kredi kartı no/CVV ve paylaşılan şifreler artık veritabanına düz metin değil,
+// yalnızca admin'in bildiği "ana şifre" ile şifrelenmiş halde yazılır.
+// Eski (şifresiz) kayıtlar bozulmaz; her düzenleyip kaydettiğinizde o kayıt şifrelenir.
+let bozMasterKey = null; // CryptoKey - yalnızca bellekte tutulur, sayfa yenilenince silinir
+const BOZ_KDF_SALT = new TextEncoder().encode('kilicoglu-kuyumcu-kdf-salt-v1');
+
+async function bozDeriveKey(password) {
+  const enc = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: BOZ_KDF_SALT, iterations: 150000, hash: 'SHA-256' },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function bozEnsureMasterKey() {
+  if (bozMasterKey) return bozMasterKey;
+  const pw = prompt('Kart / şifre verilerini şifrelemek ya da çözmek için ANA ŞİFRENİZİ girin.\n\n⚠️ Bu şifreyi unutursanız, şifrelenmiş kart ve şifre kayıtları KURTARILAMAZ. Güvenli bir yerde saklayın.');
+  if (!pw) throw new Error('Ana şifre girilmedi.');
+  bozMasterKey = await bozDeriveKey(pw);
+  return bozMasterKey;
+}
+
+async function bozEncryptField(plain) {
+  if (!plain) return plain;
+  const key = await bozEnsureMasterKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const enc = new TextEncoder();
+  const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, enc.encode(plain));
+  const cipherBytes = new Uint8Array(cipherBuf);
+  const combined = new Uint8Array(iv.length + cipherBytes.length);
+  combined.set(iv, 0);
+  combined.set(cipherBytes, iv.length);
+  return 'ENC1:' + btoa(String.fromCharCode(...combined));
+}
+
+async function bozDecryptField(value) {
+  if (!value || typeof value !== 'string' || !value.startsWith('ENC1:')) return value; // eski/şifresiz veri, dokunma
+  const key = await bozEnsureMasterKey();
+  const raw = atob(value.slice(5));
+  const bytes = new Uint8Array([...raw].map(c => c.charCodeAt(0)));
+  const iv = bytes.slice(0, 12);
+  const cipherBytes = bytes.slice(12);
+  const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherBytes); // yanlış şifrede burada hata fırlatır
+  return new TextDecoder().decode(plainBuf);
+}
+
 // ===== BURAK (SADECE ADMIN'E ÖZEL NOTLAR) =====
 let bozCache = { adresler: [], kartlar: [], sifreler: [], odemeler: [] };
 let bozAktifKategori = 'genel';
@@ -5921,7 +5972,19 @@ async function bozYukle() {
   try {
     const rows = await api('burak_notlar?select=*&order=olusturma.desc');
     const yeni = { adresler: [], kartlar: [], sifreler: [], odemeler: [] };
-    (rows || []).forEach(r => { if (yeni[r.kategori]) yeni[r.kategori].push(r); });
+    for (const r of (rows || [])) {
+      if (!yeni[r.kategori]) continue;
+      if (r.kategori === 'kartlar' && (String(r.kart_no||'').startsWith('ENC1:') || String(r.cvv||'').startsWith('ENC1:'))) {
+        try {
+          r.kart_no = await bozDecryptField(r.kart_no);
+          r.cvv = await bozDecryptField(r.cvv);
+        } catch(e) {
+          r.kart_no = '•••• (ana şifre gerekli/yanlış)';
+          r.cvv = '???';
+        }
+      }
+      yeni[r.kategori].push(r);
+    }
     bozCache = yeni;
   } catch(e) { /* yetkisiz veya giriş öncesi olabilir, sessiz geç */ }
   bozYuklendi = true;
@@ -6530,7 +6593,9 @@ async function bozKartKaydet() {
     bozKartEkleKapat();
     bozKartRenderListe();
     try {
-      await api('burak_notlar?id=eq.' + editId, 'PATCH', { baslik, kart_no, son_kullanma, cvv, son_odeme_tarihi, ekstre_kesim_tarihi, kart_rengi });
+      const encKartNo = await bozEncryptField(kart_no);
+      const encCvv = await bozEncryptField(cvv);
+      await api('burak_notlar?id=eq.' + editId, 'PATCH', { baslik, kart_no: encKartNo, son_kullanma, cvv: encCvv, son_odeme_tarihi, ekstre_kesim_tarihi, kart_rengi });
     } catch(e) {
       Object.assign(item, onceki);
       bozKartRenderListe();
@@ -6545,7 +6610,9 @@ async function bozKartKaydet() {
   bozKartEkleKapat();
   bozKartRenderListe();
   try {
-    await api('burak_notlar', 'POST', { id, kategori: 'kartlar', baslik, icerik: '', kart_no, son_kullanma, cvv, son_odeme_tarihi, ekstre_kesim_tarihi, kart_rengi });
+    const encKartNo = await bozEncryptField(kart_no);
+    const encCvv = await bozEncryptField(cvv);
+    await api('burak_notlar', 'POST', { id, kategori: 'kartlar', baslik, icerik: '', kart_no: encKartNo, son_kullanma, cvv: encCvv, son_odeme_tarihi, ekstre_kesim_tarihi, kart_rengi });
   } catch(e) {
     bozCache.kartlar = bozCache.kartlar.filter(x => x.id !== id);
     bozKartRenderListe();
@@ -6621,6 +6688,12 @@ async function sfpInit() {
 async function sfpYukle() {
   try {
     const data = await api('paylasilan_sifreler?select=*&order=olusturma.desc');
+    for (const r of (data || [])) {
+      if (String(r.sifre||'').startsWith('ENC1:')) {
+        try { r.sifre = await bozDecryptField(r.sifre); }
+        catch(e) { r.sifre = '(ana şifre gerekli/yanlış)'; }
+      }
+    }
     sfpCache = data || [];
     sfpYuklendi = true;
   } catch(e) { sfpCache = []; }
@@ -6755,7 +6828,8 @@ async function sfpKaydet() {
     sfpEkleKapat();
     sfpRenderListe();
     try {
-      await api('paylasilan_sifreler?id=eq.' + editId, 'PATCH', { baslik, kullanici_bilgisi, sifre, icerik, renk, izinli_kullanicilar });
+      const encSifre = await bozEncryptField(sifre);
+      await api('paylasilan_sifreler?id=eq.' + editId, 'PATCH', { baslik, kullanici_bilgisi, sifre: encSifre, icerik, renk, izinli_kullanicilar });
     } catch(e) {
       Object.assign(item, onceki);
       sfpRenderListe();
@@ -6770,7 +6844,8 @@ async function sfpKaydet() {
   sfpEkleKapat();
   sfpRenderListe();
   try {
-    await api('paylasilan_sifreler', 'POST', yeni);
+    const encSifre = await bozEncryptField(sifre);
+    await api('paylasilan_sifreler', 'POST', { ...yeni, sifre: encSifre });
   } catch(e) {
     sfpCache = sfpCache.filter(x => x.id !== id);
     sfpRenderListe();
