@@ -1946,6 +1946,19 @@ function bugunAy(d) {
   const x = d || new Date();
   return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}`;
 }
+function bugunTarihStr(d) {
+  // Aynı UTC kayması gün bazında da yaşanıyor: toISOString().slice(0,10) yerine
+  // HER ZAMAN yerel yıl/ay/gün bileşenlerini kullan (TR saat 00:00-03:00 arası
+  // kayıtların bir önceki güne düşmesini engeller).
+  const x = d || new Date();
+  return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
+}
+// JS'te 0.1+0.2 gibi kayan nokta hataları oluşabiliyor; veritabanına YAZILAN
+// (bir kere hesaplanıp kalıcı olarak saklanan) para/gram değerlerini her zaman
+// bu fonksiyonlarla standart bir hassasiyete yuvarla. Ekranda anlık gösterilen
+// (kaydedilmeyen) değerler zaten .toFixed() ile formatlandığı için etkilenmez.
+function r2(x) { return Math.round((Number(x) || 0) * 100) / 100; }   // TL/USD tutarları
+function r4(x) { return Math.round((Number(x) || 0) * 10000) / 10000; } // has/gram değerleri
 function parseTasGr(notlar) {
   const m = (notlar || '').match(/TAŞ:([\d.]+)/);
   return m ? parseFloat(m[1]) : 0;
@@ -2066,6 +2079,18 @@ async function saveParametre() {
     }
     const nowAy = bugunAy();
     if (ay === nowAy) { aylikParam = { dolar_kuru: kur, altin_fiyati_usd: altin, reklam_usd: reklam }; updateParamBar(ay); }
+    // Platformlar/Grup B/Grup C/Yuppion sayfaları bu ayın kur/altın verisini
+    // önbelleğe alıyor; kaydettikten sonra o önbelleği temizlemezsek eski
+    // (örn. 0) değeri göstermeye devam ederler. Temizleyip taze veri çekmelerini sağla.
+    delete _cache['param:' + ay];
+    const platAyEl = document.getElementById('platAy');
+    if (platAyEl && platAyEl.value === ay) loadPlatformData();
+    const gbAyEl = document.getElementById('gbAy');
+    if (gbAyEl && gbAyEl.value === ay) loadGrupBData();
+    const gcAyEl = document.getElementById('gcAy');
+    if (gcAyEl && gcAyEl.value === ay) loadGrupCData();
+    const ypAyEl = document.getElementById('ypAy');
+    if (ypAyEl && ypAyEl.value === ay) loadYuppionData();
     const msg = document.getElementById('paramMsg');
     msg.style.display = 'inline';
     setTimeout(() => msg.style.display = 'none', 2000);
@@ -3815,7 +3840,7 @@ async function loadRapor() {
   const ay = document.getElementById('raporAy').value;
   const bas = ay+'-01';
   const bit = new Date(ay+'-01'); bit.setMonth(bit.getMonth()+1);
-  const bitStr = bit.toISOString().slice(0,10);
+  const bitStr = bugunTarihStr(bit);
   try {
     const [siparisler, params, platSip, platParam, giderKayitlari] = await Promise.all([
       api(`siparisler?select=*,varyantlar(ayar,urun_tipi,urunler(ad))&tarih=gte.${bas}&tarih=lt.${bitStr}&order=tarih.desc`),
@@ -4381,7 +4406,7 @@ function updatePlatOzet() {
 function openPlatSiparisModal() {
   document.getElementById('platSipId').value = '';
   document.getElementById('platSiparisBaslik').textContent = PLATFORM_LABELS[aktifPlatform] + ' — Yeni Satış';
-  document.getElementById('psTarih').value = new Date().toISOString().slice(0,10);
+  document.getElementById('psTarih').value = bugunTarihStr();
   document.getElementById('psSiparisNo').value = '';
   document.getElementById('psUrun').value = '';
   document.getElementById('psAdet').value = '1';
@@ -4485,17 +4510,17 @@ async function savePlatSiparis() {
 
   const sipData = {
     platform: aktifPlatform, ay, tarih,
-    urun_adi: urun, adet, gram, ayar, milyem, has,
-    ulke, kargo_usd: kargo,
-    maliyet_usd: maliyet,
-    satis_fiyati_usd: satis,
-    komisyon_usd: komisyon,
-    kar_usd: kar,
+    urun_adi: urun, adet, gram, ayar, milyem, has: r4(has),
+    ulke, kargo_usd: r2(kargo),
+    maliyet_usd: r2(maliyet),
+    satis_fiyati_usd: r2(satis),
+    komisyon_usd: r2(komisyon),
+    kar_usd: r2(kar),
     musteri_adi: document.getElementById('psSiparisNo').value || '',
     notlar: notlarWithTas(document.getElementById('psNot').value, parseFloat(document.getElementById('psTasGr').value)||0),
     adres: (aktifPlatform === 'essos_etsy' || aktifPlatform === 'alfred_etsy') ? psAdresFormatla(document.getElementById('psAdres').value.trim(), satis) : '',
     fatura_kur: aktifPlatform === 'essos_etsy' ? (parseFloat(document.getElementById('essosFaturaKur').value)||0) : 0,
-    fatura_tl: aktifPlatform === 'essos_etsy' ? (satis * (parseFloat(document.getElementById('essosFaturaKur').value)||0)) : 0,
+    fatura_tl: aktifPlatform === 'essos_etsy' ? r2(satis * (parseFloat(document.getElementById('essosFaturaKur').value)||0)) : 0,
     fatura_kesildi: editId ? (platSiparisler.find(x=>x.id===editId)?.fatura_kesildi||false) : false
   };
 
@@ -4825,7 +4850,7 @@ async function saveGrupBOdeme() {
   const aciklama = document.getElementById('gbOdemeAciklama').value.trim();
   const ay = document.getElementById('gbAy').value;
   const key = 'odemeB:' + aktifPlatformB + ':' + ay;
-  const yeni = { id: Date.now(), platform: aktifPlatformB, ay, has, aciklama, tarih: new Date().toISOString().slice(0, 10) };
+  const yeni = { id: Date.now(), platform: aktifPlatformB, ay, has, aciklama, tarih: bugunTarihStr() };
   if (!_cache[key]) _cache[key] = [];
   _cache[key].push(yeni);
   closeModal('grupBOdemeModal');
@@ -4903,7 +4928,7 @@ function openGrupBModal(id) {
     document.getElementById('gbTasGr').value = parseTasGr(s.notlar) || 0;
     document.getElementById('gbSiparisNo').value = s.musteri_adi || '';
   } else {
-    document.getElementById('gbTarih').value = new Date().toISOString().slice(0,10);
+    document.getElementById('gbTarih').value = bugunTarihStr();
     document.getElementById('gbUrun').value = '';
     document.getElementById('gbGram').value = '';
     document.getElementById('gbTip').value = 'kolye14';
@@ -4981,7 +5006,7 @@ async function saveGrupBSiparis() {
     gram:             parseFloat(gram),
     ayar:             ayar,
     milyem:           t.satis,
-    has:              satHas,
+    has:              r4(satHas),
     ulke:             '',
     kargo_usd:        0,
     maliyet_usd:      parseFloat((malHas * altin).toFixed(2)),
@@ -5144,7 +5169,7 @@ function openGrupCModal(id) {
     document.getElementById('gcUlke').value   = s.ulke||'ABD';
     document.getElementById('gcTasGr').value = parseTasGr(s.notlar) || 0;
   } else {
-    document.getElementById('gcTarih').value  = new Date().toISOString().slice(0,10);
+    document.getElementById('gcTarih').value  = bugunTarihStr();
     document.getElementById('gcSiparisNo').value = '';
     document.getElementById('gcUrun').value   = '';
     document.getElementById('gcAdet').value   = '1';
@@ -5243,13 +5268,13 @@ async function saveGrupCSiparis() {
   const has    = gram * milyem;
   let data = {
     platform: aktifPlatformC, ay: tarih.slice(0,7), tarih,
-    urun_adi: urun, adet, gram, ayar, milyem, has,
+    urun_adi: urun, adet, gram, ayar, milyem, has: r4(has),
     musteri_adi: document.getElementById('gcSiparisNo').value || '',
     ulke: document.getElementById('gcUlke').value || 'ABD',
     notlar: notlarWithTas('', parseFloat(document.getElementById('gcTasGr').value)||0),
     adres: aktifPlatformC === 'essos_etsy' ? document.getElementById('gcAdres').value.trim() : '',
     fatura_kur: aktifPlatformC === 'essos_etsy' ? (parseFloat(document.getElementById('gcFaturaKur').value)||0) : 0,
-    fatura_tl: aktifPlatformC === 'essos_etsy' ? ((parseFloat(document.getElementById('gcSatisFiyat').value)||0) * (parseFloat(document.getElementById('gcFaturaKur').value)||0)) : 0,
+    fatura_tl: aktifPlatformC === 'essos_etsy' ? r2((parseFloat(document.getElementById('gcSatisFiyat').value)||0) * (parseFloat(document.getElementById('gcFaturaKur').value)||0)) : 0,
     fatura_kesildi: editingGrupCId ? (grupcSiparisler.find(x=>x.id===editingGrupCId)?.fatura_kesildi||false) : false
   };
   const siparisNoGc = document.getElementById('gcSiparisNo').value;
@@ -5264,13 +5289,13 @@ async function saveGrupCSiparis() {
     const mal = has * altinTl;
     const kom_ = satis * kom;
     const kar = satis - mal - kargo - kom_;
-    Object.assign(data, { kargo_try: kargo, satis_try: satis, maliyet_try: mal, komisyon_try: kom_, kar_try: kar, kargo_usd: 0, satis_usd: 0, maliyet_usd: 0, komisyon_usd: 0, kar_usd: 0 });
+    Object.assign(data, { kargo_try: r2(kargo), satis_try: r2(satis), maliyet_try: r2(mal), komisyon_try: r2(kom_), kar_try: r2(kar), kargo_usd: 0, satis_usd: 0, maliyet_usd: 0, komisyon_usd: 0, kar_usd: 0 });
   } else {
     const altin = parseFloat(grupcAylikParam?.altin_fiyati_usd)||0;
     const mal = has * altin;
     const kom_ = satis * kom;
     const kar = satis - mal - kargo - kom_;
-    Object.assign(data, { kargo_usd: kargo, satis_usd: satis, maliyet_usd: mal, komisyon_usd: kom_, kar_usd: kar, kargo_try: 0, satis_try: 0, maliyet_try: 0, komisyon_try: 0, kar_try: 0 });
+    Object.assign(data, { kargo_usd: r2(kargo), satis_usd: r2(satis), maliyet_usd: r2(mal), komisyon_usd: r2(kom_), kar_usd: r2(kar), kargo_try: 0, satis_try: 0, maliyet_try: 0, komisyon_try: 0, kar_try: 0 });
   }
   if (editingGrupCId) {
     await api('platform_siparisler?id=eq.' + editingGrupCId, 'PATCH', data);
@@ -5415,7 +5440,7 @@ function openYuppionModal(id) {
     document.getElementById('ypTasGr').value   = parseTasGr(s.notlar) || 0;
     document.getElementById('ypSiparisNo').value = s.musteri_adi || '';
   } else {
-    document.getElementById('ypTarih').value   = new Date().toISOString().slice(0,10);
+    document.getElementById('ypTarih').value   = bugunTarihStr();
     document.getElementById('ypUrun').value    = '';
     document.getElementById('ypAdet').value    = '1';
     document.getElementById('ypGram').value    = '';
@@ -5487,9 +5512,9 @@ async function saveYuppionSiparis() {
   const maliyet = has * altin;
   const kar = satis - maliyet - kargo;
   const data = {
-    ay: tarih.slice(0,7), tarih, urun_adi: urun, adet, gram, ayar, milyem, has,
-    ulke: document.getElementById('ypUlke').value, kargo_usd: kargo,
-    maliyet_usd: maliyet, satis_usd: satis, kar_usd: kar, altin_fiyati: altin,
+    ay: tarih.slice(0,7), tarih, urun_adi: urun, adet, gram, ayar, milyem, has: r4(has),
+    ulke: document.getElementById('ypUlke').value, kargo_usd: r2(kargo),
+    maliyet_usd: r2(maliyet), satis_usd: r2(satis), kar_usd: r2(kar), altin_fiyati: altin,
     musteri_adi: document.getElementById('ypSiparisNo').value || '',
     notlar: notlarWithTas('', parseFloat(document.getElementById('ypTasGr').value)||0)
   };
@@ -5513,7 +5538,7 @@ async function deleteYuppionSiparis(id) {
 }
 
 function openYuppionOdemeModal() {
-  document.getElementById('ypOdemeTarih').value = new Date().toISOString().slice(0,10);
+  document.getElementById('ypOdemeTarih').value = bugunTarihStr();
   document.getElementById('ypOdemeTutar').value = '';
   document.getElementById('ypOdemeNot').value   = '';
   openModal('yuppionOdemeModal');
@@ -5805,7 +5830,7 @@ async function asHatirlatmaYukle() {
 function asHatirlatmaAc() {
   document.getElementById('asHIsim').value = '';
   document.getElementById('asHAciklama').value = '';
-  document.getElementById('asHTarih').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('asHTarih').value = bugunTarihStr();
   document.querySelector('input[name="asHTekrar"][value="yok"]').checked = true;
   openModal('asHatirlatmaModal');
 }
@@ -5848,7 +5873,7 @@ async function asHatirlatmaOdendi(id) {
   if (h.tekrar === 'hafta') t.setDate(t.getDate() + 7);
   else if (h.tekrar === 'ay') t.setMonth(t.getMonth() + 1);
   else if (h.tekrar === 'yil') t.setFullYear(t.getFullYear() + 1);
-  h.tarih = t.toISOString().slice(0, 10);
+  h.tarih = bugunTarihStr(t);
   asHatirlatmaRender();
   try {
     await api('odeme_hatirlatmalari?id=eq.' + id, 'PATCH', { tarih: h.tarih });
@@ -6145,7 +6170,7 @@ async function bozInit() {
   await loadGorevCache();
   bozGorevRender();
   const bg = new Date();
-  const bugunISO = bg.toISOString().slice(0, 10);
+  const bugunISO = bugunTarihStr(bg);
   const bt = document.getElementById('bozTarih');
   if (bt) bt.textContent = AS_GUNLER[bg.getDay()] + ', ' + bg.getDate() + ' ' + AS_AYLAR[bg.getMonth()] + ' ' + bg.getFullYear();
   const at = document.getElementById('bozAlarmTarih');
@@ -6254,7 +6279,7 @@ function bozAlarmKontrolEt() {
   if (!bozAlarmCache || !bozAlarmCache.length) return;
   const simdi = new Date();
   const hhmm = String(simdi.getHours()).padStart(2, '0') + ':' + String(simdi.getMinutes()).padStart(2, '0');
-  const bugun = simdi.toISOString().slice(0, 10);
+  const bugun = bugunTarihStr(simdi);
   bozAlarmCache.slice().forEach(a => {
     if (a.aktif === false) return;
     const aSaat = (a.saat || '').slice(0, 5);
@@ -6295,7 +6320,7 @@ async function bozAlarmSonrasi(a) {
     if (a.tekrar === 'hafta') t.setDate(t.getDate() + 7);
     else if (a.tekrar === 'ay') t.setMonth(t.getMonth() + 1);
     else if (a.tekrar === 'yil') t.setFullYear(t.getFullYear() + 1);
-    const yeniTarih = t.toISOString().slice(0, 10);
+    const yeniTarih = bugunTarihStr(t);
     a.tarih = yeniTarih;
     bozAlarmRender();
     try { await api('burak_alarmlar?id=eq.' + a.id, 'PATCH', { tarih: yeniTarih }); } catch(e) {}
@@ -6431,7 +6456,7 @@ async function bozHatirlatmaYukle() {
 function bozHOpenModal() {
   document.getElementById('bozHIsim').value = '';
   document.getElementById('bozHAciklama').value = '';
-  document.getElementById('bozHTarih').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('bozHTarih').value = bugunTarihStr();
   document.querySelector('input[name="bozHTekrar"][value="yok"]').checked = true;
   openModal('bozHatirlatmaModal');
 }
@@ -6472,7 +6497,7 @@ async function bozHatirlatmaOdendi(id) {
     if (h.tekrar === 'hafta') t.setDate(t.getDate() + 7);
     else if (h.tekrar === 'ay') t.setMonth(t.getMonth() + 1);
     else if (h.tekrar === 'yil') t.setFullYear(t.getFullYear() + 1);
-    const yeniTarih = t.toISOString().slice(0, 10);
+    const yeniTarih = bugunTarihStr(t);
     const eskiTarih = h.tarih;
     h.tarih = yeniTarih;
     bozHatirlatmaRender();
@@ -7276,7 +7301,7 @@ async function baYukle() {
 }
 function baGetListe() { return baCache; }
 function baInit() {
-  var today = new Date().toISOString().slice(0,10);
+  var today = bugunTarihStr();
   var el = document.getElementById('baYeniTarih'); if (el) el.value = today;
   var altin = parseFloat((document.getElementById('pbAltin')||{}).textContent) || 0;
   var kur = parseFloat((document.getElementById('pbKur')||{}).textContent) || 0;
@@ -7320,7 +7345,7 @@ async function baKaydet() {
   if (!tutar || !kur) { showToast('Tutar ve kur gerekli'); return; }
   var gram = tip==='tl' ? tutar/kur : tutar;
   var tutarTL = tip==='tl' ? tutar : tutar*kur;
-  var tarih = document.getElementById('baYeniTarih').value || new Date().toISOString().slice(0,10);
+  var tarih = document.getElementById('baYeniTarih').value || bugunTarihStr();
   var yeni = { id: Date.now(), tip: baYeniTipi, ad: ad, aciklama: document.getElementById('baYeniAciklama').value.trim(), giris_tipi: tip, tutar_tl: parseFloat(tutarTL.toFixed(2)), kur: kur, gram: parseFloat(gram.toFixed(4)), tarih: tarih, odendi: false };
   baCache.unshift(yeni);
   document.getElementById('baYeniAd').value = ''; document.getElementById('baYeniAciklama').value = '';
