@@ -8284,18 +8284,25 @@ function renderTaksitliGiderler(data) {
       '</div>' +
       '<div style="display:flex;align-items:center;gap:10px;">' +
       '<strong style="font-size:14px;">' + fmtTL(d.tutar) + '</strong>' +
-      '<button class="btn btn-sm btn-danger" onclick="deleteTaksitPlani(\'' + d.taksit_id + '\')" title="Kalan taksitleri iptal et">İptal</button>' +
+      '<button class="btn btn-sm btn-danger" onclick="deleteTaksitPlani(\'' + d.taksit_id + '\',\'' + d.id + '\')" title="Bu ayki satırı sil ve gelecek taksitleri durdur">İptal</button>' +
       '</div></div>';
   }).join('');
 }
 
-async function deleteTaksitPlani(planId) {
-  if (!confirm('Bu taksit planı iptal edilsin mi? Geçmişte oluşmuş taksit kayıtları silinmez, ama bundan sonraki aylar için otomatik taksit oluşturulmaz.')) return;
+async function deleteTaksitPlani(planId, giderId) {
+  if (!confirm('Bu taksit iptal edilsin mi? Bu ayki satır silinir ve bundan sonraki aylar için otomatik taksit oluşturulmaz. Önceki aylarda zaten oluşmuş taksit kayıtları etkilenmez.')) return;
   try {
     await api('gider_taksitler?id=eq.' + planId, 'DELETE');
-    taksitPlanlari = taksitPlanlari.filter(p => String(p.id) !== String(planId));
-    showToast('Taksit planı iptal edildi.');
-  } catch(e) { alert('İptal edilemedi: ' + e.message); }
+    if (giderId) await api('giderler?id=eq.' + giderId, 'DELETE');
+  } catch(e) {
+    alert('İptal edilemedi: ' + e.message);
+    return;
+  }
+  taksitPlanlari = taksitPlanlari.filter(p => String(p.id) !== String(planId));
+  const ay = document.getElementById('giderAy').value;
+  delete giderlerCache['gider:' + ay];
+  showToast('Taksit iptal edildi.');
+  await loadGiderler();
 }
 
 function renderMaasKartlari(data) {
