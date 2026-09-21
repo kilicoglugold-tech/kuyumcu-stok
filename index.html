@@ -7933,25 +7933,34 @@ async function giderKalemleriYukle() {
   giderKalemleriYuklendi = true;
 }
 
-let sabitGiderTipleriCache = null; // null = henüz yüklenmedi
-const SABIT_GIDER_VARSAYILAN = ['Kira','Elektrik','Su','Internet','Muhasebe','Kirtasiye','Sadaka'];
+let sabitGiderTipleriCache = null; // null = henüz yüklenmedi; dolduğunda [{ad, emoji, sira}, ...]
+const SABIT_GIDER_VARSAYILAN = [
+  { ad: 'Kira',       emoji: '🏠' },
+  { ad: 'Elektrik',   emoji: '⚡' },
+  { ad: 'Su',         emoji: '💧' },
+  { ad: 'Internet',   emoji: '🌐' },
+  { ad: 'Muhasebe',   emoji: '📊' },
+  { ad: 'Kirtasiye',  emoji: '📝' },
+  { ad: 'Sadaka',     emoji: '🤲' }
+].map((t, i) => ({ ...t, sira: i + 1 }));
+
 async function sabitGiderTipleriYukle() {
   try {
-    const rows = await api('gider_tipleri?select=*&order=ad.asc');
+    const rows = await api('gider_tipleri?select=*&order=sira.asc.nullslast,ad.asc');
     if (rows && rows.length) {
-      sabitGiderTipleriCache = rows.map(r => r.ad);
+      sabitGiderTipleriCache = rows.map(r => ({ ad: r.ad, emoji: r.emoji || '💰', sira: r.sira || 999 }));
     } else {
       // Tablo tamamen boşsa (ilk kurulum), varsayılanları bir kereliğine
       // kalıcı olarak Supabase'e yaz — aksi halde bunlar sadece ekranda
       // "gösteriliyormuş gibi" durur, isim değiştirme/silme veritabanında
       // hiçbir satırı bulamaz ve sessizce başarısız olur.
       try {
-        await api('gider_tipleri', 'POST', SABIT_GIDER_VARSAYILAN.map((ad, i) => ({ id: Date.now() + i, ad })));
+        await api('gider_tipleri', 'POST', SABIT_GIDER_VARSAYILAN.map((t, i) => ({ id: Date.now() + i, ad: t.ad, emoji: t.emoji, sira: t.sira })));
       } catch(e) {}
-      sabitGiderTipleriCache = SABIT_GIDER_VARSAYILAN.slice();
+      sabitGiderTipleriCache = SABIT_GIDER_VARSAYILAN.map(t => ({ ...t }));
     }
   } catch(e) {
-    sabitGiderTipleriCache = SABIT_GIDER_VARSAYILAN.slice();
+    sabitGiderTipleriCache = SABIT_GIDER_VARSAYILAN.map(t => ({ ...t }));
   }
 }
 
@@ -7964,7 +7973,7 @@ async function migrateLocalGiderAyarlariToSupabase() {
   if (!kalemler.length && !tipler.length) { alert('Bu tarayıcıda taşınacak gider ayarı bulunamadı.'); return; }
   try {
     if (kalemler.length) await api('gider_kalemleri', 'POST', kalemler.map(k => ({ id: String(k.id), ad: k.ad, aciklama: k.aciklama || '' })));
-    if (tipler.length) await api('gider_tipleri', 'POST', tipler.map((ad, i) => ({ id: Date.now() + i, ad })));
+    if (tipler.length) await api('gider_tipleri', 'POST', tipler.map((ad, i) => ({ id: Date.now() + i, ad, emoji: '💰', sira: i + 1 })));
   } catch(e) {
     alert('Taşıma hatası: ' + e.message);
     return;
@@ -8024,7 +8033,7 @@ async function taksitPlanlariYukle() {
 
 async function giderCarryForward(ay, data) {
   const tipler = (sabitGiderTipleriCache && sabitGiderTipleriCache.length) ? sabitGiderTipleriCache : SABIT_GIDER_VARSAYILAN;
-  const sabitAdlari = new Set(tipler);
+  const sabitAdlari = new Set(tipler.map(t => t.ad));
   data.filter(d => d.kategori === 'sabit').forEach(d => sabitAdlari.add(d.ad));
 
   for (const ad of sabitAdlari) {
@@ -8110,9 +8119,9 @@ function renderGiderOzet(data) {
 
 function renderSabitGiderler(data) {
   let tipler = (sabitGiderTipleriCache || SABIT_GIDER_VARSAYILAN).slice();
-  // Supabase'de olup listede olmayan tipleri de ekle
+  // Supabase'de olup listede olmayan tipleri de ekle (sıra sonuna)
   data.filter(d => d.kategori==='sabit').forEach(d => {
-    if (!tipler.includes(d.ad)) tipler.push(d.ad);
+    if (!tipler.some(t => t.ad === d.ad)) tipler.push({ ad: d.ad, emoji: '💰', sira: 999 });
   });
   const el = document.getElementById('sabitGiderKartlari');
   if (!el) return;
@@ -8120,21 +8129,48 @@ function renderSabitGiderler(data) {
     el.innerHTML = '<div style="color:var(--text3);font-size:12px;">Henüz sabit gider yok.</div>';
     return;
   }
-  el.innerHTML = tipler.map(ad => {
+  el.innerHTML = tipler.map((t, idx) => {
+    const ad = t.ad;
     const safeId = 'sabit_' + ad.replace(/[^a-zA-Z0-9]/g, '_');
     const kayit  = data.find(d => d.kategori==='sabit' && d.ad===ad);
     const tutar  = kayit ? parseFloat(kayit.tutar).toLocaleString('tr-TR') : '';
     const kayitId = kayit ? kayit.id : '';
     return '<div style="display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:0.5px solid var(--border);flex-wrap:wrap;">' +
+      '<div style="display:flex;flex-direction:column;line-height:0.7;">' +
+      '<button onclick="moveSabitGiderSira(\'' + ad + '\',-1)" ' + (idx===0?'disabled':'') + ' style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:1px;' + (idx===0?'opacity:0.25;':'') + '">▲</button>' +
+      '<button onclick="moveSabitGiderSira(\'' + ad + '\',1)" ' + (idx===tipler.length-1?'disabled':'') + ' style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;padding:1px;' + (idx===tipler.length-1?'opacity:0.25;':'') + '">▼</button>' +
+      '</div>' +
+      '<span style="font-size:16px;">' + (t.emoji || '💰') + '</span>' +
       '<div style="min-width:90px;font-weight:600;font-size:13px;">' + ad + '</div>' +
       '<span style="background:var(--bg2);color:var(--text3);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;">Sabit</span>' +
       '<input type="text" inputmode="decimal" id="' + safeId + '" data-gider-id="' + kayitId + '" class="form-control" placeholder="0" value="' + tutar + '" oninput="formatParaInput(this)" style="width:100px;padding:5px 8px;font-size:12px;" onkeydown="if(event.key===\'Enter\'){event.preventDefault();saveSabitGider(\'' + ad + '\')}">' +
       '<button class="btn btn-sm" onclick="saveSabitGider(\'' + ad + '\')" style="font-size:11px;padding:4px 10px;">Kaydet ↵</button>' +
       '<span id="' + safeId + '_ok" style="color:green;font-size:14px;display:none;">✓</span>' +
-      '<button onclick="renameSabitGiderTipi(\'' + ad + '\')" title="Adını düzenle" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;line-height:1;margin-left:auto;">✏️</button>' +
+      '<button onclick="editSabitGiderTipi(\'' + ad + '\')" title="Ad / emoji düzenle" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;line-height:1;margin-left:auto;">✏️</button>' +
       '<button onclick="deleteSabitGiderTipi(\'' + ad + '\',\'' + kayitId + '\')" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;">×</button>' +
       '</div>';
   }).join('');
+}
+
+async function moveSabitGiderSira(ad, yon) {
+  const liste = sabitGiderTipleriCache;
+  if (!liste) return;
+  const idx = liste.findIndex(t => t.ad === ad);
+  const hedef = idx + yon;
+  if (idx === -1 || hedef < 0 || hedef >= liste.length) return;
+  const a = liste[idx], b = liste[hedef];
+  const geciciSira = a.sira;
+  a.sira = b.sira;
+  b.sira = geciciSira;
+  liste.sort((x, y) => (x.sira||999) - (y.sira||999));
+  const ay = document.getElementById('giderAy').value;
+  renderSabitGiderler(giderlerCache['gider:' + ay] || []);
+  try {
+    await api('gider_tipleri?ad=eq.' + encodeURIComponent(a.ad), 'PATCH', { sira: a.sira });
+    await api('gider_tipleri?ad=eq.' + encodeURIComponent(b.ad), 'PATCH', { sira: b.sira });
+  } catch(e) {
+    showToast('Sıra kaydedilemedi: ' + e.message);
+  }
 }
 
 function openGiderRaporModal() {
@@ -8154,7 +8190,7 @@ function grKategoriDegisti() {
   const isimSel = document.getElementById('grIsim');
   let secenekler = [];
   if (kategori === 'sabit') {
-    secenekler = (sabitGiderTipleriCache || SABIT_GIDER_VARSAYILAN).map(ad => ({ ad }));
+    secenekler = (sabitGiderTipleriCache || SABIT_GIDER_VARSAYILAN).map(t => ({ ad: t.ad }));
   } else if (kategori === 'maas') {
     secenekler = calisanlar.map(c => ({ ad: c.ad }));
   } else {
@@ -8193,35 +8229,39 @@ async function giderRaporGoster() {
   }
 }
 
-async function renameSabitGiderTipi(eskiAd) {
-  const girilen = prompt('Yeni isim:', eskiAd);
-  if (girilen === null) return;
-  const yeniAd = girilen.trim();
-  if (!yeniAd || yeniAd === eskiAd) return;
-  if ((sabitGiderTipleriCache || []).some(t => t.toLowerCase() === yeniAd.toLowerCase())) {
+async function editSabitGiderTipi(eskiAd) {
+  const t = (sabitGiderTipleriCache || []).find(x => x.ad === eskiAd);
+  const girilenAd = prompt('İsim:', eskiAd);
+  if (girilenAd === null) return;
+  const yeniAd = girilenAd.trim() || eskiAd;
+  const girilenEmoji = prompt('Emoji (örn: 🏠 ⚡ 💧 🌐 📊 📝 🤲):', (t && t.emoji) || '💰');
+  const yeniEmoji = (girilenEmoji === null ? (t && t.emoji) : girilenEmoji.trim()) || '💰';
+  if (yeniAd === eskiAd && yeniEmoji === (t && t.emoji)) return;
+  if (yeniAd !== eskiAd && (sabitGiderTipleriCache || []).some(x => x.ad.toLowerCase() === yeniAd.toLowerCase() && x.ad !== eskiAd)) {
     alert('Bu isimde bir sabit gider zaten var!');
     return;
   }
   try {
     const mevcut = await api('gider_tipleri?ad=eq.' + encodeURIComponent(eskiAd) + '&select=id');
     if (mevcut && mevcut.length) {
-      await api('gider_tipleri?ad=eq.' + encodeURIComponent(eskiAd), 'PATCH', { ad: yeniAd });
+      await api('gider_tipleri?ad=eq.' + encodeURIComponent(eskiAd), 'PATCH', { ad: yeniAd, emoji: yeniEmoji });
     } else {
-      await api('gider_tipleri', 'POST', { id: Date.now(), ad: yeniAd });
+      await api('gider_tipleri', 'POST', { id: Date.now(), ad: yeniAd, emoji: yeniEmoji, sira: (t && t.sira) || 999 });
     }
-    await api('giderler?kategori=eq.sabit&ad=eq.' + encodeURIComponent(eskiAd), 'PATCH', { ad: yeniAd });
+    if (yeniAd !== eskiAd) {
+      await api('giderler?kategori=eq.sabit&ad=eq.' + encodeURIComponent(eskiAd), 'PATCH', { ad: yeniAd });
+    }
   } catch(e) {
     alert('Güncellenemedi: ' + e.message);
     return;
   }
-  if (sabitGiderTipleriCache) {
-    const idx = sabitGiderTipleriCache.indexOf(eskiAd);
-    if (idx !== -1) sabitGiderTipleriCache[idx] = yeniAd;
+  if (t) { t.ad = yeniAd; t.emoji = yeniEmoji; }
+  if (yeniAd !== eskiAd) {
+    Object.keys(giderlerCache).forEach(k => {
+      if (!k.startsWith('gider:')) return;
+      (giderlerCache[k] || []).forEach(d => { if (d.kategori === 'sabit' && d.ad === eskiAd) d.ad = yeniAd; });
+    });
   }
-  Object.keys(giderlerCache).forEach(k => {
-    if (!k.startsWith('gider:')) return;
-    (giderlerCache[k] || []).forEach(d => { if (d.kategori === 'sabit' && d.ad === eskiAd) d.ad = yeniAd; });
-  });
   loadGiderler();
 }
 
@@ -8712,6 +8752,7 @@ async function saveTaksitliGider() {
 
 function openSabitGiderEkleModal() {
   document.getElementById('sgeAd').value = '';
+  document.getElementById('sgeEmoji').value = '';
   openModal('sabitGiderEkleModal');
   setTimeout(() => document.getElementById('sgeAd').focus(), 100);
 }
@@ -8720,16 +8761,18 @@ async function saveSabitGiderEkle() {
   const ad = document.getElementById('sgeAd').value.trim();
   if (!ad) { alert('Gider adı zorunludur!'); document.getElementById('sgeAd').focus(); return; }
   const tipler = sabitGiderTipleriCache || [];
-  if (tipler.find(t => t.toLowerCase() === ad.toLowerCase())) { alert('Bu gider zaten mevcut!'); return; }
-  const yeni = { id: Date.now(), ad };
-  tipler.push(ad);
+  if (tipler.find(t => t.ad.toLowerCase() === ad.toLowerCase())) { alert('Bu gider zaten mevcut!'); return; }
+  const emoji = document.getElementById('sgeEmoji').value.trim() || '💰';
+  const sira = tipler.reduce((m, t) => Math.max(m, t.sira || 0), 0) + 1;
+  const yeni = { id: Date.now(), ad, emoji, sira };
+  tipler.push({ ad, emoji, sira });
   sabitGiderTipleriCache = tipler;
   closeModal('sabitGiderEkleModal');
   loadGiderler();
   try {
     await api('gider_tipleri', 'POST', yeni);
   } catch(e) {
-    sabitGiderTipleriCache = sabitGiderTipleriCache.filter(t => t !== ad);
+    sabitGiderTipleriCache = sabitGiderTipleriCache.filter(t => t.ad !== ad);
     loadGiderler();
     alert('Kaydedilemedi: ' + e.message);
   }
@@ -8742,7 +8785,7 @@ async function deleteSabitGiderTipi(ad, kayitId) {
     const ay = document.getElementById('giderAy').value;
     delete giderlerCache['gider:' + ay];
   }
-  sabitGiderTipleriCache = (sabitGiderTipleriCache || []).filter(t => t !== ad);
+  sabitGiderTipleriCache = (sabitGiderTipleriCache || []).filter(t => t.ad !== ad);
   try {
     await api('gider_tipleri?ad=eq.' + encodeURIComponent(ad), 'DELETE');
   } catch(e) {}
@@ -8868,6 +8911,10 @@ async function deleteGider(id) {
       <div class="form-group">
         <label class="form-label">Gider Adı *</label>
         <input type="text" class="form-control" id="sgeAd" placeholder="Örn: Sigorta, Kira..." onkeydown="if(event.key==='Enter'){event.preventDefault();saveSabitGiderEkle()}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Emoji (isteğe bağlı)</label>
+        <input type="text" class="form-control" id="sgeEmoji" placeholder="Örn: 🏠" maxlength="4" onkeydown="if(event.key==='Enter'){event.preventDefault();saveSabitGiderEkle()}">
       </div>
     </div>
     <div class="modal-footer">
