@@ -1096,12 +1096,16 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <!-- ÖZET KUTULAR -->
   <div style="display:flex;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;align-items:stretch;">
     <div class="metric-card" style="flex:1;min-width:130px;">
+      <div class="metric-label">MAAŞLAR</div>
+      <div class="metric-value" id="ozMaas" style="font-size:18px;">—</div>
+    </div>
+    <div class="metric-card" style="flex:1;min-width:130px;">
       <div class="metric-label">SABİT GİDERLER</div>
       <div class="metric-value" id="ozSabit" style="font-size:18px;">—</div>
     </div>
     <div class="metric-card" style="flex:1;min-width:130px;">
-      <div class="metric-label">MAAŞLAR</div>
-      <div class="metric-value" id="ozMaas" style="font-size:18px;">—</div>
+      <div class="metric-label">TAKSİTLİ GİDERLER</div>
+      <div class="metric-value" id="ozTaksit" style="font-size:18px;">—</div>
     </div>
     <div class="metric-card" style="flex:1;min-width:130px;">
       <div class="metric-label">DEĞİŞKEN GİDERLER</div>
@@ -1113,14 +1117,6 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     </div>
   </div>
 
-  <!-- SABİT GİDERLER -->
-  <div class="card" style="margin-bottom:1rem;padding:1.25rem 1.5rem;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-      <div class="section-title" style="margin-bottom:0;">SABİT GİDERLER</div>
-      <button class="btn btn-sm btn-primary" onclick="openSabitGiderEkleModal()">+ Sabit Gider Ekle</button>
-    </div>
-    <div id="sabitGiderKartlari" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
-  </div>
   <!-- MAAŞLAR -->
   <div class="card" style="margin-bottom:1rem;padding:1.25rem 1.5rem;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
@@ -1130,24 +1126,61 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div id="maasKartlari" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
   </div>
 
-  <!-- DEĞİŞKEN GİDERLER -->
-  <div class="card" style="margin-bottom:1rem;padding:1.25rem 1.5rem;">
+  <!-- SABİT / TAKSİTLİ / DEĞİŞKEN GİDERLER — yan yana -->
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-start;">
+
+  <!-- SABİT GİDERLER -->
+  <div class="card" style="margin-bottom:1rem;padding:1.25rem 1.5rem;flex:1;min-width:320px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div class="section-title" style="margin-bottom:0;">SABİT GİDERLER</div>
+      <button class="btn btn-sm btn-primary" onclick="openSabitGiderEkleModal()">+ Sabit Gider Ekle</button>
+    </div>
+    <div id="sabitGiderKartlari"></div>
+  </div>
+
+  <!-- TAKSİTLİ GİDERLER -->
+  <div class="card" style="margin-bottom:1rem;padding:1.25rem 1.5rem;flex:1;min-width:320px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+      <div class="section-title" style="margin-bottom:0;">TAKSİTLİ GİDERLER</div>
+    </div>
+    <div id="taksitliGiderListe"><div style="color:var(--text3);font-size:12px;padding:4px 0;">Bu ay aktif taksit yok.</div></div>
+  </div>
+
+  <!-- DEĞİŞKEN / TEK SEFERLİK GİDERLER -->
+  <div class="card" style="margin-bottom:1rem;padding:1.25rem 1.5rem;flex:1;min-width:320px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
       <div class="section-title" style="margin-bottom:0;">DEĞİŞKEN GİDERLER</div>
       <button class="btn btn-sm" onclick="openGiderKalemiModal()" style="border:1px solid var(--border);font-size:12px;">⚙ Kalem Ekle</button>
     </div>
     <div style="margin-bottom:10px;">
-      <input type="text" id="giderKalemiAra" class="form-control" placeholder="Kalem ara veya seç..." style="max-width:320px;" oninput="filterGiderKalemleri(this.value)">
+      <input type="text" id="giderKalemiAra" class="form-control" placeholder="Kalem ara (isim veya kod, örn. 8) veya seç..." oninput="filterGiderKalemleri(this.value)">
     </div>
     <div id="giderKalemiSonuclar" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;"></div>
-    <div id="giderKalemiSeciliForm" style="display:none;background:var(--bg2);border-radius:8px;padding:12px;margin-bottom:12px;gap:8px;flex-wrap:wrap;align-items:center;">
-      <strong id="giderKalemiSeciliAd" style="min-width:80px;"></strong>
-      <input type="text" id="giderDegiskenAciklama" class="form-control" placeholder="Açıklama (isteğe bağlı)" style="flex:1;min-width:140px;">
-      <input type="text" inputmode="decimal" id="giderDegiskenTutar" class="form-control" placeholder="0" style="max-width:120px;" oninput="formatParaInput(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();addDegiskenGider()}">
-      <button class="btn btn-primary btn-sm" onclick="addDegiskenGider()">Ekle</button>
-      <button class="btn btn-sm" onclick="document.getElementById('giderKalemiSeciliForm').style.display='none';document.getElementById('giderKalemiAra').value='';filterGiderKalemleri('')">İptal</button>
+    <div id="giderKalemiSeciliForm" style="display:none;background:var(--bg2);border-radius:8px;padding:14px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong id="giderKalemiSeciliAd" style="font-size:14px;"></strong>
+        <button class="btn btn-sm" onclick="document.getElementById('giderKalemiSeciliForm').style.display='none';document.getElementById('giderKalemiAra').value='';filterGiderKalemleri('')">İptal</button>
+      </div>
+      <div id="giderKalemiGecmisOzet" style="font-size:12px;color:var(--text3);margin-bottom:10px;"></div>
+      <div style="display:flex;gap:16px;margin-bottom:10px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;"><input type="radio" name="kalemOdemeTipi" value="tek" checked onchange="kalemOdemeTipiDegisti()"> Tek Seferlik</label>
+        <label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;"><input type="radio" name="kalemOdemeTipi" value="taksit" onchange="kalemOdemeTipiDegisti()"> Taksitli</label>
+      </div>
+      <input type="text" id="giderDegiskenAciklama" class="form-control" placeholder="Alt açıklama (örn: Lazer makinası) — isteğe bağlı" style="margin-bottom:8px;">
+      <div id="kalemTekSeferlikAlan" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="text" inputmode="decimal" id="giderDegiskenTutar" class="form-control" placeholder="Tutar (₺)" style="max-width:160px;" oninput="formatParaInput(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();saveKalemGideri()}">
+        <button class="btn btn-primary btn-sm" onclick="saveKalemGideri()">Ekle</button>
+      </div>
+      <div id="kalemTaksitliAlan" style="display:none;flex-wrap:wrap;gap:8px;align-items:center;">
+        <input type="number" id="giderTaksitSayisi" class="form-control" placeholder="Taksit sayısı" min="2" style="max-width:120px;">
+        <input type="text" inputmode="decimal" id="giderTaksitTutari" class="form-control" placeholder="Taksit başı tutar (₺)" style="max-width:180px;" oninput="formatParaInput(this)">
+        <span style="font-size:12px;color:var(--text3);">Başlangıç: bu ay (<span id="giderTaksitBaslangicAy"></span>)</span>
+        <button class="btn btn-primary btn-sm" onclick="saveKalemGideri()">Taksit Planını Başlat</button>
+      </div>
     </div>
     <div id="degiskenGiderListe"><div style="color:var(--text3);font-size:12px;padding:4px 0;">Bu ay değişken gider yok.</div></div>
+  </div>
+
   </div>
 
 </div>
@@ -7893,7 +7926,7 @@ let giderKalemleri = [];
 let giderKalemleriYuklendi = false;
 async function giderKalemleriYukle() {
   try {
-    const rows = await api('gider_kalemleri?select=*&order=ad.asc');
+    const rows = await api('gider_kalemleri?select=*&order=kod.asc');
     giderKalemleri = rows || [];
   } catch(e) { giderKalemleri = []; }
   giderKalemleriYuklendi = true;
@@ -7960,6 +7993,23 @@ let giderlerCache = {};
 // olarak Supabase'e yazılır) — Burak değiştirene kadar aynı rakam her ay
 // kendiliğinden devam eder. Değişken giderler/avanslar bu mantığın dışında,
 // onlar hâlâ her ay manuel/tek seferlik girilir.
+function ayFarki(ay1, ay2) {
+  // 'YYYY-MM' formatında iki ay arasındaki fark (ay2 - ay1), ay olarak.
+  const [y1, m1] = ay1.split('-').map(Number);
+  const [y2, m2] = ay2.split('-').map(Number);
+  return (y2 - y1) * 12 + (m2 - m1);
+}
+
+let taksitPlanlari = [];
+let taksitPlanlariYuklendi = false;
+async function taksitPlanlariYukle() {
+  try {
+    const rows = await api('gider_taksitler?select=*&order=baslangic_ay.desc');
+    taksitPlanlari = rows || [];
+  } catch(e) { taksitPlanlari = []; }
+  taksitPlanlariYuklendi = true;
+}
+
 async function giderCarryForward(ay, data) {
   const tipler = (sabitGiderTipleriCache && sabitGiderTipleriCache.length) ? sabitGiderTipleriCache : SABIT_GIDER_VARSAYILAN;
   const sabitAdlari = new Set(tipler);
@@ -7987,12 +8037,31 @@ async function giderCarryForward(ay, data) {
       }
     } catch(e) {}
   }
+
+  // Taksitli giderler: aktif plan varsa ve bu ay için henüz taksit satırı
+  // oluşturulmamışsa, otomatik olarak o ayın taksitini oluştur.
+  if (!taksitPlanlariYuklendi) await taksitPlanlariYukle();
+  for (const plan of taksitPlanlari) {
+    const fark = ayFarki(plan.baslangic_ay, ay);
+    if (fark < 0 || fark >= plan.taksit_sayisi) continue; // henüz başlamamış ya da bitmiş
+    const taksitNo = fark + 1;
+    if (data.find(d => d.kategori === 'taksit' && d.taksit_id === plan.id)) continue;
+    try {
+      const r = await api('giderler', 'POST', {
+        ay, kategori: 'taksit', ad: plan.kalem_ad, kalem_kod: plan.kalem_kod,
+        aciklama: (plan.aciklama || '') + ' (' + Number(plan.taksit_tutari).toLocaleString('tr-TR') + ' x ' + plan.taksit_sayisi + ')',
+        tutar: plan.taksit_tutari, para_birimi: 'TL', taksit_id: plan.id, taksit_no: taksitNo
+      });
+      if (r && r[0]) data.push(r[0]);
+    } catch(e) {}
+  }
 }
 
 async function loadGiderler() {
   if (!calisanlarYuklendi) await loadCalisanlarCache();
   if (!giderKalemleriYuklendi) await giderKalemleriYukle();
   if (sabitGiderTipleriCache === null) await sabitGiderTipleriYukle();
+  if (!taksitPlanlariYuklendi) await taksitPlanlariYukle();
   const ay = document.getElementById('giderAy').value;
   if (!ay) return;
   const cacheKey = 'gider:' + ay;
@@ -8005,8 +8074,9 @@ async function loadGiderler() {
   }
   const data = giderlerCache[cacheKey];
   renderGiderOzet(data);
-  renderSabitGiderler(data);
   renderMaasKartlari(data);
+  renderSabitGiderler(data);
+  renderTaksitliGiderler(data);
   renderDegiskenListe(data);
   filterGiderKalemleri(document.getElementById('giderKalemiAra') ? document.getElementById('giderKalemiAra').value : '');
 }
@@ -8016,10 +8086,12 @@ function fmtTL(v) { return Number(v||0).toLocaleString('tr-TR',{minimumFractionD
 function renderGiderOzet(data) {
   const sabit    = data.filter(d => d.kategori==='sabit').reduce((s,d) => s+(parseFloat(d.tutar)||0), 0);
   const maas     = calisanlar.reduce((s,c) => { const k = data.find(d => d.kategori==='maas' && d.ad===c.ad); return s + (k ? (parseFloat(k.tutar)||0) : 0); }, 0);
+  const taksit   = data.filter(d => d.kategori==='taksit').reduce((s,d) => s+(parseFloat(d.tutar)||0), 0);
   const degisken = data.filter(d => d.kategori==='degisken').reduce((s,d) => s+(parseFloat(d.tutar)||0), 0);
-  const toplam   = sabit + maas + degisken;
+  const toplam   = sabit + maas + taksit + degisken;
   document.getElementById('ozSabit').textContent    = fmtTL(sabit);
   document.getElementById('ozMaas').textContent     = fmtTL(maas);
+  document.getElementById('ozTaksit').textContent   = fmtTL(taksit);
   document.getElementById('ozDegisken').textContent = fmtTL(degisken);
   document.getElementById('ozToplam').textContent   = fmtTL(toplam);
 }
@@ -8041,17 +8113,48 @@ function renderSabitGiderler(data) {
     const kayit  = data.find(d => d.kategori==='sabit' && d.ad===ad);
     const tutar  = kayit ? parseFloat(kayit.tutar).toLocaleString('tr-TR') : '';
     const kayitId = kayit ? kayit.id : '';
-    return '<div style="background:var(--bg2);border-radius:10px;padding:12px 14px;flex:1;min-width:120px;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-      '<div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;">' + ad + '</div>' +
-      '<button onclick="deleteSabitGiderTipi(\'' + ad + '\',\'' + kayitId + '\')" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;line-height:1;padding:0 0 0 4px;">×</button>' +
-      '</div>' +
-      '<input type="text" inputmode="decimal" id="' + safeId + '" data-gider-id="' + kayitId + '" class="form-control" placeholder="0" value="' + tutar + '" oninput="formatParaInput(this)" style="margin-bottom:6px;" onkeydown="if(event.key===\'Enter\'){event.preventDefault();saveSabitGider(\'' + ad + '\')}">' +
-      '<div style="display:flex;align-items:center;gap:4px;">' +
-      '<button class="btn btn-sm btn-primary" onclick="saveSabitGider(\'' + ad + '\')" style="flex:1;font-size:11px;">Kaydet ↵</button>' +
+    return '<div style="display:flex;align-items:center;gap:8px;padding:9px 4px;border-bottom:0.5px solid var(--border);flex-wrap:wrap;">' +
+      '<div style="min-width:90px;font-weight:600;font-size:13px;">' + ad + '</div>' +
+      '<span style="background:var(--bg2);color:var(--text3);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;">Sabit</span>' +
+      '<input type="text" inputmode="decimal" id="' + safeId + '" data-gider-id="' + kayitId + '" class="form-control" placeholder="0" value="' + tutar + '" oninput="formatParaInput(this)" style="width:100px;padding:5px 8px;font-size:12px;" onkeydown="if(event.key===\'Enter\'){event.preventDefault();saveSabitGider(\'' + ad + '\')}">' +
+      '<button class="btn btn-sm" onclick="saveSabitGider(\'' + ad + '\')" style="font-size:11px;padding:4px 10px;">Kaydet ↵</button>' +
       '<span id="' + safeId + '_ok" style="color:green;font-size:14px;display:none;">✓</span>' +
+      '<button onclick="deleteSabitGiderTipi(\'' + ad + '\',\'' + kayitId + '\')" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;line-height:1;margin-left:auto;">×</button>' +
+      '</div>';
+  }).join('');
+}
+
+function renderTaksitliGiderler(data) {
+  const el = document.getElementById('taksitliGiderListe');
+  if (!el) return;
+  const liste = data.filter(d => d.kategori === 'taksit');
+  if (!liste.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:4px 0;">Bu ay aktif taksit yok.</div>';
+    return;
+  }
+  el.innerHTML = liste.map(d => {
+    const plan = taksitPlanlari.find(p => String(p.id) === String(d.taksit_id));
+    const toplamTaksit = plan ? plan.taksit_sayisi : '?';
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 4px;border-bottom:0.5px solid var(--border);flex-wrap:wrap;">' +
+      '<div>' +
+      '<span style="font-weight:600;font-size:13px;">' + d.ad + '</span>' +
+      '<span style="background:var(--gold-light);color:var(--gold-dark);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:8px;">Taksit ' + (d.taksit_no||1) + '/' + toplamTaksit + '</span>' +
+      (d.aciklama ? '<div style="color:var(--text3);font-size:11px;margin-top:2px;">' + d.aciklama + '</div>' : '') +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:10px;">' +
+      '<strong style="font-size:14px;">' + fmtTL(d.tutar) + '</strong>' +
+      '<button class="btn btn-sm btn-danger" onclick="deleteTaksitPlani(\'' + d.taksit_id + '\')" title="Kalan taksitleri iptal et">İptal</button>' +
       '</div></div>';
   }).join('');
+}
+
+async function deleteTaksitPlani(planId) {
+  if (!confirm('Bu taksit planı iptal edilsin mi? Geçmişte oluşmuş taksit kayıtları silinmez, ama bundan sonraki aylar için otomatik taksit oluşturulmaz.')) return;
+  try {
+    await api('gider_taksitler?id=eq.' + planId, 'DELETE');
+    taksitPlanlari = taksitPlanlari.filter(p => String(p.id) !== String(planId));
+    showToast('Taksit planı iptal edildi.');
+  } catch(e) { alert('İptal edilemedi: ' + e.message); }
 }
 
 function renderMaasKartlari(data) {
@@ -8361,7 +8464,7 @@ function renderGiderKalemiYonetim() {
   if (!giderKalemleri.length) { el.innerHTML = '<div style="color:var(--text3);font-size:12px;">Henüz kalem yok.</div>'; return; }
   el.innerHTML = giderKalemleri.map(k =>
     '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--border);">' +
-    '<div><strong style="font-size:13px;">' + k.ad + '</strong>' + (k.aciklama ? ' <span style="color:var(--text3);font-size:11px;">— ' + k.aciklama + '</span>' : '') + '</div>' +
+    '<div><strong style="font-size:13px;">' + (k.kod ? k.kod + ' — ' : '') + k.ad + '</strong>' + (k.aciklama ? ' <span style="color:var(--text3);font-size:11px;">— ' + k.aciklama + '</span>' : '') + '</div>' +
     '<button class="btn btn-sm btn-danger" onclick="deleteGiderKalemi(\'' + k.id + '\')">Sil</button></div>'
   ).join('');
 }
@@ -8371,7 +8474,8 @@ async function saveGiderKalemi() {
   const aciklama = document.getElementById('gkAciklama').value.trim();
   if (!ad) { alert('Kalem adı zorunludur!'); document.getElementById('gkAd').focus(); return; }
   if (giderKalemleri.find(k => k.ad.toLowerCase() === ad.toLowerCase())) { alert('Bu kalem zaten mevcut!'); return; }
-  const yeni = { id: String(Date.now()), ad, aciklama };
+  const sonrakiKod = giderKalemleri.reduce((m, k) => Math.max(m, k.kod || 0), 0) + 1;
+  const yeni = { id: String(Date.now()), kod: sonrakiKod, ad, aciklama };
   giderKalemleri.push(yeni);
   document.getElementById('gkAd').value = '';
   document.getElementById('gkAciklama').value = '';
@@ -8405,7 +8509,8 @@ async function deleteGiderKalemi(id) {
 function filterGiderKalemleri(q) {
   const wrap = document.getElementById('giderKalemiSonuclar');
   if (!wrap) return;
-  const filtered = q ? giderKalemleri.filter(k => k.ad.toLowerCase().includes(q.toLowerCase())) : giderKalemleri;
+  const ql = (q || '').toLowerCase();
+  const filtered = q ? giderKalemleri.filter(k => k.ad.toLowerCase().includes(ql) || String(k.kod||'').includes(ql)) : giderKalemleri;
   if (!filtered.length) {
     wrap.innerHTML = giderKalemleri.length
       ? '<div style="color:var(--text3);font-size:12px;padding:4px;">Kalem bulunamadı.</div>'
@@ -8414,18 +8519,55 @@ function filterGiderKalemleri(q) {
   }
   wrap.innerHTML = filtered.map(k =>
     '<button style="padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);cursor:pointer;font-size:12px;font-family:DM Sans,sans-serif;" ' +
-    'onclick="selectGiderKalemi(\'' + k.id + '\')">' + k.ad + '</button>'
+    'onclick="selectGiderKalemi(\'' + k.id + '\')">' + (k.kod ? k.kod + ' — ' : '') + k.ad + '</button>'
   ).join('');
 }
 
-function selectGiderKalemi(id) {
+function kalemOdemeTipiDegisti() {
+  const tip = document.querySelector('input[name="kalemOdemeTipi"]:checked').value;
+  document.getElementById('kalemTekSeferlikAlan').style.display = tip === 'tek' ? 'flex' : 'none';
+  document.getElementById('kalemTaksitliAlan').style.display = tip === 'taksit' ? 'flex' : 'none';
+}
+
+async function selectGiderKalemi(id) {
   secilenGiderKalem = giderKalemleri.find(k => k.id === id);
   if (!secilenGiderKalem) return;
-  document.getElementById('giderKalemiSeciliAd').textContent = secilenGiderKalem.ad;
+  document.getElementById('giderKalemiSeciliAd').textContent = (secilenGiderKalem.kod ? secilenGiderKalem.kod + ' — ' : '') + secilenGiderKalem.ad;
   document.getElementById('giderDegiskenAciklama').value = '';
   document.getElementById('giderDegiskenTutar').value = '';
-  document.getElementById('giderKalemiSeciliForm').style.display = 'flex';
+  document.getElementById('giderTaksitSayisi').value = '';
+  document.getElementById('giderTaksitTutari').value = '';
+  document.querySelector('input[name="kalemOdemeTipi"][value="tek"]').checked = true;
+  kalemOdemeTipiDegisti();
+  const ay = document.getElementById('giderAy').value;
+  document.getElementById('giderTaksitBaslangicAy').textContent = ay;
+  document.getElementById('giderKalemiSeciliForm').style.display = 'block';
+  document.getElementById('giderKalemiGecmisOzet').textContent = 'Geçmiş yükleniyor...';
   setTimeout(() => document.getElementById('giderDegiskenTutar').focus(), 50);
+  try {
+    const gecmis = await api('giderler?ad=eq.' + encodeURIComponent(secilenGiderKalem.ad) + '&kategori=in.(degisken,taksit)&order=ay.desc');
+    const toplam = (gecmis || []).reduce((s, g) => s + (parseFloat(g.tutar) || 0), 0);
+    const el = document.getElementById('giderKalemiGecmisOzet');
+    if (!gecmis || !gecmis.length) { el.textContent = 'Bu kalemde daha önce hiç ödeme yapılmamış.'; return; }
+    el.innerHTML = '📊 Bugüne kadar bu kalemde toplam <strong>' + fmtTL(toplam) + '</strong> ödendi (' + gecmis.length + ' kayıt). ' +
+      '<button onclick="toggleKalemGecmisDetay()" style="background:none;border:none;color:var(--gold-dark);text-decoration:underline;cursor:pointer;font-size:12px;padding:0;">Detayları göster</button>' +
+      '<div id="kalemGecmisDetay" style="display:none;margin-top:8px;max-height:160px;overflow-y:auto;">' +
+      gecmis.map(g => '<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:0.5px solid var(--border);"><span>' + g.ay + (g.aciklama ? ' — ' + g.aciklama : '') + (g.taksit_no ? ' (Taksit ' + g.taksit_no + ')' : '') + '</span><span style="font-weight:600;">' + fmtTL(g.tutar) + '</span></div>').join('') +
+      '</div>';
+  } catch(e) {
+    document.getElementById('giderKalemiGecmisOzet').textContent = '';
+  }
+}
+
+function toggleKalemGecmisDetay() {
+  const el = document.getElementById('kalemGecmisDetay');
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+async function saveKalemGideri() {
+  const tip = document.querySelector('input[name="kalemOdemeTipi"]:checked').value;
+  if (tip === 'tek') { await addDegiskenGider(); }
+  else { await saveTaksitliGider(); }
 }
 
 async function addDegiskenGider() {
@@ -8435,7 +8577,29 @@ async function addDegiskenGider() {
   const aciklama = document.getElementById('giderDegiskenAciklama').value.trim();
   if (!tutar) { alert('Tutar giriniz!'); document.getElementById('giderDegiskenTutar').focus(); return; }
   try {
-    await api('giderler', 'POST', { ay, kategori: 'degisken', ad: secilenGiderKalem.ad, aciklama, tutar, para_birimi: 'TL' });
+    await api('giderler', 'POST', { ay, kategori: 'degisken', ad: secilenGiderKalem.ad, kalem_kod: secilenGiderKalem.kod || null, aciklama, tutar, para_birimi: 'TL' });
+    delete giderlerCache['gider:' + ay];
+    document.getElementById('giderKalemiSeciliForm').style.display = 'none';
+    document.getElementById('giderKalemiAra').value = '';
+    secilenGiderKalem = null;
+    await loadGiderler();
+  } catch(e) { alert('Kayıt hatası: ' + e.message); }
+}
+
+async function saveTaksitliGider() {
+  if (!secilenGiderKalem) { alert('Önce bir kalem seçin!'); return; }
+  const ay = document.getElementById('giderAy').value;
+  const taksitSayisi = parseInt(document.getElementById('giderTaksitSayisi').value) || 0;
+  const taksitTutari = rawVal(document.getElementById('giderTaksitTutari'));
+  const aciklama = document.getElementById('giderDegiskenAciklama').value.trim();
+  if (!taksitSayisi || taksitSayisi < 2) { alert('Geçerli bir taksit sayısı giriniz (en az 2).'); return; }
+  if (!taksitTutari) { alert('Taksit başı tutar giriniz!'); return; }
+  const planId = Date.now();
+  const plan = { id: planId, kalem_kod: secilenGiderKalem.kod || null, kalem_ad: secilenGiderKalem.ad, aciklama, taksit_sayisi: taksitSayisi, taksit_tutari: taksitTutari, baslangic_ay: ay };
+  try {
+    await api('gider_taksitler', 'POST', plan);
+    await api('giderler', 'POST', { ay, kategori: 'taksit', ad: secilenGiderKalem.ad, kalem_kod: secilenGiderKalem.kod || null, aciklama: aciklama + ' (' + taksitTutari.toLocaleString('tr-TR') + ' x ' + taksitSayisi + ')', tutar: taksitTutari, para_birimi: 'TL', taksit_id: planId, taksit_no: 1 });
+    taksitPlanlariYuklendi = false;
     delete giderlerCache['gider:' + ay];
     document.getElementById('giderKalemiSeciliForm').style.display = 'none';
     document.getElementById('giderKalemiAra').value = '';
