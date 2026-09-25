@@ -5129,12 +5129,12 @@ function renderGrupCTablo() {
       <td>${Number(s.has).toFixed(2)}</td>
       <td>${sym}${fmtPara(isTl?s.kargo_try:s.kargo_usd)}</td>
       <td>${sym}${fmtPara(isTl?s.maliyet_try:s.maliyet_usd)}</td>
-      <td>${sym}${fmtPara(isTl?s.satis_try:s.satis_usd)}</td>
+      <td>${sym}${fmtPara(isTl?s.satis_try:s.satis_fiyati_usd)}</td>
       <td>${sym}${fmtPara(isTl?s.komisyon_try:s.komisyon_usd)}</td>
       <td><span class="gizle-rakam" style="padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${bg};color:${renk}">${sym}${fmtPara(kar)}</span></td>
       ${isEssos ? `
         <td style="max-width:140px;"><span style="font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;max-width:100px;vertical-align:middle;">${(s.adres||'').slice(0,28)}${(s.adres||'').length>28?'…':''}</span>${s.adres ? ` <button onclick="navigator.clipboard.writeText(this.dataset.v);this.textContent='✓';setTimeout(()=>this.textContent='📋',1500)" data-v="${(s.adres||'').replace(/"/g,'')}" style="background:none;border:none;cursor:pointer;font-size:12px;padding:0 2px;vertical-align:middle;">📋</button>` : ''}</td>
-        <td style="font-size:12px;white-space:nowrap;">${s.fatura_kur ? '₺' + fmtPara((parseFloat(s.satis_usd)||0) * s.fatura_kur) : '—'}</td>
+        <td style="font-size:12px;white-space:nowrap;">${s.fatura_kur ? '₺' + fmtPara((parseFloat(s.satis_fiyati_usd)||0) * s.fatura_kur) : '—'}</td>
         <td><input type="checkbox" ${s.fatura_kesildi ? 'checked' : ''} onchange="gcFaturaKesil('${s.id}',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--gold);"></td>
       ` : ''}
       <td><button class="btn btn-sm" onclick="editGrupCSiparis('${s.id}')" style="margin-right:4px">Düz</button><button class="btn btn-sm btn-danger" onclick="deleteGrupCSiparis('${s.id}')">Sil</button></td>
@@ -5148,7 +5148,7 @@ function updateGrupCOzet() {
   let ts=0, tm=0, tk=0, tkar=0, topGram=0, topTasGr=0, topHasGC=0, topKargoGC=0;
   grupcSiparisler.forEach(s => {
     const adet = parseFloat(s.adet)||1;
-    ts         += parseFloat(isTl?s.satis_try:s.satis_usd)||0;
+    ts         += parseFloat(isTl?s.satis_try:s.satis_fiyati_usd)||0;
     tm         += parseFloat(isTl?s.maliyet_try:s.maliyet_usd)||0;
     tk         += parseFloat(isTl?s.komisyon_try:s.komisyon_usd)||0;
     tkar       += parseFloat(isTl?s.kar_try:s.kar_usd)||0;
@@ -5198,7 +5198,7 @@ function openGrupCModal(id) {
     document.getElementById('gcAyar').value   = s.ayar||'14K';
     document.getElementById('gcMilyem').value = s.milyem;
     document.getElementById('gcMilyem').readOnly = (s.ayar !== 'Diğer');
-    document.getElementById('gcSatisFiyat').value = isTl ? s.satis_try : s.satis_usd;
+    document.getElementById('gcSatisFiyat').value = isTl ? s.satis_try : s.satis_fiyati_usd;
     document.getElementById('gcKargo').value = isTl ? s.kargo_try : s.kargo_usd;
     document.getElementById('gcUlke').value   = s.ulke||'ABD';
     document.getElementById('gcTasGr').value = parseTasGr(s.notlar) || 0;
@@ -5323,13 +5323,13 @@ async function saveGrupCSiparis() {
     const mal = has * altinTl;
     const kom_ = satis * kom;
     const kar = satis - mal - kargo - kom_;
-    Object.assign(data, { kargo_try: r2(kargo), satis_try: r2(satis), maliyet_try: r2(mal), komisyon_try: r2(kom_), kar_try: r2(kar), kargo_usd: 0, satis_usd: 0, maliyet_usd: 0, komisyon_usd: 0, kar_usd: 0 });
+    Object.assign(data, { kargo_try: r2(kargo), satis_try: r2(satis), maliyet_try: r2(mal), komisyon_try: r2(kom_), kar_try: r2(kar), kargo_usd: 0, satis_fiyati_usd: 0, maliyet_usd: 0, komisyon_usd: 0, kar_usd: 0 });
   } else {
     const altin = parseFloat(grupcAylikParam?.altin_fiyati_usd)||0;
     const mal = has * altin;
     const kom_ = satis * kom;
     const kar = satis - mal - kargo - kom_;
-    Object.assign(data, { kargo_usd: r2(kargo), satis_usd: r2(satis), maliyet_usd: r2(mal), komisyon_usd: r2(kom_), kar_usd: r2(kar), kargo_try: 0, satis_try: 0, maliyet_try: 0, komisyon_try: 0, kar_try: 0 });
+    Object.assign(data, { kargo_usd: r2(kargo), satis_fiyati_usd: r2(satis), maliyet_usd: r2(mal), komisyon_usd: r2(kom_), kar_usd: r2(kar), kargo_try: 0, satis_try: 0, maliyet_try: 0, komisyon_try: 0, kar_try: 0 });
   }
   if (editingGrupCId) {
     await api('platform_siparisler?id=eq.' + editingGrupCId, 'PATCH', data);
