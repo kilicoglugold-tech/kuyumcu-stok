@@ -1,4 +1,4 @@
-<!-- SURUM-V96-CARI-AB-TAM --><!DOCTYPE html>
+<!-- SURUM-V97-CARI-BASTAN-AKTAR --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -9036,6 +9036,10 @@ async function deleteGider(id) {
         <div class="form-group"><label class="form-label">Excel / CSV Dosyası</label><input type="file" class="form-control" id="caDosya" accept=".xlsx,.xls,.csv" onchange="cariAktarDosyaSec(this)"></div>
         <div class="form-group" style="font-size:11.5px;color:var(--text3);line-height:1.45;align-self:center;">AltınBarkod'da Geçmiş (T) listesini Excel'e aktarıp o dosyayı seçin. Çevirmeler (CA/CB), veresiyeler (VV/VA), çeyrek/ata gibi birimler otomatik işlenir.</div>
       </div>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:12.5px;background:#FEF3C7;color:#92400E;border-radius:8px;padding:8px 10px;margin-bottom:12px;cursor:pointer;">
+        <input type="checkbox" id="caYenile" checked onchange="cariAktarOnizle()" style="margin-top:2px;">
+        <span><b>Baştan aktar (önerilen):</b> bu müşteriye daha önce AltınBarkod'dan aktarılmış kayıtlar silinir, liste sıfırdan yazılır. Elle girdiğiniz işlemler silinmez.</span>
+      </label>
       <div class="form-group"><label class="form-label">…ya da kopyaladığınız satırları buraya yapıştırın</label>
         <textarea class="form-control" id="caYapistir" rows="4" placeholder="AltınBarkod listesinden Ctrl+A, Ctrl+C ile kopyalayıp buraya Ctrl+V..." onpaste="setTimeout(cariAktarYapistirOku,30)"></textarea>
         <button class="btn btn-sm" style="margin-top:6px;" onclick="cariAktarYapistirOku()">Yapıştırılanı Oku</button>
@@ -9860,6 +9864,10 @@ async function cariAktarOnizle() {
       mevcut = (Number(musVal) === cariSeciliId) ? cariIslemler : await cariApiTumu('cari_islemler?select=*&musteri_id=eq.' + musVal);
     } catch (e) { mevcut = []; }
   }
+  // "Baştan aktar" seçiliyse bu müşterinin önceki AltınBarkod kayıtları silinecek; sadece elle girilenler kalır
+  const yenile = musVal !== '__yeni__' && document.getElementById('caYenile').checked;
+  const silinecek = yenile ? mevcut.filter(r => r.kaynak === 'altinbarkod').length : 0;
+  if (yenile) mevcut = mevcut.filter(r => r.kaynak !== 'altinbarkod');
   // Aynı fiş numarası satış + veresiye (ZS + VV) gibi iki satırda olabilir; anahtar = fiş no + işlem tipi
   const anahtar = (fis, tip) => String(fis || '').trim() + '|' + String(tip || '').trim().toUpperCase();
   const gorulen = new Set(mevcut.filter(r => r.kaynak !== 'manuel' && String(r.fis_no || '').trim()).map(r => anahtar(r.fis_no, r.islem_tipi)));
@@ -9889,6 +9897,7 @@ async function cariAktarOnizle() {
       <span>📄 Okunan satır: <b>${kayitlar.length}</b></span>
       <span style="color:var(--green);">✓ Aktarılacak: <b>${eklenecek.length}</b></span>
       ${mukerrer ? `<span style="color:var(--text3);">↷ Zaten kayıtlı (fiş no): <b>${mukerrer}</b></span>` : ''}
+      ${silinecek ? `<span style="color:var(--red);">🗑 Önceki aktarımdan silinip yeniden yazılacak: <b>${silinecek}</b></span>` : ''}
       ${okunamayan ? `<span style="color:var(--text3);">— Atlanan boş/toplam satırı: <b>${okunamayan}</b></span>` : ''}
     </div>
     <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">Aktarım sonrası bakiye — AltınBarkod'daki "Bakiyeler" ile karşılaştırın:</div>
@@ -9913,6 +9922,7 @@ async function cariAktarKaydet() {
     cariMusteriler.sort((a, b) => a.ad.localeCompare(b.ad, 'tr'));
     musteriId = m.id;
   } else musteriId = Number(musVal);
+  const yenile = musVal !== '__yeni__' && document.getElementById('caYenile').checked;
 
   const taban = Date.now() * 1000;
   const satirlar = cariAktarHazir.map((k, i) => ({
@@ -9923,6 +9933,10 @@ async function cariAktarKaydet() {
   const stoksuz = () => satirlar.forEach(x => delete x.stok);
   btn.disabled = true;
   try {
+    if (yenile) {
+      btn.textContent = 'Önceki aktarım siliniyor...';
+      await api('cari_islemler?musteri_id=eq.' + musteriId + '&kaynak=eq.altinbarkod', 'DELETE');
+    }
     for (let i = 0; i < satirlar.length; i += 500) {
       btn.textContent = 'Aktarılıyor... (' + Math.min(i + 500, satirlar.length) + '/' + satirlar.length + ')';
       try { await api('cari_islemler', 'POST', satirlar.slice(i, i + 500)); }
