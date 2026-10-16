@@ -1,4 +1,4 @@
-﻿<!-- SURUM-V91-OLCU-FOTOGRAFTA-CIZGI --><!DOCTYPE html>
+<!-- SURUM-V92-CARI-HESAP --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -298,6 +298,17 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 #platTable th { white-space:nowrap; padding:8px 10px; font-size:12px; }
 #platTable td { white-space:nowrap; padding:8px 10px; font-size:12px; }
 #a4PrintArea { display:none; }
+.cari-grid { display:grid; grid-template-columns:270px 1fr; gap:16px; align-items:start; }
+@media (max-width: 860px) { .cari-grid { grid-template-columns:1fr; } }
+.cari-musteri { padding:9px 10px; border-radius:8px; cursor:pointer; border:1px solid transparent; margin-bottom:4px; }
+.cari-musteri:hover { background:var(--bg2); }
+.cari-musteri.secili { background:var(--gold-light); border-color:var(--gold); }
+.cari-chip { display:inline-block; font-size:10.5px; font-weight:600; padding:1px 7px; border-radius:10px; margin:3px 3px 0 0; }
+.cari-chip.a { background:#FDF0EE; color:#C0392B; }
+.cari-chip.b { background:#EAF5EE; color:#1B7A4A; }
+.cari-tablo td, .cari-tablo th { padding:6px 8px; font-size:12.5px; }
+.cari-tablo td.sayi, .cari-tablo th.sayi { text-align:right; }
+.cari-tablo tr.son td { background:#F5E6C0 !important; font-weight:600; }
 @page { size: A4 portrait; margin: 10mm; }
 @media print {
   body * { visibility: hidden; }
@@ -342,7 +353,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="nav-tab" onclick="showPage('rapor')">📊 Rapor (O)</button>
     <button class="nav-tab" onclick="showPage('platformlar')">🏪 Platformlar (P)</button>
     <button class="nav-tab" onclick="showPage('giderler')">💸 Giderler (G)</button>
-    <button class="nav-tab" onclick="showPage('borcalacak')">⚖️ Borç/Alacak (B)</button><button class="nav-tab" onclick="showPage('parametreler')">⚙ Parametreler (Y)</button><button class="nav-tab" onclick="showPage('sayim')">📋 Sayım (S)</button><button class="nav-tab" onclick="showPage('burak_ozel')">🔒 Burak</button><button class="nav-tab" onclick="showPage('sifreler_ortak')">🔑 Şifreler</button>
+    <button class="nav-tab" onclick="showPage('borcalacak')">📒 Cari Hesap (B)</button><button class="nav-tab" onclick="showPage('parametreler')">⚙ Parametreler (Y)</button><button class="nav-tab" onclick="showPage('sayim')">📋 Sayım (S)</button><button class="nav-tab" onclick="showPage('burak_ozel')">🔒 Burak</button><button class="nav-tab" onclick="showPage('sifreler_ortak')">🔑 Şifreler</button>
   </div>
   <div class="nav-right">
   </div>
@@ -2046,7 +2057,7 @@ function showPage(page) {
   if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('hatirlatmaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('grupBOdemeMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('giderAyarMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
-  if (page === 'borcalacak') { baInit(); if (!baYuklendi) { baRender(); baYukle().then(baRender); } else { baRender(); } }
+  if (page === 'borcalacak') { cariInit(); }
   if (page === 'sayim') { fillAySec('sayimAy'); loadSayim(); loadSayimGecmisRaporlar(); }
   if (page === 'burak_ozel') { bozInit(); }
   if (page === 'sifreler_ortak') { sfpInit(); }
@@ -2187,7 +2198,7 @@ async function sifreSifirlaEmail(email) {
 
 const ROL_IZIN_ETIKETLERI = {
   anasayfa: 'Ana Sayfa', urunler: 'Ürünler', fiyat_hesaplama: 'Fiyat Hesaplama', rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
-  borcalacak: 'Borç/Alacak', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu', sifreler_ortak: 'Şifreler (Paylaşılan)'
+  borcalacak: 'Cari Hesap (Borç/Alacak)', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu', sifreler_ortak: 'Şifreler (Paylaşılan)'
 };
 async function loadRolIzinPanel() {
   if (!isAdmin()) return;
@@ -7878,7 +7889,8 @@ function acBakiyeDetayModal() {
     'sabitGiderEkleModal':function() { saveSabitGiderEkle(); },
     'maasGuncelleModal':  function() { saveMaasGuncelle(); },
     'sayimKalemEkleModal':function() { saveSayimKalemEkle(); },
-    'sayimSatirEkleModal':function() { saveSayimSatirEkle(); }
+    'sayimSatirEkleModal':function() { saveSayimSatirEkle(); },
+    'cariMusteriModal':   function() { cariMusteriKaydet(); }
   };
 
   document.addEventListener('keydown', function(e) {
@@ -8963,71 +8975,752 @@ async function deleteGider(id) {
 </div>
 
 <div class="page" id="page-borcalacak">
-  <div class="page-header"><div class="page-title">Borç / Alacak</div></div>
-  <div style="display:flex;gap:1rem;margin-bottom:1.5rem;">
-    <div class="metric-card" style="flex:1;border-left:4px solid #C0392B;"><div class="metric-label">TOPLAM BORÇ</div><div class="metric-value" id="baToplam-borc" style="color:#C0392B;">0.000 gr</div></div>
-    <div class="metric-card" style="flex:1;border-left:4px solid #1B7A4A;"><div class="metric-label">TOPLAM ALACAK</div><div class="metric-value" id="baToplam-alacak" style="color:#1B7A4A;">0.000 gr</div></div>
-  </div>
-  <div style="background:var(--bg2);border-radius:12px;padding:14px;margin-bottom:1.2rem;">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
-      <div><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Tarih</div><input id="baYeniTarih" type="date" class="form-control" style="width:135px;"></div>
-      <div><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Tür</div>
-        <div style="display:flex;gap:4px;">
-          <button id="baYeniTip-borc" onclick="baYeniTipSec('borc')" style="background:#C0392B;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;">📤 Borç</button>
-          <button id="baYeniTip-alacak" onclick="baYeniTipSec('alacak')" style="background:#e5e7eb;color:#555;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;cursor:pointer;">📥 Alacak</button>
-        </div>
-      </div>
-      <div style="flex:1;min-width:110px;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Müşteri</div><input id="baYeniAd" class="form-control" placeholder="Ad Soyad"></div>
-      <div style="flex:1;min-width:110px;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Açıklama</div><input id="baYeniAciklama" class="form-control" placeholder="İsteğe bağlı"></div>
-      <div><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Giriş</div>
-        <select id="baYeniGirisTip" class="form-control" onchange="baYeniGirisChange()" style="width:90px;">
-          <option value="tl">₺ TL</option>
-          <option value="has">Has / gr</option>
-        </select>
-      </div>
-      <div style="min-width:100px;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;" id="baYeniTutarLabel">TL Tutar</div><input id="baYeniTutar" class="form-control" type="text" inputmode="numeric" placeholder="0" oninput="baFormatTutar(this);baYeniHesapla()"></div>
-      <div style="min-width:90px;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">Kur (₺/gr)</div><input id="baYeniKur" class="form-control" type="number" placeholder="0" oninput="baYeniHesapla()"></div>
-      <div style="min-width:90px;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;" id="baYeniSonucLabel">→ Has gr</div><div id="baYeniSonuc" style="padding:8px 10px;border-radius:8px;font-size:13px;font-weight:700;background:#FEF3C7;color:#92400E;white-space:nowrap;min-height:36px;display:flex;align-items:center;">—</div></div>
-      <button onclick="baKaydet()" style="background:var(--gold);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;align-self:flex-end;">Kaydet ↵</button>
+  <div class="page-header">
+    <div><div class="page-title">📒 Cari Hesaplar</div><div class="page-sub">Müşteri bazlı HAS / USD / TL / EUR bakiye takibi — her işlemle bakiye güncellenir</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" onclick="cariMusteriModalAc()">+ Müşteri</button>
+      <button class="btn btn-primary" onclick="cariAktarAc()">📥 AltınBarkod'dan Aktar</button>
+      <button class="btn" id="cariEskiAktarBtn" onclick="cariEskiBorcAlacakAktar()" style="display:none;">↪ Eski Borç/Alacak Kayıtlarını Aktar</button>
     </div>
   </div>
-  <div id="baListe"></div>
+  <div class="cari-grid">
+    <div class="card" style="padding:10px;">
+      <input id="cariAra" class="form-control" placeholder="Müşteri ara..." oninput="cariMusteriListeRender()" style="margin-bottom:8px;">
+      <div id="cariMusteriListe"><div class="loading">Yükleniyor...</div></div>
+    </div>
+    <div id="cariDetay"><div class="card empty">Soldan bir müşteri seçin ya da "+ Müşteri" ile ekleyin.</div></div>
+  </div>
 </div>
 
-<div id="baModal" class="modal" style="display:none;">
-  <div class="modal-box">
-    <div class="modal-title">Yeni Kayıt</div>
+<!-- CARİ: MÜŞTERİ EKLE / DÜZENLE -->
+<div class="modal-overlay" id="cariMusteriModal">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <div class="modal-title" id="cmBaslik">Yeni Müşteri</div>
+      <button class="modal-close" onclick="closeModal('cariMusteriModal')">×</button>
+    </div>
     <div class="modal-body">
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <button id="baTip-borc" class="btn btn-primary" onclick="baSetTip('borc')" style="flex:1;">📤 Borç</button>
-        <button id="baTip-alacak" class="btn" onclick="baSetTip('alacak')" style="flex:1;">📥 Alacak</button>
-      </div>
-      <input id="baAd" class="form-control" placeholder="Ad Soyad" style="margin-bottom:8px;">
-      <input id="baAciklama" class="form-control" placeholder="Açıklama (isteğe bağlı)" style="margin-bottom:12px;">
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <button id="baGirisTip-tl" class="btn btn-primary" onclick="baSetGirisTip('tl')" style="flex:1;">₺ TL ile</button>
-        <button id="baGirisTip-has" class="btn" onclick="baSetGirisTip('has')" style="flex:1;">Has / Gram ile</button>
-      </div>
-      <div id="baTLAlan">
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input id="baTutarTL" class="form-control" type="number" placeholder="Tutar (₺)" oninput="baHesapla()">
-          <input id="baAltinKur" class="form-control" type="number" placeholder="Altın ₺/gr" oninput="baHesapla()">
-        </div>
-        <div style="background:var(--bg2);padding:8px 12px;border-radius:8px;font-size:13px;color:var(--text2);" id="baGramSonuc">Has Gram: —</div>
-      </div>
-      <div id="baHasAlan" style="display:none;">
-        <input id="baHasGram" class="form-control" type="number" placeholder="Has Gram (örn: 1.500)" step="0.001">
-      </div>
+      <input type="hidden" id="cmEditId">
+      <div class="form-group"><label class="form-label">Ad Soyad / Firma *</label><input class="form-control" id="cmAd" placeholder="Örn: Mustafa Kılıç"></div>
+      <div class="form-group"><label class="form-label">Telefon</label><input class="form-control" id="cmTelefon" placeholder="İsteğe bağlı"></div>
+      <div class="form-group"><label class="form-label">Not</label><textarea class="form-control" id="cmNotlar" rows="2" placeholder="İsteğe bağlı"></textarea></div>
     </div>
     <div class="modal-footer">
-      <button class="btn" onclick="closeModal('baModal')">İptal</button>
-      <button class="btn btn-primary" onclick="baKaydet()">Kaydet ↵</button>
+      <button class="btn" onclick="closeModal('cariMusteriModal')">İptal</button>
+      <button class="btn btn-primary" onclick="cariMusteriKaydet()">Kaydet ↵</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARİ: ALTINBARKOD'DAN İÇE AKTAR -->
+<div class="modal-overlay" id="cariAktarModal">
+  <div class="modal modal-wide" style="max-width:960px;">
+    <div class="modal-header">
+      <div class="modal-title">📥 AltınBarkod'dan Geçmiş İşlemleri Aktar</div>
+      <button class="modal-close" onclick="closeModal('cariAktarModal')">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12.5px;color:var(--text2);background:var(--bg2);border-radius:8px;padding:10px 12px;margin-bottom:14px;line-height:1.6;">
+        AltınBarkod'da müşterinin <b>Günlük İşlemler</b> listesini açın. İki yoldan biriyle aktarabilirsiniz:<br>
+        <b>1)</b> Listeyi Excel'e aktarıp (.xlsx / .csv) dosyayı aşağıdan seçin, <b>veya</b><br>
+        <b>2)</b> Listede bir satıra tıklayıp <span class="kbd">Ctrl</span>+<span class="kbd">A</span>, sonra <span class="kbd">Ctrl</span>+<span class="kbd">C</span> ile kopyalayın ve aşağıdaki kutuya yapıştırın.<br>
+        Aynı fiş numarası zaten kayıtlıysa o satır atlanır — aynı listeyi iki kez aktarsanız da çift kayıt oluşmaz.
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Müşteri</label>
+          <select class="form-control" id="caMusteri" onchange="cariAktarMusteriDegis()"></select>
+        </div>
+        <div class="form-group" id="caYeniAdWrap"><label class="form-label">Yeni Müşteri Adı</label><input class="form-control" id="caYeniAd" placeholder="Örn: Mustafa Kılıç"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Excel / CSV Dosyası</label><input type="file" class="form-control" id="caDosya" accept=".xlsx,.xls,.csv" onchange="cariAktarDosyaSec(this)"></div>
+        <div class="form-group"><label class="form-label">HAS satırlarında bakiyeye yazılacak sütun</label>
+          <select class="form-control" id="caHasKaynak" onchange="cariAktarOnizle()">
+            <option value="toplam">Toplam (önerilen)</option>
+            <option value="islemhas">İşlem HAS</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">…ya da kopyaladığınız satırları buraya yapıştırın</label>
+        <textarea class="form-control" id="caYapistir" rows="4" placeholder="AltınBarkod listesinden Ctrl+A, Ctrl+C ile kopyalayıp buraya Ctrl+V..." onpaste="setTimeout(cariAktarYapistirOku,30)"></textarea>
+        <button class="btn btn-sm" style="margin-top:6px;" onclick="cariAktarYapistirOku()">Yapıştırılanı Oku</button>
+      </div>
+      <div id="caOnizleme"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('cariAktarModal')">İptal</button>
+      <button class="btn btn-primary" id="caAktarBtn" onclick="cariAktarKaydet()" disabled>İçe Aktar</button>
     </div>
   </div>
 </div>
 
 <!-- A4 ETİKET YAZDIRMA ALANI: normalde gizli, sadece yazdırma sırasında görünür -->
 <div id="a4PrintArea"></div>
+<script>
+// ===== CARİ HESAP (müşteri bazlı HAS / USD / TL / EUR bakiye defteri) =====
+// Bakiye kuralı (AltınBarkod ile aynı): tipi "G" ile biten işlem (NG, AG, ZG, HG...) müşteriyi ALACAKLI yapar (+),
+// "C" ile biten (NC, AC, ZC, HC...) BORÇLU yapar (−). Diğer kodlar (DV devir, DB düzeltme) girilen işaretle (±) işlenir.
+const CARI_BIRIMLER = ['HAS', 'USD', 'TL', 'EUR'];
+const CARI_TIPLER = [
+  { kod: 'NG', ad: 'Nakit Giriş' },   { kod: 'NC', ad: 'Nakit Çıkış' },
+  { kod: 'AG', ad: 'Altın Giriş' },   { kod: 'AC', ad: 'Altın Çıkış' },
+  { kod: 'ZG', ad: 'Ziynet Giriş' },  { kod: 'ZC', ad: 'Ziynet Çıkış' },
+  { kod: 'HG', ad: 'Hurda Giriş' },   { kod: 'HC', ad: 'Hurda Çıkış' },
+  { kod: 'DV', ad: 'Devir (± elle)' }, { kod: 'DB', ad: 'Düzeltme (± elle)' }
+];
+let cariMusteriler = [];
+let cariOzet = {};          // musteri_id -> { HAS, USD, TL, EUR }
+let cariYuklendi = false;
+let cariSeciliId = null;
+let cariIslemler = [];      // seçili müşterinin işlemleri
+let cariToplamElle = false;
+let cariAktarSatirlar = null;
+
+function cariEtki(tip, toplam) {
+  const t = String(tip || '').toUpperCase().trim();
+  const v = Number(toplam) || 0;
+  if (/G$/.test(t)) return Math.abs(v);
+  if (/C$/.test(t)) return -Math.abs(v);
+  return v;
+}
+function cariBos() { return { HAS: 0, USD: 0, TL: 0, EUR: 0 }; }
+function cariSayi(n, d) { d = d === undefined ? 2 : d; return (Number(n) || 0).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+function cariTarihGoster(t) {
+  const m = String(t || '').match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+  if (!m) return t || '';
+  return (+m[3]) + '.' + m[2] + '.' + m[1] + (m[4] ? ' ' + m[4] + ':' + m[5] : '');
+}
+function cariSimdi() {
+  const d = new Date();
+  return bugunTarihStr(d) + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+async function cariApiTumu(endpoint) {
+  let sonuc = [], off = 0;
+  while (true) {
+    const sep = endpoint.includes('?') ? '&' : '?';
+    const r = await api(endpoint + sep + 'limit=1000&offset=' + off);
+    sonuc = sonuc.concat(r || []);
+    if (!r || r.length < 1000) break;
+    off += 1000;
+  }
+  return sonuc;
+}
+
+async function cariYukle() {
+  try {
+    cariMusteriler = await cariApiTumu('cari_musteriler?select=*&order=ad.asc');
+    const rows = await cariApiTumu('cari_islemler?select=musteri_id,islem_tipi,toplam,birim');
+    cariOzet = {};
+    rows.forEach(r => {
+      if (!cariOzet[r.musteri_id]) cariOzet[r.musteri_id] = cariBos();
+      const b = (r.birim || '').toUpperCase();
+      if (b in cariOzet[r.musteri_id]) cariOzet[r.musteri_id][b] += cariEtki(r.islem_tipi, r.toplam);
+    });
+    cariYuklendi = true;
+  } catch (e) {
+    document.getElementById('cariMusteriListe').innerHTML =
+      '<div style="color:var(--red);font-size:12px;">Okunamadı: ' + bozEsc(e.message) +
+      '<br><br>Supabase\'de "cari_musteriler" ve "cari_islemler" tabloları henüz oluşturulmamış olabilir. cari-hesap-supabase.sql dosyasını Supabase &gt; SQL Editor\'de çalıştırın.</div>';
+  }
+}
+
+async function cariInit() {
+  const btn = document.getElementById('cariEskiAktarBtn');
+  if (btn) btn.style.display = isAdmin() ? '' : 'none';
+  if (!cariYuklendi) await cariYukle();
+  if (!cariYuklendi) return;
+  cariMusteriListeRender();
+  if (cariSeciliId) cariSec(cariSeciliId);
+}
+
+function cariChipler(o) {
+  if (!o) return '';
+  return CARI_BIRIMLER.filter(b => Math.abs(o[b]) >= 0.005).map(b =>
+    `<span class="cari-chip ${o[b] > 0 ? 'a' : 'b'}">${b} ${cariSayi(Math.abs(o[b]))} ${o[b] > 0 ? 'A' : 'B'}</span>`).join('');
+}
+
+function cariMusteriListeRender() {
+  const el = document.getElementById('cariMusteriListe');
+  if (!el) return;
+  const q = (document.getElementById('cariAra')?.value || '').toLocaleLowerCase('tr-TR');
+  const liste = cariMusteriler.filter(m => !q || m.ad.toLocaleLowerCase('tr-TR').includes(q));
+  if (!liste.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:6px;">' + (cariMusteriler.length ? 'Eşleşen müşteri yok.' : 'Henüz müşteri yok.') + '</div>';
+    return;
+  }
+  el.innerHTML = liste.map(m => `<div class="cari-musteri${m.id === cariSeciliId ? ' secili' : ''}" onclick="cariSec(${m.id})">
+      <div style="font-weight:600;font-size:13px;">${bozEsc(m.ad)}</div>
+      <div>${cariChipler(cariOzet[m.id]) || '<span style="font-size:11px;color:var(--text3);">bakiye yok</span>'}</div>
+    </div>`).join('') +
+    '<div style="font-size:10.5px;color:var(--text3);margin-top:8px;line-height:1.4;">A = müşteri alacaklı (biz borçluyuz)<br>B = müşteri borçlu (bize borçlu)</div>';
+}
+
+async function cariSec(id) {
+  cariSeciliId = id;
+  cariMusteriListeRender();
+  const m = cariMusteriler.find(x => x.id === id);
+  if (!m) { cariSeciliId = null; return; }
+  const tipOps = CARI_TIPLER.map(t => `<option value="${t.kod}">${t.kod} — ${t.ad}</option>`).join('');
+  const birimOps = CARI_BIRIMLER.map(b => `<option value="${b}">${b}</option>`).join('');
+  const eurKur = localStorage.getItem('cariEurKur') || '';
+  document.getElementById('cariDetay').innerHTML = `
+    <div class="card" style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div>
+          <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--gold-dark);">${bozEsc(m.ad)}</div>
+          <div style="font-size:12px;color:var(--text3);">${bozEsc(m.telefon || '')}${m.notlar ? ' · ' + bozEsc(m.notlar) : ''}</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm" onclick="cariMusteriModalAc(${m.id})">✏️ Düzenle</button>
+          <button class="btn btn-sm btn-danger" onclick="cariMusteriSil(${m.id})">Sil</button>
+        </div>
+      </div>
+      <div id="cariBakiyeKartlar" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;"></div>
+      <div id="cariNetKarsilik" style="font-size:12px;color:var(--text2);margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;"></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">EUR kuru (₺, sadece net karşılık için):
+        <input type="number" step="0.01" id="cariEurKur" value="${eurKur}" style="width:80px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;" oninput="localStorage.setItem('cariEurKur',this.value);cariBakiyeRender()">
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;background:var(--bg2);">
+      <input type="hidden" id="ciEditId">
+      <div style="font-weight:600;font-size:13px;margin-bottom:8px;" id="ciBaslik">➕ Yeni İşlem</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+        <div><label class="form-label">Tarih</label><input type="datetime-local" id="ciTarih" class="form-control" style="width:185px;" value="${cariSimdi()}"></div>
+        <div><label class="form-label">Fiş No</label><input id="ciFisNo" class="form-control" style="width:90px;" placeholder="ops."></div>
+        <div><label class="form-label">İşlem Tipi</label><select id="ciTip" class="form-control" style="width:175px;" onchange="cariFormHesapla()">${tipOps}</select></div>
+        <div><label class="form-label">Miktar</label><input type="number" step="any" id="ciMiktar" class="form-control" style="width:120px;" oninput="cariFormHesapla()"></div>
+        <div><label class="form-label">Milyem</label><input type="number" step="any" id="ciMilyem" class="form-control" style="width:80px;" placeholder="0" oninput="cariFormHesapla()"></div>
+        <div><label class="form-label">Birim Fiyat</label><input type="number" step="any" id="ciBirimFiyat" class="form-control" style="width:100px;" placeholder="0" oninput="cariFormHesapla()"></div>
+        <div><label class="form-label">Toplam</label><input type="number" step="any" id="ciToplam" class="form-control" style="width:110px;font-weight:700;" oninput="cariToplamElle=true;cariFormHesapla(true)"></div>
+        <div><label class="form-label">Birim</label><select id="ciBirim" class="form-control" style="width:80px;" onchange="cariFormHesapla()">${birimOps}</select></div>
+        <div style="flex:1;min-width:160px;"><label class="form-label">Açıklama</label><input id="ciAciklama" class="form-control" placeholder="havale, çeyrek vb."></div>
+        <button class="btn btn-primary" onclick="cariIslemKaydet()">Kaydet ↵</button>
+        <button class="btn" id="ciIptalBtn" style="display:none;" onclick="cariFormTemizle()">Vazgeç</button>
+      </div>
+      <div id="ciOnizleme" style="font-size:12px;color:var(--text2);margin-top:8px;"></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">Toplam otomatik: Birim Fiyat girildiyse Miktar ÷ Birim Fiyat (örn. TL → HAS), Milyem girildiyse Miktar × Milyem, ikisi de boşsa Miktar. İsterseniz Toplam'ı elle değiştirebilirsiniz.</div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div id="cariIslemTablo" style="max-height:560px;overflow:auto;"><div class="loading">Yükleniyor...</div></div>
+    </div>`;
+  document.querySelectorAll('#cariDetay .card input:not([type=hidden]), #cariDetay .card select').forEach(inp => {
+    if (inp.id && inp.id.startsWith('ci')) inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); cariIslemKaydet(); } });
+  });
+  cariToplamElle = false;
+  cariFormHesapla();
+  try {
+    cariIslemler = await cariApiTumu('cari_islemler?musteri_id=eq.' + id + '&order=tarih.asc,id.asc');
+  } catch (e) {
+    document.getElementById('cariIslemTablo').innerHTML = '<div class="empty">Okunamadı: ' + bozEsc(e.message) + '</div>';
+    return;
+  }
+  if (cariSeciliId !== id) return;
+  cariOzetTekHesapla();
+  cariBakiyeRender();
+  cariTabloRender();
+  cariMusteriListeRender();
+}
+
+function cariSirala() {
+  cariIslemler.sort((a, b) => String(a.tarih || '').localeCompare(String(b.tarih || '')) || (a.id - b.id));
+}
+function cariOzetTekHesapla() {
+  const o = cariBos();
+  cariIslemler.forEach(r => { const b = (r.birim || '').toUpperCase(); if (b in o) o[b] += cariEtki(r.islem_tipi, r.toplam); });
+  cariOzet[cariSeciliId] = o;
+}
+
+function cariBakiyeRender() {
+  const el = document.getElementById('cariBakiyeKartlar');
+  if (!el) return;
+  const o = cariOzet[cariSeciliId] || cariBos();
+  el.innerHTML = CARI_BIRIMLER.map(b => {
+    const v = o[b];
+    const sifir = Math.abs(v) < 0.005;
+    const durum = sifir ? 'Kapalı' : (v > 0 ? 'ALACAKLI' : 'BORÇLU');
+    const alt = sifir ? '' : (v > 0 ? 'biz borçluyuz' : 'müşteri bize borçlu');
+    const renk = sifir ? 'var(--text3)' : (v > 0 ? '#C0392B' : '#1B7A4A');
+    const bg = sifir ? 'var(--card)' : (v > 0 ? '#FDF0EE' : '#EAF5EE');
+    return `<div class="metric-card" style="background:${bg};border-color:${renk};">
+      <div class="metric-label">${b === 'HAS' ? 'HAS (gr)' : b}</div>
+      <div class="metric-value gizle-rakam" style="color:${renk};">${cariSayi(Math.abs(v))}</div>
+      <div style="font-size:11px;font-weight:700;color:${renk};margin-top:2px;">${durum}${alt ? ' <span style="font-weight:400;">· ' + alt + '</span>' : ''}</div>
+    </div>`;
+  }).join('');
+  const altin = parseFloat(aylikParam?.altin_fiyati_usd) || 0;
+  const kur = parseFloat(aylikParam?.dolar_kuru) || 0;
+  const eur = parseFloat(document.getElementById('cariEurKur')?.value) || 0;
+  const net = o.HAS * altin * kur + o.USD * kur + o.TL + o.EUR * eur;
+  const nEl = document.getElementById('cariNetKarsilik');
+  if (!nEl) return;
+  if (!altin || !kur) { nEl.innerHTML = 'Net TL karşılığı için Parametreler\'de bu ayın kur ve altın fiyatını girin.'; return; }
+  nEl.innerHTML = `<b>Net karşılık ≈ <span class="gizle-rakam" style="color:${net > 0 ? '#C0392B' : '#1B7A4A'};">${fmtTLTam(Math.abs(net))} ₺</span> ${Math.abs(net) < 1 ? '' : (net > 0 ? '(müşteri alacaklı)' : '(müşteri borçlu)')}</b>
+    <span style="color:var(--text3);">— altın $${cariSayi(altin)}/gr, $ ${cariSayi(kur)} ₺${o.EUR && !eur ? ', EUR kuru girilmedi (EUR hariç)' : ''}</span>`;
+}
+
+function cariTabloRender() {
+  const el = document.getElementById('cariIslemTablo');
+  if (!el) return;
+  cariSirala();
+  if (!cariIslemler.length) {
+    el.innerHTML = '<div class="empty">Bu müşterinin henüz işlemi yok. Yukarıdan ekleyebilir ya da "AltınBarkod\'dan Aktar" ile geçmişi yükleyebilirsiniz.</div>';
+    return;
+  }
+  const yuruyen = cariBos();
+  const satirlar = cariIslemler.map((r, i) => {
+    const b = (r.birim || '').toUpperCase();
+    const etki = cariEtki(r.islem_tipi, r.toplam);
+    if (b in yuruyen) yuruyen[b] += etki;
+    const bak = yuruyen[b] || 0;
+    const son = i === cariIslemler.length - 1;
+    const tipRenk = etki >= 0 ? '#1B7A4A' : '#C0392B';
+    return `<tr class="${son ? 'son' : ''}">
+      <td style="white-space:nowrap;">${cariTarihGoster(r.tarih)}</td>
+      <td>${bozEsc(r.fis_no || '')}</td>
+      <td><span style="font-weight:700;color:${tipRenk};">${bozEsc(r.islem_tipi || '')}</span></td>
+      <td class="sayi">${cariSayi(r.miktar)}</td>
+      <td class="sayi">${Number(r.milyem) ? cariSayi(r.milyem, 3) : '0'}</td>
+      <td class="sayi">${Number(r.birim_fiyat) ? cariSayi(r.birim_fiyat, 3) : '0'}</td>
+      <td class="sayi" style="font-weight:600;">${cariSayi(r.toplam)}</td>
+      <td>${bozEsc(b)}</td>
+      <td class="sayi gizle-rakam" style="font-weight:700;color:${bak > 0.005 ? '#C0392B' : (bak < -0.005 ? '#1B7A4A' : 'var(--text3)')};">${cariSayi(Math.abs(bak))} ${bak > 0.005 ? 'A' : (bak < -0.005 ? 'B' : '')}</td>
+      <td style="white-space:normal;min-width:160px;">${bozEsc(r.aciklama || '')}</td>
+      <td style="white-space:nowrap;">
+        <button onclick="cariIslemDuzenle(${r.id})" title="Düzenle" style="background:none;border:none;cursor:pointer;font-size:13px;">✏️</button>
+        <button onclick="cariIslemSil(${r.id})" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<table class="cari-tablo">
+    <thead style="position:sticky;top:0;z-index:1;"><tr>
+      <th>Tarih</th><th>Fiş No</th><th>Tip</th><th class="sayi">Miktar</th><th class="sayi">Milyem</th><th class="sayi">Birim Fiyat</th>
+      <th class="sayi">Toplam</th><th>Birim</th><th class="sayi">Bakiye (o birim)</th><th>Açıklama</th><th></th>
+    </tr></thead><tbody>${satirlar}</tbody></table>
+    <div style="font-size:11px;color:var(--text3);padding:8px 10px;">${cariIslemler.length} işlem · "Bakiye" sütunu, o satır işlendikten sonraki bakiyeyi gösterir (A = alacaklı, B = borçlu).</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+function cariFormHesapla(toplamDegisti) {
+  const miktar = parseFloat(document.getElementById('ciMiktar')?.value) || 0;
+  const milyem = parseFloat(document.getElementById('ciMilyem')?.value) || 0;
+  const bf = parseFloat(document.getElementById('ciBirimFiyat')?.value) || 0;
+  const tEl = document.getElementById('ciToplam');
+  if (!tEl) return;
+  if (!cariToplamElle && !toplamDegisti) {
+    let t = miktar;
+    if (bf > 0) t = miktar / bf;
+    else if (milyem > 0) t = miktar * milyem;
+    tEl.value = miktar ? (Math.round(t * 10000) / 10000) : '';
+  }
+  const tip = document.getElementById('ciTip').value;
+  const birim = document.getElementById('ciBirim').value;
+  const etki = cariEtki(tip, parseFloat(tEl.value) || 0);
+  const mevcut = (cariOzet[cariSeciliId] || cariBos())[birim] || 0;
+  const editId = document.getElementById('ciEditId').value;
+  let eski = 0;
+  if (editId) { const r = cariIslemler.find(x => String(x.id) === editId); if (r && (r.birim || '').toUpperCase() === birim) eski = cariEtki(r.islem_tipi, r.toplam); }
+  const yeni = mevcut - eski + etki;
+  const on = document.getElementById('ciOnizleme');
+  if (on) on.innerHTML = tEl.value
+    ? `Bu işlem ${birim} bakiyesini <b>${etki >= 0 ? '+' : '−'}${cariSayi(Math.abs(etki))}</b> değiştirir → yeni ${birim} bakiyesi: <b style="color:${yeni > 0 ? '#C0392B' : '#1B7A4A'}">${cariSayi(Math.abs(yeni))} ${yeni > 0.005 ? 'Alacaklı' : (yeni < -0.005 ? 'Borçlu' : '')}</b>`
+    : '';
+}
+
+function cariFormTemizle() {
+  document.getElementById('ciEditId').value = '';
+  document.getElementById('ciBaslik').textContent = '➕ Yeni İşlem';
+  document.getElementById('ciIptalBtn').style.display = 'none';
+  document.getElementById('ciTarih').value = cariSimdi();
+  ['ciFisNo', 'ciMiktar', 'ciMilyem', 'ciBirimFiyat', 'ciToplam', 'ciAciklama'].forEach(id => { document.getElementById(id).value = ''; });
+  cariToplamElle = false;
+  cariFormHesapla();
+}
+
+function cariIslemDuzenle(id) {
+  const r = cariIslemler.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('ciEditId').value = String(r.id);
+  document.getElementById('ciBaslik').textContent = '✏️ İşlemi Düzenle';
+  document.getElementById('ciIptalBtn').style.display = '';
+  document.getElementById('ciTarih').value = String(r.tarih || '').replace(' ', 'T').slice(0, 16);
+  document.getElementById('ciFisNo').value = r.fis_no || '';
+  const tipSel = document.getElementById('ciTip');
+  if (![...tipSel.options].some(o => o.value === r.islem_tipi)) tipSel.add(new Option(r.islem_tipi, r.islem_tipi));
+  tipSel.value = r.islem_tipi;
+  document.getElementById('ciMiktar').value = r.miktar ?? '';
+  document.getElementById('ciMilyem').value = Number(r.milyem) ? r.milyem : '';
+  document.getElementById('ciBirimFiyat').value = Number(r.birim_fiyat) ? r.birim_fiyat : '';
+  document.getElementById('ciToplam').value = r.toplam ?? '';
+  document.getElementById('ciBirim').value = (r.birim || 'HAS').toUpperCase();
+  document.getElementById('ciAciklama').value = r.aciklama || '';
+  cariToplamElle = true;
+  cariFormHesapla(true);
+  document.getElementById('ciMiktar').focus();
+  document.getElementById('cariDetay').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+async function cariIslemKaydet() {
+  if (!cariSeciliId) return;
+  const toplamStr = document.getElementById('ciToplam').value;
+  const toplam = parseFloat(toplamStr);
+  if (toplamStr === '' || isNaN(toplam)) { alert('Toplam boş olamaz. Miktar girin ya da Toplam\'ı elle yazın.'); return; }
+  const tarihV = document.getElementById('ciTarih').value;
+  const kayit = {
+    musteri_id: cariSeciliId,
+    tarih: tarihV ? tarihV.replace('T', ' ') : cariSimdi().replace('T', ' '),
+    fis_no: document.getElementById('ciFisNo').value.trim(),
+    islem_tipi: document.getElementById('ciTip').value,
+    miktar: parseFloat(document.getElementById('ciMiktar').value) || 0,
+    milyem: parseFloat(document.getElementById('ciMilyem').value) || 0,
+    birim_fiyat: parseFloat(document.getElementById('ciBirimFiyat').value) || 0,
+    toplam: r4(toplam),
+    birim: document.getElementById('ciBirim').value,
+    aciklama: document.getElementById('ciAciklama').value.trim()
+  };
+  const editId = document.getElementById('ciEditId').value;
+  try {
+    if (editId) {
+      await api('cari_islemler?id=eq.' + editId, 'PATCH', kayit);
+      const r = cariIslemler.find(x => String(x.id) === editId);
+      if (r) Object.assign(r, kayit);
+    } else {
+      kayit.id = Date.now();
+      kayit.kaynak = 'manuel';
+      await api('cari_islemler', 'POST', kayit);
+      cariIslemler.push(kayit);
+    }
+  } catch (e) { alert('Kaydedilemedi: ' + e.message); return; }
+  cariOzetTekHesapla();
+  cariFormTemizle();
+  cariBakiyeRender();
+  cariTabloRender();
+  cariMusteriListeRender();
+  showToast(editId ? 'İşlem güncellendi' : 'İşlem eklendi, bakiye güncellendi');
+  document.getElementById('ciMiktar').focus();
+}
+
+async function cariIslemSil(id) {
+  const r = cariIslemler.find(x => x.id === id);
+  if (!r || !confirm('Bu işlem silinsin mi? (' + (r.islem_tipi || '') + ' ' + cariSayi(r.toplam) + ' ' + (r.birim || '') + ')')) return;
+  try { await api('cari_islemler?id=eq.' + id, 'DELETE'); } catch (e) { alert('Silinemedi: ' + e.message); return; }
+  cariIslemler = cariIslemler.filter(x => x.id !== id);
+  cariOzetTekHesapla();
+  cariBakiyeRender();
+  cariTabloRender();
+  cariMusteriListeRender();
+}
+
+// ---- Müşteri ekle / düzenle / sil ----
+function cariMusteriModalAc(id) {
+  const m = id ? cariMusteriler.find(x => x.id === id) : null;
+  document.getElementById('cmEditId').value = m ? m.id : '';
+  document.getElementById('cmBaslik').textContent = m ? 'Müşteriyi Düzenle' : 'Yeni Müşteri';
+  document.getElementById('cmAd').value = m ? m.ad : '';
+  document.getElementById('cmTelefon').value = m ? (m.telefon || '') : '';
+  document.getElementById('cmNotlar').value = m ? (m.notlar || '') : '';
+  openModal('cariMusteriModal');
+  setTimeout(() => document.getElementById('cmAd').focus(), 80);
+}
+async function cariMusteriKaydet() {
+  const ad = document.getElementById('cmAd').value.trim();
+  if (!ad) { alert('Müşteri adı zorunludur.'); return; }
+  const editId = document.getElementById('cmEditId').value;
+  const veri = { ad, telefon: document.getElementById('cmTelefon').value.trim(), notlar: document.getElementById('cmNotlar').value.trim() };
+  if (!editId && cariMusteriler.some(m => m.ad.toLocaleLowerCase('tr-TR') === ad.toLocaleLowerCase('tr-TR'))) {
+    if (!confirm('"' + ad + '" adında bir müşteri zaten var. Yine de yeni kayıt açılsın mı?')) return;
+  }
+  try {
+    if (editId) {
+      await api('cari_musteriler?id=eq.' + editId, 'PATCH', veri);
+      Object.assign(cariMusteriler.find(m => String(m.id) === editId) || {}, veri);
+    } else {
+      veri.id = Date.now();
+      await api('cari_musteriler', 'POST', veri);
+      cariMusteriler.push(veri);
+    }
+  } catch (e) { alert('Kaydedilemedi: ' + e.message); return; }
+  cariMusteriler.sort((a, b) => a.ad.localeCompare(b.ad, 'tr'));
+  closeModal('cariMusteriModal');
+  cariSec(editId ? Number(editId) : veri.id);
+}
+async function cariMusteriSil(id) {
+  const m = cariMusteriler.find(x => x.id === id);
+  if (!m) return;
+  if (!confirm('"' + m.ad + '" ve TÜM işlem geçmişi kalıcı olarak silinecek. Emin misiniz?')) return;
+  try { await api('cari_musteriler?id=eq.' + id, 'DELETE'); } catch (e) { alert('Silinemedi: ' + e.message); return; }
+  cariMusteriler = cariMusteriler.filter(x => x.id !== id);
+  delete cariOzet[id];
+  cariSeciliId = null;
+  cariIslemler = [];
+  document.getElementById('cariDetay').innerHTML = '<div class="card empty">Soldan bir müşteri seçin ya da "+ Müşteri" ile ekleyin.</div>';
+  cariMusteriListeRender();
+}
+
+// ---- AltınBarkod'dan içe aktarma (Excel/CSV dosyası veya kopyala-yapıştır) ----
+function cariNorm(s) {
+  return String(s || '').replace(/ı/g, 'i').replace(/İ/g, 'i').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
+}
+function cariSayiOku(v) {
+  if (typeof v === 'number') return v;
+  let s = String(v ?? '').trim().replace(/\s/g, '').replace(/[₺$€]/g, '');
+  if (!s) return NaN;
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+  return parseFloat(s);
+}
+function cariTarihOku(v) {
+  const iki = n => String(n).padStart(2, '0');
+  if (v instanceof Date && !isNaN(v)) return v.getFullYear() + '-' + iki(v.getMonth() + 1) + '-' + iki(v.getDate()) + ' ' + iki(v.getHours()) + ':' + iki(v.getMinutes());
+  if (typeof v === 'number' && v > 20000) {
+    const d = new Date(Math.round((v - 25569) * 864e5));
+    return d.getUTCFullYear() + '-' + iki(d.getUTCMonth() + 1) + '-' + iki(d.getUTCDate()) + ' ' + iki(d.getUTCHours()) + ':' + iki(d.getUTCMinutes());
+  }
+  const s = String(v || '').trim();
+  let m = s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if (m) return m[3] + '-' + iki(m[2]) + '-' + iki(m[1]) + ' ' + iki(m[4] || 0) + ':' + iki(m[5] || 0);
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+  if (m) return m[1] + '-' + m[2] + '-' + m[3] + ' ' + (m[4] || '00') + ':' + (m[5] || '00');
+  return '';
+}
+function cariBirimOku(v) {
+  const b = String(v || '').trim().toUpperCase().replace('TRY', 'TL').replace('₺', 'TL');
+  return CARI_BIRIMLER.includes(b) ? b : '';
+}
+
+// Satır dizisinden (her satır = hücre dizisi) işlem kayıtları çıkarır.
+function cariSatirlardanKayit(rows) {
+  rows = rows.filter(r => r && r.some(c => String(c ?? '').trim() !== ''));
+  const ALANLAR = { islemtipi: 'tip', fisno: 'fis', miktar: 'miktar', milyem: 'milyem', birimfiyat: 'bfiyat', toplam: 'toplam', birim: 'birim', tarih: 'tarih', aciklama: 'aciklama', islemhas: 'islemhas' };
+  let idx = null, basla = 0;
+  for (let i = 0; i < Math.min(rows.length, 15); i++) {
+    const n = rows[i].map(cariNorm);
+    if (n.includes('toplam') && n.includes('birim')) {
+      idx = {};
+      n.forEach((c, j) => { if (ALANLAR[c] && idx[ALANLAR[c]] === undefined) idx[ALANLAR[c]] = j; });
+      basla = i + 1;
+      break;
+    }
+  }
+  if (!idx) {
+    // Başlık yoksa (Ctrl+C ile sadece satırlar kopyalandıysa) "Birim" sütununu (HAS/USD/TL/EUR) bulup
+    // AltınBarkod ekranındaki sütun sırasına göre diğerlerini yerleştir.
+    const sayac = {};
+    rows.forEach(r => r.forEach((c, j) => { if (cariBirimOku(c)) sayac[j] = (sayac[j] || 0) + 1; }));
+    const b = Object.keys(sayac).sort((x, y) => sayac[y] - sayac[x])[0];
+    if (b === undefined) return { kayitlar: [], hata: 'Sütunlar tanınamadı. Başlık satırıyla birlikte kopyalayın ya da Excel dosyası kullanın.' };
+    const bi = Number(b);
+    idx = { tip: bi - 6, fis: bi - 5, miktar: bi - 4, milyem: bi - 3, bfiyat: bi - 2, toplam: bi - 1, birim: bi, islemhas: bi + 3, tarih: bi + 4, aciklama: bi + 5 };
+  }
+  const al = (r, k) => (idx[k] === undefined || idx[k] < 0) ? '' : r[idx[k]];
+  const kayitlar = [];
+  let okunamayan = 0;
+  for (let i = basla; i < rows.length; i++) {
+    const r = rows[i];
+    const birim = cariBirimOku(al(r, 'birim'));
+    const toplam = cariSayiOku(al(r, 'toplam'));
+    const tip = String(al(r, 'tip') || '').trim().toUpperCase();
+    if (!birim || isNaN(toplam) || !tip) { okunamayan++; continue; }
+    kayitlar.push({
+      tip, fis: String(al(r, 'fis') ?? '').trim(), birim, toplam,
+      miktar: cariSayiOku(al(r, 'miktar')) || 0,
+      milyem: cariSayiOku(al(r, 'milyem')) || 0,
+      bfiyat: cariSayiOku(al(r, 'bfiyat')) || 0,
+      islemhas: cariSayiOku(al(r, 'islemhas')),
+      tarih: cariTarihOku(al(r, 'tarih')),
+      aciklama: String(al(r, 'aciklama') ?? '').trim()
+    });
+  }
+  return { kayitlar, okunamayan };
+}
+
+function cariXlsxYukle() {
+  return new Promise((res, rej) => {
+    if (window.XLSX) return res();
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = res;
+    s.onerror = () => rej(new Error('Excel okuma kütüphanesi yüklenemedi (internet bağlantısını kontrol edin)'));
+    document.head.appendChild(s);
+  });
+}
+
+function cariAktarAc() {
+  const sel = document.getElementById('caMusteri');
+  sel.innerHTML = '<option value="__yeni__">➕ Yeni müşteri oluştur</option>' +
+    cariMusteriler.map(m => `<option value="${m.id}">${bozEsc(m.ad)}</option>`).join('');
+  sel.value = cariSeciliId ? String(cariSeciliId) : '__yeni__';
+  document.getElementById('caYeniAd').value = '';
+  document.getElementById('caDosya').value = '';
+  document.getElementById('caYapistir').value = '';
+  document.getElementById('caOnizleme').innerHTML = '';
+  document.getElementById('caAktarBtn').disabled = true;
+  cariAktarSatirlar = null;
+  cariAktarMusteriDegis();
+  openModal('cariAktarModal');
+}
+function cariAktarMusteriDegis() {
+  document.getElementById('caYeniAdWrap').style.visibility = document.getElementById('caMusteri').value === '__yeni__' ? 'visible' : 'hidden';
+  if (cariAktarSatirlar) cariAktarOnizle();
+}
+async function cariAktarDosyaSec(inp) {
+  const f = inp.files && inp.files[0];
+  if (!f) return;
+  const on = document.getElementById('caOnizleme');
+  on.innerHTML = '<div class="loading">Dosya okunuyor...</div>';
+  try {
+    await cariXlsxYukle();
+    const wb = XLSX.read(await f.arrayBuffer(), { type: 'array', cellDates: true });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    cariAktarSatirlar = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: '' });
+    await cariAktarOnizle();
+  } catch (e) {
+    on.innerHTML = '<div style="color:var(--red);">✗ ' + bozEsc(e.message) + '</div>';
+  }
+}
+function cariAktarYapistirOku() {
+  const t = document.getElementById('caYapistir').value;
+  if (!t.trim()) return;
+  cariAktarSatirlar = t.replace(/\r/g, '').split('\n').map(l => l.split('\t'));
+  cariAktarOnizle();
+}
+
+let cariAktarHazir = null;
+async function cariAktarOnizle() {
+  const on = document.getElementById('caOnizleme');
+  const btn = document.getElementById('caAktarBtn');
+  btn.disabled = true;
+  cariAktarHazir = null;
+  if (!cariAktarSatirlar) return;
+  const { kayitlar, okunamayan, hata } = cariSatirlardanKayit(cariAktarSatirlar);
+  if (hata) { on.innerHTML = '<div style="color:var(--red);">✗ ' + bozEsc(hata) + '</div>'; return; }
+  if (!kayitlar.length) { on.innerHTML = '<div style="color:var(--red);">✗ Hiç işlem satırı okunamadı. "İşlem tipi", "Toplam" ve "Birim" sütunlarının dolu olduğundan emin olun.</div>'; return; }
+  const hasKaynak = document.getElementById('caHasKaynak').value;
+  kayitlar.forEach(k => {
+    k.bakiyeTutar = (hasKaynak === 'islemhas' && k.birim === 'HAS' && !isNaN(k.islemhas)) ? k.islemhas : k.toplam;
+  });
+
+  const musVal = document.getElementById('caMusteri').value;
+  let mevcut = [];
+  if (musVal !== '__yeni__') {
+    try {
+      mevcut = (Number(musVal) === cariSeciliId) ? cariIslemler : await cariApiTumu('cari_islemler?select=fis_no,islem_tipi,toplam,birim&musteri_id=eq.' + musVal);
+    } catch (e) { mevcut = []; }
+  }
+  const gorulen = new Set(mevcut.map(r => String(r.fis_no || '').trim()).filter(Boolean));
+  const eklenecek = [];
+  let mukerrer = 0;
+  kayitlar.forEach(k => {
+    if (k.fis && gorulen.has(k.fis)) { mukerrer++; return; }
+    if (k.fis) gorulen.add(k.fis);
+    eklenecek.push(k);
+  });
+  const once = cariBos();
+  mevcut.forEach(r => { const b = (r.birim || '').toUpperCase(); if (b in once) once[b] += cariEtki(r.islem_tipi, r.toplam); });
+  const sonra = { ...once };
+  eklenecek.forEach(k => { sonra[k.birim] += cariEtki(k.tip, k.bakiyeTutar); });
+  const bilinmeyen = [...new Set(eklenecek.map(k => k.tip).filter(t => !/[GC]$/.test(t)))];
+
+  const bakiyeHtml = CARI_BIRIMLER.filter(b => Math.abs(sonra[b]) >= 0.005 || Math.abs(once[b]) >= 0.005).map(b =>
+    `<div class="metric-card" style="padding:.6rem .8rem;"><div class="metric-label">${b}</div>
+      <div style="font-size:17px;font-weight:700;color:${sonra[b] > 0 ? '#C0392B' : '#1B7A4A'};">${cariSayi(Math.abs(sonra[b]))} ${sonra[b] > 0.005 ? 'A' : (sonra[b] < -0.005 ? 'B' : '')}</div></div>`).join('')
+    || '<div style="color:var(--text3);font-size:12px;">Tüm bakiyeler sıfır.</div>';
+  const ornek = eklenecek.slice(-12).map(k => `<tr><td>${cariTarihGoster(k.tarih)}</td><td>${bozEsc(k.fis)}</td><td><b>${bozEsc(k.tip)}</b></td>
+      <td class="sayi">${cariSayi(k.miktar)}</td><td class="sayi">${cariSayi(k.bakiyeTutar)}</td><td>${k.birim}</td><td>${bozEsc(k.aciklama)}</td></tr>`).join('');
+
+  on.innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin:6px 0 10px;">
+      <span>📄 Okunan satır: <b>${kayitlar.length}</b></span>
+      <span style="color:var(--green);">✓ Aktarılacak: <b>${eklenecek.length}</b></span>
+      ${mukerrer ? `<span style="color:var(--text3);">↷ Zaten kayıtlı (fiş no): <b>${mukerrer}</b></span>` : ''}
+      ${okunamayan ? `<span style="color:var(--text3);">— Atlanan boş/toplam satırı: <b>${okunamayan}</b></span>` : ''}
+    </div>
+    <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">Aktarım sonrası bakiye — AltınBarkod'daki "Bakiyeler" ile karşılaştırın:</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">${bakiyeHtml}</div>
+    ${bilinmeyen.length ? `<div style="font-size:12px;background:#FEF3C7;color:#92400E;border-radius:8px;padding:8px 10px;margin-bottom:10px;">Şu işlem tipleri G/C ile bitmiyor, Toplam'daki işaretiyle (±) işlenecek: <b>${bilinmeyen.map(bozEsc).join(', ')}</b></div>` : ''}
+    <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">Son ${Math.min(12, eklenecek.length)} satır:</div>
+    <div style="overflow-x:auto;"><table class="cari-tablo"><thead><tr><th>Tarih</th><th>Fiş</th><th>Tip</th><th class="sayi">Miktar</th><th class="sayi">Bakiyeye</th><th>Birim</th><th>Açıklama</th></tr></thead><tbody>${ornek}</tbody></table></div>`;
+  if (eklenecek.length) { cariAktarHazir = eklenecek; btn.disabled = false; btn.textContent = eklenecek.length + ' İşlemi İçe Aktar'; }
+}
+
+async function cariAktarKaydet() {
+  if (!cariAktarHazir || !cariAktarHazir.length) return;
+  const btn = document.getElementById('caAktarBtn');
+  let musVal = document.getElementById('caMusteri').value;
+  let musteriId;
+  if (musVal === '__yeni__') {
+    const ad = document.getElementById('caYeniAd').value.trim();
+    if (!ad) { alert('Yeni müşteri adını yazın.'); document.getElementById('caYeniAd').focus(); return; }
+    const m = { id: Date.now(), ad, telefon: '', notlar: '' };
+    try { await api('cari_musteriler', 'POST', m); } catch (e) { alert('Müşteri oluşturulamadı: ' + e.message); return; }
+    cariMusteriler.push(m);
+    cariMusteriler.sort((a, b) => a.ad.localeCompare(b.ad, 'tr'));
+    musteriId = m.id;
+  } else musteriId = Number(musVal);
+
+  const taban = Date.now() * 1000;
+  const satirlar = cariAktarHazir.map((k, i) => ({
+    id: taban + i, musteri_id: musteriId, tarih: k.tarih, fis_no: k.fis, islem_tipi: k.tip,
+    miktar: k.miktar, milyem: k.milyem, birim_fiyat: k.bfiyat, toplam: r4(k.bakiyeTutar), birim: k.birim,
+    aciklama: k.aciklama, kaynak: 'altinbarkod'
+  }));
+  btn.disabled = true;
+  try {
+    for (let i = 0; i < satirlar.length; i += 500) {
+      btn.textContent = 'Aktarılıyor... (' + Math.min(i + 500, satirlar.length) + '/' + satirlar.length + ')';
+      await api('cari_islemler', 'POST', satirlar.slice(i, i + 500));
+    }
+  } catch (e) {
+    alert('Aktarım yarıda kaldı: ' + e.message + '\n\nAynı listeyi tekrar aktarabilirsiniz; kaydedilen fiş numaraları atlanır.');
+    btn.disabled = false;
+    cariYuklendi = false;
+    return;
+  }
+  closeModal('cariAktarModal');
+  cariYuklendi = false;
+  await cariYukle();
+  cariMusteriListeRender();
+  cariSec(musteriId);
+  showToast('✓ ' + satirlar.length + ' işlem aktarıldı');
+}
+
+// ---- Eski basit Borç/Alacak kayıtlarını cari hesaplara taşı (bir kerelik, admin) ----
+async function cariEskiBorcAlacakAktar() {
+  if (!confirm('Eski Borç/Alacak sayfasındaki ÖDENMEMİŞ kayıtlar, kişi adına göre cari hesaplara HAS "DV (Devir)" satırı olarak taşınacak.\n\n• "Borç" (biz borçluyuz) → müşteri ALACAKLI\n• "Alacak" (müşteri bize borçlu) → müşteri BORÇLU\n\nEski kayıtlar silinmez. Devam edilsin mi?')) return;
+  try {
+    const onceki = await api('cari_islemler?select=id&kaynak=eq.eski_ba&limit=1');
+    if (onceki && onceki.length) { alert('Eski Borç/Alacak kayıtları zaten aktarılmış.'); return; }
+    await baYukle();
+  } catch (e) { alert('Okunamadı: ' + e.message); return; }
+  const acik = baCache.filter(x => !x.odendi);
+  if (!acik.length) { alert('Aktarılacak ödenmemiş Borç/Alacak kaydı yok.'); return; }
+  const taban = Date.now() * 1000;
+  const satirlar = [];
+  let n = 0;
+  for (const x of acik) {
+    const adNorm = (x.ad || '').trim().toLocaleLowerCase('tr-TR');
+    let m = cariMusteriler.find(c => c.ad.toLocaleLowerCase('tr-TR') === adNorm);
+    if (!m) {
+      m = { id: Date.now() + (n++), ad: (x.ad || 'İsimsiz').trim(), telefon: '', notlar: '' };
+      try { await api('cari_musteriler', 'POST', m); } catch (e) { alert('Müşteri oluşturulamadı: ' + e.message); return; }
+      cariMusteriler.push(m);
+    }
+    satirlar.push({
+      id: taban + satirlar.length, musteri_id: m.id, tarih: (x.tarih || bugunTarihStr()) + ' 00:00', fis_no: '', islem_tipi: 'DV',
+      miktar: Number(x.tutar_tl) || 0, milyem: 0, birim_fiyat: Number(x.kur) || 0,
+      toplam: r4(x.tip === 'borc' ? Math.abs(x.gram) : -Math.abs(x.gram)), birim: 'HAS',
+      aciklama: 'Eski Borç/Alacak' + (x.aciklama ? ': ' + x.aciklama : ''), kaynak: 'eski_ba'
+    });
+  }
+  try { await api('cari_islemler', 'POST', satirlar); } catch (e) { alert('Aktarılamadı: ' + e.message); return; }
+  cariYuklendi = false;
+  await cariYukle();
+  cariMusteriListeRender();
+  showToast('✓ ' + satirlar.length + ' eski kayıt cari hesaplara taşındı');
+}
+
+</script>
 </body>
 </html>
 
