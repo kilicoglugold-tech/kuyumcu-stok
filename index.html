@@ -1,4 +1,4 @@
-<!-- SURUM-V93-CARI-FORM --><!DOCTYPE html>
+<!-- SURUM-V94-CARI-PAYLAS --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -9218,6 +9218,7 @@ async function cariSec(id) {
           <div style="font-size:12px;color:var(--text3);">${bozEsc(m.telefon || '')}${m.notlar ? ' · ' + bozEsc(m.notlar) : ''}</div>
         </div>
         <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm" style="background:#25D366;color:#fff;border-color:#25D366;display:inline-flex;align-items:center;gap:5px;" onclick="cariPaylas()" title="Son işlemi WhatsApp ile müşteriye gönder">${CARI_WA_IKON} Paylaş</button>
           <button class="btn btn-sm" onclick="cariMusteriModalAc(${m.id})">✏️ Düzenle</button>
           <button class="btn btn-sm btn-danger" onclick="cariMusteriSil(${m.id})">Sil</button>
         </div>
@@ -9336,6 +9337,7 @@ function cariTabloRender() {
       <td class="sayi gizle-rakam" style="font-weight:700;color:${bak > 0.005 ? '#C0392B' : (bak < -0.005 ? '#1B7A4A' : 'var(--text3)')};">${cariSayi(Math.abs(bak))} ${bak > 0.005 ? 'A' : (bak < -0.005 ? 'B' : '')}</td>
       <td style="white-space:normal;min-width:160px;">${bozEsc(r.aciklama || '')}</td>
       <td style="white-space:nowrap;">
+        <button onclick="cariPaylas(${r.id})" title="WhatsApp ile paylaş" style="background:none;border:none;cursor:pointer;color:#25D366;vertical-align:middle;">${CARI_WA_IKON}</button>
         <button onclick="cariIslemDuzenle(${r.id})" title="Düzenle" style="background:none;border:none;cursor:pointer;font-size:13px;">✏️</button>
         <button onclick="cariIslemSil(${r.id})" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;">🗑</button>
       </td>
@@ -9422,7 +9424,7 @@ function cariFormHesapla(toplamDegisti) {
   if (!cariToplamElle && !toplamDegisti) {
     let t = miktar;
     if (c) t = kur > 0 ? (c.stokUstte ? miktar * kur : miktar / kur) : 0;
-    tEl.value = (miktar && (!c || kur > 0)) ? cariSayiYaz(Math.round(t * 10000) / 10000, birim === 'HAS' ? 4 : 2) : '';
+    tEl.value = (miktar && (!c || kur > 0)) ? cariSayiYaz(Math.round(t * 100) / 100, 2) : '';
   }
   const tip = document.getElementById('ciTip').value;
   const toplam = cariSayiOku(tEl.value);
@@ -9436,7 +9438,7 @@ function cariFormHesapla(toplamDegisti) {
   if (!on) return;
   if (c && miktar && !(kur > 0) && !cariToplamElle) { on.innerHTML = '<span style="color:var(--red);">' + c.st + ' → ' + c.bi + ' çevirmek için kur girin.</span>'; return; }
   on.innerHTML = tEl.value
-    ? `${c ? cariSayi(miktar, c.st === 'HAS' ? 3 : 2) + ' ' + c.st + ' → <b>' + cariSayi(toplam, birim === 'HAS' ? 3 : 2) + ' ' + birim + '</b> · ' : ''}Bu işlem ${birim} bakiyesini <b>${etki >= 0 ? '+' : '−'}${cariSayi(Math.abs(etki))}</b> değiştirir → yeni ${birim} bakiyesi: <b style="color:${yeni > 0 ? '#C0392B' : '#1B7A4A'}">${cariSayi(Math.abs(yeni))} ${yeni > 0.005 ? 'Alacaklı' : (yeni < -0.005 ? 'Borçlu' : '')}</b>`
+    ? `${c ? cariSayi(miktar) + ' ' + c.st + ' → <b>' + cariSayi(toplam) + ' ' + birim + '</b> · ' : ''}Bu işlem ${birim} bakiyesini <b>${etki >= 0 ? '+' : '−'}${cariSayi(Math.abs(etki))}</b> değiştirir → yeni ${birim} bakiyesi: <b style="color:${yeni > 0 ? '#C0392B' : '#1B7A4A'}">${cariSayi(Math.abs(yeni))} ${yeni > 0.005 ? 'Alacaklı' : (yeni < -0.005 ? 'Borçlu' : '')}</b>`
     : '';
 }
 
@@ -9470,7 +9472,7 @@ function cariIslemDuzenle(id) {
   document.getElementById('ciMilyem').value = Number(r.milyem) ? cariSayiYaz(r.milyem, 3) : '';
   cariKurDoldur(false);
   if (Number(r.birim_fiyat)) document.getElementById('ciKur').value = cariSayiYaz(r.birim_fiyat, 4);
-  document.getElementById('ciToplam').value = cariSayiYaz(r.toplam);
+  document.getElementById('ciToplam').value = cariSayiYaz(r.toplam, 2);
   document.getElementById('ciAciklama').value = r.aciklama || '';
   cariToplamElle = true;
   cariFormHesapla(true);
@@ -9496,7 +9498,7 @@ async function cariIslemKaydet() {
     miktar: cariSayiOku(document.getElementById('ciMiktar').value),
     milyem: st === 'GR' ? cariSayiOku(document.getElementById('ciMilyem').value) : 0,
     birim_fiyat: kur,
-    toplam: r4(toplam),
+    toplam: r2(toplam),
     birim: document.getElementById('ciBirim').value,
     aciklama: document.getElementById('ciAciklama').value.trim()
   };
@@ -9541,6 +9543,76 @@ async function cariIslemKaydet() {
   cariMusteriListeRender();
   showToast(editId ? 'İşlem güncellendi' : 'Fiş ' + kayit.fis_no + ' eklendi, bakiye güncellendi');
   document.getElementById('ciMiktar').focus();
+}
+
+// ---- WhatsApp ile paylaş ----
+const CARI_WA_IKON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-2px;"><path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.64.07-.3-.15-1.25-.46-2.39-1.47-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.6.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.09 1.75-.72 2-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35M12.05 21.5h-.01a9.4 9.4 0 0 1-4.8-1.32l-.34-.2-3.57.94.95-3.48-.22-.36a9.4 9.4 0 0 1-1.44-5.02c0-5.2 4.23-9.43 9.44-9.43a9.4 9.4 0 0 1 9.43 9.44c0 5.2-4.23 9.43-9.44 9.43m8.03-17.46A11.3 11.3 0 0 0 12.05.71C5.8.71.7 5.8.7 12.05c0 2 .52 3.95 1.52 5.67L.6 23.3l5.7-1.5a11.3 11.3 0 0 0 5.74 1.47h.01c6.25 0 11.34-5.09 11.34-11.34 0-3.03-1.18-5.88-3.32-8.02"/></svg>';
+function cariMesajSayi(v) { v = Math.abs(Number(v) || 0); return cariSayi(v, Math.abs(v - Math.round(v)) < 0.005 ? 0 : 2); }
+function cariMesajTutar(v, birim) {
+  const n = birim === 'HAS' ? cariSayi(Math.abs(v)) : cariMesajSayi(v);
+  return { HAS: n + ' gr has', TL: n + '₺', USD: n + '$', EUR: n + '€' }[birim] || (n + ' ' + birim);
+}
+function cariMesajStok(v, st, milyem) {
+  if (st === 'GR') return cariSayi(v) + ' gr' + (milyem ? ' (' + cariSayi(milyem, 3) + ')' : '');
+  return cariMesajTutar(v, st);
+}
+function cariMesajBakiyeSatirlari(o) {
+  const s = CARI_BIRIMLER.filter(b => Math.abs(o[b]) >= 0.005)
+    .map(b => ' * ' + cariMesajTutar(o[b], b) + (o[b] > 0 ? ' (alacağınız)' : ' (borcunuz)'));
+  return s.length ? s.join('\n') : ' * Bakiye yok (hesap kapalı)';
+}
+function cariPaylasMetni(id) {
+  cariSirala();
+  const m = cariMusteriler.find(x => x.id === cariSeciliId);
+  const idx = cariIslemler.findIndex(x => x.id === id);
+  if (!m || idx < 0) return null;
+  const r = cariIslemler[idx];
+  const once = cariBos();
+  for (let i = 0; i < idx; i++) { const b = (cariIslemler[i].birim || '').toUpperCase(); if (b in once) once[b] += cariEtki(cariIslemler[i].islem_tipi, cariIslemler[i].toplam); }
+  const sonra = Object.assign({}, once);
+  const birim = (r.birim || '').toUpperCase();
+  if (birim in sonra) sonra[birim] += cariEtki(r.islem_tipi, r.toplam);
+  const tipAd = (CARI_TIPLER.find(t => t.kod === r.islem_tipi) || {}).ad || r.islem_tipi;
+  const st = (r.stok || '').toUpperCase() || (Number(r.milyem) ? 'GR' : birim);
+  const stH = st === 'GR' ? 'HAS' : st;
+  const kur = Number(r.birim_fiyat) || 0;
+  let islem;
+  if (stH !== birim && kur > 0) {
+    const kaynak = st === 'GR' ? (Number(r.miktar) || 0) * (Number(r.milyem) || 0) : Number(r.miktar) || 0;
+    const op = CARI_DEGER_SIRA[stH] > CARI_DEGER_SIRA[birim] ? ' x ' : ' : ';
+    islem = (st === 'GR' ? cariMesajStok(r.miktar, st, r.milyem) + ' = ' : '') + cariMesajTutar(kaynak, stH) + op + cariMesajSayi(kur) + ' = ' + cariMesajTutar(r.toplam, birim);
+  } else if (st === 'GR') {
+    islem = cariMesajStok(r.miktar, st, r.milyem) + ' = ' + cariMesajTutar(r.toplam, birim);
+  } else {
+    islem = cariMesajTutar(r.toplam, birim);
+  }
+  return 'Tarih: ' + cariTarihGoster(r.tarih) + '\n' +
+    'Müşteri ismi : ' + m.ad + '\n' +
+    'İşlem Öncesi Bakiye :\n' + cariMesajBakiyeSatirlari(once) + '\n\n' +
+    '  İŞLEM (' + tipAd + '): ' + islem + '\n\n' +
+    'SON BAKİYE:\n\n' + cariMesajBakiyeSatirlari(sonra) + '\n\n' +
+    'KILIÇOĞLU KUYUMCULUK';
+}
+function cariTelefonWa(tel) {
+  let d = String(tel || '').replace(/\D/g, '');
+  if (d.startsWith('00')) d = d.slice(2);
+  if (d.length === 11 && d.startsWith('0')) d = '9' + d;
+  if (d.length === 10 && d.startsWith('5')) d = '90' + d;
+  return d.length >= 11 ? d : '';
+}
+function cariPaylas(id) {
+  if (!id) {
+    cariSirala();
+    if (!cariIslemler.length) { alert('Paylaşılacak işlem yok.'); return; }
+    id = cariIslemler[cariIslemler.length - 1].id;
+  }
+  const metin = cariPaylasMetni(id);
+  if (!metin) return;
+  const m = cariMusteriler.find(x => x.id === cariSeciliId);
+  const tel = cariTelefonWa(m && m.telefon);
+  try { navigator.clipboard && navigator.clipboard.writeText(metin).catch(() => {}); } catch (_) {}
+  window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(metin), '_blank');
+  if (!tel) showToast('Müşterinin geçerli telefonu yok — WhatsApp\'ta kişiyi seçin (mesaj panoya da kopyalandı)');
 }
 
 async function cariIslemSil(id) {
