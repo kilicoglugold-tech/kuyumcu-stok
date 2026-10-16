@@ -1,4 +1,4 @@
-<!-- SURUM-V99-CARI-PRO --><!DOCTYPE html>
+<!-- SURUM-V100-CARI-KOYU --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -309,53 +309,135 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .cari-tablo td, .cari-tablo th { padding:6px 8px; font-size:12.5px; }
 .cari-tablo td.sayi, .cari-tablo th.sayi { text-align:right; }
 .cari-tablo tr.son td { background:#F5E6C0 !important; font-weight:600; }
-/* Cari bakiye kartları */
-.cari-bk-baslik { margin-top:14px; }
-.cari-bk-mod { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; font-size:12px; font-weight:700; letter-spacing:.3px; color:var(--text2); padding:0 2px 8px; }
-.cari-bk-mod.gecmis { background:#FFF4D6; border:1px solid #F0D58C; color:#7A5A06; border-radius:10px; padding:7px 8px 7px 12px; margin-bottom:10px; font-weight:500; letter-spacing:0; }
-.cari-bk-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
-.cari-bk { position:relative; border-radius:14px; padding:14px 16px 13px 20px; background:var(--card); border:1px solid var(--border); overflow:hidden; box-shadow:0 1px 3px rgba(60,40,10,.06), 0 6px 18px -10px rgba(60,40,10,.18); }
-.cari-bk::before { content:''; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--border); }
-.cari-bk.a { background:linear-gradient(135deg,#FFF3F0 0%,#FFFFFF 75%); border-color:#F1C9C1; }
-.cari-bk.a::before { background:#C0392B; }
-.cari-bk.b { background:linear-gradient(135deg,#ECF7F0 0%,#FFFFFF 75%); border-color:#BFE0CB; }
-.cari-bk.b::before { background:#1B7A4A; }
-.cari-bk-ust { display:flex; align-items:center; gap:8px; }
-.cari-bk-ad { font-size:12px; font-weight:700; color:var(--text2); letter-spacing:.3px; flex:1; }
-.cari-bk-durum { font-size:10.5px; font-weight:800; letter-spacing:.5px; padding:3px 9px; border-radius:20px; color:#fff; }
-.cari-bk.a .cari-bk-durum { background:#C0392B; }
-.cari-bk.b .cari-bk-durum { background:#1B7A4A; }
-.cari-bk-deger { font-size:30px; font-weight:800; line-height:1.15; margin-top:10px; font-variant-numeric:tabular-nums; letter-spacing:-.5px; }
-.cari-bk.a .cari-bk-deger { color:#B03A2E; }
-.cari-bk.b .cari-bk-deger { color:#17683F; }
-.cari-bk-deger small { font-size:14px; font-weight:600; opacity:.75; margin-left:2px; }
-.cari-bk-alt { font-size:11.5px; color:var(--text3); margin-top:3px; }
-.cari-bk-kapali { font-size:11.5px; color:var(--text3); margin-top:8px; }
-.cari-bk-kapali span { display:inline-block; background:var(--bg2); border-radius:10px; padding:1px 8px; margin-left:4px; font-weight:600; }
-.cari-tablo tbody tr:hover td { background:#FBF6EA; }
-.cari-tablo tr.secili td { background:#FFE7A3 !important; font-weight:600; }
-.cari-tablo tr.secili td:first-child { box-shadow:inset 4px 0 0 #B8860B; }
+/* ===== CARİ HESAP — koyu lacivert tema (sadece bu sayfa) ===== */
+#page-borcalacak.cari-koyu {
+  --bg:#0B1834; --bg2:#13254A; --card:#0F1F3F; --text:#E7EEF9; --text2:#A3B3CE; --text3:#7085A8;
+  --border:#1D355F; --border2:#2A4677; --gold-light:#1B335F; --gold:#2F80ED; --gold-dark:#5AA2FF; --red:#F87171; --green:#34D399;
+  color-scheme: dark; color:var(--text);
+  background: radial-gradient(1200px 500px at 85% -10%, #16336B 0%, transparent 60%), linear-gradient(180deg,#0A1530 0%,#0B1A3A 100%);
+  border-radius:20px; padding:22px 22px 26px; margin-bottom:20px; box-shadow:0 20px 50px -25px rgba(5,15,40,.8);
+}
+#page-borcalacak .card { background:linear-gradient(180deg,rgba(20,38,74,.92),rgba(14,29,58,.92)); border:1px solid var(--border); border-radius:16px; }
+#page-borcalacak .form-control { background:#0B1834; border:1px solid #24406F; color:var(--text); border-radius:10px; }
+#page-borcalacak .form-control:focus { border-color:#3B82F6; box-shadow:0 0 0 3px rgba(59,130,246,.2); }
+#page-borcalacak .form-control::placeholder, #page-borcalacak input::placeholder { color:#5E7398; }
+#page-borcalacak select option { background:#0B1834; color:#E7EEF9; }
+#page-borcalacak .form-label { color:#A3B3CE; text-transform:none; letter-spacing:0; font-size:12px; font-weight:500; }
+#page-borcalacak .empty, #page-borcalacak .loading { color:var(--text2); }
+#page-borcalacak .btn { border-radius:10px; font-weight:600; display:inline-flex; align-items:center; gap:7px; }
+.cari-btn-mavi { background:linear-gradient(180deg,#2F86FF,#1A6CF0) !important; border:1px solid #2F86FF !important; color:#fff !important; padding:9px 18px !important; box-shadow:0 6px 18px -8px rgba(47,134,255,.8); }
+.cari-btn-mavi:hover { filter:brightness(1.08); }
+.cari-btn-cizgi { background:rgba(255,255,255,.03) !important; border:1px solid #2C4A7C !important; color:#DCE6F5 !important; }
+.cari-btn-cizgi:hover { background:rgba(255,255,255,.08) !important; border-color:#3F66A6 !important; }
+.cari-btn-cizgi.kirmizi { color:#FCA5A5 !important; border-color:#5B2A3A !important; }
+.cari-btn-wa { background:rgba(37,211,102,.08) !important; border:1px solid #1FA855 !important; color:#4ADE80 !important; }
+.cari-btn-wa:hover { background:rgba(37,211,102,.16) !important; }
+/* üst başlık */
+.cari-ust { display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid #18305A; }
+.cari-baslik { font-size:26px; font-weight:700; color:#fff; letter-spacing:-.3px; }
+.cari-altbaslik { font-size:13px; color:#8FA2C2; margin-top:2px; }
+.cari-ust-btn { display:flex; gap:8px; flex-wrap:wrap; }
+/* sol kolon */
+#page-borcalacak .cari-grid { grid-template-columns:260px 1fr; gap:18px; }
+.cari-yan { background:rgba(10,22,46,.6); border:1px solid #182F57; border-radius:16px; padding:14px; position:sticky; top:70px; }
+.cari-yan-etiket { font-size:13px; color:#A3B3CE; margin-bottom:8px; }
+.cari-arama { display:flex; align-items:center; gap:8px; background:#0B1834; border:1px solid #24406F; border-radius:10px; padding:0 12px; color:#7F93B5; }
+.cari-arama:focus-within { border-color:#3B82F6; }
+.cari-arama input { flex:1; background:transparent; border:none; outline:none; color:#E7EEF9; font-size:13px; padding:10px 0; font-family:inherit; min-width:0; }
+.cari-yan .cari-arama { margin-bottom:12px; }
+#page-borcalacak .cari-musteri { display:flex; align-items:center; gap:10px; padding:10px; border-radius:12px; border:1px solid transparent; margin-bottom:6px; cursor:pointer; transition:background .15s; }
+#page-borcalacak .cari-musteri:hover { background:rgba(59,130,246,.08); }
+#page-borcalacak .cari-musteri.secili { background:linear-gradient(90deg,rgba(47,128,237,.28),rgba(47,128,237,.08)); border-color:#2B5DAA; box-shadow:inset 3px 0 0 #3B82F6; }
+.cari-mini-avatar { width:38px; height:38px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:#fff; background:linear-gradient(135deg,#4BA3FF,#1F6FEB); }
+.cari-musteri-ad { font-weight:600; font-size:13.5px; color:#F1F5FC; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cari-musteri-ozet { font-size:11.5px; color:#9FB0CC; margin-top:2px; display:flex; flex-wrap:wrap; gap:2px 8px; }
+.cari-musteri-ozet .a { color:#FCD34D; } .cari-musteri-ozet .b { color:#6EE7B7; } .cari-musteri-ozet .s { color:#6F82A3; }
+.cari-yan-bos { color:#7085A8; font-size:12px; padding:6px; }
+.cari-yan-not { font-size:10.5px; color:#5E7398; margin-top:10px; line-height:1.4; }
+/* müşteri başlığı */
+#page-borcalacak .cari-hero { display:flex; align-items:center; gap:18px; flex-wrap:wrap; padding:18px 22px; margin-bottom:16px; border-radius:16px; background:linear-gradient(120deg,rgba(25,48,92,.95),rgba(14,29,58,.95)); border:1px solid #213D6C; }
+#page-borcalacak .cari-avatar { width:68px; height:68px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:24px; color:#fff; background:radial-gradient(circle at 30% 25%,#6CB6FF,#1F6FEB 70%); box-shadow:0 0 0 4px rgba(59,130,246,.18), 0 10px 25px -10px rgba(31,111,235,.9); flex-shrink:0; }
+#page-borcalacak .cari-hero-ad { font-size:28px; font-weight:700; color:#fff; letter-spacing:-.4px; line-height:1.15; }
+#page-borcalacak .cari-hero-alt { font-size:14px; color:#A3B3CE; margin-top:4px; }
+#page-borcalacak .cari-hero-alt i { font-style:normal; margin:0 6px; opacity:.6; }
+#page-borcalacak .cari-hero-btnlar { display:flex; gap:8px; flex-wrap:wrap; }
+/* bakiye kartları */
+.cari-gecmis { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; background:rgba(251,191,36,.1); border:1px solid rgba(251,191,36,.35); color:#FDE68A; border-radius:12px; padding:8px 10px 8px 14px; margin-bottom:12px; font-size:13px; }
+.cari-kartlar { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px; margin-bottom:14px; }
+.cari-kart { --ac:#60A5FA; position:relative; overflow:hidden; border-radius:16px; padding:18px 20px 16px; min-height:168px; border:1.5px solid rgba(96,165,250,.55); background:linear-gradient(135deg,#132E63,#1A3E85 55%,#10285A); box-shadow:0 12px 30px -18px rgba(0,0,0,.9); }
+.cari-kart.k-has { --ac:#F5C451; border-color:#C99A32; background:radial-gradient(400px 200px at 90% 40%,rgba(201,154,50,.35),transparent 60%), linear-gradient(135deg,#2E2412 0%,#4A3815 50%,#231A0C 100%); }
+.cari-kart.k-usd { --ac:#34D399; border-color:#23885F; background:radial-gradient(400px 200px at 90% 40%,rgba(52,211,153,.18),transparent 60%), linear-gradient(135deg,#0C3428 0%,#11503D 55%,#0A2A21 100%); }
+.cari-kart.k-tl { --ac:#60A5FA; border-color:#3466C8; background:radial-gradient(400px 200px at 90% 30%,rgba(96,165,250,.2),transparent 60%), linear-gradient(135deg,#102759 0%,#193C80 55%,#0E2350 100%); }
+.cari-kart.k-eur { --ac:#A5B4FC; border-color:#5258D6; background:radial-gradient(400px 200px at 90% 30%,rgba(129,140,248,.25),transparent 60%), linear-gradient(135deg,#171C57 0%,#262C86 55%,#141849 100%); }
+.cari-kart.k-diger { --ac:#FBBF24; border-color:#8A6A1F; background:linear-gradient(135deg,#2A2414,#3D321A); }
+.cari-kart.sifir { opacity:.92; }
+.cari-kart-dekor { position:absolute; right:-6px; top:50%; transform:translateY(-50%); font-size:150px; font-weight:800; line-height:1; color:var(--ac); opacity:.09; pointer-events:none; }
+.cari-kart-dekor svg { width:170px; height:150px; opacity:1.6; }
+.k-has .cari-kart-dekor { opacity:.22; right:-14px; }
+.cari-kart-ust { position:relative; display:flex; align-items:center; gap:12px; font-size:14px; font-weight:600; color:#EAF0FA; letter-spacing:.3px; }
+.cari-kart-ikon { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:800; color:#0B1834; background:var(--ac); box-shadow:0 4px 14px -4px var(--ac); }
+.k-has .cari-kart-ikon { background:transparent; box-shadow:none; }
+.k-has .cari-kart-ikon svg { width:40px; height:34px; }
+.k-tl .cari-kart-ikon, .k-eur .cari-kart-ikon { background:#3B6FE0; color:#fff; } .k-eur .cari-kart-ikon { background:#5B5FE6; }
+.cari-kart-deger { position:relative; font-size:40px; font-weight:800; color:#fff; margin:14px 0 10px; letter-spacing:-1px; font-variant-numeric:tabular-nums; line-height:1; }
+.cari-kart-deger small { font-size:18px; font-weight:600; color:#DCE6F5; margin-left:6px; letter-spacing:0; }
+.cari-kart-pill { position:relative; display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; padding:5px 14px; border-radius:20px; color:var(--ac); background:color-mix(in srgb, var(--ac) 16%, transparent); border:1px solid color-mix(in srgb, var(--ac) 45%, transparent); }
+.cari-kart-pill.bos { color:#C9D5EA; background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.14); }
+.cari-kart-alt { position:relative; font-size:13.5px; color:#DCE6F5; margin-top:10px; }
+/* yaklaşık değer */
+#page-borcalacak .cari-net { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; border-radius:16px; padding:14px 20px; margin-bottom:16px; background:linear-gradient(90deg,rgba(47,128,237,.16),rgba(15,31,63,.7)); border:1px solid #24406F; }
+#page-borcalacak .cari-net-etiket { font-size:11px; letter-spacing:1.5px; font-weight:700; color:#8FB4F0; }
+#page-borcalacak .cari-net-deger { font-size:28px; font-weight:800; color:#F5C451; font-variant-numeric:tabular-nums; line-height:1.2; }
+#page-borcalacak .cari-net-kur { font-size:12px; color:#8FA2C2; }
+#page-borcalacak .cari-net-durum { font-size:11.5px; font-weight:700; letter-spacing:.5px; padding:6px 14px; border-radius:20px; background:rgba(245,196,81,.14); color:#F5C451; border:1px solid rgba(245,196,81,.4); }
+/* paneller */
+.cari-panel-baslik { display:flex; align-items:center; gap:10px; font-size:17px; font-weight:600; color:#fff; margin-bottom:14px; }
+.cari-panel-ikon { width:30px; height:30px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; color:#7FB2FF; background:rgba(59,130,246,.14); }
+.cari-form { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+.cari-fisno { height:40px; display:flex; align-items:center; padding:0 12px; border:1px dashed #2C4A7C; border-radius:10px; font-weight:700; color:#8FB4F0; min-width:62px; }
+.cari-onizleme { font-size:12.5px; color:#C9D5EA; margin-top:10px; }
+.cari-onizleme b { color:#fff; }
+.cari-ipucu { font-size:11.5px; color:#6F82A3; margin-top:4px; }
+.cari-hareket-ust { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; padding:16px 20px; border-bottom:1px solid #1D355F; }
+.cari-hareket-filtre { display:flex; gap:10px; flex-wrap:wrap; }
+.cari-tarih-aralik { display:flex; align-items:center; gap:6px; background:#0B1834; border:1px solid #24406F; border-radius:10px; padding:0 10px; color:#A3B3CE; }
+.cari-tarih-aralik input { background:transparent; border:none; outline:none; color:#E7EEF9; font-family:inherit; font-size:13px; padding:9px 2px; }
+.cari-tarih-aralik button { background:none; border:none; color:#7085A8; cursor:pointer; font-size:12px; }
+.cari-hareket-filtre .cari-arama { min-width:240px; }
+/* tablo */
+#page-borcalacak .cari-tablo th { position:sticky; top:0; z-index:1; background:#102245; color:#C9D5EA; font-size:13px; font-weight:600; text-transform:none; letter-spacing:0; border-bottom:1px solid #22406F; padding:12px 12px; }
+#page-borcalacak .cari-tablo th.sirali { cursor:pointer; user-select:none; }
+#page-borcalacak .cari-tablo th .ok { font-size:10px; opacity:.5; margin-left:3px; }
+#page-borcalacak .cari-tablo th.aktif { color:#fff; } #page-borcalacak .cari-tablo th.aktif .ok { opacity:1; color:#5AA2FF; }
+#page-borcalacak .cari-tablo td { color:#E7EEF9; border-bottom:1px solid #182F57; padding:11px 12px; font-size:13.5px; background:transparent; }
+#page-borcalacak .cari-tablo tbody tr { cursor:pointer; transition:background .1s; }
+#page-borcalacak .cari-tablo tbody tr:hover td { background:rgba(59,130,246,.07); }
+#page-borcalacak .cari-tablo tr.son td { background:rgba(245,196,81,.07) !important; font-weight:500; }
+#page-borcalacak .cari-tablo tr.secili td { background:rgba(59,130,246,.22) !important; font-weight:600; }
+#page-borcalacak .cari-tablo tr.secili td:first-child { box-shadow:inset 3px 0 0 #3B82F6; }
+#page-borcalacak .cari-tablo td.soluk { color:#A3B3CE; }
+#page-borcalacak .cari-tablo td.kalin { font-weight:700; }
+#page-borcalacak .cari-tablo td.aciklama { white-space:normal; min-width:180px; color:#DCE6F5; }
+#page-borcalacak .cari-tablo td.bakiye { font-weight:700; } #page-borcalacak .cari-tablo td.bakiye.a { color:#FCD34D; } #page-borcalacak .cari-tablo td.bakiye.b { color:#6EE7B7; }
+#page-borcalacak .cari-tablo .birim-ek { color:#7085A8; font-size:11px; }
+#page-borcalacak .cari-tablo td.islemler { white-space:nowrap; text-align:right; }
+.cari-pill { display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600; padding:3px 11px; border-radius:20px; border:1px solid; white-space:nowrap; }
+.cari-pill b { font-size:13px; }
+.cari-pill.yesil { color:#4ADE80; background:rgba(34,197,94,.12); border-color:rgba(34,197,94,.35); }
+.cari-pill.kirmizi { color:#F87171; background:rgba(239,68,68,.12); border-color:rgba(239,68,68,.35); }
+.cari-pill.mavi { color:#93C5FD; background:rgba(59,130,246,.16); border-color:rgba(59,130,246,.45); }
+.cari-pill.mor { color:#C4B5FD; background:rgba(139,92,246,.15); border-color:rgba(139,92,246,.4); }
+.cari-pill.gri { color:#B6C3DA; background:rgba(148,163,184,.12); border-color:rgba(148,163,184,.3); }
+.cari-ikon-btn { background:none; border:1px solid transparent; border-radius:8px; color:#8FA2C2; cursor:pointer; padding:5px 6px; display:inline-flex; vertical-align:middle; }
+.cari-ikon-btn:hover { background:rgba(255,255,255,.07); color:#fff; border-color:#2C4A7C; }
+.cari-ikon-btn.wa { color:#4ADE80; } .cari-ikon-btn.sil:hover { color:#F87171; }
+.cari-tablo-alt { font-size:11.5px; color:#6F82A3; padding:10px 16px; }
+.cari-eur { font-size:11.5px; color:#6F82A3; margin-top:10px; }
+.cari-eur input { width:90px; padding:3px 8px; border:1px solid #24406F; border-radius:8px; font-size:12px; background:#0B1834; color:#E7EEF9; }
+#page-borcalacak #cariDetay { min-width:0; }
+#page-borcalacak #cariIslemTablo { overflow:auto; }
+@media (max-width: 860px) { #page-borcalacak .cari-grid { grid-template-columns:1fr; } .cari-yan { position:static; } #page-borcalacak.cari-koyu { padding:14px; } }
 @media (max-width: 700px) { .cari-paylas-grid { grid-template-columns:1fr !important; } }
-/* Cari müşteri başlığı (profesyonel görünüm) */
-.cari-hero { border-radius:16px; overflow:hidden; margin-bottom:12px; background:var(--card); border:1px solid #E6DBC2; box-shadow:0 2px 6px rgba(60,40,10,.06), 0 14px 30px -18px rgba(60,40,10,.35); }
-.cari-hero-ust { display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:18px 22px; background:linear-gradient(120deg,#2B2213 0%,#3D2E14 55%,#5A4316 100%); border-bottom:3px solid #C9A44C; }
-.cari-avatar { width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:21px; color:#2B2213; background:linear-gradient(135deg,#F7E3A3,#C9A44C); box-shadow:0 0 0 3px rgba(232,200,114,.25); flex-shrink:0; }
-.cari-hero-etiket { font-size:10.5px; letter-spacing:2px; font-weight:700; color:#E8C872; }
-.cari-hero-ad { font-family:'DM Serif Display',serif; font-size:27px; color:#FFFFFF; line-height:1.15; }
-.cari-hero-alt { font-size:12px; color:rgba(255,255,255,.65); margin-top:2px; }
-.cari-hero-btnlar { display:flex; gap:6px; flex-wrap:wrap; }
-.cari-btn-wa { background:#25D366 !important; color:#fff !important; border-color:#25D366 !important; display:inline-flex; align-items:center; gap:5px; font-weight:700; }
-.cari-btn-cam { background:rgba(255,255,255,.08) !important; color:#F3E7C6 !important; border-color:rgba(232,200,114,.35) !important; }
-.cari-btn-cam:hover { background:rgba(255,255,255,.16) !important; }
-.cari-hero-govde { padding:14px 22px 16px; background:linear-gradient(180deg,#FCFAF4,#FFFFFF 60%); }
-.cari-hero-govde .cari-bk-baslik { margin-top:0; }
-.cari-bk-ikon { width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
-.cari-ikon-daire { width:32px; height:32px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:15px; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15); }
-.cari-net { margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; border-radius:14px; padding:12px 18px; background:linear-gradient(120deg,#2B2213,#4A3712); color:#fff; }
-.cari-net-etiket { font-size:10.5px; letter-spacing:1.5px; font-weight:700; color:#E8C872; }
-.cari-net-deger { font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.2; }
-.cari-net-kur { font-size:11.5px; color:rgba(255,255,255,.6); }
-.cari-net-durum { font-size:11px; font-weight:800; letter-spacing:.6px; padding:5px 12px; border-radius:20px; background:#E8C872; color:#2B2213; }
 
 
 @page { size: A4 portrait; margin: 10mm; }
@@ -9023,21 +9105,22 @@ async function deleteGider(id) {
   </div>
 </div>
 
-<div class="page" id="page-borcalacak">
-  <div class="page-header">
-    <div><div class="page-title">📒 Cari Hesaplar</div><div class="page-sub">Müşteri bazlı HAS / USD / TL / EUR bakiye takibi — her işlemle bakiye güncellenir</div></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn" onclick="cariMusteriModalAc()">+ Müşteri</button>
-      <button class="btn btn-primary" onclick="cariAktarAc()">📥 AltınBarkod'dan Aktar</button>
-      <button class="btn" id="cariEskiAktarBtn" onclick="cariEskiBorcAlacakAktar()" style="display:none;">↪ Eski Borç/Alacak Kayıtlarını Aktar</button>
+<div class="page cari-koyu" id="page-borcalacak">
+  <div class="cari-ust">
+    <div><div class="cari-baslik">Cari Hesaplar</div><div class="cari-altbaslik">Müşteri bazlı HAS / USD / TL / EUR bakiye takibi — her işlemle bakiye güncellenir.</div></div>
+    <div class="cari-ust-btn">
+      <button class="btn cari-btn-cizgi" id="cariEskiAktarBtn" onclick="cariEskiBorcAlacakAktar()" style="display:none;">↪ Eski Borç/Alacak</button>
+      <button class="btn cari-btn-cizgi" onclick="cariAktarAc()">📥 AltınBarkod'dan Aktar</button>
+      <button class="btn cari-btn-mavi" onclick="cariMusteriModalAc()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg> Yeni Müşteri</button>
     </div>
   </div>
   <div class="cari-grid">
-    <div class="card" style="padding:10px;">
-      <input id="cariAra" class="form-control" placeholder="Müşteri ara..." oninput="cariMusteriListeRender()" style="margin-bottom:8px;">
+    <div class="cari-yan">
+      <div class="cari-yan-etiket">Müşteri Ara</div>
+      <div class="cari-arama"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="cariAra" placeholder="Müşteri adı, telefon..." oninput="cariMusteriListeRender()"></div>
       <div id="cariMusteriListe"><div class="loading">Yükleniyor...</div></div>
     </div>
-    <div id="cariDetay"><div class="card empty">Soldan bir müşteri seçin ya da "+ Müşteri" ile ekleyin.</div></div>
+    <div id="cariDetay"><div class="card empty">Soldan bir müşteri seçin ya da "Yeni Müşteri" ile ekleyin.</div></div>
   </div>
 </div>
 
@@ -9167,6 +9250,26 @@ function cariTlDeger(birim) {
 // ZS/AS/MS... anlık satış (bakiyeyi etkilemez; borcu hemen ardındaki VV satırı yazar),
 // CA/CB çevirme (iki birimi birden etkiler, bkz. cariEtkiler), DB/DV/VR girilen işaretle (±).
 const CARI_ALTIN_TIPLER = /^(AG|AC|ZG|ZC|HG|HC)$/;
+const CARI_AB_ADLARI = { CA: 'Çevirme', CB: 'Çevirme', VV: 'Veresiye Verildi', VA: 'Veresiye Alındı', VR: 'Virman', DB: 'Düzeltme', DV: 'Devir', ZS: 'Ziynet Satış', AS: 'Altın Satış', MS: 'Mücevher Satış' };
+const CARI_SVG = {
+  ara: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  kaydet: '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M7 3v5h8V3M7 21v-7h10v7"/></svg>',
+  kalem: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>',
+  cop: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+  izgara: '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>',
+  takvim: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  arti: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>'
+};
+function cariTipAd(tip) { return ((CARI_TIPLER.find(t => t.kod === tip) || {}).ad || CARI_AB_ADLARI[tip] || tip || '').replace(/\s*\(.*\)$/, ''); }
+function cariTipPill(r) {
+  const t = String(r.islem_tipi || '').toUpperCase();
+  let cls = 'gri', ok = '±';
+  if (t === 'VR' || t === 'CA' || t === 'CB') { cls = t === 'VR' ? 'mavi' : 'mor'; ok = '⇄'; }
+  else if (/^[A-Z]S$/.test(t)) { cls = 'gri'; ok = '◆'; }
+  else if (t === 'VA' || /G$/.test(t)) { cls = 'yesil'; ok = '↓'; }
+  else if (t === 'VV' || /C$/.test(t)) { cls = 'kirmizi'; ok = '↑'; }
+  return `<span class="cari-pill ${cls}" title="${bozEsc(t)}"><b>${ok}</b> ${bozEsc(cariTipAd(t))}</span>`;
+}
 const CARI_BIRIM_AD = { HAS: 'HAS (gr)', ECY: 'Çeyrek (adet)', ATM: 'Ata (adet)', G22: '22 ayar (gr)' };
 function cariEtki(tip, toplam) {
   const t = String(tip || '').toUpperCase().trim();
@@ -9261,20 +9364,26 @@ function cariChipler(o) {
 function cariMusteriListeRender() {
   const el = document.getElementById('cariMusteriListe');
   if (!el) return;
-  const q = (document.getElementById('cariAra')?.value || '').toLocaleLowerCase('tr-TR');
-  const liste = cariMusteriler.filter(m => !q || m.ad.toLocaleLowerCase('tr-TR').includes(q));
+  const q = (document.getElementById('cariAra')?.value || '').toLocaleLowerCase('tr-TR').trim();
+  const liste = cariMusteriler.filter(m => !q || m.ad.toLocaleLowerCase('tr-TR').includes(q) || String(m.telefon || '').replace(/\D/g, '').includes(q.replace(/\D/g, '') || '§'));
   if (!liste.length) {
-    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:6px;">' + (cariMusteriler.length ? 'Eşleşen müşteri yok.' : 'Henüz müşteri yok.') + '</div>';
+    el.innerHTML = '<div class="cari-yan-bos">' + (cariMusteriler.length ? 'Eşleşen müşteri yok.' : 'Henüz müşteri yok.') + '</div>';
     return;
   }
-  el.innerHTML = liste.map(m => `<div class="cari-musteri${m.id === cariSeciliId ? ' secili' : ''}" onclick="cariSec(${m.id})">
-      <div style="font-weight:600;font-size:13px;">${bozEsc(m.ad)}</div>
-      <div>${cariChipler(cariOzet[m.id]) || '<span style="font-size:11px;color:var(--text3);">bakiye yok</span>'}</div>
-    </div>`).join('') +
-    '<div style="font-size:10.5px;color:var(--text3);margin-top:8px;line-height:1.4;">A = müşteri alacaklı (biz borçluyuz)<br>B = müşteri borçlu (bize borçlu)</div>';
+  el.innerHTML = liste.map(m => {
+    const o = cariOzet[m.id];
+    const ozet = o ? cariBirimListesi(o).filter(b => Math.abs(o[b] || 0) >= 0.005).map(b =>
+      `<span class="${o[b] > 0 ? 'a' : 'b'}">${b} ${cariSayi(Math.abs(o[b]))} ${o[b] > 0 ? 'A' : 'B'}</span>`).join('') : '';
+    return `<div class="cari-musteri${m.id === cariSeciliId ? ' secili' : ''}" onclick="cariSec(${m.id})">
+      <span class="cari-mini-avatar">${bozEsc(cariBasHarf(m.ad))}</span>
+      <div style="min-width:0;flex:1;"><div class="cari-musteri-ad">${bozEsc(m.ad)}</div>
+      <div class="cari-musteri-ozet gizle-rakam">${ozet || '<span class="s">bakiye yok</span>'}</div></div>
+    </div>`;
+  }).join('') + '<div class="cari-yan-not">A = müşteri alacaklı (biz borçluyuz) · B = müşteri borçlu</div>';
 }
 
-let cariSeciliIslemId = null;   // tabloda tıklanan işlem: bakiye o anki haliyle gösterilir
+let cariSeciliIslemId = null;
+let cariFiltre = { bas: '', bit: '', q: '', sira: 'tarih', yon: 1 };   // tabloda tıklanan işlem: bakiye o anki haliyle gösterilir
 async function cariSec(id) {
   if (cariSeciliId !== id) cariSeciliIslemId = null;
   cariSeciliId = id;
@@ -9287,55 +9396,61 @@ async function cariSec(id) {
   const eurKur = localStorage.getItem('cariEurKur') || '';
   document.getElementById('cariDetay').innerHTML = `
     <div class="cari-hero">
-      <div class="cari-hero-ust">
-        <div class="cari-avatar">${bozEsc(cariBasHarf(m.ad))}</div>
-        <div style="flex:1;min-width:180px;">
-          <div class="cari-hero-etiket">CARİ HESAP</div>
-          <div class="cari-hero-ad">${bozEsc(m.ad)}</div>
-          <div class="cari-hero-alt">${m.telefon ? '📞 ' + bozEsc(m.telefon) : '<span style="opacity:.6;">telefon yok</span>'}${m.notlar ? ' · ' + bozEsc(m.notlar) : ''}<span id="cariIslemSayisi"></span></div>
-        </div>
-        <div class="cari-hero-btnlar">
-          <button class="btn btn-sm cari-btn-wa" onclick="cariPaylas()" title="Seçili (yoksa son) işlemi WhatsApp ile müşteriye gönder">${CARI_WA_IKON} Paylaş</button>
-          <button class="btn btn-sm cari-btn-cam" onclick="cariMusteriModalAc(${m.id})">✏️ Düzenle</button>
-          <button class="btn btn-sm cari-btn-cam" onclick="cariMusteriSil(${m.id})">Sil</button>
-        </div>
+      <div class="cari-avatar">${bozEsc(cariBasHarf(m.ad))}</div>
+      <div style="flex:1;min-width:180px;">
+        <div class="cari-hero-ad">${bozEsc(m.ad)}</div>
+        <div class="cari-hero-alt">Müşteri hesabı${m.telefon ? ' <i>•</i> ' + bozEsc(m.telefon) : ''}${m.notlar ? ' <i>•</i> ' + bozEsc(m.notlar) : ''}<span id="cariIslemSayisi"></span></div>
       </div>
-      <div class="cari-hero-govde">
-        <div id="cariBakiyeBaslik" class="cari-bk-baslik"></div>
-        <div id="cariBakiyeKartlar" class="cari-bk-grid"></div>
-        <div id="cariBakiyeKapali" class="cari-bk-kapali"></div>
-        <div id="cariNetKarsilik"></div>
-        <div style="font-size:11px;color:var(--text3);margin-top:6px;">EUR kuru (₺, yaklaşık değer için):
-          <input type="number" step="0.01" id="cariEurKur" value="${eurKur}" style="width:80px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;" oninput="localStorage.setItem('cariEurKur',this.value);cariBakiyeRender()">
-        </div>
+      <div class="cari-hero-btnlar">
+        <button class="btn cari-btn-wa" onclick="cariPaylas()" title="Seçili (yoksa son) işlemi WhatsApp ile müşteriye gönder">${CARI_WA_IKON} Paylaş</button>
+        <button class="btn cari-btn-cizgi" onclick="cariMusteriModalAc(${m.id})">${CARI_SVG.kalem} Düzenle</button>
+        <button class="btn cari-btn-cizgi kirmizi" onclick="cariMusteriSil(${m.id})" title="Müşteriyi sil">${CARI_SVG.cop}</button>
       </div>
     </div>
+    <div id="cariBakiyeBaslik"></div>
+    <div id="cariBakiyeKartlar" class="cari-kartlar"></div>
+    <div id="cariNetKarsilik"></div>
 
-    <div class="card" style="margin-bottom:12px;background:var(--bg2);">
+    <div class="card cari-panel" style="margin-bottom:14px;">
       <input type="hidden" id="ciEditId">
-      <div style="font-weight:600;font-size:13px;margin-bottom:8px;" id="ciBaslik">➕ Yeni İşlem</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
-        <div><label class="form-label">Fiş No</label><div id="ciFisNo" style="height:36px;display:flex;align-items:center;padding:0 10px;border:1px dashed var(--border);border-radius:8px;font-weight:700;color:var(--text2);min-width:60px;" title="Otomatik verilir"></div></div>
-        <div><label class="form-label">Tarih</label><input type="datetime-local" id="ciTarih" class="form-control" style="width:185px;" value="${cariSimdi()}"></div>
-        <div><label class="form-label">İşlem Tipi</label><select id="ciTip" class="form-control" style="width:165px;" onchange="cariTipDegisti()">${tipOps}</select></div>
-        <div><label class="form-label">Stok (gelen/giden)</label><select id="ciStok" class="form-control" style="width:150px;" onchange="cariStokDegisti()">${stokOps}</select></div>
-        <div><label class="form-label">Miktar</label><input type="text" inputmode="decimal" autocomplete="off" id="ciMiktar" class="form-control" style="width:140px;text-align:right;font-weight:600;" oninput="cariInputBicim(this,event);cariFormHesapla()"></div>
-        <div id="ciMilyemWrap" style="display:none;"><label class="form-label">Milyem</label><input type="text" inputmode="decimal" autocomplete="off" id="ciMilyem" class="form-control" style="width:80px;text-align:right;" placeholder="0,916" oninput="cariInputBicim(this,event);cariFormHesapla()"></div>
-        <div><label class="form-label">Bakiye Birimi</label><select id="ciBirim" class="form-control" style="width:95px;" onchange="cariBirimDegisti()">${birimOps}</select></div>
+      <div class="cari-panel-baslik"><span class="cari-panel-ikon">${CARI_SVG.izgara}</span><span id="ciBaslik">Yeni İşlem Ekle</span></div>
+      <div class="cari-form">
+        <div><label class="form-label">Fiş No</label><div id="ciFisNo" class="cari-fisno" title="Otomatik verilir"></div></div>
+        <div><label class="form-label">Tarih</label><input type="datetime-local" id="ciTarih" class="form-control" style="width:190px;" value="${cariSimdi()}"></div>
+        <div><label class="form-label">İşlem Tipi</label><select id="ciTip" class="form-control" style="width:175px;" onchange="cariTipDegisti()">${tipOps}</select></div>
+        <div><label class="form-label">Stok (gelen/giden)</label><select id="ciStok" class="form-control" style="width:160px;" onchange="cariStokDegisti()">${stokOps}</select></div>
+        <div><label class="form-label">Miktar</label><input type="text" inputmode="decimal" autocomplete="off" id="ciMiktar" class="form-control" placeholder="0,00" style="width:150px;text-align:right;font-weight:600;" oninput="cariInputBicim(this,event);cariFormHesapla()"></div>
+        <div id="ciMilyemWrap" style="display:none;"><label class="form-label">Milyem</label><input type="text" inputmode="decimal" autocomplete="off" id="ciMilyem" class="form-control" style="width:85px;text-align:right;" placeholder="0,916" oninput="cariInputBicim(this,event);cariFormHesapla()"></div>
+        <div><label class="form-label">Bakiye Birimi</label><select id="ciBirim" class="form-control" style="width:100px;" onchange="cariBirimDegisti()">${birimOps}</select></div>
         <div id="ciKurWrap" style="display:none;"><label class="form-label" id="ciKurEtiket">Kur</label>
-          <div style="display:flex;gap:4px;"><input type="text" inputmode="decimal" autocomplete="off" id="ciKur" class="form-control" style="width:120px;text-align:right;" oninput="cariInputBicim(this,event);cariKurElle=true;cariFormHesapla()">
-          <button type="button" class="btn btn-sm" title="Parametrelerdeki kurla doldur" onclick="cariKurDoldur(true)">Oto</button></div></div>
-        <div><label class="form-label">Toplam <span id="ciToplamBirim" style="color:var(--text3);"></span></label><input type="text" inputmode="decimal" autocomplete="off" id="ciToplam" class="form-control" style="width:130px;text-align:right;font-weight:700;" oninput="cariInputBicim(this,event);cariToplamElle=true;cariFormHesapla(true)"></div>
-        <div style="flex:1;min-width:160px;"><label class="form-label">Açıklama</label><input id="ciAciklama" class="form-control" placeholder="havale, çeyrek vb."></div>
-        <button class="btn btn-primary" onclick="cariIslemKaydet()">Kaydet ↵</button>
-        <button class="btn" id="ciIptalBtn" style="display:none;" onclick="cariFormTemizle()">Vazgeç</button>
+          <div style="display:flex;gap:4px;"><input type="text" inputmode="decimal" autocomplete="off" id="ciKur" class="form-control" style="width:125px;text-align:right;" oninput="cariInputBicim(this,event);cariKurElle=true;cariFormHesapla()">
+          <button type="button" class="btn cari-btn-cizgi" title="Parametrelerdeki kurla doldur" onclick="cariKurDoldur(true)">Oto</button></div></div>
+        <div><label class="form-label">Toplam <span id="ciToplamBirim" style="opacity:.7;"></span></label><input type="text" inputmode="decimal" autocomplete="off" id="ciToplam" class="form-control" style="width:135px;text-align:right;font-weight:700;" oninput="cariInputBicim(this,event);cariToplamElle=true;cariFormHesapla(true)"></div>
+        <div style="flex:1;min-width:200px;"><label class="form-label">Açıklama</label><input id="ciAciklama" class="form-control" placeholder="Havale, çek, çeyrek vb."></div>
+        <button class="btn cari-btn-mavi" onclick="cariIslemKaydet()">${CARI_SVG.kaydet} Kaydet</button>
+        <button class="btn cari-btn-cizgi" id="ciIptalBtn" style="display:none;" onclick="cariFormTemizle()">Vazgeç</button>
       </div>
-      <div id="ciOnizleme" style="font-size:12px;color:var(--text2);margin-top:8px;"></div>
-      <div style="font-size:11px;color:var(--text3);margin-top:4px;">Stok = gelen/giden şey, Bakiye Birimi = bakiyenin hangi birimde tutulacağı. İkisi aynıysa (TL → TL) çevrilmez; farklıysa (TL → HAS) kur sorulur ve çevrilir.</div>
+      <div id="ciOnizleme" class="cari-onizleme"></div>
+      <div class="cari-ipucu">Stok = gelen/giden şey, Bakiye Birimi = bakiyenin tutulacağı birim. İkisi aynıysa (TL → TL) çevrilmez; farklıysa (TL → HAS) kur sorulur ve çevrilir.</div>
     </div>
 
-    <div class="card" style="padding:0;overflow:hidden;">
-      <div id="cariIslemTablo" style="max-height:560px;overflow:auto;"><div class="loading">Yükleniyor...</div></div>
+    <div class="card cari-panel" style="padding:0;overflow:hidden;">
+      <div class="cari-hareket-ust">
+        <div class="cari-panel-baslik" style="margin:0;"><span class="cari-panel-ikon">${CARI_SVG.izgara}</span>Hesap Hareketleri</div>
+        <div class="cari-hareket-filtre">
+          <div class="cari-tarih-aralik">${CARI_SVG.takvim}
+            <input type="date" id="cfBas" value="${cariFiltre.bas}" onchange="cariFiltre.bas=this.value;cariTabloRender()">
+            <span>–</span>
+            <input type="date" id="cfBit" value="${cariFiltre.bit}" onchange="cariFiltre.bit=this.value;cariTabloRender()">
+            <button title="Tarih filtresini temizle" onclick="cariFiltre.bas='';cariFiltre.bit='';document.getElementById('cfBas').value='';document.getElementById('cfBit').value='';cariTabloRender()">✕</button>
+          </div>
+          <div class="cari-arama">${CARI_SVG.ara}<input id="cfAra" placeholder="Açıklama, fiş no ile ara..." value="${bozEsc(cariFiltre.q)}" oninput="cariFiltre.q=this.value;cariTabloRender()"></div>
+        </div>
+      </div>
+      <div id="cariIslemTablo" style="max-height:600px;overflow:auto;"><div class="loading">Yükleniyor...</div></div>
+    </div>
+    <div class="cari-eur">EUR kuru (₺, yaklaşık değer için):
+      <input type="number" step="0.01" id="cariEurKur" value="${eurKur}" oninput="localStorage.setItem('cariEurKur',this.value);cariBakiyeRender()">
     </div>`;
   document.querySelectorAll('#cariDetay .card input:not([type=hidden]), #cariDetay .card select').forEach(inp => {
     if (inp.id && inp.id.startsWith('ci')) inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); cariIslemKaydet(); } });
@@ -9418,6 +9533,9 @@ function cariYaklasikDeger(o) {
   if (Math.abs(o.EUR || 0) >= 0.005 && k.EUR) kurYazi.push('1 € = ' + cariSayi(k.EUR) + ' ₺');
   return { net, eksik, kurYazi: kurYazi.join(' · ') };
 }
+const CARI_KART_TEMA = { HAS: 'has', USD: 'usd', TL: 'tl', EUR: 'eur' };
+const CARI_KART_AD = { HAS: 'HAS ALTIN', USD: 'USD', TL: 'TL', EUR: 'EUR', ECY: 'ÇEYREK', ATM: 'ATA LİRA', G22: '22 AYAR' };
+const CARI_KART_EK = { HAS: 'gr', USD: '$', TL: '₺', EUR: '€', ECY: 'adet', ATM: 'adet', G22: 'gr' };
 function cariBakiyeRender() {
   const el = document.getElementById('cariBakiyeKartlar');
   if (!el) return;
@@ -9426,27 +9544,23 @@ function cariBakiyeRender() {
   if (sec) o = cariBakiyeAnlik(sec.id) || o; else cariSeciliIslemId = null;
   const baslik = document.getElementById('cariBakiyeBaslik');
   if (baslik) baslik.innerHTML = sec
-    ? `<div class="cari-bk-mod gecmis"><span>📍 <b>${bozEsc(sec.fis_no ? 'Fiş ' + sec.fis_no : sec.islem_tipi)}</b> · ${cariTarihGoster(sec.tarih)} işlemi sonrasındaki bakiye</span>
-         <button class="btn btn-sm" onclick="cariIslemSecRow(null)">↺ Güncel bakiye</button></div>`
-    : `<div class="cari-bk-mod"><span>Güncel bakiye</span><span style="font-weight:400;color:var(--text3);">Bir işleme tıklayınca o andaki bakiye görünür</span></div>`;
-  const acik = cariBirimListesi(o).filter(b => Math.abs(o[b] || 0) >= 0.005);
-  const kapali = CARI_BIRIMLER.filter(b => Math.abs(o[b] || 0) < 0.005);
-  el.innerHTML = acik.length ? acik.map(b => {
-    const v = o[b];
-    const cls = v > 0 ? 'a' : 'b';
-    return `<div class="cari-bk ${cls}">
-      <div class="cari-bk-ust">
-        <span class="cari-bk-ikon">${cariIkonHtml(b)}</span>
-        <span class="cari-bk-ad">${bozEsc(CARI_BIRIM_AD[b] || b)}</span>
-        <span class="cari-bk-durum">${v > 0 ? 'ALACAKLI' : 'BORÇLU'}</span>
-      </div>
-      <div class="cari-bk-deger gizle-rakam">${cariSayi(Math.abs(v))}<small>${b === 'HAS' ? ' gr' : (b === 'TL' ? ' ₺' : (b === 'USD' ? ' $' : (b === 'EUR' ? ' €' : '')))}</small></div>
-      <div class="cari-bk-alt">${v > 0 ? 'Biz müşteriye borçluyuz' : 'Müşteri bize borçlu'}</div>
+    ? `<div class="cari-gecmis"><span>📍 <b>${bozEsc(sec.fis_no ? 'Fiş ' + sec.fis_no : cariTipAd(sec.islem_tipi))}</b> · ${cariTarihGoster(sec.tarih)} işlemi sonrasındaki bakiye gösteriliyor</span>
+         <button class="btn cari-btn-cizgi" onclick="cariIslemSecRow(null)">↺ Güncel bakiye</button></div>` : '';
+  const birimler = CARI_BIRIMLER.concat(cariBirimListesi(o).filter(b => !CARI_BIRIMLER.includes(b) && Math.abs(o[b] || 0) >= 0.005));
+  el.innerHTML = birimler.map(b => {
+    const v = o[b] || 0;
+    const sifir = Math.abs(v) < 0.005;
+    const tema = CARI_KART_TEMA[b] || 'diger';
+    const dekor = b === 'HAS' ? cariIkonHtml('HAS') : `<span>${bozEsc(CARI_BIRIM_SEMBOL[b] || b)}</span>`;
+    return `<div class="cari-kart k-${tema}${sifir ? ' sifir' : ''}">
+      <div class="cari-kart-dekor">${dekor}</div>
+      <div class="cari-kart-ust"><span class="cari-kart-ikon">${b === 'HAS' ? cariIkonHtml('HAS') : bozEsc(CARI_BIRIM_SEMBOL[b] || b.slice(0, 2))}</span><span>${bozEsc(CARI_KART_AD[b] || b)}</span></div>
+      <div class="cari-kart-deger gizle-rakam">${cariSayi(Math.abs(v))}<small>${bozEsc(CARI_KART_EK[b] || '')}</small></div>
+      ${sifir ? '<span class="cari-kart-pill bos">Bakiye yok</span>'
+        : `<span class="cari-kart-pill">${v > 0 ? '▲ Müşteri alacaklı' : '▼ Müşteri borçlu'}</span>
+           <div class="cari-kart-alt">${v > 0 ? 'Biz müşteriye borçluyuz' : 'Müşteri bize borçlu'}</div>`}
     </div>`;
-  }).join('') : `<div class="cari-bk kapalı-tum"><div class="cari-bk-deger" style="color:var(--text3);font-size:20px;">Hesap kapalı</div><div class="cari-bk-alt">Tüm bakiyeler sıfır</div></div>`;
-  const kEl = document.getElementById('cariBakiyeKapali');
-  if (kEl) kEl.innerHTML = (acik.length && kapali.length) ? 'Kapalı: ' + kapali.map(b => `<span>${b}</span>`).join('') : '';
-
+  }).join('');
   const nEl = document.getElementById('cariNetKarsilik');
   if (nEl) {
     const y = cariYaklasikDeger(o);
@@ -9468,6 +9582,10 @@ function cariIslemSecRow(id, ev) {
   if (cariSeciliIslemId) document.getElementById('cariDetay').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function cariSiralaTikla(k) {
+  if (cariFiltre.sira === k) cariFiltre.yon = -cariFiltre.yon; else { cariFiltre.sira = k; cariFiltre.yon = k === 'tarih' ? 1 : -1; }
+  cariTabloRender();
+}
 function cariTabloRender() {
   const el = document.getElementById('cariIslemTablo');
   if (!el) return;
@@ -9476,39 +9594,54 @@ function cariTabloRender() {
     el.innerHTML = '<div class="empty">Bu müşterinin henüz işlemi yok. Yukarıdan ekleyebilir ya da "AltınBarkod\'dan Aktar" ile geçmişi yükleyebilirsiniz.</div>';
     return;
   }
-  const yuruyen = cariBos();
-  const satirlar = cariIslemler.map((r, i) => {
+  // bakiyeyi kronolojik sırayla hesapla, sonra filtrele/sırala
+  const yuruyen = cariBos(), bakiye = {};
+  cariIslemler.forEach(r => { cariEtkiEkle(yuruyen, r); bakiye[r.id] = yuruyen[cariBirimNorm(r.birim)] || 0; });
+  const sonId = cariIslemler[cariIslemler.length - 1].id;
+  const f = cariFiltre, q = f.q.toLocaleLowerCase('tr-TR').trim();
+  let liste = cariIslemler.filter(r => {
+    const g = String(r.tarih || '').slice(0, 10);
+    if (f.bas && g < f.bas) return false;
+    if (f.bit && g > f.bit) return false;
+    if (q) {
+      const metin = [r.fis_no, r.aciklama, r.islem_tipi, cariTipAd(r.islem_tipi), cariSayi(r.miktar), cariSayi(r.toplam)].join(' ').toLocaleLowerCase('tr-TR');
+      if (!metin.includes(q)) return false;
+    }
+    return true;
+  });
+  const anahtar = { tarih: r => String(r.tarih || '') + String(r.id).padStart(20, '0'), fis: r => Number(r.fis_no) || 0, tip: r => cariTipAd(r.islem_tipi),
+    miktar: r => Number(r.miktar) || 0, toplam: r => Number(r.toplam) || 0, birim: r => cariBirimNorm(r.birim) }[f.sira];
+  if (f.sira !== 'tarih' || f.yon !== 1) liste = liste.slice().sort((a, b) => { const x = anahtar(a), y = anahtar(b); return (x < y ? -1 : x > y ? 1 : 0) * f.yon; });
+  const th = (k, ad, cls) => `<th class="${cls || ''} sirali${f.sira === k ? ' aktif' : ''}" onclick="cariSiralaTikla('${k}')">${ad} <span class="ok">${f.sira === k ? (f.yon === 1 ? '▲' : '▼') : '⇅'}</span></th>`;
+  const satirlar = liste.map(r => {
     const b = cariBirimNorm(r.birim);
-    const etki = cariEtkiler(r)[0][1];
-    cariEtkiEkle(yuruyen, r);
-    const bak = yuruyen[b] || 0;
-    const son = i === cariIslemler.length - 1;
-    const tipRenk = etki >= 0 ? '#1B7A4A' : '#C0392B';
-    return `<tr data-id="${r.id}" class="${son ? 'son' : ''}${r.id === cariSeciliIslemId ? ' secili' : ''}" onclick="cariIslemSecRow(${r.id}, event)" style="cursor:pointer;">
-      <td style="white-space:nowrap;">${cariTarihGoster(r.tarih)}</td>
-      <td>${bozEsc(r.fis_no || '')}</td>
-      <td><span style="font-weight:700;color:${tipRenk};">${bozEsc(r.islem_tipi || '')}</span></td>
-      <td class="sayi">${cariSayi(r.miktar)} <span style="color:var(--text3);font-size:11px;">${bozEsc(cariStokAd(r))}</span></td>
-      <td class="sayi">${Number(r.birim_fiyat) ? cariSayi(r.birim_fiyat, 2) : ''}</td>
-      <td class="sayi" style="font-weight:600;">${cariSayi(r.toplam)}</td>
+    const bak = bakiye[r.id];
+    return `<tr data-id="${r.id}" class="${r.id === sonId ? 'son' : ''}${r.id === cariSeciliIslemId ? ' secili' : ''}" onclick="cariIslemSecRow(${r.id}, event)">
+      <td>${cariTarihGoster(r.tarih)}</td>
+      <td class="soluk">${bozEsc(r.fis_no || '')}</td>
+      <td>${cariTipPill(r)}</td>
+      <td class="sayi">${cariSayi(r.miktar)} <span class="birim-ek">${bozEsc(cariStokAd(r))}</span></td>
+      <td class="sayi soluk">${Number(r.birim_fiyat) ? cariSayi(r.birim_fiyat, 2) : ''}</td>
+      <td class="sayi kalin">${cariSayi(r.toplam)}</td>
       <td>${bozEsc(b)}</td>
-      <td class="sayi gizle-rakam" style="font-weight:700;color:${bak > 0.005 ? '#C0392B' : (bak < -0.005 ? '#1B7A4A' : 'var(--text3)')};">${cariSayi(Math.abs(bak))} ${bak > 0.005 ? 'A' : (bak < -0.005 ? 'B' : '')}</td>
-      <td style="white-space:normal;min-width:160px;">${bozEsc(r.aciklama || '')}</td>
-      <td style="white-space:nowrap;">
-        <button onclick="cariPaylas(${r.id})" title="WhatsApp ile paylaş" style="background:none;border:none;cursor:pointer;color:#25D366;vertical-align:middle;">${CARI_WA_IKON}</button>
-        <button onclick="cariIslemDuzenle(${r.id})" title="Düzenle" style="background:none;border:none;cursor:pointer;font-size:13px;">✏️</button>
-        <button onclick="cariIslemSil(${r.id})" title="Sil" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:14px;">🗑</button>
+      <td class="sayi gizle-rakam bakiye ${bak > 0.005 ? 'a' : (bak < -0.005 ? 'b' : '')}">${cariSayi(Math.abs(bak))} ${bak > 0.005 ? 'A' : (bak < -0.005 ? 'B' : '')}</td>
+      <td class="aciklama">${bozEsc(r.aciklama || '')}</td>
+      <td class="islemler">
+        <button class="cari-ikon-btn wa" onclick="cariPaylas(${r.id})" title="WhatsApp ile paylaş">${CARI_WA_IKON}</button>
+        <button class="cari-ikon-btn" onclick="cariIslemDuzenle(${r.id})" title="Düzenle">${CARI_SVG.kalem}</button>
+        <button class="cari-ikon-btn sil" onclick="cariIslemSil(${r.id})" title="Sil">${CARI_SVG.cop}</button>
       </td>
     </tr>`;
   }).join('');
   el.innerHTML = `<table class="cari-tablo">
-    <thead style="position:sticky;top:0;z-index:1;"><tr>
-      <th>Tarih</th><th>Fiş No</th><th>Tip</th><th class="sayi">Miktar</th><th class="sayi">Kur</th>
-      <th class="sayi">Toplam</th><th>Birim</th><th class="sayi">Bakiye (o birim)</th><th>Açıklama</th><th></th>
-    </tr></thead><tbody>${satirlar}</tbody></table>
-    <div style="font-size:11px;color:var(--text3);padding:8px 10px;">${cariIslemler.length} işlem · "Bakiye" sütunu, o satır işlendikten sonraki bakiyeyi gösterir (A = alacaklı, B = borçlu).</div>`;
-  el.scrollTop = el.scrollHeight;
+    <thead><tr>
+      ${th('tarih', 'Tarih')}${th('fis', 'Fiş No')}${th('tip', 'İşlem')}${th('miktar', 'Miktar', 'sayi')}<th class="sayi">Kur</th>
+      ${th('toplam', 'Toplam', 'sayi')}${th('birim', 'Birim')}<th class="sayi">Bakiye</th><th>Açıklama</th><th></th>
+    </tr></thead><tbody>${satirlar || '<tr><td colspan="10" class="empty" style="padding:2rem;">Filtreye uyan işlem yok.</td></tr>'}</tbody></table>
+    <div class="cari-tablo-alt">${liste.length === cariIslemler.length ? cariIslemler.length + ' işlem' : liste.length + ' / ' + cariIslemler.length + ' işlem gösteriliyor'} · "Bakiye" o işlemden sonraki bakiyedir (A = alacaklı, B = borçlu) · Satıra tıklayınca üstte o anki bakiye görünür.</div>`;
+  if (f.sira === 'tarih' && f.yon === 1) el.scrollTop = el.scrollHeight; else el.scrollTop = 0;
 }
+
 
 function cariStokAd(r) {
   if (/^C[AB]$/.test(r.islem_tipi)) return cariCevirKaynak(r);
@@ -9608,7 +9741,7 @@ function cariFormHesapla(toplamDegisti) {
 
 function cariFormTemizle() {
   document.getElementById('ciEditId').value = '';
-  document.getElementById('ciBaslik').textContent = '➕ Yeni İşlem';
+  document.getElementById('ciBaslik').textContent = 'Yeni İşlem Ekle';
   document.getElementById('ciIptalBtn').style.display = 'none';
   document.getElementById('ciTarih').value = cariSimdi();
   document.getElementById('ciFisNo').textContent = String(cariSonFis + 1);
@@ -9624,7 +9757,7 @@ function cariIslemDuzenle(id) {
     return;
   }
   document.getElementById('ciEditId').value = String(r.id);
-  document.getElementById('ciBaslik').textContent = '✏️ İşlemi Düzenle';
+  document.getElementById('ciBaslik').textContent = 'İşlemi Düzenle';
   document.getElementById('ciIptalBtn').style.display = '';
   document.getElementById('ciTarih').value = String(r.tarih || '').replace(' ', 'T').slice(0, 16);
   document.getElementById('ciFisNo').textContent = r.fis_no || '—';
