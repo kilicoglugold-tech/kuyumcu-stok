@@ -1,4 +1,4 @@
-<!-- SURUM-V94-CARI-PAYLAS --><!DOCTYPE html>
+<!-- SURUM-V95-CARI-PAYLAS-KALIN --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -9586,12 +9586,13 @@ function cariPaylasMetni(id) {
   } else {
     islem = cariMesajTutar(r.toplam, birim);
   }
-  return 'Tarih: ' + cariTarihGoster(r.tarih) + '\n' +
-    'Müşteri ismi : ' + m.ad + '\n' +
-    'İşlem Öncesi Bakiye :\n' + cariMesajBakiyeSatirlari(once) + '\n\n' +
-    '  İŞLEM (' + tipAd + '): ' + islem + '\n\n' +
-    'SON BAKİYE:\n\n' + cariMesajBakiyeSatirlari(sonra) + '\n\n' +
-    'KILIÇOĞLU KUYUMCULUK';
+  // *...* WhatsApp'ta kalın görünür
+  return '*Tarih:* ' + cariTarihGoster(r.tarih) + '\n' +
+    '*Müşteri ismi :* ' + m.ad + '\n\n' +
+    '*İşlem Öncesi Bakiye :*\n' + cariMesajBakiyeSatirlari(once) + '\n\n' +
+    '  *İŞLEM (' + tipAd + '):* ' + islem + '\n\n' +
+    '*SON BAKİYE:*\n\n' + cariMesajBakiyeSatirlari(sonra) + '\n\n' +
+    '*KILIÇOĞLU KUYUMCULUK*';
 }
 function cariTelefonWa(tel) {
   let d = String(tel || '').replace(/\D/g, '');
