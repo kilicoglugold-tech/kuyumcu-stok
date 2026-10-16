@@ -1,4 +1,4 @@
-<!-- SURUM-V98-CARI-GORSEL --><!DOCTYPE html>
+<!-- SURUM-V99-CARI-PRO --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -321,7 +321,6 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .cari-bk.b { background:linear-gradient(135deg,#ECF7F0 0%,#FFFFFF 75%); border-color:#BFE0CB; }
 .cari-bk.b::before { background:#1B7A4A; }
 .cari-bk-ust { display:flex; align-items:center; gap:8px; }
-.cari-bk-ikon { width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; background:linear-gradient(135deg,#F5E6C0,#E2C47A); color:#6B4E07; flex-shrink:0; }
 .cari-bk-ad { font-size:12px; font-weight:700; color:var(--text2); letter-spacing:.3px; flex:1; }
 .cari-bk-durum { font-size:10.5px; font-weight:800; letter-spacing:.5px; padding:3px 9px; border-radius:20px; color:#fff; }
 .cari-bk.a .cari-bk-durum { background:#C0392B; }
@@ -337,6 +336,27 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .cari-tablo tr.secili td { background:#FFE7A3 !important; font-weight:600; }
 .cari-tablo tr.secili td:first-child { box-shadow:inset 4px 0 0 #B8860B; }
 @media (max-width: 700px) { .cari-paylas-grid { grid-template-columns:1fr !important; } }
+/* Cari müşteri başlığı (profesyonel görünüm) */
+.cari-hero { border-radius:16px; overflow:hidden; margin-bottom:12px; background:var(--card); border:1px solid #E6DBC2; box-shadow:0 2px 6px rgba(60,40,10,.06), 0 14px 30px -18px rgba(60,40,10,.35); }
+.cari-hero-ust { display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding:18px 22px; background:linear-gradient(120deg,#2B2213 0%,#3D2E14 55%,#5A4316 100%); border-bottom:3px solid #C9A44C; }
+.cari-avatar { width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:21px; color:#2B2213; background:linear-gradient(135deg,#F7E3A3,#C9A44C); box-shadow:0 0 0 3px rgba(232,200,114,.25); flex-shrink:0; }
+.cari-hero-etiket { font-size:10.5px; letter-spacing:2px; font-weight:700; color:#E8C872; }
+.cari-hero-ad { font-family:'DM Serif Display',serif; font-size:27px; color:#FFFFFF; line-height:1.15; }
+.cari-hero-alt { font-size:12px; color:rgba(255,255,255,.65); margin-top:2px; }
+.cari-hero-btnlar { display:flex; gap:6px; flex-wrap:wrap; }
+.cari-btn-wa { background:#25D366 !important; color:#fff !important; border-color:#25D366 !important; display:inline-flex; align-items:center; gap:5px; font-weight:700; }
+.cari-btn-cam { background:rgba(255,255,255,.08) !important; color:#F3E7C6 !important; border-color:rgba(232,200,114,.35) !important; }
+.cari-btn-cam:hover { background:rgba(255,255,255,.16) !important; }
+.cari-hero-govde { padding:14px 22px 16px; background:linear-gradient(180deg,#FCFAF4,#FFFFFF 60%); }
+.cari-hero-govde .cari-bk-baslik { margin-top:0; }
+.cari-bk-ikon { width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.cari-ikon-daire { width:32px; height:32px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:15px; box-shadow:inset 0 -2px 0 rgba(0,0,0,.15); }
+.cari-net { margin-top:12px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; border-radius:14px; padding:12px 18px; background:linear-gradient(120deg,#2B2213,#4A3712); color:#fff; }
+.cari-net-etiket { font-size:10.5px; letter-spacing:1.5px; font-weight:700; color:#E8C872; }
+.cari-net-deger { font-size:26px; font-weight:800; font-variant-numeric:tabular-nums; line-height:1.2; }
+.cari-net-kur { font-size:11.5px; color:rgba(255,255,255,.6); }
+.cari-net-durum { font-size:11px; font-weight:800; letter-spacing:.6px; padding:5px 12px; border-radius:20px; background:#E8C872; color:#2B2213; }
+
 
 @page { size: A4 portrait; margin: 10mm; }
 @media print {
@@ -9266,24 +9286,28 @@ async function cariSec(id) {
   const stokOps = CARI_STOKLAR.map(b => `<option value="${b.kod}">${b.ad}</option>`).join('');
   const eurKur = localStorage.getItem('cariEurKur') || '';
   document.getElementById('cariDetay').innerHTML = `
-    <div class="card" style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-        <div>
-          <div style="font-family:'DM Serif Display',serif;font-size:22px;color:var(--gold-dark);">${bozEsc(m.ad)}</div>
-          <div style="font-size:12px;color:var(--text3);">${bozEsc(m.telefon || '')}${m.notlar ? ' · ' + bozEsc(m.notlar) : ''}</div>
+    <div class="cari-hero">
+      <div class="cari-hero-ust">
+        <div class="cari-avatar">${bozEsc(cariBasHarf(m.ad))}</div>
+        <div style="flex:1;min-width:180px;">
+          <div class="cari-hero-etiket">CARİ HESAP</div>
+          <div class="cari-hero-ad">${bozEsc(m.ad)}</div>
+          <div class="cari-hero-alt">${m.telefon ? '📞 ' + bozEsc(m.telefon) : '<span style="opacity:.6;">telefon yok</span>'}${m.notlar ? ' · ' + bozEsc(m.notlar) : ''}<span id="cariIslemSayisi"></span></div>
         </div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn btn-sm" style="background:#25D366;color:#fff;border-color:#25D366;display:inline-flex;align-items:center;gap:5px;" onclick="cariPaylas()" title="Seçili (yoksa son) işlemi WhatsApp ile müşteriye gönder">${CARI_WA_IKON} Paylaş</button>
-          <button class="btn btn-sm" onclick="cariMusteriModalAc(${m.id})">✏️ Düzenle</button>
-          <button class="btn btn-sm btn-danger" onclick="cariMusteriSil(${m.id})">Sil</button>
+        <div class="cari-hero-btnlar">
+          <button class="btn btn-sm cari-btn-wa" onclick="cariPaylas()" title="Seçili (yoksa son) işlemi WhatsApp ile müşteriye gönder">${CARI_WA_IKON} Paylaş</button>
+          <button class="btn btn-sm cari-btn-cam" onclick="cariMusteriModalAc(${m.id})">✏️ Düzenle</button>
+          <button class="btn btn-sm cari-btn-cam" onclick="cariMusteriSil(${m.id})">Sil</button>
         </div>
       </div>
-      <div id="cariBakiyeBaslik" class="cari-bk-baslik"></div>
-      <div id="cariBakiyeKartlar" class="cari-bk-grid"></div>
-      <div id="cariBakiyeKapali" class="cari-bk-kapali"></div>
-      <div id="cariNetKarsilik" style="font-size:12px;color:var(--text2);margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;"></div>
-      <div style="font-size:11px;color:var(--text3);margin-top:4px;">EUR kuru (₺, sadece net karşılık için):
-        <input type="number" step="0.01" id="cariEurKur" value="${eurKur}" style="width:80px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;" oninput="localStorage.setItem('cariEurKur',this.value);cariBakiyeRender()">
+      <div class="cari-hero-govde">
+        <div id="cariBakiyeBaslik" class="cari-bk-baslik"></div>
+        <div id="cariBakiyeKartlar" class="cari-bk-grid"></div>
+        <div id="cariBakiyeKapali" class="cari-bk-kapali"></div>
+        <div id="cariNetKarsilik"></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px;">EUR kuru (₺, yaklaşık değer için):
+          <input type="number" step="0.01" id="cariEurKur" value="${eurKur}" style="width:80px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;" oninput="localStorage.setItem('cariEurKur',this.value);cariBakiyeRender()">
+        </div>
       </div>
     </div>
 
@@ -9347,6 +9371,53 @@ function cariBakiyeAnlik(islemId) {
   return null;
 }
 const CARI_BIRIM_SEMBOL = { HAS: 'Au', TL: '₺', USD: '$', EUR: '€', ECY: 'Ç', ATM: 'A', G22: '22' };
+function cariBasHarf(ad) { return String(ad || '?').trim().split(/\s+/).slice(0, 2).map(s => s[0] || '').join('').toLocaleUpperCase('tr-TR'); }
+const CARI_IKON_RENK = { USD: ['#1B7A4A', '#2FA36B'], TL: ['#8E2A20', '#C0392B'], EUR: ['#23408E', '#3A62C9'] };
+function cariIkonHtml(b) {
+  if (b === 'HAS') return `<svg viewBox="0 0 34 30" width="34" height="30" aria-label="Has altın"><defs><linearGradient id="cariKulce" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCE79A"/><stop offset=".55" stop-color="#E2B33C"/><stop offset="1" stop-color="#B07D12"/></linearGradient></defs>
+    <path d="M10 3h14l3.2 9H6.8z" fill="url(#cariKulce)" stroke="#8C6210" stroke-width=".9" stroke-linejoin="round"/>
+    <path d="M2.6 16h13.2l3 10.5H-.4z" transform="translate(1 0)" fill="url(#cariKulce)" stroke="#8C6210" stroke-width=".9" stroke-linejoin="round"/>
+    <path d="M17.6 16h13.2l3 10.5H14.6z" transform="translate(-1 0)" fill="url(#cariKulce)" stroke="#8C6210" stroke-width=".9" stroke-linejoin="round"/>
+    <path d="M11.5 5h5l-.6 1.6h-4.9z" fill="#FFF6CF" opacity=".8"/></svg>`;
+  const r = CARI_IKON_RENK[b] || ['#9A6B0C', '#D9A93A'];
+  return `<span class="cari-ikon-daire" style="background:linear-gradient(135deg,${r[1]},${r[0]});">${bozEsc(CARI_BIRIM_SEMBOL[b] || b.slice(0, 2))}</span>`;
+}
+// "Son girdiğim kur": bu cihazda en son kaydedilen işlem kuru ya da müşterinin en son işlemindeki kur; yoksa Parametreler
+function cariGuncelKurlar() {
+  const ls = k => { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (_) { return null; } };
+  const sec = (lsKayit, satir, yedek) => {
+    const lt = lsKayit ? (lsKayit.zaman || lsKayit.gun || '') : '';
+    const st = satir ? String(satir.tarih || '') : '';
+    if (lsKayit && lsKayit.kur > 0 && (!satir || lt >= st.slice(0, lt.length))) return lsKayit.kur;
+    if (satir) return Number(satir.birim_fiyat);
+    return yedek;
+  };
+  const sirali = cariIslemler.slice().sort((a, b) => String(b.tarih || '').localeCompare(String(a.tarih || '')));
+  const hasSatir = sirali.find(r => cariBirimNorm(r.birim) === 'HAS' && Number(r.birim_fiyat) > 100 &&
+    ((r.stok || '').toUpperCase() === 'TL' || (!r.stok && /^(N|CA|CB)/.test(r.islem_tipi) && (r.islem_tipi[0] === 'N' || cariCevirKaynak(r) === 'TL'))));
+  const usdSatir = sirali.find(r => Number(r.birim_fiyat) > 1 && Number(r.birim_fiyat) < 1000 &&
+    ((cariBirimNorm(r.birim) === 'TL' && (r.stok || '').toUpperCase() === 'USD') || (cariBirimNorm(r.birim) === 'USD' && (r.stok || '').toUpperCase() === 'TL')));
+  const altin = parseFloat(aylikParam?.altin_fiyati_usd) || 0, dolar = parseFloat(aylikParam?.dolar_kuru) || 0;
+  return {
+    HAS: sec(ls('cariSonKur_HAS_TL'), hasSatir, altin * dolar),
+    USD: sec(ls('cariSonKur_USD_TL'), usdSatir, dolar),
+    EUR: (ls('cariSonKur_EUR_TL') || {}).kur || parseFloat(localStorage.getItem('cariEurKur')) || 0
+  };
+}
+function cariYaklasikDeger(o) {
+  const k = cariGuncelKurlar();
+  let net = (o.TL || 0), eksik = [];
+  [['HAS', o.HAS], ['USD', o.USD], ['EUR', o.EUR]].forEach(([b, v]) => {
+    if (Math.abs(v || 0) < 0.005) return;
+    if (k[b] > 0) net += v * k[b]; else eksik.push(b);
+  });
+  Object.keys(o).forEach(b => { if (!CARI_BIRIMLER.includes(b) && Math.abs(o[b]) >= 0.005) eksik.push(b); });
+  const kurYazi = [];
+  if (Math.abs(o.HAS || 0) >= 0.005 && k.HAS) kurYazi.push('1 gr has = ' + cariMesajSayi(k.HAS) + ' ₺');
+  if (Math.abs(o.USD || 0) >= 0.005 && k.USD) kurYazi.push('1 $ = ' + cariSayi(k.USD) + ' ₺');
+  if (Math.abs(o.EUR || 0) >= 0.005 && k.EUR) kurYazi.push('1 € = ' + cariSayi(k.EUR) + ' ₺');
+  return { net, eksik, kurYazi: kurYazi.join(' · ') };
+}
 function cariBakiyeRender() {
   const el = document.getElementById('cariBakiyeKartlar');
   if (!el) return;
@@ -9365,7 +9436,7 @@ function cariBakiyeRender() {
     const cls = v > 0 ? 'a' : 'b';
     return `<div class="cari-bk ${cls}">
       <div class="cari-bk-ust">
-        <span class="cari-bk-ikon">${bozEsc(CARI_BIRIM_SEMBOL[b] || b.slice(0, 2))}</span>
+        <span class="cari-bk-ikon">${cariIkonHtml(b)}</span>
         <span class="cari-bk-ad">${bozEsc(CARI_BIRIM_AD[b] || b)}</span>
         <span class="cari-bk-durum">${v > 0 ? 'ALACAKLI' : 'BORÇLU'}</span>
       </div>
@@ -9376,16 +9447,18 @@ function cariBakiyeRender() {
   const kEl = document.getElementById('cariBakiyeKapali');
   if (kEl) kEl.innerHTML = (acik.length && kapali.length) ? 'Kapalı: ' + kapali.map(b => `<span>${b}</span>`).join('') : '';
 
-  const altin = parseFloat(aylikParam?.altin_fiyati_usd) || 0;
-  const kur = parseFloat(aylikParam?.dolar_kuru) || 0;
-  const eur = parseFloat(document.getElementById('cariEurKur')?.value) || 0;
-  const net = (o.HAS || 0) * altin * kur + (o.USD || 0) * kur + (o.TL || 0) + (o.EUR || 0) * eur;
-  const haric = Object.keys(o).filter(b => !CARI_BIRIMLER.includes(b) && Math.abs(o[b]) >= 0.005);
   const nEl = document.getElementById('cariNetKarsilik');
-  if (!nEl) return;
-  if (!altin || !kur) { nEl.innerHTML = 'Net TL karşılığı için Parametreler\'de bu ayın kur ve altın fiyatını girin.'; return; }
-  nEl.innerHTML = `<b>Net karşılık ≈ <span class="gizle-rakam" style="color:${net > 0 ? '#C0392B' : '#1B7A4A'};">${fmtTLTam(Math.abs(net))} ₺</span> ${Math.abs(net) < 1 ? '' : (net > 0 ? '(müşteri alacaklı)' : '(müşteri borçlu)')}</b>
-    <span style="color:var(--text3);">— altın $${cariSayi(altin)}/gr, $ ${cariSayi(kur)} ₺${o.EUR && !eur ? ', EUR kuru girilmedi (EUR hariç)' : ''}${haric.length ? ', ' + haric.join('/') + ' hariç' : ''}</span>`;
+  if (nEl) {
+    const y = cariYaklasikDeger(o);
+    const sayEl = document.getElementById('cariIslemSayisi');
+    if (sayEl) sayEl.textContent = cariIslemler.length ? ' · ' + cariIslemler.length + ' işlem' : '';
+    nEl.innerHTML = Math.abs(y.net) < 1 ? '' : `<div class="cari-net ${y.net > 0 ? 'a' : 'b'}">
+      <div><div class="cari-net-etiket">${sec ? 'BU BAKİYENİN ' : ''}BUGÜNKÜ YAKLAŞIK DEĞERİ</div>
+        <div class="cari-net-deger gizle-rakam">≈ ${fmtTLTam(Math.abs(y.net))} ₺</div>
+        <div class="cari-net-kur">${bozEsc(y.kurYazi)}${y.eksik.length ? ' · ' + bozEsc(y.eksik.join('/')) + ' hariç' : ''}</div></div>
+      <span class="cari-net-durum">${y.net > 0 ? 'MÜŞTERİ ALACAKLI' : 'MÜŞTERİ BORÇLU'}</span>
+    </div>`;
+  }
 }
 function cariIslemSecRow(id, ev) {
   if (ev && ev.target.closest('button')) return;
@@ -9606,7 +9679,7 @@ async function cariIslemKaydet() {
     kayit.fis_no = String(cariSonFis + 1);
   }
   if (c && kur > 0) {
-    try { localStorage.setItem('cariSonKur_' + c.ust + '_' + c.alt, JSON.stringify({ gun: bugunTarihStr(), kur })); } catch (_) {}
+    try { localStorage.setItem('cariSonKur_' + c.ust + '_' + c.alt, JSON.stringify({ gun: bugunTarihStr(), kur, zaman: cariSimdi().replace('T', ' ') })); } catch (_) {}
   }
   const gonder = async (veri) => {
     try {
@@ -9693,12 +9766,14 @@ function cariPaylasMetni(id) {
   const v = cariPaylasVeri(id);
   if (!v) return null;
   const { m, r, once, sonra, tipAd, islem } = v;
+  const y = cariYaklasikDeger(sonra);
   // *...* WhatsApp'ta kalın görünür
   return '*Tarih:* ' + cariTarihGoster(r.tarih) + '\n' +
     '*Müşteri ismi :* ' + m.ad + '\n\n' +
     '*İşlem Öncesi Bakiye :*\n' + cariMesajBakiyeSatirlari(once) + '\n\n' +
     '  *İŞLEM (' + tipAd + '):* ' + islem + '\n\n' +
     '*SON BAKİYE:*\n\n' + cariMesajBakiyeSatirlari(sonra) + '\n\n' +
+    (Math.abs(y.net) >= 1 ? '*Bugünkü yaklaşık değeri:* ≈ ' + cariMesajSayi(Math.round(y.net)) + '₺ ' + (y.net > 0 ? '(alacağınız)' : '(borcunuz)') + '\n\n' : '') +
     '*KILIÇOĞLU KUYUMCULUK*';
 }
 
@@ -9714,6 +9789,26 @@ function cariYuvarlakDikdortgen(ctx, x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
   ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
+function cariIkonCiz(c, b, x, y, s) {
+  // x,y: sol üst; s: boyut
+  if (b === 'HAS') {
+    const g = c.createLinearGradient(0, y, 0, y + s);
+    g.addColorStop(0, '#FCE79A'); g.addColorStop(.55, '#E2B33C'); g.addColorStop(1, '#B07D12');
+    const k = s / 34;
+    const kulce = pts => { c.beginPath(); pts.forEach((p, i) => (i ? c.lineTo : c.moveTo).call(c, x + p[0] * k, y + p[1] * k)); c.closePath(); c.fillStyle = g; c.fill(); c.strokeStyle = '#8C6210'; c.lineWidth = 1; c.stroke(); };
+    kulce([[10, 4], [24, 4], [27.2, 13], [6.8, 13]]);
+    kulce([[3.6, 17], [16.8, 17], [19.8, 27.5], [0.6, 27.5]]);
+    kulce([[16.6, 17], [29.8, 17], [32.8, 27.5], [13.6, 27.5]]);
+    return;
+  }
+  const r = CARI_IKON_RENK[b] || ['#9A6B0C', '#D9A93A'];
+  const g = c.createLinearGradient(x, y, x + s, y + s); g.addColorStop(0, r[1]); g.addColorStop(1, r[0]);
+  c.beginPath(); c.arc(x + s / 2, y + s / 2, s / 2, 0, Math.PI * 2); c.fillStyle = g; c.fill();
+  c.fillStyle = '#FFFFFF'; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.font = '800 ' + Math.round(s * .5) + "px 'DM Sans', 'Segoe UI', Arial, sans-serif";
+  c.fillText(CARI_BIRIM_SEMBOL[b] || b.slice(0, 2), x + s / 2, y + s / 2 + 1);
+  c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+}
 async function cariBakiyeGorsel(id) {
   const v = cariPaylasVeri(id);
   if (!v) return null;
@@ -9721,86 +9816,120 @@ async function cariBakiyeGorsel(id) {
   const { m, r, once, sonra, tipAd, islem } = v;
   const satir = o => cariBirimListesi(o).filter(b => Math.abs(o[b] || 0) >= 0.005);
   const sonS = satir(sonra), onceS = satir(once);
+  const yd = cariYaklasikDeger(sonra);
+  const degerVar = Math.abs(yd.net) >= 1;
   const W = 760, P = 40, S = 2;
   const sans = "'DM Sans', 'Segoe UI', Arial, sans-serif", serif = "'DM Serif Display', Georgia, serif";
-  const H = 330 + Math.max(1, onceS.length) * 30 + Math.max(1, sonS.length) * 74 + 175;
+  // yükseklik: üst 160 + müşteri 110 + önce (40 + n*44) + işlem (24+84) + son (44 + n*80) + değer (112) + alt 100
+  const H = 160 + 110 + 40 + Math.max(1, onceS.length) * 44 + 108 + 44 + Math.max(1, sonS.length) * 80 + (degerVar ? 112 : 0) + 100;
   const cv = document.createElement('canvas');
   cv.width = W * S; cv.height = H * S;
   const c = cv.getContext('2d');
   c.scale(S, S);
+  const durumYaz = val => val > 0 ? 'Alacağınız' : 'Borcunuz';
   // zemin + kart
   c.fillStyle = '#EFE8D8'; c.fillRect(0, 0, W, H);
   c.save(); c.shadowColor = 'rgba(80,60,20,.18)'; c.shadowBlur = 24; c.shadowOffsetY = 6;
   cariYuvarlakDikdortgen(c, 20, 20, W - 40, H - 40, 22); c.fillStyle = '#FFFFFF'; c.fill(); c.restore();
-  // üst şerit
   c.save(); cariYuvarlakDikdortgen(c, 20, 20, W - 40, H - 40, 22); c.clip();
   const g = c.createLinearGradient(0, 20, W, 140); g.addColorStop(0, '#2B2213'); g.addColorStop(1, '#4A3712');
   c.fillStyle = g; c.fillRect(20, 20, W - 40, 120);
   c.fillStyle = '#C9A44C'; c.fillRect(20, 140, W - 40, 3);
   c.restore();
-  // logo (beyaz kutu içinde)
   const logo = document.querySelector('#mainNav .nav-brand img');
-  let yaziX = P + 8;
   if (logo && logo.complete && logo.naturalWidth) {
     const lh = 58, lw = Math.min(260, logo.naturalWidth * lh / logo.naturalHeight);
     cariYuvarlakDikdortgen(c, P, 51, lw + 20, lh + 12, 10); c.fillStyle = '#FFFFFF'; c.fill();
     c.drawImage(logo, P + 10, 57, lw, lh);
-    yaziX = P + lw + 40;
   } else {
-    c.fillStyle = '#E8C872'; c.font = '700 26px ' + serif; c.textBaseline = 'middle'; c.fillText('KILIÇOĞLU KUYUMCULUK', P + 8, 80);
-    yaziX = W;
+    c.fillStyle = '#E8C872'; c.font = '700 26px ' + serif; c.fillText('KILIÇOĞLU KUYUMCULUK', P + 8, 90);
   }
-  c.textBaseline = 'alphabetic'; c.textAlign = 'right';
+  c.textAlign = 'right';
   c.fillStyle = '#E8C872'; c.font = '700 13px ' + sans; c.fillText('HESAP ÖZETİ', W - P - 4, 70);
   c.fillStyle = '#FFFFFF'; c.font = '500 15px ' + sans; c.fillText(cariTarihGoster(r.tarih), W - P - 4, 96);
+  if (r.fis_no) { c.fillStyle = 'rgba(255,255,255,.6)'; c.font = '500 12px ' + sans; c.fillText('Fiş No: ' + r.fis_no, W - P - 4, 116); }
   c.textAlign = 'left';
-  // müşteri
-  let y = 192;
-  c.fillStyle = '#8A7F6A'; c.font = '600 12px ' + sans; c.fillText('MÜŞTERİ', P + 8, y - 24);
-  c.fillStyle = '#1A1A18'; c.font = '28px ' + serif; c.fillText(m.ad, P + 8, y + 8);
-  // işlem kutusu
-  y += 34;
-  cariYuvarlakDikdortgen(c, P, y, W - 2 * P, 74, 14); c.fillStyle = '#FBF4E2'; c.fill();
-  c.strokeStyle = '#E9D8AE'; c.lineWidth = 1; c.stroke();
-  c.fillStyle = '#8B6508'; c.font = '700 12px ' + sans; c.fillText('İŞLEM · ' + tipAd.toLocaleUpperCase('tr-TR'), P + 18, y + 26);
-  let fs = 24; c.font = '700 ' + fs + 'px ' + sans;
-  while (c.measureText(islem).width > W - 2 * P - 36 && fs > 13) { fs--; c.font = '700 ' + fs + 'px ' + sans; }
-  c.fillStyle = '#1A1A18'; c.fillText(islem, P + 18, y + 58);
-  // işlem öncesi
-  y += 112;
-  c.fillStyle = '#8A7F6A'; c.font = '600 12px ' + sans; c.fillText('İŞLEM ÖNCESİ BAKİYE', P + 8, y);
+
+  // müşteri satırı (baş harf rozeti + ad)
+  let y = 176;
+  const ag = c.createLinearGradient(P, y, P + 64, y + 64); ag.addColorStop(0, '#E8C872'); ag.addColorStop(1, '#9A6B0C');
+  c.beginPath(); c.arc(P + 32, y + 32, 32, 0, Math.PI * 2); c.fillStyle = ag; c.fill();
+  c.fillStyle = '#FFFFFF'; c.font = '700 24px ' + sans; c.textAlign = 'center'; c.textBaseline = 'middle';
+  c.fillText(cariBasHarf(m.ad), P + 32, y + 33); c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+  c.fillStyle = '#8A7F6A'; c.font = '700 12px ' + sans; c.fillText('SAYIN MÜŞTERİMİZ', P + 82, y + 22);
+  let nfs = 30; c.font = nfs + 'px ' + serif;
+  while (c.measureText(m.ad).width > W - 2 * P - 90 && nfs > 18) { nfs--; c.font = nfs + 'px ' + serif; }
+  c.fillStyle = '#1A1A18'; c.fillText(m.ad, P + 82, y + 56);
+  y += 94;
+  c.fillStyle = '#EFE6D2'; c.fillRect(P, y, W - 2 * P, 1);
+
+  // 1) işlem öncesi bakiye
+  y += 32;
+  c.fillStyle = '#8A7F6A'; c.font = '700 12px ' + sans; c.fillText('İŞLEM ÖNCESİ BAKİYE', P + 4, y);
   y += 8;
-  const durumYaz = val => val > 0 ? 'Alacağınız' : 'Borcunuz';
-  if (!onceS.length) { y += 26; c.fillStyle = '#6B6455'; c.font = '500 16px ' + sans; c.fillText('Bakiye yok', P + 8, y); }
+  if (!onceS.length) { c.fillStyle = '#6B6455'; c.font = '500 16px ' + sans; c.fillText('Bakiye yok', P + 4, y + 28); y += 44; }
   onceS.forEach(b => {
-    y += 30; const val = once[b];
-    c.fillStyle = '#4A4538'; c.font = '600 17px ' + sans; c.fillText(cariMesajTutar(val, b), P + 8, y);
-    c.textAlign = 'right'; c.fillStyle = val > 0 ? '#B03A2E' : '#1B7A4A'; c.font = '600 14px ' + sans; c.fillText(durumYaz(val), W - P - 8, y); c.textAlign = 'left';
+    const val = once[b];
+    cariIkonCiz(c, b, P + 4, y + 8, 28);
+    c.fillStyle = '#4A4538'; c.font = '600 18px ' + sans; c.fillText(cariMesajTutar(val, b), P + 44, y + 29);
+    c.textAlign = 'right'; c.fillStyle = val > 0 ? '#B03A2E' : '#1B7A4A'; c.font = '600 14px ' + sans; c.fillText(durumYaz(val), W - P - 8, y + 29); c.textAlign = 'left';
+    y += 44;
   });
-  // son bakiye
-  y += 40;
-  c.fillStyle = '#8B6508'; c.font = '700 13px ' + sans; c.fillText('SON BAKİYE', P + 8, y);
-  y += 12;
+
+  // 2) işlem (ortada)
+  y += 24;
+  const ok = c.createLinearGradient(P, y, W - P, y); ok.addColorStop(0, '#FBF1D6'); ok.addColorStop(1, '#FDF8EA');
+  cariYuvarlakDikdortgen(c, P, y, W - 2 * P, 76, 14); c.fillStyle = ok; c.fill();
+  c.strokeStyle = '#E3CC92'; c.lineWidth = 1; c.stroke();
+  c.fillStyle = '#B8860B'; c.fillRect(P, y + 14, 4, 48);
+  c.fillStyle = '#8B6508'; c.font = '700 12px ' + sans; c.fillText('İŞLEM · ' + tipAd.toLocaleUpperCase('tr-TR'), P + 20, y + 27);
+  let fs = 24; c.font = '700 ' + fs + 'px ' + sans;
+  while (c.measureText(islem).width > W - 2 * P - 40 && fs > 13) { fs--; c.font = '700 ' + fs + 'px ' + sans; }
+  c.fillStyle = '#1A1A18'; c.fillText(islem, P + 20, y + 60);
+  y += 84;
+
+  // 3) son bakiye
+  y += 34;
+  c.fillStyle = '#8B6508'; c.font = '800 13px ' + sans; c.fillText('SON BAKİYE', P + 4, y);
+  y += 10;
   if (!sonS.length) {
-    cariYuvarlakDikdortgen(c, P, y, W - 2 * P, 62, 14); c.fillStyle = '#F3F0E8'; c.fill();
-    c.fillStyle = '#6B6455'; c.font = '700 22px ' + sans; c.fillText('Hesap kapalı', P + 20, y + 40); y += 74;
+    cariYuvarlakDikdortgen(c, P, y, W - 2 * P, 66, 14); c.fillStyle = '#F3F0E8'; c.fill();
+    c.fillStyle = '#6B6455'; c.font = '700 22px ' + sans; c.fillText('Hesap kapalı', P + 22, y + 42); y += 80;
   }
   sonS.forEach(b => {
     const val = sonra[b], alacak = val > 0;
-    cariYuvarlakDikdortgen(c, P, y, W - 2 * P, 62, 14);
+    cariYuvarlakDikdortgen(c, P, y, W - 2 * P, 66, 14);
     c.fillStyle = alacak ? '#FDF0EE' : '#EAF5EE'; c.fill();
-    c.fillStyle = alacak ? '#C0392B' : '#1B7A4A'; c.fillRect(P, y + 12, 5, 38);
-    c.font = '800 28px ' + sans; c.fillText(cariMesajTutar(val, b), P + 22, y + 42);
-    // durum rozeti
+    c.fillStyle = alacak ? '#C0392B' : '#1B7A4A'; c.fillRect(P, y + 13, 5, 40);
+    cariIkonCiz(c, b, P + 20, y + 15, 36);
+    c.fillStyle = alacak ? '#B03A2E' : '#17683F'; c.font = '800 30px ' + sans; c.fillText(cariMesajTutar(val, b), P + 68, y + 44);
     const t = durumYaz(val).toLocaleUpperCase('tr-TR'); c.font = '800 13px ' + sans;
-    const tw = c.measureText(t).width + 24;
-    cariYuvarlakDikdortgen(c, W - P - 16 - tw, y + 18, tw, 26, 13); c.fillStyle = alacak ? '#C0392B' : '#1B7A4A'; c.fill();
-    c.fillStyle = '#FFFFFF'; c.fillText(t, W - P - 16 - tw + 12, y + 36);
-    y += 74;
+    const tw = c.measureText(t).width + 26;
+    cariYuvarlakDikdortgen(c, W - P - 16 - tw, y + 20, tw, 26, 13); c.fillStyle = alacak ? '#C0392B' : '#1B7A4A'; c.fill();
+    c.fillStyle = '#FFFFFF'; c.fillText(t, W - P - 16 - tw + 13, y + 38);
+    y += 80;
   });
+
+  // 4) bugünkü yaklaşık değer
+  if (degerVar) {
+    y += 8;
+    const dg = c.createLinearGradient(P, y, W - P, y + 92); dg.addColorStop(0, '#2B2213'); dg.addColorStop(1, '#4A3712');
+    cariYuvarlakDikdortgen(c, P, y, W - 2 * P, 92, 16); c.fillStyle = dg; c.fill();
+    c.fillStyle = '#E8C872'; c.font = '700 12px ' + sans; c.fillText('BUGÜNKÜ YAKLAŞIK DEĞERİ', P + 22, y + 28);
+    c.fillStyle = '#FFFFFF'; c.font = '800 30px ' + sans; c.fillText('≈ ' + cariMesajSayi(Math.round(yd.net)) + ' ₺', P + 22, y + 63);
+    c.fillStyle = 'rgba(255,255,255,.62)'; c.font = '500 12px ' + sans;
+    c.fillText((yd.kurYazi || '') + (yd.eksik.length ? '  (' + yd.eksik.join('/') + ' hariç)' : ''), P + 22, y + 82);
+    const t = durumYaz(yd.net).toLocaleUpperCase('tr-TR'); c.font = '800 13px ' + sans;
+    const tw = c.measureText(t).width + 26;
+    cariYuvarlakDikdortgen(c, W - P - 20 - tw, y + 33, tw, 26, 13); c.fillStyle = '#E8C872'; c.fill();
+    c.fillStyle = '#2B2213'; c.fillText(t, W - P - 20 - tw + 13, y + 51);
+    y += 104;
+  }
+
   // alt bilgi
   c.fillStyle = '#E9D8AE'; c.fillRect(P, H - 92, W - 2 * P, 1);
-  c.textAlign = 'center'; c.fillStyle = '#8B6508'; c.font = '20px ' + serif; c.fillText('KILIÇOĞLU KUYUMCULUK', W / 2, H - 56);
+  c.textAlign = 'center'; c.fillStyle = '#8B6508'; c.font = '20px ' + serif; c.fillText('KILIÇOĞLU KUYUMCULUK', W / 2, H - 58);
+  c.fillStyle = '#A99F88'; c.font = '500 11px ' + sans; c.fillText('Yaklaşık değer bilgi amaçlıdır; güncel kurla değişebilir.', W / 2, H - 38);
   c.textAlign = 'left';
   return new Promise(res => cv.toBlob(bl => res({ blob: bl, url: cv.toDataURL('image/png') }), 'image/png'));
 }
