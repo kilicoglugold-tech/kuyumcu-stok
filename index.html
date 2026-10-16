@@ -1,4 +1,4 @@
-<!-- SURUM-V95-CARI-PAYLAS-KALIN --><!DOCTYPE html>
+<!-- SURUM-V96-CARI-AB-TAM --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -9034,12 +9034,7 @@ async function deleteGider(id) {
       </div>
       <div class="form-row">
         <div class="form-group"><label class="form-label">Excel / CSV Dosyası</label><input type="file" class="form-control" id="caDosya" accept=".xlsx,.xls,.csv" onchange="cariAktarDosyaSec(this)"></div>
-        <div class="form-group"><label class="form-label">HAS satırlarında bakiyeye yazılacak sütun</label>
-          <select class="form-control" id="caHasKaynak" onchange="cariAktarOnizle()">
-            <option value="toplam">Toplam (önerilen)</option>
-            <option value="islemhas">İşlem HAS</option>
-          </select>
-        </div>
+        <div class="form-group" style="font-size:11.5px;color:var(--text3);line-height:1.45;align-self:center;">AltınBarkod'da Geçmiş (T) listesini Excel'e aktarıp o dosyayı seçin. Çevirmeler (CA/CB), veresiyeler (VV/VA), çeyrek/ata gibi birimler otomatik işlenir.</div>
       </div>
       <div class="form-group"><label class="form-label">…ya da kopyaladığınız satırları buraya yapıştırın</label>
         <textarea class="form-control" id="caYapistir" rows="4" placeholder="AltınBarkod listesinden Ctrl+A, Ctrl+C ile kopyalayıp buraya Ctrl+V..." onpaste="setTimeout(cariAktarYapistirOku,30)"></textarea>
@@ -9084,11 +9079,6 @@ const CARI_STOKLAR = [
 const CARI_DEGER_SIRA = { TL: 1, USD: 2, EUR: 3, HAS: 4, GR: 4 };
 
 // ---- Sayı yazarken 100.000 / 1.500,50 biçimi ----
-function cariSayiOku(v) {
-  if (typeof v === 'number') return v;
-  const t = String(v || '').replace(/\./g, '').replace(',', '.').replace(/[^0-9.\-]/g, '');
-  return parseFloat(t) || 0;
-}
 function cariSayiYaz(n, maxOndalik) {
   if (n === '' || n === null || n === undefined || isNaN(n)) return '';
   return (Number(n) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 0, maximumFractionDigits: maxOndalik === undefined ? 4 : maxOndalik });
@@ -9120,14 +9110,45 @@ function cariTlDeger(birim) {
   return { TL: 1, USD: kur, EUR: eur, HAS: altin * kur, GR: altin * kur }[birim] || 0;
 }
 
+// AltınBarkod kodları: ..G giriş (+), ..C çıkış (−), VA veresiye alınan (+), VV verilen veresiye (−),
+// ZS/AS/MS... anlık satış (bakiyeyi etkilemez; borcu hemen ardındaki VV satırı yazar),
+// CA/CB çevirme (iki birimi birden etkiler, bkz. cariEtkiler), DB/DV/VR girilen işaretle (±).
+const CARI_ALTIN_TIPLER = /^(AG|AC|ZG|ZC|HG|HC)$/;
+const CARI_BIRIM_AD = { HAS: 'HAS (gr)', ECY: 'Çeyrek (adet)', ATM: 'Ata (adet)', G22: '22 ayar (gr)' };
 function cariEtki(tip, toplam) {
   const t = String(tip || '').toUpperCase().trim();
   const v = Number(toplam) || 0;
+  if (/^[A-Z]S$/.test(t)) return 0;
+  if (t === 'VV') return -Math.abs(v);
+  if (t === 'VA') return Math.abs(v);
   if (/G$/.test(t)) return Math.abs(v);
   if (/C$/.test(t)) return -Math.abs(v);
   return v;
 }
 function cariBos() { return { HAS: 0, USD: 0, TL: 0, EUR: 0 }; }
+function cariBirimNorm(b) { b = String(b || '').trim().toUpperCase(); return b === 'TRY' || b === '₺' ? 'TL' : b; }
+// Çevirme satırında (CA/CB) kaynak birim: stok sütunu ya da açıklamadaki "Çevir TL - HAS"
+function cariCevirKaynak(r) {
+  if (r.stok) return cariBirimNorm(r.stok);
+  const m = String(r.aciklama || '').match(/Çevir\s+(\S+)\s*-\s*(\S+)/i);
+  return m ? cariBirimNorm(m[1]) : '';
+}
+// Bir işlemin bakiyeye etkileri: [[birim, tutar], ...]
+function cariEtkiler(r) {
+  const tip = String(r.islem_tipi || '').toUpperCase().trim();
+  const b = cariBirimNorm(r.birim);
+  if (tip === 'CA' || tip === 'CB') {
+    // CA: müşterinin alacağı çevrildi (kaynak −, hedef +); CB: borcu çevrildi (kaynak +, hedef −)
+    const s = tip === 'CA' ? 1 : -1;
+    const out = [[b, s * Math.abs(Number(r.toplam) || 0)]];
+    const src = cariCevirKaynak(r);
+    if (src) out.push([src, -s * Math.abs(Number(r.miktar) || 0)]);
+    return out;
+  }
+  return [[b, cariEtki(tip, r.toplam)]];
+}
+function cariEtkiEkle(o, r) { cariEtkiler(r).forEach(([b, v]) => { if (b) o[b] = (o[b] || 0) + v; }); return o; }
+function cariBirimListesi(o) { return CARI_BIRIMLER.concat(Object.keys(o || {}).filter(b => !CARI_BIRIMLER.includes(b)).sort()); }
 function cariSayi(n, d) { d = d === undefined ? 2 : d; return (Number(n) || 0).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d }); }
 function cariTarihGoster(t) {
   const m = String(t || '').match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
@@ -9153,14 +9174,13 @@ async function cariApiTumu(endpoint) {
 async function cariYukle() {
   try {
     cariMusteriler = await cariApiTumu('cari_musteriler?select=*&order=ad.asc');
-    const rows = await cariApiTumu('cari_islemler?select=musteri_id,islem_tipi,toplam,birim,fis_no,kaynak');
+    const rows = await cariApiTumu('cari_islemler?select=*');
     cariOzet = {};
     cariSonFis = 0;
     rows.forEach(r => {
       if (r.kaynak === 'manuel') { const n = parseInt(r.fis_no, 10); if (n > cariSonFis) cariSonFis = n; }
       if (!cariOzet[r.musteri_id]) cariOzet[r.musteri_id] = cariBos();
-      const b = (r.birim || '').toUpperCase();
-      if (b in cariOzet[r.musteri_id]) cariOzet[r.musteri_id][b] += cariEtki(r.islem_tipi, r.toplam);
+      cariEtkiEkle(cariOzet[r.musteri_id], r);
     });
     cariYuklendi = true;
   } catch (e) {
@@ -9181,7 +9201,7 @@ async function cariInit() {
 
 function cariChipler(o) {
   if (!o) return '';
-  return CARI_BIRIMLER.filter(b => Math.abs(o[b]) >= 0.005).map(b =>
+  return cariBirimListesi(o).filter(b => Math.abs(o[b] || 0) >= 0.005).map(b =>
     `<span class="cari-chip ${o[b] > 0 ? 'a' : 'b'}">${b} ${cariSayi(Math.abs(o[b]))} ${o[b] > 0 ? 'A' : 'B'}</span>`).join('');
 }
 
@@ -9223,7 +9243,7 @@ async function cariSec(id) {
           <button class="btn btn-sm btn-danger" onclick="cariMusteriSil(${m.id})">Sil</button>
         </div>
       </div>
-      <div id="cariBakiyeKartlar" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px;"></div>
+      <div id="cariBakiyeKartlar" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px;"></div>
       <div id="cariNetKarsilik" style="font-size:12px;color:var(--text2);margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;"></div>
       <div style="font-size:11px;color:var(--text3);margin-top:4px;">EUR kuru (₺, sadece net karşılık için):
         <input type="number" step="0.01" id="cariEurKur" value="${eurKur}" style="width:80px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;font-size:11px;" oninput="localStorage.setItem('cariEurKur',this.value);cariBakiyeRender()">
@@ -9278,7 +9298,7 @@ function cariSirala() {
 }
 function cariOzetTekHesapla() {
   const o = cariBos();
-  cariIslemler.forEach(r => { const b = (r.birim || '').toUpperCase(); if (b in o) o[b] += cariEtki(r.islem_tipi, r.toplam); });
+  cariIslemler.forEach(r => cariEtkiEkle(o, r));
   cariOzet[cariSeciliId] = o;
 }
 
@@ -9286,15 +9306,15 @@ function cariBakiyeRender() {
   const el = document.getElementById('cariBakiyeKartlar');
   if (!el) return;
   const o = cariOzet[cariSeciliId] || cariBos();
-  el.innerHTML = CARI_BIRIMLER.map(b => {
-    const v = o[b];
+  el.innerHTML = cariBirimListesi(o).filter(b => CARI_BIRIMLER.includes(b) || Math.abs(o[b] || 0) >= 0.005).map(b => {
+    const v = o[b] || 0;
     const sifir = Math.abs(v) < 0.005;
     const durum = sifir ? 'Kapalı' : (v > 0 ? 'ALACAKLI' : 'BORÇLU');
     const alt = sifir ? '' : (v > 0 ? 'biz borçluyuz' : 'müşteri bize borçlu');
     const renk = sifir ? 'var(--text3)' : (v > 0 ? '#C0392B' : '#1B7A4A');
     const bg = sifir ? 'var(--card)' : (v > 0 ? '#FDF0EE' : '#EAF5EE');
     return `<div class="metric-card" style="background:${bg};border-color:${renk};">
-      <div class="metric-label">${b === 'HAS' ? 'HAS (gr)' : b}</div>
+      <div class="metric-label">${bozEsc(CARI_BIRIM_AD[b] || b)}</div>
       <div class="metric-value gizle-rakam" style="color:${renk};">${cariSayi(Math.abs(v))}</div>
       <div style="font-size:11px;font-weight:700;color:${renk};margin-top:2px;">${durum}${alt ? ' <span style="font-weight:400;">· ' + alt + '</span>' : ''}</div>
     </div>`;
@@ -9302,12 +9322,13 @@ function cariBakiyeRender() {
   const altin = parseFloat(aylikParam?.altin_fiyati_usd) || 0;
   const kur = parseFloat(aylikParam?.dolar_kuru) || 0;
   const eur = parseFloat(document.getElementById('cariEurKur')?.value) || 0;
-  const net = o.HAS * altin * kur + o.USD * kur + o.TL + o.EUR * eur;
+  const net = (o.HAS || 0) * altin * kur + (o.USD || 0) * kur + (o.TL || 0) + (o.EUR || 0) * eur;
+  const haric = Object.keys(o).filter(b => !CARI_BIRIMLER.includes(b) && Math.abs(o[b]) >= 0.005);
   const nEl = document.getElementById('cariNetKarsilik');
   if (!nEl) return;
   if (!altin || !kur) { nEl.innerHTML = 'Net TL karşılığı için Parametreler\'de bu ayın kur ve altın fiyatını girin.'; return; }
   nEl.innerHTML = `<b>Net karşılık ≈ <span class="gizle-rakam" style="color:${net > 0 ? '#C0392B' : '#1B7A4A'};">${fmtTLTam(Math.abs(net))} ₺</span> ${Math.abs(net) < 1 ? '' : (net > 0 ? '(müşteri alacaklı)' : '(müşteri borçlu)')}</b>
-    <span style="color:var(--text3);">— altın $${cariSayi(altin)}/gr, $ ${cariSayi(kur)} ₺${o.EUR && !eur ? ', EUR kuru girilmedi (EUR hariç)' : ''}</span>`;
+    <span style="color:var(--text3);">— altın $${cariSayi(altin)}/gr, $ ${cariSayi(kur)} ₺${o.EUR && !eur ? ', EUR kuru girilmedi (EUR hariç)' : ''}${haric.length ? ', ' + haric.join('/') + ' hariç' : ''}</span>`;
 }
 
 function cariTabloRender() {
@@ -9320,9 +9341,9 @@ function cariTabloRender() {
   }
   const yuruyen = cariBos();
   const satirlar = cariIslemler.map((r, i) => {
-    const b = (r.birim || '').toUpperCase();
-    const etki = cariEtki(r.islem_tipi, r.toplam);
-    if (b in yuruyen) yuruyen[b] += etki;
+    const b = cariBirimNorm(r.birim);
+    const etki = cariEtkiler(r)[0][1];
+    cariEtkiEkle(yuruyen, r);
     const bak = yuruyen[b] || 0;
     const son = i === cariIslemler.length - 1;
     const tipRenk = etki >= 0 ? '#1B7A4A' : '#C0392B';
@@ -9353,9 +9374,15 @@ function cariTabloRender() {
 }
 
 function cariStokAd(r) {
+  if (/^C[AB]$/.test(r.islem_tipi)) return cariCevirKaynak(r);
   const st = (r.stok || '').toUpperCase();
   if (st === 'GR') return 'gr' + (Number(r.milyem) ? ' ×' + cariSayi(r.milyem, 3) : '');
-  return st || (r.birim || '').toUpperCase();
+  if (st) return st;
+  // AltınBarkod'dan gelen satırlarda stok yok: tahmin et
+  const b = cariBirimNorm(r.birim), tip = String(r.islem_tipi || '');
+  if (/^N/.test(tip) && b !== 'TL' && Number(r.birim_fiyat) > 1) return 'TL';
+  if (Number(r.milyem) && CARI_ALTIN_TIPLER.test(tip)) return (/^Z/.test(tip) ? 'adet' : 'gr') + ' ×' + cariSayi(r.milyem, 3);
+  return b;
 }
 let cariKurElle = false;
 function cariVarsayilanStok(tip) {
@@ -9455,6 +9482,10 @@ function cariFormTemizle() {
 function cariIslemDuzenle(id) {
   const r = cariIslemler.find(x => x.id === id);
   if (!r) return;
+  if (!CARI_TIPLER.some(t => t.kod === r.islem_tipi)) {
+    alert('"' + r.islem_tipi + '" AltınBarkod\'dan aktarılmış bir işlem (çevirme/veresiye/satış); buradan düzenlenemez. Gerekirse silip yeni işlem girin.');
+    return;
+  }
   document.getElementById('ciEditId').value = String(r.id);
   document.getElementById('ciBaslik').textContent = '✏️ İşlemi Düzenle';
   document.getElementById('ciIptalBtn').style.display = '';
@@ -9495,7 +9526,7 @@ async function cariIslemKaydet() {
     tarih: tarihV ? tarihV.replace('T', ' ') : cariSimdi().replace('T', ' '),
     islem_tipi: document.getElementById('ciTip').value,
     stok: st,
-    miktar: cariSayiOku(document.getElementById('ciMiktar').value),
+    miktar: cariSayiOku(document.getElementById('ciMiktar').value) || 0,
     milyem: st === 'GR' ? cariSayiOku(document.getElementById('ciMilyem').value) : 0,
     birim_fiyat: kur,
     toplam: r2(toplam),
@@ -9550,14 +9581,14 @@ const CARI_WA_IKON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="curr
 function cariMesajSayi(v) { v = Math.abs(Number(v) || 0); return cariSayi(v, Math.abs(v - Math.round(v)) < 0.005 ? 0 : 2); }
 function cariMesajTutar(v, birim) {
   const n = birim === 'HAS' ? cariSayi(Math.abs(v)) : cariMesajSayi(v);
-  return { HAS: n + ' gr has', TL: n + '₺', USD: n + '$', EUR: n + '€' }[birim] || (n + ' ' + birim);
+  return { HAS: n + ' gr has', TL: n + '₺', USD: n + '$', EUR: n + '€', ECY: n + ' çeyrek', ATM: n + ' ata lira', G22: n + ' gr 22 ayar' }[birim] || (n + ' ' + birim);
 }
-function cariMesajStok(v, st, milyem) {
-  if (st === 'GR') return cariSayi(v) + ' gr' + (milyem ? ' (' + cariSayi(milyem, 3) + ')' : '');
+function cariMesajStok(v, st, milyem, tip) {
+  if (st === 'GR') return cariMesajSayi(v) + (/^Z/.test(tip || '') ? ' adet' : ' gr') + (milyem ? ' (' + cariSayi(milyem, 3) + ')' : '');
   return cariMesajTutar(v, st);
 }
 function cariMesajBakiyeSatirlari(o) {
-  const s = CARI_BIRIMLER.filter(b => Math.abs(o[b]) >= 0.005)
+  const s = cariBirimListesi(o).filter(b => Math.abs(o[b] || 0) >= 0.005)
     .map(b => ' * ' + cariMesajTutar(o[b], b) + (o[b] > 0 ? ' (alacağınız)' : ' (borcunuz)'));
   return s.length ? s.join('\n') : ' * Bakiye yok (hesap kapalı)';
 }
@@ -9568,23 +9599,26 @@ function cariPaylasMetni(id) {
   if (!m || idx < 0) return null;
   const r = cariIslemler[idx];
   const once = cariBos();
-  for (let i = 0; i < idx; i++) { const b = (cariIslemler[i].birim || '').toUpperCase(); if (b in once) once[b] += cariEtki(cariIslemler[i].islem_tipi, cariIslemler[i].toplam); }
-  const sonra = Object.assign({}, once);
-  const birim = (r.birim || '').toUpperCase();
-  if (birim in sonra) sonra[birim] += cariEtki(r.islem_tipi, r.toplam);
-  const tipAd = (CARI_TIPLER.find(t => t.kod === r.islem_tipi) || {}).ad || r.islem_tipi;
-  const st = (r.stok || '').toUpperCase() || (Number(r.milyem) ? 'GR' : birim);
+  for (let i = 0; i < idx; i++) cariEtkiEkle(once, cariIslemler[i]);
+  const sonra = cariEtkiEkle(Object.assign({}, once), r);
+  const birim = cariBirimNorm(r.birim);
+  const AB_ADLARI = { CA: 'Çevirme', CB: 'Çevirme', VV: 'Veresiye Verildi', VA: 'Veresiye Alındı', VR: 'Virman', DB: 'Düzeltme', ZS: 'Ziynet Satış', AS: 'Altın Satış', MS: 'Mücevher Satış' };
+  const tipAd = ((CARI_TIPLER.find(t => t.kod === r.islem_tipi) || {}).ad || AB_ADLARI[r.islem_tipi] || r.islem_tipi).replace(/\s*\(.*\)$/, '');
+  const ceviri = /^C[AB]$/.test(r.islem_tipi);
+  const st = (ceviri ? cariCevirKaynak(r) : (r.stok || '').toUpperCase()) || (Number(r.milyem) ? 'GR' : birim);
   const stH = st === 'GR' ? 'HAS' : st;
   const kur = Number(r.birim_fiyat) || 0;
   let islem;
-  if (stH !== birim && kur > 0) {
+  if (ceviri && !(kur > 0 && CARI_DEGER_SIRA[stH] && CARI_DEGER_SIRA[birim])) {
+    islem = cariMesajTutar(r.miktar, stH) + ' = ' + cariMesajTutar(r.toplam, birim);
+  } else if (stH !== birim && kur > 0) {
     const kaynak = st === 'GR' ? (Number(r.miktar) || 0) * (Number(r.milyem) || 0) : Number(r.miktar) || 0;
     const op = CARI_DEGER_SIRA[stH] > CARI_DEGER_SIRA[birim] ? ' x ' : ' : ';
-    islem = (st === 'GR' ? cariMesajStok(r.miktar, st, r.milyem) + ' = ' : '') + cariMesajTutar(kaynak, stH) + op + cariMesajSayi(kur) + ' = ' + cariMesajTutar(r.toplam, birim);
+    islem = (st === 'GR' ? cariMesajStok(r.miktar, st, r.milyem, r.islem_tipi) + ' = ' : '') + cariMesajTutar(kaynak, stH) + op + cariMesajSayi(kur) + ' = ' + cariMesajTutar(r.toplam, birim);
   } else if (st === 'GR') {
-    islem = cariMesajStok(r.miktar, st, r.milyem) + ' = ' + cariMesajTutar(r.toplam, birim);
+    islem = cariMesajStok(r.miktar, st, r.milyem, r.islem_tipi) + ' = ' + cariMesajTutar(cariEtkiler(r)[0][1], birim);
   } else {
-    islem = cariMesajTutar(r.toplam, birim);
+    islem = cariMesajTutar(cariEtkiler(r)[0][1] || r.toplam, birim);
   }
   // *...* WhatsApp'ta kalın görünür
   return '*Tarih:* ' + cariTarihGoster(r.tarih) + '\n' +
@@ -9699,9 +9733,10 @@ function cariTarihOku(v) {
   if (m) return m[1] + '-' + m[2] + '-' + m[3] + ' ' + (m[4] || '00') + ':' + (m[5] || '00');
   return '';
 }
-function cariBirimOku(v) {
-  const b = String(v || '').trim().toUpperCase().replace('TRY', 'TL').replace('₺', 'TL');
-  return CARI_BIRIMLER.includes(b) ? b : '';
+function cariBirimOku(v, siki) {
+  const b = cariBirimNorm(v);
+  if (siki) return CARI_BIRIMLER.includes(b) ? b : '';
+  return /^[A-Z][A-Z0-9]{1,4}$/.test(b) ? b : '';   // ECY, ATM, G22 gibi AltınBarkod birimleri de
 }
 
 // Satır dizisinden (her satır = hücre dizisi) işlem kayıtları çıkarır.
@@ -9722,7 +9757,7 @@ function cariSatirlardanKayit(rows) {
     // Başlık yoksa (Ctrl+C ile sadece satırlar kopyalandıysa) "Birim" sütununu (HAS/USD/TL/EUR) bulup
     // AltınBarkod ekranındaki sütun sırasına göre diğerlerini yerleştir.
     const sayac = {};
-    rows.forEach(r => r.forEach((c, j) => { if (cariBirimOku(c)) sayac[j] = (sayac[j] || 0) + 1; }));
+    rows.forEach(r => r.forEach((c, j) => { if (cariBirimOku(c, true)) sayac[j] = (sayac[j] || 0) + 1; }));
     const b = Object.keys(sayac).sort((x, y) => sayac[y] - sayac[x])[0];
     if (b === undefined) return { kayitlar: [], hata: 'Sütunlar tanınamadı. Başlık satırıyla birlikte kopyalayın ya da Excel dosyası kullanın.' };
     const bi = Number(b);
@@ -9811,33 +9846,38 @@ async function cariAktarOnizle() {
   const { kayitlar, okunamayan, hata } = cariSatirlardanKayit(cariAktarSatirlar);
   if (hata) { on.innerHTML = '<div style="color:var(--red);">✗ ' + bozEsc(hata) + '</div>'; return; }
   if (!kayitlar.length) { on.innerHTML = '<div style="color:var(--red);">✗ Hiç işlem satırı okunamadı. "İşlem tipi", "Toplam" ve "Birim" sütunlarının dolu olduğundan emin olun.</div>'; return; }
-  const hasKaynak = document.getElementById('caHasKaynak').value;
   kayitlar.forEach(k => {
-    k.bakiyeTutar = (hasKaynak === 'islemhas' && k.birim === 'HAS' && !isNaN(k.islemhas)) ? k.islemhas : k.toplam;
+    // Altın/ziynet/hurda satırlarında bakiyeye "İşlem HAS" yazılır (Toplam sadece işçilik farkıdır)
+    k.bakiyeTutar = (CARI_ALTIN_TIPLER.test(k.tip) && k.birim === 'HAS' && !isNaN(k.islemhas)) ? k.islemhas : k.toplam;
+    k.stok = /^C[AB]$/.test(k.tip) ? cariCevirKaynak({ aciklama: k.aciklama }) : '';
   });
+  const etkiSatiri = k => ({ islem_tipi: k.tip, birim: k.birim, toplam: k.bakiyeTutar, miktar: k.miktar, stok: k.stok, aciklama: k.aciklama });
 
   const musVal = document.getElementById('caMusteri').value;
   let mevcut = [];
   if (musVal !== '__yeni__') {
     try {
-      mevcut = (Number(musVal) === cariSeciliId) ? cariIslemler : await cariApiTumu('cari_islemler?select=fis_no,islem_tipi,toplam,birim,kaynak&musteri_id=eq.' + musVal);
+      mevcut = (Number(musVal) === cariSeciliId) ? cariIslemler : await cariApiTumu('cari_islemler?select=*&musteri_id=eq.' + musVal);
     } catch (e) { mevcut = []; }
   }
-  const gorulen = new Set(mevcut.filter(r => r.kaynak !== 'manuel').map(r => String(r.fis_no || '').trim()).filter(Boolean));
+  // Aynı fiş numarası satış + veresiye (ZS + VV) gibi iki satırda olabilir; anahtar = fiş no + işlem tipi
+  const anahtar = (fis, tip) => String(fis || '').trim() + '|' + String(tip || '').trim().toUpperCase();
+  const gorulen = new Set(mevcut.filter(r => r.kaynak !== 'manuel' && String(r.fis_no || '').trim()).map(r => anahtar(r.fis_no, r.islem_tipi)));
   const eklenecek = [];
   let mukerrer = 0;
   kayitlar.forEach(k => {
-    if (k.fis && gorulen.has(k.fis)) { mukerrer++; return; }
-    if (k.fis) gorulen.add(k.fis);
+    const a = anahtar(k.fis, k.tip);
+    if (k.fis && gorulen.has(a)) { mukerrer++; return; }
+    if (k.fis) gorulen.add(a);
     eklenecek.push(k);
   });
   const once = cariBos();
-  mevcut.forEach(r => { const b = (r.birim || '').toUpperCase(); if (b in once) once[b] += cariEtki(r.islem_tipi, r.toplam); });
+  mevcut.forEach(r => cariEtkiEkle(once, r));
   const sonra = { ...once };
-  eklenecek.forEach(k => { sonra[k.birim] += cariEtki(k.tip, k.bakiyeTutar); });
-  const bilinmeyen = [...new Set(eklenecek.map(k => k.tip).filter(t => !/[GC]$/.test(t)))];
+  eklenecek.forEach(k => cariEtkiEkle(sonra, etkiSatiri(k)));
+  const bilinmeyen = [...new Set(eklenecek.map(k => k.tip).filter(t => !/[GC]$|^(CA|CB|VV|VA)$|^[A-Z]S$/.test(t)))];
 
-  const bakiyeHtml = CARI_BIRIMLER.filter(b => Math.abs(sonra[b]) >= 0.005 || Math.abs(once[b]) >= 0.005).map(b =>
+  const bakiyeHtml = cariBirimListesi(sonra).filter(b => Math.abs(sonra[b] || 0) >= 0.005 || Math.abs(once[b] || 0) >= 0.005).map(b =>
     `<div class="metric-card" style="padding:.6rem .8rem;"><div class="metric-label">${b}</div>
       <div style="font-size:17px;font-weight:700;color:${sonra[b] > 0 ? '#C0392B' : '#1B7A4A'};">${cariSayi(Math.abs(sonra[b]))} ${sonra[b] > 0.005 ? 'A' : (sonra[b] < -0.005 ? 'B' : '')}</div></div>`).join('')
     || '<div style="color:var(--text3);font-size:12px;">Tüm bakiyeler sıfır.</div>';
@@ -9878,13 +9918,20 @@ async function cariAktarKaydet() {
   const satirlar = cariAktarHazir.map((k, i) => ({
     id: taban + i, musteri_id: musteriId, tarih: k.tarih, fis_no: k.fis, islem_tipi: k.tip,
     miktar: k.miktar, milyem: k.milyem, birim_fiyat: k.bfiyat, toplam: r4(k.bakiyeTutar), birim: k.birim,
-    aciklama: k.aciklama, kaynak: 'altinbarkod'
+    stok: k.stok || '', aciklama: k.aciklama, kaynak: 'altinbarkod'
   }));
+  const stoksuz = () => satirlar.forEach(x => delete x.stok);
   btn.disabled = true;
   try {
     for (let i = 0; i < satirlar.length; i += 500) {
       btn.textContent = 'Aktarılıyor... (' + Math.min(i + 500, satirlar.length) + '/' + satirlar.length + ')';
-      await api('cari_islemler', 'POST', satirlar.slice(i, i + 500));
+      try { await api('cari_islemler', 'POST', satirlar.slice(i, i + 500)); }
+      catch (e) {
+        // "stok" sütunu henüz eklenmemişse onsuz gönder (çevirme kaynağı açıklamadan okunur)
+        if (!/stok/i.test(e.message) || !('stok' in satirlar[0])) throw e;
+        stoksuz();
+        await api('cari_islemler', 'POST', satirlar.slice(i, i + 500));
+      }
     }
   } catch (e) {
     alert('Aktarım yarıda kaldı: ' + e.message + '\n\nAynı listeyi tekrar aktarabilirsiniz; kaydedilen fiş numaraları atlanır.');
@@ -9934,7 +9981,6 @@ async function cariEskiBorcAlacakAktar() {
   cariMusteriListeRender();
   showToast('✓ ' + satirlar.length + ' eski kayıt cari hesaplara taşındı');
 }
-
 </script>
 </body>
 </html>
