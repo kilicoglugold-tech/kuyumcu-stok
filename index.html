@@ -1,4 +1,4 @@
-<!-- SURUM-V109-KATEGORI --><!DOCTYPE html>
+<!-- SURUM-V110-DOKUM-SIPARIS --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -524,6 +524,23 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 
 .ayar-tab.kategori-ekle-btn { border-style:dashed; border-color:rgba(212,175,55,.6); color:#F7DA84; }
 .ayar-tab.kategori-ekle-btn:hover { background:rgba(212,175,55,.12); }
+
+/* V110 döküm sipariş geç */
+.ds-ust{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ds-baslik{font-size:17px;font-weight:700;color:var(--gold)}
+.ds-x{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer}
+.ds-aciklama{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:8px}
+.ds-aciklama b{color:var(--text)}
+.ds-klasor{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin:6px 0;border-radius:10px;border:1px solid var(--k);background:color-mix(in srgb,var(--k) 14%,transparent);font-size:14px}
+.ds-klasor b{color:var(--k)}
+.ds-uyari{font-size:12.5px;color:#FCA5A5;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);border-radius:8px;padding:8px 10px;margin:8px 0;line-height:1.45}
+.ds-ilerleme{margin:12px 0}
+.ds-bar{height:8px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden}
+.ds-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#B8902A,#F3D27A);transition:width .25s}
+.ds-durum{font-size:12px;color:var(--text2);margin-top:6px;word-break:break-word}
+.ds-etiket{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
+.ds-butonlar{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+#dokumSiparisModal input.form-control{width:100%;box-sizing:border-box}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -913,7 +930,10 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div class="card as-renk k-turuncu" data-dekor="🔥" style="margin-bottom:1.5rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <div class="as-baslik" style="font-weight:600;font-size:14px;"><span class="as-baslik-ikon">🔥</span>Döküm Siparişi</div>
-      <button onclick="dokumTemizle()" style="background:none;border:1px solid #C0392B;color:#C0392B;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">Tümünü Temizle</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
+        <button class="btn btn-primary btn-sm dokum-gec-btn" onclick="dokumSiparisGec()">📦 Sipariş Geç</button>
+        <button onclick="dokumTemizle()" style="background:none;border:1px solid #C0392B;color:#C0392B;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">Tümünü Temizle</button>
+      </div>
     </div>
     <div id="dokumListe"></div>
   </div>
@@ -8067,6 +8087,172 @@ function dokumRenderListe() {
       <button onclick="dokumSil(${item.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:0 4px;flex-shrink:0;">🗑</button>
     </div>`;
   }).join('');
+}
+
+
+// ===== DÖKÜM: SİPARİŞ GEÇ (STL'leri klasörlü zip olarak hazırla) =====
+const DOKUM_KLASOR_14 = '14K Yeşil', DOKUM_KLASOR_10 = '10K Yeşil', DOKUM_KLASOR_TAS = 'Taş Dizilecekler', DOKUM_KLASOR_AYARSIZ = 'Ayar Seçilmemiş';
+let dokumSonZip = null;
+function dokumHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function dokumTasliMi(item) {
+  if (Number(String(item.tas_gram || '').replace(',', '.')) > 0) return true;
+  try { const t = (getUrunMeta(item.urun_id) || {}).tas || {}; return !t.tasSiz && Number(t.gram) > 0; } catch (_) { return false; }
+}
+function dokumKlasor(item) {
+  if (dokumTasliMi(item)) return DOKUM_KLASOR_TAS;
+  if (item.ayar === '14K') return DOKUM_KLASOR_14;
+  if (item.ayar === '10K') return DOKUM_KLASOR_10;
+  return DOKUM_KLASOR_AYARSIZ;
+}
+function dokumDosyaAdi(s) { return String(s || '').replace(/[\\/:*?"<>|]+/g, '_').trim(); }
+function dokumFirmaMail() { try { return localStorage.getItem('kk_dokum_firma_mail') || ''; } catch (_) { return ''; } }
+function dokumFirmaMailKaydet(v) { try { localStorage.setItem('kk_dokum_firma_mail', v.trim()); } catch (_) {} }
+
+function dokumSiparisModal(icerik) {
+  let ov = document.getElementById('dokumSiparisModal');
+  if (!ov) {
+    ov = document.createElement('div'); ov.id = 'dokumSiparisModal';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    document.body.appendChild(ov);
+  }
+  ov.style.display = 'flex';
+  ov.innerHTML = `<div class="card ds-kutu" style="width:min(620px,100%);max-height:90vh;overflow:auto;">${icerik}</div>`;
+}
+function dokumSiparisKapat() { const ov = document.getElementById('dokumSiparisModal'); if (ov) ov.style.display = 'none'; }
+
+function dokumSiparisGec() {
+  const tum = dokumGetListe();
+  const bekleyen = tum.filter(x => !x.tiklendi);
+  if (!tum.length) { showToast('Döküm listesi boş'); return; }
+  const liste = bekleyen.length ? bekleyen : tum;
+  const say = { [DOKUM_KLASOR_14]: 0, [DOKUM_KLASOR_10]: 0, [DOKUM_KLASOR_TAS]: 0, [DOKUM_KLASOR_AYARSIZ]: 0 };
+  liste.forEach(x => say[dokumKlasor(x)]++);
+  const satir = (ad, n, renk) => n ? `<div class="ds-klasor" style="--k:${renk}"><span>📁 ${ad}</span><b>${n} ürün</b></div>` : '';
+  dokumSiparisModal(`
+    <div class="ds-ust"><div class="ds-baslik">📦 Döküm Siparişi Geç</div><button class="ds-x" onclick="dokumSiparisKapat()">✕</button></div>
+    <div class="ds-aciklama">${bekleyen.length ? 'Tiklenmemiş' : 'Listedeki'} <b>${liste.length}</b> ürünün STL dosyaları indirilip <b>“Kılıçoğlu Kuyumculuk”</b> klasörünün içine şöyle yerleştirilecek:</div>
+    ${satir(DOKUM_KLASOR_14, say[DOKUM_KLASOR_14], '#D97706')}
+    ${satir(DOKUM_KLASOR_10, say[DOKUM_KLASOR_10], '#3B82F6')}
+    ${satir(DOKUM_KLASOR_TAS, say[DOKUM_KLASOR_TAS], '#A855F7')}
+    ${say[DOKUM_KLASOR_AYARSIZ] ? satir(DOKUM_KLASOR_AYARSIZ + ' ⚠️', say[DOKUM_KLASOR_AYARSIZ], '#DC2626') + '<div class="ds-uyari">Bazı ürünlerde 10K/14K seçilmemiş; bunlar ayrı klasöre konacak.</div>' : ''}
+    <div class="ds-aciklama" style="margin-top:10px;">Taşlı ürünlerin dosya adının başına ayarı (14K / 10K) yazılır. Klasöre ayrıca bir <b>Sipariş Listesi</b> dosyası eklenir.</div>
+    <div id="dsIlerleme" class="ds-ilerleme" style="display:none;"><div class="ds-bar"><i id="dsBar"></i></div><div id="dsDurum" class="ds-durum"></div></div>
+    <div class="ds-butonlar" id="dsButonlar">
+      <button class="btn" onclick="dokumSiparisKapat()">Vazgeç</button>
+      <button class="btn btn-primary" onclick="dokumSiparisHazirla(${bekleyen.length ? 1 : 0})">📦 Hazırla ve İndir</button>
+    </div>`);
+}
+
+async function dokumSiparisHazirla(sadeceBekleyen) {
+  const liste = sadeceBekleyen ? dokumGetListe().filter(x => !x.tiklendi) : dokumGetListe().slice();
+  const bar = document.getElementById('dsBar'), durum = document.getElementById('dsDurum');
+  document.getElementById('dsIlerleme').style.display = 'block';
+  document.getElementById('dsButonlar').innerHTML = '<button class="btn" disabled>Hazırlanıyor…</button>';
+  const yaz = (t, oran) => { if (durum) durum.textContent = t; if (bar && oran != null) bar.style.width = Math.round(oran * 100) + '%'; };
+  try {
+    yaz('Zip aracı yükleniyor…', 0.02);
+    if (!window.JSZip) await stlScriptYukle('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+    const zip = new JSZip();
+    const kok = zip.folder('Kılıçoğlu Kuyumculuk');
+    const klasorler = {};
+    const kullanilan = new Set();
+    const eksik = [], hatali = [], ozet = [];
+    let toplamDosya = 0;
+    // Aynı ürün aynı klasöre birden çok eklendiyse dosyalar bir kez konur, listede adet yazılır
+    const gruplar = [];
+    liste.forEach(item => {
+      const k = dokumKlasor(item), g = gruplar.find(x => x.item.urun_id && x.item.urun_id === item.urun_id && x.k === k && x.item.ayar === item.ayar);
+      if (g) g.sayi++; else gruplar.push({ item, k, sayi: 1 });
+    });
+    for (let i = 0; i < gruplar.length; i++) {
+      const { item, k, sayi } = gruplar[i];
+      yaz(`(${i + 1}/${gruplar.length}) ${item.kod} — dosyalar alınıyor…`, 0.05 + 0.8 * i / gruplar.length);
+      if (!item.urun_id) { eksik.push(item); continue; }
+      let dosyalar = [];
+      try { dosyalar = await (await stlIstek('/liste/' + encodeURIComponent(item.urun_id))).json(); }
+      catch (e) { hatali.push({ item, hata: e.message }); continue; }
+      if (!dosyalar.length) { eksik.push(item); continue; }
+      if (!klasorler[k]) klasorler[k] = kok.folder(k);
+      const onEk = (k === DOKUM_KLASOR_TAS && item.ayar ? item.ayar + ' - ' : '') + dokumDosyaAdi(item.kod) + ' - ';
+      for (const d of dosyalar) {
+        yaz(`(${i + 1}/${gruplar.length}) ${item.kod} — ${d.ad} indiriliyor…`, 0.05 + 0.8 * i / gruplar.length);
+        let ad = onEk + dokumDosyaAdi(d.ad.startsWith(item.kod) ? d.ad.slice(String(item.kod).length).replace(/^[\s_-]+/, '') || d.ad : d.ad);
+        let anahtar = k + '/' + ad, n = 2;
+        while (kullanilan.has(anahtar)) { const nokta = ad.lastIndexOf('.'); anahtar = k + '/' + (nokta > 0 ? ad.slice(0, nokta) + ` (${n})` + ad.slice(nokta) : ad + ` (${n})`); n++; }
+        kullanilan.add(anahtar);
+        try { klasorler[k].file(anahtar.slice(k.length + 1), await stlBlob(item.urun_id, d.ad)); toplamDosya++; }
+        catch (e) { hatali.push({ item, hata: d.ad + ': ' + e.message }); }
+      }
+      ozet.push({ item, k, adet: dosyalar.length, sayi, idler: liste.filter(x => x.urun_id === item.urun_id && dokumKlasor(x) === k && x.ayar === item.ayar).map(x => x.id) });
+    }
+    if (!toplamDosya) throw new Error('Listedeki ürünlerin hiçbirinde STL dosyası bulunamadı.');
+    const tarih = new Date().toLocaleDateString('tr-TR');
+    const txt = ['KILIÇOĞLU KUYUMCULUK — DÖKÜM SİPARİŞİ', 'Tarih: ' + tarih, ''];
+    [DOKUM_KLASOR_14, DOKUM_KLASOR_10, DOKUM_KLASOR_TAS, DOKUM_KLASOR_AYARSIZ].forEach(k => {
+      const s = ozet.filter(o => o.k === k); if (!s.length) return;
+      txt.push(k.toLocaleUpperCase('tr-TR') + ' (' + s.length + ' model)');
+      s.forEach(o => txt.push('  • ' + (o.sayi > 1 ? o.sayi + ' adet — ' : '') + o.item.kod + ' — ' + o.item.ad + (o.item.ayar ? ' — ' + o.item.ayar : '') + (dokumTasliMi(o.item) ? ' — taş ' + (o.item.tas_gram || '') + ' gr' : '') + (o.adet > 1 ? ' (' + o.adet + ' dosya)' : '')));
+      txt.push('');
+    });
+    txt.push('Toplam: ' + ozet.length + ' model, ' + ozet.reduce((a, o) => a + o.sayi, 0) + ' adet, ' + toplamDosya + ' dosya');
+    kok.file('Sipariş Listesi.txt', '﻿' + txt.join('\r\n'));
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } },
+      m => yaz('Klasör sıkıştırılıyor… %' + Math.round(m.percent), 0.85 + 0.15 * m.percent / 100));
+    const dosyaAdi = 'Kilicoglu Kuyumculuk - ' + tarih.replace(/\./g, '-') + '.zip';
+    dokumSonZip = { blob, dosyaAdi, ozet, metin: txt.join('\n'), idler: ozet.flatMap(o => o.idler) };
+    dokumZipIndir();
+    dokumSiparisSonuc(eksik, hatali, toplamDosya);
+  } catch (e) {
+    yaz('Hata: ' + e.message, null);
+    document.getElementById('dsButonlar').innerHTML = '<button class="btn" onclick="dokumSiparisKapat()">Kapat</button>';
+  }
+}
+
+function dokumZipIndir() {
+  if (!dokumSonZip) return;
+  const a = document.createElement('a'); a.href = URL.createObjectURL(dokumSonZip.blob); a.download = dokumSonZip.dosyaAdi;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+}
+
+function dokumSiparisSonuc(eksik, hatali, toplamDosya) {
+  const z = dokumSonZip, mb = z.blob.size / 1048576;
+  const paylasilir = !!(navigator.canShare && navigator.canShare({ files: [new File([z.blob], z.dosyaAdi, { type: 'application/zip' })] }));
+  const buyuk = mb > 24;
+  dokumSiparisModal(`
+    <div class="ds-ust"><div class="ds-baslik">✅ Sipariş klasörü hazır</div><button class="ds-x" onclick="dokumSiparisKapat()">✕</button></div>
+    <div class="ds-aciklama"><b>${dokumHtml(z.dosyaAdi)}</b> indirildi — ${z.ozet.length} model, ${toplamDosya} dosya, <b>${stlBoyut(z.blob.size)}</b>.</div>
+    ${buyuk ? `<div class="ds-uyari">Dosya ${stlBoyut(z.blob.size)}; Gmail ve Outlook 25 MB'tan büyük ekleri doğrudan göndermez. Gmail ekleyince otomatik Google Drive linkine çevirir; o şekilde gönderebilir ya da WeTransfer kullanabilirsiniz.</div>` : ''}
+    ${eksik.length ? `<div class="ds-uyari">⚠️ STL'si olmayan ${eksik.length} ürün pakete girmedi: ${eksik.map(x => dokumHtml(x.kod)).join(', ')}</div>` : ''}
+    ${hatali.length ? `<div class="ds-uyari">⚠️ İndirilemeyenler: ${hatali.map(h => dokumHtml(h.item.kod + ' (' + h.hata + ')')).join(', ')}</div>` : ''}
+    <label class="ds-etiket">Firmanın mail adresi</label>
+    <input id="dsFirmaMail" class="form-control" type="email" placeholder="ornek@firma.com" value="${dokumHtml(dokumFirmaMail())}" onchange="dokumFirmaMailKaydet(this.value)">
+    <div class="ds-butonlar" style="flex-wrap:wrap;">
+      ${paylasilir ? '<button class="btn btn-primary" onclick="dokumZipPaylas()">📤 Paylaş (Mail / WhatsApp)</button>' : ''}
+      <button class="btn btn-primary" onclick="dokumMailAc()">✉️ Mail taslağı aç</button>
+      <button class="btn" onclick="dokumZipIndir()">⬇️ Tekrar indir</button>
+      <button class="btn" onclick="dokumSiparisVerildiIsaretle()">✔ Listede tikle</button>
+    </div>
+    <div class="ds-aciklama" style="margin-top:8px;font-size:12px;">Mail taslağı konu ve sipariş listesiyle açılır; tarayıcı eki kendisi ekleyemediği için indirilen <b>${dokumHtml(z.dosyaAdi)}</b> dosyasını maile sürükleyin.</div>`);
+}
+
+async function dokumZipPaylas() {
+  const z = dokumSonZip; if (!z) return;
+  try { await navigator.share({ files: [new File([z.blob], z.dosyaAdi, { type: 'application/zip' })], title: 'Kılıçoğlu Kuyumculuk — Döküm Siparişi', text: z.metin }); }
+  catch (e) { if (e.name !== 'AbortError') alert('Paylaşılamadı: ' + e.message); }
+}
+function dokumMailAc() {
+  const z = dokumSonZip; if (!z) return;
+  const kime = (document.getElementById('dsFirmaMail') || {}).value || dokumFirmaMail();
+  if (kime) dokumFirmaMailKaydet(kime);
+  const konu = 'Kılıçoğlu Kuyumculuk — Döküm Siparişi (' + new Date().toLocaleDateString('tr-TR') + ')';
+  const govde = 'Merhaba,\n\nEkteki "' + z.dosyaAdi + '" dosyasında döküm siparişimiz bulunmaktadır.\n\n' + z.metin + '\n\nİyi çalışmalar,\nKılıçoğlu Kuyumculuk';
+  location.href = 'mailto:' + encodeURIComponent(kime.trim()) + '?subject=' + encodeURIComponent(konu) + '&body=' + encodeURIComponent(govde);
+}
+async function dokumSiparisVerildiIsaretle() {
+  const z = dokumSonZip; if (!z) return;
+  for (const id of z.idler) { const it = dokumCache.find(x => x.id === id); if (it && !it.tiklendi) await dokumToggle(id); }
+  showToast('✓ Paketteki ürünler listede tiklendi');
+  dokumSiparisKapat();
 }
 
 // Ana sayfa ilk yüklenişinde init
