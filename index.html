@@ -1,4 +1,4 @@
-<!-- SURUM-V111-BEYAZ-FOTO --><!DOCTYPE html>
+<!-- SURUM-V112-GMAIL --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -8231,7 +8231,8 @@ function dokumSiparisSonuc(eksik, hatali, toplamDosya) {
     <input id="dsFirmaMail" class="form-control" type="email" placeholder="ornek@firma.com" value="${dokumHtml(dokumFirmaMail())}" onchange="dokumFirmaMailKaydet(this.value)">
     <div class="ds-butonlar" style="flex-wrap:wrap;">
       ${paylasilir ? '<button class="btn btn-primary" onclick="dokumZipPaylas()">📤 Paylaş (Mail / WhatsApp)</button>' : ''}
-      <button class="btn btn-primary" onclick="dokumMailAc()">✉️ Mail taslağı aç</button>
+      <button class="btn btn-primary" onclick="dokumMailAc(true)">✉️ Gmail'de aç</button>
+      <button class="btn" onclick="dokumMailAc()">📧 Mail uygulamasında aç</button>
       <button class="btn" onclick="dokumZipIndir()">⬇️ Tekrar indir</button>
       <button class="btn" onclick="dokumSiparisVerildiIsaretle()">✔ Listede tikle</button>
     </div>
@@ -8243,12 +8244,13 @@ async function dokumZipPaylas() {
   try { await navigator.share({ files: [new File([z.blob], z.dosyaAdi, { type: 'application/zip' })], title: 'Kılıçoğlu Kuyumculuk — Döküm Siparişi', text: z.metin }); }
   catch (e) { if (e.name !== 'AbortError') alert('Paylaşılamadı: ' + e.message); }
 }
-function dokumMailAc() {
+function dokumMailAc(gmail) {
   const z = dokumSonZip; if (!z) return;
   const kime = (document.getElementById('dsFirmaMail') || {}).value || dokumFirmaMail();
   if (kime) dokumFirmaMailKaydet(kime);
   const konu = 'Kılıçoğlu Kuyumculuk — Döküm Siparişi (' + new Date().toLocaleDateString('tr-TR') + ')';
   const govde = 'Merhaba,\n\nEkteki "' + z.dosyaAdi + '" dosyasında döküm siparişimiz bulunmaktadır.\n\n' + z.metin + '\n\nİyi çalışmalar,\nKılıçoğlu Kuyumculuk';
+  if (gmail) { window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(kime.trim()) + '&su=' + encodeURIComponent(konu) + '&body=' + encodeURIComponent(govde), '_blank'); return; }
   location.href = 'mailto:' + encodeURIComponent(kime.trim()) + '?subject=' + encodeURIComponent(konu) + '&body=' + encodeURIComponent(govde);
 }
 async function dokumSiparisVerildiIsaretle() {
