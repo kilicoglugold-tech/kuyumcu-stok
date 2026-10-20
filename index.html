@@ -1,4 +1,4 @@
-<!-- SURUM-V110-DOKUM-SIPARIS --><!DOCTYPE html>
+<!-- SURUM-V111-BEYAZ-FOTO --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -541,6 +541,9 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .ds-etiket{display:block;font-size:12px;color:var(--text2);margin:12px 0 4px}
 .ds-butonlar{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 #dokumSiparisModal input.form-control{width:100%;box-sizing:border-box}
+
+/* V111 ürün fotoğraf zemini beyaz */
+.urun-card-foto, .urun-card-foto img { background:#FFFFFF !important; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -2717,14 +2720,14 @@ function renderUrunGrid(urunler) {
       const o = meta.olcu || {};
       const oYukseklik = o.yukseklik || o.boy;
       if (!o.en && !oYukseklik) return '';
-      const tick = 'position:absolute;width:5px;height:5px;border:solid #fff;filter:drop-shadow(0 0 1px rgba(0,0,0,.7));';
+      const tick = 'position:absolute;width:5px;height:5px;border:solid #1a1a1a;';
       const enHtml = o.en ? `
-        <div style="position:absolute;left:16%;right:16%;bottom:30px;height:1px;background:#fff;box-shadow:0 0 2px rgba(0,0,0,.7);"></div>
+        <div style="position:absolute;left:16%;right:16%;bottom:30px;height:1px;background:#1a1a1a;"></div>
         <div style="${tick}left:16%;bottom:28px;border-width:0 0 1px 1px;"></div>
         <div style="${tick}right:16%;bottom:28px;border-width:0 1px 1px 0;"></div>
         <div style="position:absolute;left:0;right:0;bottom:34px;text-align:center;font-size:9px;font-weight:700;color:#1a1a1a;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;">↔ En: ${o.en} mm</div>` : '';
       const yukseklikHtml = oYukseklik ? `
-        <div style="position:absolute;top:24%;bottom:24%;right:10px;width:1px;background:#fff;box-shadow:0 0 2px rgba(0,0,0,.7);"></div>
+        <div style="position:absolute;top:24%;bottom:24%;right:10px;width:1px;background:#1a1a1a;"></div>
         <div style="${tick}top:24%;right:8px;border-width:1px 1px 0 0;"></div>
         <div style="${tick}bottom:24%;right:8px;border-width:0 1px 1px 0;"></div>
         <div style="position:absolute;top:50%;right:16px;transform:translateY(-50%) rotate(-90deg);font-size:9px;font-weight:700;color:#1a1a1a;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;white-space:nowrap;">↕ Yükseklik: ${oYukseklik} mm</div>` : '';
