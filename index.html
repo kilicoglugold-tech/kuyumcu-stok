@@ -1,4 +1,4 @@
-<!-- SURUM-V106-NETKAR-MAGAZA --><!DOCTYPE html>
+<!-- SURUM-V107-STL --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -483,6 +483,28 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
   box-shadow:0 0 0 1px var(--ac), 0 14px 30px -12px color-mix(in srgb, var(--ac) 70%, transparent) !important; }
 #platformTabBar .ayar-tab.active::after { content:'✓'; position:absolute; top:7px; right:9px; width:18px; height:18px; border-radius:50%; background:var(--ac); color:#0B0A09; font-size:11px; font-weight:900; display:flex; align-items:center; justify-content:center; }
 #platformTabBar .ayar-tab img { flex-shrink:0; box-sizing:content-box; background:#fff; border-radius:10px !important; padding:5px 6px; width:auto !important; height:22px !important; max-width:62px !important; max-height:22px !important; object-fit:contain !important; margin:0 !important; vertical-align:middle !important; box-shadow:0 4px 12px -4px rgba(0,0,0,.7); }
+
+/* ===== STL dosyaları paneli ===== */
+.stl-panel { margin:16px 0 14px; padding:14px 16px; border-radius:14px; border:1.5px solid #3466C8; background:radial-gradient(360px 160px at 100% 0%,rgba(96,165,250,.22),transparent 60%), linear-gradient(135deg,#102759,#193C80 60%,#0E2350); }
+.stl-ust { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px; }
+.stl-baslik { font-weight:700; font-size:14px; color:#fff; }
+.stl-liste { display:flex; flex-direction:column; gap:8px; }
+.stl-bos { font-size:12.5px; color:rgba(255,255,255,.6); padding:4px 0; }
+.stl-dosya { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.1); }
+.stl-dosya-ikon { font-size:20px; }
+.stl-dosya-bilgi { flex:1; min-width:0; }
+.stl-dosya-ad { font-size:13px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.stl-dosya-alt { font-size:11px; color:rgba(255,255,255,.55); }
+.stl-ikon-btn { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18); color:#fff; border-radius:8px; padding:5px 9px; cursor:pointer; font-size:13px; }
+.stl-ikon-btn:hover { background:rgba(255,255,255,.14); } .stl-ikon-btn.sil:hover { background:rgba(240,90,80,.3); }
+.stl-ilerleme { height:6px; border-radius:6px; background:rgba(255,255,255,.12); margin-top:5px; overflow:hidden; }
+.stl-ilerleme div { height:100%; background:linear-gradient(90deg,#60A5FA,#F5C451); transition:width .2s; }
+
+/* Ürün detayı penceresi — koyu tema */
+#detayBody { background:linear-gradient(180deg,#17150F,#100F0D) !important; }
+.detay-foto-kart { background:#fff; }
+.detay-info-ad { color:#fff !important; }
+.detay-kod-badge { background:rgba(212,175,55,.16) !important; color:#F7DA84 !important; border-color:rgba(212,175,55,.6) !important; }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -3168,6 +3190,7 @@ function openDetay(urunId) {
       </div>
     </div>
     ${vars.length ? ayarlar.map(buildAyarBlok).join('') : '<div style="color:var(--text3);font-size:13px;margin-bottom:1rem;">Henüz varyant eklenmemiş.</div>'}
+    ${urunYetkiVar() ? '<div class="stl-panel" id="stlPanel"></div>' : ''}
     <div class="detay-actions">
       <button class="btn btn-sm" onclick="dokumSiparisVer('${u.id}')">🔥 Döküm Siparişine Ekle</button>
       <button class="btn btn-sm" onclick="toggleUrunFlag('${u.id}','fotoYuklendi');openDetay('${u.id}')" style="${meta.fotoYuklendi ? 'background:#1B7A4A;color:#fff;border-color:#1B7A4A;' : ''}">📷 Fotoğrafları Yüklendi${meta.fotoYuklendi ? ' ✓' : ''}</button>
@@ -3175,7 +3198,151 @@ function openDetay(urunId) {
       ${urunYetkiVar() ? `<button class="btn btn-sm btn-danger" onclick="deleteUrun('${u.id}')">Sil</button>` : ''}
     </div>`;
   openModal('detayModal');
+  if (urunYetkiVar()) stlPanelYukle(u.id);
 }
+
+// ===== STL DOSYALARI (Cloudflare R2 — kilicoglu-stl Worker üzerinden, sadece "Ürünler" yetkilisi) =====
+const STL_URL = 'https://kilicoglu-stl.kilicoglugold.workers.dev';
+let stlAktifUrun = null;
+async function stlIstek(yol, ayar = {}) {
+  const s = await ensureValidSession();
+  if (!s) throw new Error('Oturum bulunamadı, tekrar giriş yapın.');
+  ayar.headers = Object.assign({}, ayar.headers || {}, { Authorization: 'Bearer ' + s.access_token });
+  const r = await fetch(STL_URL + yol, ayar);
+  if (!r.ok) {
+    let m = r.status + ''; try { m = (await r.json()).hata || m; } catch (_) {}
+    throw new Error(m);
+  }
+  return r;
+}
+function stlBoyut(b) { return b >= 1048576 ? (b / 1048576).toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+function stlYol(urunId, ad) { return '/dosya/' + encodeURIComponent(urunId) + '/' + encodeURIComponent(ad); }
+
+async function stlPanelYukle(urunId) {
+  stlAktifUrun = urunId;
+  const el = document.getElementById('stlPanel');
+  if (!el) return;
+  el.innerHTML = `<div class="stl-ust"><div class="stl-baslik">🧊 STL Dosyaları</div>
+      <label class="btn btn-sm" style="cursor:pointer;">＋ STL Yükle<input type="file" multiple accept=".stl,.zip,.obj,.3dm,.step,.stp" style="display:none" onchange="stlYukle(this)"></label></div>
+    <div id="stlListe" class="stl-liste"><div class="stl-bos">Yükleniyor...</div></div>`;
+  try {
+    const liste = await (await stlIstek('/liste/' + encodeURIComponent(urunId))).json();
+    if (stlAktifUrun !== urunId) return;
+    const l = document.getElementById('stlListe');
+    if (!liste.length) { l.innerHTML = '<div class="stl-bos">Bu ürüne henüz STL yüklenmemiş.</div>'; return; }
+    l.innerHTML = liste.map(f => {
+      const ad = bozEsc(f.ad), js = f.ad.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const onizle = /\.stl$/i.test(f.ad) ? `<button class="stl-ikon-btn" title="3D önizle" onclick="stlOnizle('${urunId}','${js}')">👁</button>` : '';
+      return `<div class="stl-dosya"><span class="stl-dosya-ikon">${/\.zip$/i.test(f.ad) ? '🗜' : '🧊'}</span>
+        <div class="stl-dosya-bilgi"><div class="stl-dosya-ad" title="${ad}">${ad}</div><div class="stl-dosya-alt">${stlBoyut(f.boyut)} · ${new Date(f.tarih).toLocaleDateString('tr-TR')}</div></div>
+        ${onizle}<button class="stl-ikon-btn" title="İndir" onclick="stlIndir('${urunId}','${js}',this)">⬇</button>
+        <button class="stl-ikon-btn sil" title="Sil" onclick="stlSil('${urunId}','${js}')">🗑</button></div>`;
+    }).join('');
+  } catch (e) {
+    const l = document.getElementById('stlListe');
+    if (l) l.innerHTML = '<div class="stl-bos" style="color:var(--red);">STL listesi alınamadı: ' + bozEsc(e.message) + '</div>';
+  }
+}
+
+async function stlYukle(inp) {
+  const dosyalar = [...(inp.files || [])];
+  inp.value = '';
+  const urunId = stlAktifUrun;
+  if (!dosyalar.length || !urunId) return;
+  const s = await ensureValidSession();
+  if (!s) { alert('Oturum bulunamadı.'); return; }
+  const l = document.getElementById('stlListe');
+  for (const f of dosyalar) {
+    if (f.size > 95 * 1048576) { alert(f.name + ': 95 MB sınırını aşıyor. Dosyayı zip\'leyip tekrar deneyin.'); continue; }
+    const satir = document.createElement('div');
+    satir.className = 'stl-dosya';
+    satir.innerHTML = `<span class="stl-dosya-ikon">⏫</span><div class="stl-dosya-bilgi"><div class="stl-dosya-ad">${bozEsc(f.name)}</div>
+      <div class="stl-ilerleme"><div style="width:0%"></div></div></div>`;
+    if (l) { if (l.querySelector('.stl-bos')) l.innerHTML = ''; l.prepend(satir); }
+    const bar = satir.querySelector('.stl-ilerleme div');
+    try {
+      await new Promise((ok, hata) => {
+        const x = new XMLHttpRequest();
+        x.open('PUT', STL_URL + stlYol(urunId, f.name));
+        x.setRequestHeader('Authorization', 'Bearer ' + s.access_token);
+        x.setRequestHeader('Content-Type', f.type || 'application/octet-stream');
+        x.upload.onprogress = e => { if (e.lengthComputable && bar) bar.style.width = Math.round(e.loaded / e.total * 100) + '%'; };
+        x.onload = () => x.status < 300 ? ok() : hata(new Error((() => { try { return JSON.parse(x.responseText).hata; } catch (_) { return 'HTTP ' + x.status; } })()));
+        x.onerror = () => hata(new Error('Bağlantı hatası'));
+        x.send(f);
+      });
+    } catch (e) { alert(f.name + ' yüklenemedi: ' + e.message); }
+  }
+  showToast('STL yüklendi');
+  if (stlAktifUrun === urunId) stlPanelYukle(urunId);
+}
+
+async function stlBlob(urunId, ad) { return (await stlIstek(stlYol(urunId, ad))).blob(); }
+async function stlIndir(urunId, ad, btn) {
+  const eski = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = '…'; btn.disabled = true; }
+  try {
+    const b = await stlBlob(urunId, ad);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = ad;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  } catch (e) { alert('İndirilemedi: ' + e.message); }
+  if (btn) { btn.textContent = eski; btn.disabled = false; }
+}
+async function stlSil(urunId, ad) {
+  if (!confirm('"' + ad + '" kalıcı olarak silinsin mi?')) return;
+  try { await stlIstek(stlYol(urunId, ad), { method: 'DELETE' }); showToast('STL silindi'); stlPanelYukle(urunId); }
+  catch (e) { alert('Silinemedi: ' + e.message); }
+}
+
+// ---- 3D önizleme (three.js ilk kullanımda yüklenir) ----
+function stlScriptYukle(src) {
+  return new Promise((ok, hata) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => hata(new Error('3D kütüphanesi yüklenemedi')); document.head.appendChild(s); });
+}
+async function stlOnizle(urunId, ad) {
+  let ov = document.getElementById('stlOnizleModal');
+  if (!ov) {
+    ov = document.createElement('div'); ov.id = 'stlOnizleModal';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+    document.body.appendChild(ov);
+  }
+  ov.style.display = 'flex';
+  ov.innerHTML = `<div class="card" style="width:min(900px,100%);padding:0;overflow:hidden;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);">
+      <div style="font-weight:700;color:#F7DA84;">🧊 ${bozEsc(ad)}</div><button class="btn btn-sm" onclick="stlOnizleKapat()">✕</button></div>
+    <div id="stlSahne" style="height:min(70vh,560px);position:relative;background:radial-gradient(circle at 50% 40%,#2A2416,#0B0A09);">
+      <div id="stlDurum" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#B9B09B;">Model yükleniyor...</div></div>
+    <div style="padding:8px 16px;font-size:11.5px;color:var(--text3);">Fareyle sürükle: döndür · Tekerlek: yakınlaştır · Sağ tık sürükle: kaydır</div></div>`;
+  try {
+    if (!window.THREE) await stlScriptYukle('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
+    if (!THREE.STLLoader) await stlScriptYukle('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js');
+    if (!THREE.OrbitControls) await stlScriptYukle('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js');
+    const buf = await (await stlBlob(urunId, ad)).arrayBuffer();
+    const kap = document.getElementById('stlSahne'); if (!kap) return;
+    const geo = new THREE.STLLoader().parse(buf);
+    geo.computeVertexNormals(); geo.center(); geo.computeBoundingSphere();
+    const r = geo.boundingSphere.radius || 1;
+    const sahne = new THREE.Scene();
+    const kamera = new THREE.PerspectiveCamera(40, kap.clientWidth / kap.clientHeight, r / 100, r * 100);
+    kamera.position.set(r * 1.6, r * 1.2, r * 2.2);
+    const cizici = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    cizici.setPixelRatio(window.devicePixelRatio); cizici.setSize(kap.clientWidth, kap.clientHeight);
+    kap.innerHTML = ''; kap.appendChild(cizici.domElement);
+    const mat = new THREE.MeshStandardMaterial({ color: 0xE6BE5A, metalness: 0.85, roughness: 0.28 });
+    sahne.add(new THREE.Mesh(geo, mat));
+    sahne.add(new THREE.HemisphereLight(0xfff6e0, 0x3a2a10, 0.9));
+    const l1 = new THREE.DirectionalLight(0xffffff, 1.1); l1.position.set(1, 2, 3); sahne.add(l1);
+    const l2 = new THREE.DirectionalLight(0xffe0a0, 0.6); l2.position.set(-2, -1, -2); sahne.add(l2);
+    const kontrol = new THREE.OrbitControls(kamera, cizici.domElement);
+    kontrol.enableDamping = true; kontrol.autoRotate = true; kontrol.autoRotateSpeed = 1.2;
+    cizici.domElement.addEventListener('pointerdown', () => { kontrol.autoRotate = false; });
+    let calis = true;
+    ov._durdur = () => { calis = false; cizici.dispose(); geo.dispose(); };
+    (function dongu() { if (!calis) return; kontrol.update(); cizici.render(sahne, kamera); requestAnimationFrame(dongu); })();
+  } catch (e) {
+    const d = document.getElementById('stlDurum'); if (d) d.textContent = 'Önizleme açılamadı: ' + e.message;
+  }
+}
+function stlOnizleKapat() { const ov = document.getElementById('stlOnizleModal'); if (!ov) return; if (ov._durdur) ov._durdur(); ov._durdur = null; ov.style.display = 'none'; ov.innerHTML = ''; }
 
 function detayTipToggle(bodyId, btn) {
   const body = document.getElementById(bodyId);
