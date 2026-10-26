@@ -1,4 +1,4 @@
-<!-- SURUM-V115-TUM-KURLAR --><!DOCTYPE html>
+<!-- SURUM-V116-KUR-BEKCI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -4774,6 +4774,7 @@ async function showMainApp() {
   initRaporAylar();
   loadAylikParam().then(() => loadUrunler());
   dokumYukle().then(dokumRenderListe);
+  { const as = document.getElementById('page-anasayfa'); if (as && as.classList.contains('active')) haremKurOtomatik(); }
   if (typeof loadZincirFormulleri === 'function') loadZincirFormulleri();
   if (currentUser.rol === 'admin' && typeof bozAlarmYukle === 'function') {
     bozAlarmYukle().then(bozAlarmBaslat);
@@ -8319,11 +8320,26 @@ function haremSayi(v) {
   if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.'); else if (s.includes(',')) s = s.replace(',', '.');
   const n = parseFloat(s); return isFinite(n) && n !== 0 ? n : null;
 }
+let haremSonMesaj = 0, haremBekciSaat = null, haremBaglantiBas = 0;
 function haremBaglan() {
   if (haremWs && (haremWs.readyState === 0 || haremWs.readyState === 1)) return;
   try { haremWs = new WebSocket(HAREM_SOCKET); } catch (e) { return; }
   const ws = haremWs;
+  haremBaglantiBas = Date.now();
+  // Bekçi: bağlantı takılır ya da veri kesilirse kapatıp yeniden bağlan
+  if (!haremBekciSaat) haremBekciSaat = setInterval(() => {
+    if (!haremWs) return;
+    const sessiz = Date.now() - Math.max(haremSonMesaj, haremBaglantiBas);
+    if (sessiz > (haremCanliZaman ? 45000 : 10000)) {
+      const eski = haremWs; haremWs = null;
+      try { eski.close(); } catch (_) {}
+      if (!haremCanliZaman) { const el = document.getElementById('haremKurKutu'); if (el) el.innerHTML = '<div class="hk-bos">Harem Altın\'a bağlanılamadı, yeniden deneniyor… <button class="btn btn-sm" onclick="haremBaglan()">Tekrar dene</button></div>'; }
+      const sayfa = document.getElementById('page-anasayfa');
+      if (document.visibilityState === 'visible' && sayfa && sayfa.classList.contains('active')) haremBaglan();
+    }
+  }, 5000);
   ws.onmessage = e => {
+    haremSonMesaj = Date.now();
     const d = String(e.data);
     if (d[0] === '0') { ws.send('40'); return; }
     if (d === '2') { ws.send('3'); return; }
@@ -8466,6 +8482,10 @@ function haremGecmisSec(v) {
   ['haremCanliBtn', 'htCanliBtn'].forEach(id => { const b = document.getElementById(id); if (b) b.style.display = haremGecmisTarih ? '' : 'none'; });
   haremKurCiz();
 }
+document.addEventListener('visibilitychange', () => {
+  const sayfa = document.getElementById('page-anasayfa');
+  if (document.visibilityState === 'visible' && sayfa && sayfa.classList.contains('active') && typeof currentUser !== 'undefined' && currentUser) haremBaglan();
+});
 function haremKurOtomatik() {
   const inp = document.getElementById('haremTarihSec');
   if (inp && !inp.max) inp.max = new Date().toISOString().slice(0, 10);
