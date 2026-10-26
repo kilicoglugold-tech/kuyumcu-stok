@@ -1,4 +1,4 @@
-<!-- SURUM-V113-CANLI-KUR --><!DOCTYPE html>
+<!-- SURUM-V114-HAREM-SOCKET --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -545,6 +545,9 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 /* V111 ürün fotoğraf zemini beyaz */
 .urun-card-foto, .urun-card-foto img { background:#FFFFFF !important; }
 
+.hk-tarih{background:rgba(0,0,0,.3);border:1px solid rgba(212,175,55,.35);color:#F2ECDD;border-radius:8px;padding:4px 8px;font-size:12px;font-family:inherit;color-scheme:dark}
+.hk-canli{display:inline-block;width:7px;height:7px;border-radius:50%;background:#34D399;margin-right:6px;box-shadow:0 0 0 0 rgba(52,211,153,.7);animation:hkNabiz 1.6s infinite}
+@keyframes hkNabiz{0%{box-shadow:0 0 0 0 rgba(52,211,153,.6)}70%{box-shadow:0 0 0 7px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
 /* V113 canlı kur */
 .hk-panel{--ac:#F5C451}
 .hk-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
@@ -844,8 +847,9 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div class="card as-renk hk-panel" data-dekor="📈" style="margin-bottom:1.25rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
       <div class="as-baslik" style="font-weight:600;font-size:14px;"><span class="as-baslik-ikon">📈</span>Canlı Kur</div>
-      <div style="display:flex;align-items:center;gap:8px;"><span id="haremKurDurum" class="hk-durum"></span>
-        <button class="btn btn-sm" onclick="haremKurCiz(true)" title="Yenile">↻</button></div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;"><span id="haremKurDurum" class="hk-durum"></span>
+        <input type="date" id="haremTarihSec" class="hk-tarih" title="Geçmiş bir günün kapanış fiyatlarını gör" onchange="haremGecmisSec(this.value)">
+        <button class="btn btn-sm" id="haremCanliBtn" style="display:none;" onclick="document.getElementById('haremTarihSec').value='';haremGecmisSec('')">● Canlı</button></div>
     </div>
     <div id="haremKurKutu" class="hk-grid"><div class="hk-bos">Yükleniyor…</div></div>
   </div>
@@ -1692,7 +1696,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
       <button class="btn btn-primary" onclick="saveParametre()">Kaydet ↵</button>
-      <button class="btn" onclick="haremKurDoldur('paramKur','paramAltin',this)" title="Dolar kuru ve has altın $/gr değerini Harem Altın satış fiyatından doldurur; kaydetmek için Kaydet'e basın">🔄 Harem'den getir</button>
+      <button class="btn" onclick="haremKurDoldur('paramKur','paramAltin',this,null,'paramAy')" title="Seçili ayın dolar kuru ve has $/gr değerini Harem Altın satış fiyatından doldurur (bu ay: canlı, geçmiş ay: ayın son günü kapanışı). Kaydetmek için Kaydet'e basın.">🔄 Harem'den getir</button>
       <button class="btn" onclick="loadParametre()">Bu Ayı Yükle</button>
       <span id="paramMsg" style="font-size:13px;color:var(--green);display:none;">✓ Kaydedildi!</span>
     </div>
@@ -1876,7 +1880,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <span style="display:flex;align-items:center;gap:5px;">Altın Fiyatı ($/gr)
       <input type="number" step="0.01" id="syAltinGirdi" placeholder="0" style="width:70px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;font-family:inherit;" onchange="saveSayimParametre()">
     </span>
-    <button class="btn btn-sm" onclick="haremKurDoldur('syDolarKuruGirdi','syAltinGirdi',this,saveSayimParametre)">🔄 Harem'den getir</button>
+    <button class="btn btn-sm" onclick="haremKurDoldur('syDolarKuruGirdi','syAltinGirdi',this,saveSayimParametre,'sayimAy')">🔄 Harem'den getir</button>
     <span>Has Karşılığı: <strong id="syHasTL">-</strong></span>
   </div>
 
@@ -8286,62 +8290,133 @@ async function dokumSiparisVerildiIsaretle() {
 }
 
 
-// ===== CANLI KUR (Harem Altın, Cloudflare köprüsü üzerinden) =====
-let haremKurVeri = null, haremKurZaman = 0, haremKurSaat = null;
-async function haremKurGetir(zorla) {
-  if (!zorla && haremKurVeri && Date.now() - haremKurZaman < 55000) return haremKurVeri;
+// ===== CANLI KUR (Harem Altın) =====
+// Canlı: tarayıcı doğrudan Harem'in fiyat yayınına (socket) bağlanır, her değişiklik anında gelir.
+// Geçmiş: Harem'in "Geçmiş Kurlar" verisi Cloudflare köprüsü üzerinden alınır (/kur-gecmis).
+const HAREM_SOCKET = 'wss://hrmsocketonly.haremaltin.com/socket.io/?EIO=4&transport=websocket';
+let haremCanli = {}, haremCanliZaman = 0, haremWs = null, haremWsDeneme = 0, haremCizZamanlayici = null, haremGecmisTarih = '';
+function haremSayi(v) {
+  if (typeof v === 'number') return v;
+  let s = String(v == null ? '' : v).trim();
+  if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.'); else if (s.includes(',')) s = s.replace(',', '.');
+  const n = parseFloat(s); return isFinite(n) && n !== 0 ? n : null;
+}
+function haremBaglan() {
+  if (haremWs && (haremWs.readyState === 0 || haremWs.readyState === 1)) return;
+  try { haremWs = new WebSocket(HAREM_SOCKET); } catch (e) { return; }
+  const ws = haremWs;
+  ws.onmessage = e => {
+    const d = String(e.data);
+    if (d[0] === '0') { ws.send('40'); return; }
+    if (d === '2') { ws.send('3'); return; }
+    if (!d.startsWith('42')) return;
+    try {
+      const [ad, veri] = JSON.parse(d.slice(2));
+      if (ad !== 'price_changed' || !veri || !veri.data) return;
+      haremWsDeneme = 0;
+      for (const [k, x] of Object.entries(veri.data)) {
+        const alis = haremSayi(x.alis), satis = haremSayi(x.satis);
+        if (alis == null && satis == null) continue;
+        const yon = (x.dir && (x.dir.satis_dir || x.dir.alis_dir)) || (haremCanli[k] && haremCanli[k].yon) || '';
+        haremCanli[k] = { alis, satis, yon, tarih: x.tarih || '' };
+      }
+      haremCanliZaman = Date.now();
+      if (!haremCizZamanlayici) haremCizZamanlayici = setTimeout(() => { haremCizZamanlayici = null; if (!haremGecmisTarih) haremKurCiz(); }, 400);
+    } catch (_) {}
+  };
+  ws.onclose = () => {
+    if (haremWs !== ws) return;
+    haremWs = null;
+    const sayfa = document.getElementById('page-anasayfa');
+    if (sayfa && sayfa.classList.contains('active')) setTimeout(haremBaglan, Math.min(30000, 2000 * Math.pow(2, haremWsDeneme++)));
+  };
+}
+function haremCanliBekle(ms = 8000) {
+  haremBaglan();
+  return new Promise((ok, hata) => {
+    const t0 = Date.now();
+    (function bak() {
+      if (haremCanli.USDTRY && haremCanli.ALTIN) return ok(haremCanli);
+      if (Date.now() - t0 > ms) return hata(new Error('Harem Altın canlı fiyatlarına bağlanılamadı'));
+      setTimeout(bak, 200);
+    })();
+  });
+}
+// Geçmiş: tarih 'GG-AA-YYYY' → o günün kapanış fiyatları
+const haremGecmisOnbellek = {};
+async function haremGecmisGetir(tarih) {
+  if (haremGecmisOnbellek[tarih]) return haremGecmisOnbellek[tarih];
   const s = await ensureValidSession();
   if (!s) throw new Error('Oturum bulunamadı');
-  const r = await fetch(STL_URL + '/kur', { headers: { Authorization: 'Bearer ' + s.access_token } });
+  const r = await fetch(STL_URL + '/kur-gecmis?tarih=' + encodeURIComponent(tarih), { headers: { Authorization: 'Bearer ' + s.access_token } });
   let j = null; try { j = await r.json(); } catch (_) {}
-  if (r.status === 404) throw new Error('Cloudflare köprüsü henüz güncellenmemiş (yeni Worker kodunu yapıştırıp Deploy edin).');
-  if (!r.ok) throw new Error((j && j.hata) || ('Kur alınamadı (' + r.status + ')'));
-  haremKurVeri = j; haremKurZaman = Date.now();
+  if (r.status === 404 && j && /Bilinmeyen/.test(j.hata || '')) throw new Error('Cloudflare köprüsü güncellenmemiş (yeni Worker kodunu yapıştırıp Deploy edin).');
+  if (!r.ok) throw new Error((j && j.hata) || ('Geçmiş kur alınamadı (' + r.status + ')'));
+  const bugun = haremTarihStr(new Date());
+  if (tarih !== bugun) haremGecmisOnbellek[tarih] = j;
   return j;
 }
+function haremTarihStr(d) { return String(d.getDate()).padStart(2, '0') + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + d.getFullYear(); }
 function haremFmt(n, ond) { return n == null ? '—' : Number(n).toLocaleString('tr-TR', { minimumFractionDigits: ond, maximumFractionDigits: ond }); }
 const HAREM_KARTLAR = [
   ['ALTIN', 'Has Altın', '🥇', 2], ['KULCEALTIN', 'Gram Altın', '🪙', 2], ['USDTRY', 'Dolar', '💵', 4],
   ['EURTRY', 'Euro', '💶', 4], ['AYAR22', '22 Ayar', '💛', 2], ['CEYREK_YENI', 'Yeni Çeyrek', '🔸', 0]
 ];
-async function haremKurCiz(zorla) {
-  const el = document.getElementById('haremKurKutu');
+function haremKartlarHtml(f, yonGoster) {
+  return HAREM_KARTLAR.filter(([k]) => f[k]).map(([k, ad, ik, ond]) => {
+    const y = yonGoster ? f[k].yon : '';
+    const yon = y === 'up' ? '<span class="hk-yon yukari">▲</span>' : y === 'down' ? '<span class="hk-yon asagi">▼</span>' : '';
+    return `<div class="hk-kart"><div class="hk-ad">${ik} ${ad} ${yon}</div>
+      <div class="hk-satir"><span>Alış</span><b>${haremFmt(f[k].alis, ond)}</b></div>
+      <div class="hk-satir"><span>Satış</span><b>${haremFmt(f[k].satis, ond)}</b></div></div>`;
+  }).join('');
+}
+async function haremKurCiz() {
+  const el = document.getElementById('haremKurKutu'), durum = document.getElementById('haremKurDurum');
   if (!el) return;
-  const durum = document.getElementById('haremKurDurum');
-  if (durum) durum.textContent = 'Güncelleniyor…';
-  try {
-    const v = await haremKurGetir(zorla), f = v.fiyatlar || {};
-    el.innerHTML = HAREM_KARTLAR.filter(([k]) => f[k]).map(([k, ad, ik, ond]) => {
-      const yon = f[k].yon === 'up' ? '<span class="hk-yon yukari">▲</span>' : f[k].yon === 'down' ? '<span class="hk-yon asagi">▼</span>' : '';
-      return `<div class="hk-kart"><div class="hk-ad">${ik} ${ad} ${yon}</div>
-        <div class="hk-satir"><span>Alış</span><b>${haremFmt(f[k].alis, ond)}</b></div>
-        <div class="hk-satir"><span>Satış</span><b>${haremFmt(f[k].satis, ond)}</b></div></div>`;
-    }).join('') || '<div class="hk-bos">Kur verisi gelmedi.</div>';
-    if (durum) durum.textContent = 'Harem Altın · ' + new Date(haremKurZaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-  } catch (e) {
-    if (durum) durum.textContent = '';
-    el.innerHTML = `<div class="hk-bos">⚠️ ${String(e.message).replace(/</g, '&lt;')}</div>`;
+  if (haremGecmisTarih) {
+    if (durum) durum.textContent = 'Yükleniyor…';
+    try {
+      const g = await haremGecmisGetir(haremGecmisTarih);
+      el.innerHTML = haremKartlarHtml(g.fiyatlar || {}, false) || '<div class="hk-bos">Bu tarih için kayıt yok.</div>';
+      if (durum) durum.textContent = 'Harem Altın · ' + haremGecmisTarih.replace(/-/g, '.') + ' kapanış';
+    } catch (e) { if (durum) durum.textContent = ''; el.innerHTML = `<div class="hk-bos">⚠️ ${String(e.message).replace(/</g, '&lt;')}</div>`; }
+    return;
   }
+  if (!haremCanliZaman) { el.innerHTML = '<div class="hk-bos">Harem Altın\'a bağlanılıyor…</div>'; if (durum) durum.textContent = ''; return; }
+  el.innerHTML = haremKartlarHtml(haremCanli, true);
+  if (durum) durum.innerHTML = '<span class="hk-canli"></span>Canlı · Harem Altın · ' + new Date(haremCanliZaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+function haremGecmisSec(v) {
+  // v: input[type=date] değeri YYYY-AA-GG ya da boş (canlı)
+  haremGecmisTarih = v ? v.split('-').reverse().join('-') : '';
+  const btn = document.getElementById('haremCanliBtn'); if (btn) btn.style.display = haremGecmisTarih ? '' : 'none';
+  haremKurCiz();
 }
 function haremKurOtomatik() {
-  haremKurCiz();
-  if (haremKurSaat) return;
-  haremKurSaat = setInterval(() => {
-    const sayfa = document.getElementById('page-anasayfa');
-    if (document.visibilityState === 'visible' && sayfa && sayfa.classList.contains('active')) haremKurCiz(true);
-  }, 60000);
+  const inp = document.getElementById('haremTarihSec');
+  if (inp && !inp.max) inp.max = new Date().toISOString().slice(0, 10);
+  haremBaglan(); haremKurCiz();
 }
-// Parametreler / Sayım: dolar kuru ve has $/gr değerini Harem'den doldur (satış fiyatı)
-async function haremKurDoldur(kurId, altinId, btn, sonra) {
+// Parametreler / Sayım: seçili ayın kurunu doldur. Bu ay → canlı satış; geçmiş ay → ayın son günü kapanış satışı.
+async function haremKurDoldur(kurId, altinId, btn, sonra, ayId) {
   const eski = btn ? btn.textContent : '';
   if (btn) { btn.textContent = '⏳ Alınıyor…'; btn.disabled = true; }
   try {
-    const f = (await haremKurGetir(true)).fiyatlar || {};
+    const ay = (document.getElementById(ayId) || {}).value || '';
+    const simdi = new Date(), buAy = simdi.getFullYear() + '-' + String(simdi.getMonth() + 1).padStart(2, '0');
+    let f, aciklama;
+    if (!ay || ay >= buAy) { f = await haremCanliBekle(); aciklama = 'canlı'; }
+    else {
+      const [y, m] = ay.split('-').map(Number);
+      const tarih = haremTarihStr(new Date(y, m, 0));
+      f = (await haremGecmisGetir(tarih)).fiyatlar || {}; aciklama = tarih.replace(/-/g, '.') + ' kapanış';
+    }
     const usd = f.USDTRY && f.USDTRY.satis, has = f.ALTIN && f.ALTIN.satis;
     if (!usd) throw new Error('Dolar kuru gelmedi');
     document.getElementById(kurId).value = usd.toFixed(2);
     if (has) document.getElementById(altinId).value = (has / usd).toFixed(2);
-    showToast('✓ Harem Altın satış fiyatları dolduruldu: $ ' + haremFmt(usd, 4) + ' ₺' + (has ? ' · has ' + haremFmt(has, 2) + ' ₺/gr' : ''));
+    showToast('✓ Harem (' + aciklama + ', satış): $ ' + haremFmt(usd, 4) + ' ₺' + (has ? ' · has ' + haremFmt(has, 2) + ' ₺/gr' : ''));
     if (sonra) sonra();
   } catch (e) { alert('Kur alınamadı: ' + e.message); }
   if (btn) { btn.textContent = eski; btn.disabled = false; }
