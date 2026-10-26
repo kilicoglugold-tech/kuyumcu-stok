@@ -1,4 +1,4 @@
-<!-- SURUM-V114-HAREM-SOCKET --><!DOCTYPE html>
+<!-- SURUM-V115-TUM-KURLAR --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -560,6 +560,23 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .hk-yon{font-size:10px}.hk-yon.yukari{color:#34D399}.hk-yon.asagi{color:#F87171}
 .hk-durum{font-size:11px;color:#A39A85}
 .hk-bos{grid-column:1/-1;font-size:13px;color:#C9BFA8;padding:4px 0}
+.hk-grid{grid-template-columns:repeat(7,minmax(0,1fr)) !important}
+@media(max-width:1300px){.hk-grid{grid-template-columns:repeat(4,minmax(0,1fr)) !important}}
+@media(max-width:560px){.hk-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important}}
+#haremTumModal{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.ht-kutu{width:min(1400px,100%);max-height:94vh;display:flex;flex-direction:column;background:linear-gradient(160deg,#1B1813,#0E0D0B);border:1px solid rgba(212,175,55,.5);border-radius:18px;box-shadow:0 30px 80px -20px rgba(0,0,0,.9)}
+.ht-ust{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid rgba(212,175,55,.25)}
+.ht-baslik{font-size:20px;font-weight:700;color:#F5C451;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ht-sag{display:flex;align-items:center;gap:8px}
+.ht-icerik{overflow:auto;padding:16px 20px 20px;columns:3 380px;column-gap:16px}
+.ht-grup{break-inside:avoid;margin-bottom:16px;background:rgba(0,0,0,.25);border:1px solid rgba(212,175,55,.22);border-radius:14px;padding:12px 14px}
+.ht-grup-baslik{font-size:14px;font-weight:700;color:#F7DA84;margin-bottom:6px}
+.ht-tablo{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.ht-tablo th{font-size:11px;color:#A39A85;font-weight:600;text-align:right;padding:4px 6px;text-transform:uppercase;letter-spacing:.04em}
+.ht-tablo td{padding:7px 6px;border-top:1px solid rgba(255,255,255,.06);font-size:15px;color:#F2ECDD;text-align:right;white-space:nowrap}
+.ht-tablo td:first-child{text-align:left;font-size:13.5px;color:#E8DFC8;white-space:normal}
+.ht-tablo td.ht-fark{font-size:12px;color:#A39A85}
+.ht-tablo tbody tr:hover td{background:rgba(212,175,55,.07)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -849,7 +866,8 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <div class="as-baslik" style="font-weight:600;font-size:14px;"><span class="as-baslik-ikon">📈</span>Canlı Kur</div>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;"><span id="haremKurDurum" class="hk-durum"></span>
         <input type="date" id="haremTarihSec" class="hk-tarih" title="Geçmiş bir günün kapanış fiyatlarını gör" onchange="haremGecmisSec(this.value)">
-        <button class="btn btn-sm" id="haremCanliBtn" style="display:none;" onclick="document.getElementById('haremTarihSec').value='';haremGecmisSec('')">● Canlı</button></div>
+        <button class="btn btn-sm" id="haremCanliBtn" style="display:none;" onclick="haremGecmisSec('')">● Canlı</button>
+        <button class="btn btn-sm" onclick="haremTumAc()" title="Tüm kurları büyük ekranda gör">⤢ Tüm Kurlar</button></div>
     </div>
     <div id="haremKurKutu" class="hk-grid"><div class="hk-bos">Yükleniyor…</div></div>
   </div>
@@ -8360,8 +8378,58 @@ function haremTarihStr(d) { return String(d.getDate()).padStart(2, '0') + '-' + 
 function haremFmt(n, ond) { return n == null ? '—' : Number(n).toLocaleString('tr-TR', { minimumFractionDigits: ond, maximumFractionDigits: ond }); }
 const HAREM_KARTLAR = [
   ['ALTIN', 'Has Altın', '🥇', 2], ['KULCEALTIN', 'Gram Altın', '🪙', 2], ['USDTRY', 'Dolar', '💵', 4],
-  ['EURTRY', 'Euro', '💶', 4], ['AYAR22', '22 Ayar', '💛', 2], ['CEYREK_YENI', 'Yeni Çeyrek', '🔸', 0]
+  ['EURTRY', 'Euro', '💶', 4], ['AYAR22', '22 Ayar', '💛', 2], ['CEYREK_YENI', 'Yeni Çeyrek', '🔸', 0], ['CEYREK_ESKI', 'Eski Çeyrek', '🔹', 0]
 ];
+// "Tüm Kurlar" penceresi: gruplar ve Türkçe adlar (listede olmayan yeni kodlar "Diğer"e düşer)
+const HAREM_GRUPLAR = [
+  ['🥇 Altın', [['ALTIN', 'Has Altın'], ['KULCEALTIN', 'Gram Altın (Külçe)'], ['AYAR22', '22 Ayar'], ['AYAR14', '14 Ayar'], ['USDKG', 'Külçe USD/KG'], ['EURKG', 'Külçe EUR/KG'], ['ONS', 'Ons ($)'], ['USDPURE', 'Has ($/gr)'], ['XAUXAG', 'Altın / Gümüş Oranı']]],
+  ['🔸 Sarrafiye', [['CEYREK_YENI', 'Yeni Çeyrek'], ['CEYREK_ESKI', 'Eski Çeyrek'], ['YARIM_YENI', 'Yeni Yarım'], ['YARIM_ESKI', 'Eski Yarım'], ['TEK_YENI', 'Yeni Tam'], ['TEK_ESKI', 'Eski Tam'], ['ATA_YENI', 'Yeni Ata'], ['ATA_ESKI', 'Eski Ata'], ['ATA5_YENI', 'Yeni Ata 5\'li'], ['ATA5_ESKI', 'Eski Ata 5\'li'], ['GREMESE_YENI', 'Yeni Gremse'], ['GREMESE_ESKI', 'Eski Gremse']]],
+  ['💵 Döviz (₺)', [['USDTRY', 'Dolar'], ['EURTRY', 'Euro'], ['GBPTRY', 'Sterlin'], ['CHFTRY', 'İsviçre Frangı'], ['AUDTRY', 'Avustralya Doları'], ['CADTRY', 'Kanada Doları'], ['SARTRY', 'Suudi Riyali'], ['JPYTRY', 'Japon Yeni'], ['KWDTRY', 'Kuveyt Dinarı'], ['JODTRY', 'Ürdün Dinarı'], ['OMRTRY', 'Umman Riyali'], ['ILSTRY', 'İsrail Şekeli'], ['MADTRY', 'Fas Dirhemi']]],
+  ['🔁 Parite', [['EURUSD', 'EUR / USD'], ['GBPUSD', 'GBP / USD'], ['AUDUSD', 'AUD / USD'], ['USDCHF', 'USD / CHF'], ['USDCAD', 'USD / CAD'], ['USDJPY', 'USD / JPY'], ['USDSAR', 'USD / SAR'], ['USDQAR', 'USD / QAR'], ['KWDUSD', 'KWD / USD'], ['JODUSD', 'JOD / USD'], ['OMRUSD', 'OMR / USD'], ['AEDUSD', 'AED / USD'], ['USDILS', 'USD / ILS'], ['USDMAD', 'USD / MAD']]],
+  ['🥈 Gümüş · Platin · Paladyum', [['GUMUSTRY', 'Gümüş (₺/gr)'], ['GUMUSUSD', 'Gümüş ($/kg)'], ['XAGUSD', 'Gümüş Ons ($)'], ['PLATIN', 'Platin ($/kg)'], ['XPTUSD', 'Platin Ons ($)'], ['PALADYUM', 'Paladyum ($/kg)'], ['XPDUSD', 'Paladyum Ons ($)']]]
+];
+let haremTumAcik = false;
+function haremTumAc() {
+  haremTumAcik = true;
+  let ov = document.getElementById('haremTumModal');
+  if (!ov) {
+    ov = document.createElement('div'); ov.id = 'haremTumModal';
+    ov.onclick = e => { if (e.target === ov) haremTumKapat(); };
+    document.body.appendChild(ov);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && haremTumAcik) haremTumKapat(); });
+  }
+  ov.style.display = 'flex';
+  ov.innerHTML = `<div class="ht-kutu">
+    <div class="ht-ust">
+      <div class="ht-baslik">📈 Tüm Kurlar <span id="htDurum" class="hk-durum"></span></div>
+      <div class="ht-sag">
+        <input type="date" class="hk-tarih" id="htTarih" max="${new Date().toISOString().slice(0, 10)}" value="${haremGecmisTarih ? haremGecmisTarih.split('-').reverse().join('-') : ''}" onchange="haremGecmisSec(this.value)" title="Geçmiş bir günün kapanışı">
+        <button class="btn btn-sm" id="htCanliBtn" style="${haremGecmisTarih ? '' : 'display:none;'}" onclick="haremGecmisSec('')">● Canlı</button>
+        <button class="ds-x" onclick="haremTumKapat()" title="Kapat">✕</button>
+      </div>
+    </div>
+    <div id="htIcerik" class="ht-icerik"><div class="hk-bos">Yükleniyor…</div></div>
+  </div>`;
+  haremKurCiz();
+}
+function haremTumKapat() { haremTumAcik = false; const ov = document.getElementById('haremTumModal'); if (ov) ov.style.display = 'none'; }
+function haremTumCiz(f, yonGoster, durumHtml) {
+  const el = document.getElementById('htIcerik'); if (!el || !haremTumAcik) return;
+  const d = document.getElementById('htDurum'); if (d) d.innerHTML = durumHtml || '';
+  const bilinen = new Set(HAREM_GRUPLAR.flatMap(g => g[1].map(x => x[0])));
+  const gruplar = HAREM_GRUPLAR.concat([['➕ Diğer', Object.keys(f).filter(k => !bilinen.has(k)).map(k => [k, k])]]);
+  el.innerHTML = gruplar.map(([baslik, liste]) => {
+    const satirlar = liste.filter(([k]) => f[k]).map(([k, ad]) => {
+      const x = f[k], y = yonGoster ? x.yon : '';
+      const yon = y === 'up' ? '<span class="hk-yon yukari">▲</span>' : y === 'down' ? '<span class="hk-yon asagi">▼</span>' : '';
+      const fark = x.alis != null && x.satis != null ? x.satis - x.alis : null;
+      const buyuk = Math.max(Math.abs(x.alis || 0), Math.abs(x.satis || 0));
+      const od = buyuk >= 1000 ? ([x.alis, x.satis].every(v => v == null || Number.isInteger(v)) ? 0 : 2) : buyuk >= 100 ? 2 : 4;
+      return `<tr><td>${ad} ${yon}</td><td>${haremFmt(x.alis, od)}</td><td>${haremFmt(x.satis, od)}</td><td class="ht-fark">${fark == null ? '' : haremFmt(fark, od)}</td></tr>`;
+    }).join('');
+    return satirlar ? `<div class="ht-grup"><div class="ht-grup-baslik">${baslik}</div><table class="ht-tablo"><thead><tr><th></th><th>Alış</th><th>Satış</th><th>Fark</th></tr></thead><tbody>${satirlar}</tbody></table></div>` : '';
+  }).join('') || '<div class="hk-bos">Kur verisi yok.</div>';
+}
 function haremKartlarHtml(f, yonGoster) {
   return HAREM_KARTLAR.filter(([k]) => f[k]).map(([k, ad, ik, ond]) => {
     const y = yonGoster ? f[k].yon : '';
@@ -8380,17 +8448,22 @@ async function haremKurCiz() {
       const g = await haremGecmisGetir(haremGecmisTarih);
       el.innerHTML = haremKartlarHtml(g.fiyatlar || {}, false) || '<div class="hk-bos">Bu tarih için kayıt yok.</div>';
       if (durum) durum.textContent = 'Harem Altın · ' + haremGecmisTarih.replace(/-/g, '.') + ' kapanış';
+      haremTumCiz(g.fiyatlar || {}, false, 'Harem Altın · ' + haremGecmisTarih.replace(/-/g, '.') + ' kapanış');
     } catch (e) { if (durum) durum.textContent = ''; el.innerHTML = `<div class="hk-bos">⚠️ ${String(e.message).replace(/</g, '&lt;')}</div>`; }
     return;
   }
   if (!haremCanliZaman) { el.innerHTML = '<div class="hk-bos">Harem Altın\'a bağlanılıyor…</div>'; if (durum) durum.textContent = ''; return; }
   el.innerHTML = haremKartlarHtml(haremCanli, true);
-  if (durum) durum.innerHTML = '<span class="hk-canli"></span>Canlı · Harem Altın · ' + new Date(haremCanliZaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const canliYazi = '<span class="hk-canli"></span>Canlı · Harem Altın · ' + new Date(haremCanliZaman).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  if (durum) durum.innerHTML = canliYazi;
+  haremTumCiz(haremCanli, true, canliYazi);
 }
 function haremGecmisSec(v) {
   // v: input[type=date] değeri YYYY-AA-GG ya da boş (canlı)
   haremGecmisTarih = v ? v.split('-').reverse().join('-') : '';
-  const btn = document.getElementById('haremCanliBtn'); if (btn) btn.style.display = haremGecmisTarih ? '' : 'none';
+  const iso = haremGecmisTarih ? haremGecmisTarih.split('-').reverse().join('-') : '';
+  ['haremTarihSec', 'htTarih'].forEach(id => { const i = document.getElementById(id); if (i) i.value = iso; });
+  ['haremCanliBtn', 'htCanliBtn'].forEach(id => { const b = document.getElementById(id); if (b) b.style.display = haremGecmisTarih ? '' : 'none'; });
   haremKurCiz();
 }
 function haremKurOtomatik() {
