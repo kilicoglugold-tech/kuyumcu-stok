@@ -1,4 +1,4 @@
-<!-- SURUM-V116-KUR-BEKCI --><!DOCTYPE html>
+<!-- SURUM-V117-KOD-CAKISMA --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -4578,6 +4578,14 @@ async function saveUrun() {
   const kod = document.getElementById('urunKod').value.trim();
   const ad = document.getElementById('urunAd').value.trim();
   if (!kod || !ad) { alert('Kod ve ad zorunludur.'); return; }
+  // Aynı kod başka üründe var mı? (büyük/küçük harf ve boşluk fark etmez)
+  const kodNorm = k => String(k || '').replace(/\s+/g, '').toLocaleUpperCase('tr-TR');
+  const ayniKod = allUrunler.find(x => x.id !== id && kodNorm(x.kod) === kodNorm(kod));
+  if (ayniKod) { urunKodCakisma(kod, ayniKod); return; }
+  const kaydetBtn = document.querySelector('#urunModal button[onclick^="saveUrun"]');
+  const kaydetYazi = kaydetBtn ? kaydetBtn.textContent : '';
+  if (kaydetBtn) { if (kaydetBtn.disabled) return; kaydetBtn.disabled = true; kaydetBtn.textContent = 'Kaydediliyor…'; }
+  try {
   let fotograf_url = id ? allUrunler.find(x=>x.id===id)?.fotograf_url || null : null;
   if (currentFotoFile) { const url = await uploadFoto(currentFotoFile); if (url) fotograf_url = url; }
   const urunData = {
@@ -4586,8 +4594,13 @@ async function saveUrun() {
     fotograf_url,
   };
   let urunId = id;
-  if (id) { await api('urunler?id=eq.'+id, 'PATCH', urunData); }
-  else { const res = await api('urunler', 'POST', urunData); urunId = res[0].id; }
+  try {
+    if (id) { await api('urunler?id=eq.'+id, 'PATCH', urunData); }
+    else { const res = await api('urunler', 'POST', urunData); urunId = res[0].id; }
+  } catch (e) {
+    if (/23505|duplicate key|urunler_kod_key/.test(e.message || '')) { urunKodCakisma(kod, null); return; }
+    throw e;
+  }
   setUrunMeta(urunId, { durum: getDurumValues(), tur: getTurValues(), mecralar: getMecraValues(), tas: getTasBilgisi(), olcu: getOlcuBilgisi(), kategori: document.getElementById('urunKategori').value || '' });
   if (id) await api('varyantlar?urun_id=eq.'+id, 'DELETE');
   const tumVaryantlar = [];
@@ -4600,6 +4613,29 @@ async function saveUrun() {
   if (tumVaryantlar.length) await api('varyantlar', 'POST', tumVaryantlar);
   closeModal('urunModal'); currentFotoFile = null;
   await loadUrunler();
+  } catch (e) {
+    alert('Ürün kaydedilemedi: ' + (e.message || e));
+  } finally {
+    if (kaydetBtn) { kaydetBtn.disabled = false; kaydetBtn.textContent = kaydetYazi; }
+  }
+}
+
+// Kod çakışması: mevcut ürünü göster ve boştaki ilk kodu öner
+function urunKodBosOner(kod) {
+  const m = String(kod).replace(/\s+/g, '').toLocaleUpperCase('tr-TR').match(/^(.*?)(\d+)$/);
+  if (!m) return '';
+  const on = m[1], kullanilan = new Set();
+  allUrunler.forEach(u => { const x = String(u.kod || '').replace(/\s+/g, '').match(/^(.*?)(\d+)$/); if (x && x[1].toLocaleUpperCase('tr-TR') === on) kullanilan.add(Number(x[2])); });
+  let n = Math.max(0, ...kullanilan) + 1;
+  return m[1] + n;
+}
+function urunKodCakisma(kod, mevcut) {
+  const oneri = urunKodBosOner(kod);
+  const mesaj = '"' + kod + '" kodu zaten kayıtlı' + (mevcut ? ': ' + mevcut.kod + ' – ' + mevcut.ad : ' (başka bir üründe)') + '.\n\n' +
+    (oneri ? 'Bu seriden boştaki ilk kod: ' + oneri + '\n\nKod "' + oneri + '" olarak değiştirilsin mi? (Sonra Kaydet\'e basın)' : 'Lütfen farklı bir kod girin.');
+  if (oneri && confirm(mesaj)) { const el = document.getElementById('urunKod'); el.value = oneri; el.focus(); }
+  else if (!oneri) alert(mesaj);
+  else document.getElementById('urunKod').focus();
 }
 
 async function deleteUrun(urunId) {
