@@ -1,4 +1,4 @@
-<!-- SURUM-V117R5-GMAIL-FOTO --><!DOCTYPE html>
+<!-- SURUM-V117R7-TABLO-FOTO --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -663,6 +663,8 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .gelen-btn{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
 .gelen-butonlar{display:flex;justify-content:flex-end;margin-top:12px}
 @media(max-width:600px){.gelen-satir{flex-direction:column}.gelen-btn{flex-direction:row}}
+.gram-yok{font-size:11px;font-weight:700;color:#FBBF24;background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.4);padding:2px 8px;border-radius:20px;white-space:nowrap}
+.tablo-foto{width:34px;height:34px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px;border:1px solid rgba(212,175,55,.35);background:#fff}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -5254,6 +5256,7 @@ async function saveKargoFiyatlari() {
 
 async function loadPlatformData() {
   if (typeof gelenSayacGuncelle === 'function') gelenSayacGuncelle();
+  if (typeof gelenFotoYukle === 'function' && (aktifPlatform === 'alfred_etsy' || aktifPlatform === 'essos_etsy')) gelenFotoYukle().then(() => { if (Object.keys(gelenFotoHarita).length && typeof renderPlatTablo === 'function') renderPlatTablo(); });
   const ay = document.getElementById('platAy').value;
   if (!ay) return;
 
@@ -5329,9 +5332,9 @@ function renderPlatTablo() {
     return `<tr>
       <td style="color:var(--text);font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
       <td>${s.tarih||'-'}</td>
-      <td style="font-weight:500;max-width:140px;overflow:hidden;text-overflow:ellipsis">${s.urun_adi||'-'}</td>
+      <td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(() => { const f = gelenSiparisFoto(s); return f ? `<a href="${gelenEsc(f)}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><img class="tablo-foto" src="${gelenEsc(f)}" alt="" loading="lazy"></a>` : ''; })()}${s.urun_adi||'-'}</td>
       <td>${s.adet}</td>
-      <td>${parseFloat(s.gram).toString()}</td>
+      <td>${parseFloat(s.gram) ? parseFloat(s.gram).toString() : '<span class="gram-yok" title="Gram girilmedi — maliyet ve kâr eksik hesaplanıyor. Düz ile gramı girin.">⚖️ gram yok</span>'}</td>
       <td><span class="ayar-badge">${s.ayar}</span></td>
       <td>${parseFloat(s.milyem).toString()}</td>
       <td>${Number(s.has).toFixed(2)}</td>
@@ -5513,6 +5516,7 @@ async function savePlatSiparis() {
   const kargo = parseFloat(document.getElementById('psKargo').value) || 0;
   const adet = parseInt(document.getElementById('psAdet').value) || 1;
   const ayar = document.getElementById('psAyar').value;
+  if (!gram && !confirm('Gram girilmedi. Bu durumda maliyet $0 sayılır ve kâr olduğundan yüksek görünür.\n\nYine de kaydedilsin mi? (Sonra Düz ile gramı girebilirsiniz.)')) { document.getElementById('psGram').focus(); return; }
   const ulke = document.getElementById('psUlke').value;
 
   const has = gram * milyem;
@@ -9073,6 +9077,20 @@ async function gelenSipariseEkle(id) {
     durum.style.color = 'var(--green)';
   }
   setTimeout(() => document.getElementById('psGram')?.focus(), 150);
+}
+// Tablodaki siparişlerin fotoğrafı: Etsy sipariş no → mailden gelen ürün fotoğrafı
+let gelenFotoHarita = {}, gelenFotoYuklendi = false;
+async function gelenFotoYukle() {
+  try {
+    const r = await api('gelen_mailler?select=id,konu,govde,mail_tarih&order=mail_tarih.desc&limit=500');
+    gelenFotoHarita = {};
+    (r || []).forEach(m => { const c = gelenCozumle(m); const f = c.urunler.map(u => u.foto).filter(Boolean)[0]; if (c.siparisNo && f && !gelenFotoHarita[c.siparisNo]) gelenFotoHarita[c.siparisNo] = f; });
+    gelenFotoYuklendi = true;
+  } catch (e) { gelenFotoHarita = {}; }
+}
+function gelenSiparisFoto(s) {
+  const no = s.harici_no || ((s.notlar || '').match(/Etsy\s*#(\d+)/) || [])[1];
+  return no ? gelenFotoHarita[no] || '' : '';
 }
 // savePlatSiparis başarılı olunca çağrılır
 async function gelenKaydedildi() {
