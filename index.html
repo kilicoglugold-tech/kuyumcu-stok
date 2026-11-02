@@ -1,4 +1,4 @@
-<!-- SURUM-V117-KOD-CAKISMA --><!DOCTYPE html>
+<!-- SURUM-V117R-RAMAT --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -577,6 +577,49 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .ht-tablo td:first-child{text-align:left;font-size:13.5px;color:#E8DFC8;white-space:normal}
 .ht-tablo td.ht-fark{font-size:12px;color:#A39A85}
 .ht-tablo tbody tr:hover td{background:rgba(212,175,55,.07)}
+/* Ramat */
+.rm-uyari{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.45);color:#FDE68A;border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:1rem}
+.rm-ust-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
+@media(max-width:800px){.rm-ust-grid{grid-template-columns:1fr}}
+.rm-kart{--k:#F5C451;border-radius:16px;padding:16px 18px;border:1px solid color-mix(in srgb,var(--k) 55%,transparent);background:linear-gradient(150deg,color-mix(in srgb,var(--k) 18%,#15130F),#100F0C)}
+.rm-kart.rk-sari{--k:#F5C451}.rm-kart.rk-mor{--k:#A5B4FC}
+.rm-ust{font-size:13px;font-weight:700;color:var(--k)}
+.rm-deger{font-size:24px;font-weight:700;color:#F2ECDD;margin-top:6px}
+.rm-alt{font-size:12.5px;color:#A39A85;margin-top:6px;line-height:1.5}
+.rm-alt b{color:#E8DFC8}
+.rm-iki{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.rm-iki>div{background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:8px 10px}
+.rm-iki span{display:block;font-size:11px;color:#A39A85;text-transform:uppercase;letter-spacing:.04em}
+.rm-iki b{font-size:19px;color:#F2ECDD;font-variant-numeric:tabular-nums}
+.rm-giris-kart{padding:16px 18px}
+.rm-giris-ust{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.rm-tarih-sec{display:flex;align-items:center;gap:8px;font-size:12px;color:#A39A85}
+.rm-tarih-sec .form-control{width:auto;padding:5px 8px;color-scheme:dark}
+.rm-giris-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:700px){.rm-giris-grid{grid-template-columns:1fr}}
+.rm-ayar-kutu{display:flex;align-items:center;gap:8px;border-radius:12px;padding:10px;border:1px solid rgba(212,175,55,.35);background:rgba(212,175,55,.06)}
+.rm-ayar-kutu.k10{border-color:rgba(96,165,250,.45);background:rgba(96,165,250,.07)}
+.rm-ayar-kutu span{font-weight:800;font-size:13px;color:#F5C451;min-width:64px}
+.rm-ayar-kutu.k10 span{color:#60A5FA}
+.rm-ayar-kutu .form-control{flex:1;font-size:16px;font-weight:600}
+.rm-aciklama{grid-column:1/-1}
+.rm-baslik2{font-size:12px;font-weight:700;color:#A39A85;text-transform:uppercase;letter-spacing:.05em;margin:14px 0 6px}
+.rm-giris-liste{max-height:360px;overflow:auto}
+.rm-giris{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13.5px}
+.rm-tarih{color:#A39A85;min-width:84px;font-variant-numeric:tabular-nums}
+.rm-ayar{font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;background:rgba(245,196,81,.15);color:#F5C451}
+.rm-ayar.on{background:rgba(96,165,250,.15);color:#60A5FA}
+.rm-giris b{min-width:80px;font-variant-numeric:tabular-nums;color:#F2ECDD}
+.rm-acik{flex:1;color:#C9BFA8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rm-sil{background:none;border:none;cursor:pointer;color:#7A7466;font-size:15px}
+#rmModal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.rm-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.rm-form{grid-template-columns:1fr}}
+.rm-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#C9BFA8}
+.rm-form small{color:#7A7466}
+.rm-not{margin-top:10px;font-size:13px;color:#C9BFA8}
+.rm-liste{border:1px solid rgba(212,175,55,.25);border-radius:10px;overflow:auto;margin:8px 0 12px}
+.rm-liste>div{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.06)}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -833,6 +876,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="nav-tab" onclick="showPage('platformlar')" title="Kısayol: P"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16l-1.5-5h-13z"/><path d="M5 9v11h14V9M9 20v-6h6v6"/></svg>Platformlar</button>
     <button class="nav-tab" onclick="showPage('giderler')" title="Kısayol: G"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Giderler</button>
     <button class="nav-tab" onclick="showPage('borcalacak')" title="Kısayol: B"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>Cari Hesap</button><button class="nav-tab" onclick="showPage('parametreler')" title="Kısayol: Y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Parametreler</button><button class="nav-tab" onclick="showPage('sayim')" title="Kısayol: S"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>Sayım</button><button class="nav-tab" onclick="showPage('burak_ozel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Burak</button><button class="nav-tab" onclick="showPage('sifreler_ortak')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l2 2M15 8l2 2"/></svg>Şifreler</button>
+    <button class="nav-tab" onclick="showPage('ramat')" title="Ramat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L5 13"/><path d="m8.5 16.5-1.5 2.5 1.5 2.5"/><path d="M17 19h2.2a1.8 1.8 0 0 0 1.6-2.7L19 13"/><path d="M9.5 6.5 11 4a1.8 1.8 0 0 1 3 0l1.6 2.7"/><path d="m13.5 6.8 2.1.3.6-2"/><path d="m17.5 13.5-.3 2.6 2.4.6"/></svg>Ramat</button>
   </div>
   <div class="nav-right">
   </div>
@@ -2161,6 +2205,37 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 </div>
 </main>
 
+<!-- RAMAT -->
+<div class="page" id="page-ramat">
+  <div class="page-header">
+    <div><div class="page-title">♻️ Ramat</div><div class="page-sub">14 ve 10 ayar hurda / talaş birikimi — ramat yaptırınca birikim sıfırlanır</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn" onclick="ramatKayitModal()">＋ Geçmiş Ramat Gir</button>
+      <button class="btn btn-primary" onclick="ramatYaptirAc()">♻️ Ramat Yaptır</button>
+    </div>
+  </div>
+  <div id="ramatUyari" class="rm-uyari" style="display:none;">⚠️ Ramat sayfası için <b>ramat.sql</b> dosyasını Supabase'de bir kez çalıştırın.</div>
+  <div class="rm-ust-grid">
+    <div class="rm-kart rk-mor" id="ramatSon"></div>
+    <div class="rm-kart rk-sari" id="ramatBirikimKart"></div>
+  </div>
+  <div class="card rm-giris-kart">
+    <div class="rm-giris-ust">
+      <div style="font-weight:700;font-size:15px;">＋ Gram Ekle</div>
+      <label class="rm-tarih-sec">Tarih <input type="date" id="ramatTarih" class="form-control"></label>
+    </div>
+    <div class="rm-giris-grid">
+      <div class="rm-ayar-kutu k14"><span>14 AYAR</span><input type="number" step="0.01" min="0" id="ramatGram14" class="form-control" placeholder="gram" onkeydown="if(event.key==='Enter')ramatGirisEkle('14K')"><button class="btn btn-primary" onclick="ramatGirisEkle('14K')">Ekle</button></div>
+      <div class="rm-ayar-kutu k10"><span>10 AYAR</span><input type="number" step="0.01" min="0" id="ramatGram10" class="form-control" placeholder="gram" onkeydown="if(event.key==='Enter')ramatGirisEkle('10K')"><button class="btn btn-primary" onclick="ramatGirisEkle('10K')">Ekle</button></div>
+      <input id="ramatAciklama" class="form-control rm-aciklama" placeholder="Açıklama (isteğe bağlı) — örn. talaş, kırık zincir, cila tozu">
+    </div>
+    <div class="rm-baslik2">Son ramattan beri girişler</div>
+    <div id="ramatGirisListe" class="rm-giris-liste"></div>
+  </div>
+  <div class="rm-baslik2" style="margin-top:1.25rem;">Geçmiş Ramatlar</div>
+  <div class="card" id="ramatGecmis" style="padding:0;overflow-x:auto;"></div>
+</div>
+
 <!-- ŞİFRELER (PAYLAŞILAN) -->
 <div class="page" id="page-sifreler_ortak">
   <div class="page-header">
@@ -2513,7 +2588,7 @@ async function uploadFoto(file) {
 // NAV
 let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
-  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel','sifreler_ortak'];
+  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel','sifreler_ortak','ramat'];
   const idx = pages.indexOf(page);
   // Ana Sayfa'daki kısayol kartları, alt menüler vb. üzerinden de olsa,
   // yetkisi olmayan bir role sayfa açtırma (sadece üst menüyü gizlemek yetmiyordu).
@@ -2541,6 +2616,7 @@ function showPage(page) {
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { cariInit(); }
+  if (page === 'ramat') { ramatInit(); }
   if (page === 'sayim') { fillAySec('sayimAy'); loadSayim(); loadSayimGecmisRaporlar(); }
   if (page === 'burak_ozel') { bozInit(); }
   if (page === 'sifreler_ortak') { sfpInit(); }
@@ -2681,7 +2757,7 @@ async function sifreSifirlaEmail(email) {
 
 const ROL_IZIN_ETIKETLERI = {
   anasayfa: 'Ana Sayfa', urunler: 'Ürünler', fiyat_hesaplama: 'Fiyat Hesaplama', rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
-  borcalacak: 'Cari Hesap (Borç/Alacak)', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu', sifreler_ortak: 'Şifreler (Paylaşılan)'
+  borcalacak: 'Cari Hesap (Borç/Alacak)', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu', sifreler_ortak: 'Şifreler (Paylaşılan)', ramat: 'Ramat'
 };
 async function loadRolIzinPanel() {
   if (!isAdmin()) return;
@@ -4872,8 +4948,8 @@ async function doLogin() {
 // Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Giderler(4), Borç/Alacak(5), Parametreler(6)
 // Hepsi rol_izinleri tablosundan (admin > Parametreler > Rol İzinleri panelinden) ayarlanır.
 // admin her zaman hepsini görür ve buradan kısıtlanamaz (kilitlenmeyi önlemek için).
-const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8, burak_ozel:9, sifreler_ortak:10 };
-const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','sifreler_ortak'];
+const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8, burak_ozel:9, sifreler_ortak:10, ramat:11 };
+const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','sifreler_ortak','ramat'];
 let rolIzinleriCache = null;
 
 async function loadRolIzinleri() {
@@ -4886,7 +4962,7 @@ async function loadRolIzinleri() {
   }
 }
 function rolSekmeleri() {
-  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9,10];
+  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9,10,11];
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
   return izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
 }
@@ -8549,6 +8625,177 @@ async function haremKurDoldur(kurId, altinId, btn, sonra, ayId) {
     if (sonra) sonra();
   } catch (e) { alert('Kur alınamadı: ' + e.message); }
   if (btn) { btn.textContent = eski; btn.disabled = false; }
+}
+
+// ===== RAMAT (hurda/talaş birikimi → rafineri) =====
+// Girişler (14K / 10K gram) son ramattan beri birikir; "Ramat Yaptır" ile toplanıp bir ramat kaydına bağlanır ve birikim sıfırlanır.
+const RAMAT_MILYEM = { '14K': 0.585, '10K': 0.417 };
+let ramatKayitlar = [], ramatBirikim = [], ramatTabloVar = null;
+function rmEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function rmGr(v) { return (Number(v) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function rmTarihTR(t) { if (!t) return '—'; const [y, a, g] = String(t).slice(0, 10).split('-'); return g + '.' + a + '.' + y; }
+function rmGunOnce(t) { const g = Math.floor((new Date() - new Date(String(t).slice(0, 10) + 'T00:00:00')) / 86400000); return g <= 0 ? 'bugün' : g + ' gün önce'; }
+function rmTeorik(g14, g10) { return (Number(g14) || 0) * RAMAT_MILYEM['14K'] + (Number(g10) || 0) * RAMAT_MILYEM['10K']; }
+async function ramatInit() {
+  const t = document.getElementById('ramatTarih');
+  if (t && !t.value) t.value = bugunTarihStr();
+  await ramatYukle();
+}
+async function ramatYukle() {
+  try {
+    const [k, g] = await Promise.all([
+      api('ramat_kayitlari?select=*&order=tarih.desc,id.desc'),
+      api('ramat_girisleri?ramat_id=is.null&select=*&order=tarih.desc,id.desc')
+    ]);
+    ramatKayitlar = k || []; ramatBirikim = g || []; ramatTabloVar = true;
+  } catch (e) { ramatTabloVar = false; ramatKayitlar = []; ramatBirikim = []; }
+  document.getElementById('ramatUyari').style.display = ramatTabloVar ? 'none' : 'block';
+  ramatCiz();
+}
+function ramatCiz() {
+  const son = ramatKayitlar[0];
+  const t14 = ramatBirikim.filter(x => x.ayar === '14K').reduce((s, x) => s + (parseFloat(x.gram) || 0), 0);
+  const t10 = ramatBirikim.filter(x => x.ayar === '10K').reduce((s, x) => s + (parseFloat(x.gram) || 0), 0);
+  // Son ramat kartı
+  const sonEl = document.getElementById('ramatSon');
+  if (!son) sonEl.innerHTML = `<div class="rm-ust">♻️ Son Ramat</div><div class="rm-deger" style="font-size:18px">Kayıt yok</div><div class="rm-alt">Son yaptırdığınız ramatı <a href="#" onclick="ramatKayitModal();return false;" style="color:#F5C451">buradan girin</a>.</div>`;
+  else {
+    const teo = rmTeorik(son.gram14, son.gram10), al = son.alinan_has != null && son.alinan_has !== '' ? parseFloat(son.alinan_has) : null;
+    const fire = al != null ? teo - al : null;
+    sonEl.innerHTML = `<div class="rm-ust">♻️ Son Ramat · ${rmTarihTR(son.tarih)} <span style="color:#A39A85;font-weight:500">(${rmGunOnce(son.tarih)})</span></div>
+      <div class="rm-iki"><div><span>14 Ayar</span><b>${rmGr(son.gram14)} gr</b></div><div><span>10 Ayar</span><b>${rmGr(son.gram10)} gr</b></div><div><span>Toplam</span><b>${rmGr((+son.gram14 || 0) + (+son.gram10 || 0))} gr</b></div></div>
+      <div class="rm-alt">Teorik has <b>${rmGr(teo)}</b> · Alınan has ${al != null ? '<b>' + rmGr(al) + '</b> · Fire <b style="color:' + (fire > 0 ? '#F87171' : '#34D399') + '">' + rmGr(fire) + ' has' + (teo ? ' (%' + (fire / teo * 100).toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ')' : '') + '</b>' : '<a href="#" onclick="ramatKayitModal(' + son.id + ');return false;" style="color:#F5C451">henüz girilmedi — gir</a>'}</div>
+      ${son.notlar ? '<div class="rm-alt">📝 ' + rmEsc(son.notlar) + '</div>' : ''}`;
+  }
+  // Birikim kartı
+  const ilk = ramatBirikim.length ? ramatBirikim[ramatBirikim.length - 1].tarih : null;
+  document.getElementById('ramatBirikimKart').innerHTML = `<div class="rm-ust">⏳ Şu Anki Birikim ${son ? '<span style="color:#A39A85;font-weight:500">(' + rmTarihTR(son.tarih) + ' ramatından beri)</span>' : ''}</div>
+    <div class="rm-iki"><div><span>14 Ayar</span><b>${rmGr(t14)} gr</b></div><div><span>10 Ayar</span><b>${rmGr(t10)} gr</b></div><div><span>Toplam</span><b>${rmGr(t14 + t10)} gr</b></div></div>
+    <div class="rm-alt">Teorik has <b>${rmGr(rmTeorik(t14, t10))}</b> · ${ramatBirikim.length} giriş${ilk ? ' · ilk giriş ' + rmTarihTR(ilk) : ''}</div>`;
+  // Girişler listesi
+  const gl = document.getElementById('ramatGirisListe');
+  gl.innerHTML = ramatBirikim.length ? ramatBirikim.map(x => `<div class="rm-giris">
+      <span class="rm-tarih">${rmTarihTR(x.tarih)}</span>
+      <span class="rm-ayar ${x.ayar === '10K' ? 'on' : ''}">${x.ayar}</span>
+      <b>${rmGr(x.gram)} gr</b>
+      <span class="rm-acik">${rmEsc(x.aciklama || '')}${x.ekleyen ? ' <span style="color:#7A7466">· ' + rmEsc(x.ekleyen) + '</span>' : ''}</span>
+      <button class="rm-sil" title="Sil" onclick="ramatGirisSil(${x.id})">🗑</button></div>`).join('')
+    : '<div class="hk-bos">Son ramattan beri giriş yok.</div>';
+  // Geçmiş ramatlar
+  const gc = document.getElementById('ramatGecmis');
+  gc.innerHTML = ramatKayitlar.length ? `<table><thead><tr><th>Tarih</th><th>14 Ayar</th><th>10 Ayar</th><th>Toplam</th><th>Teorik Has</th><th>Alınan Has</th><th>Fire</th><th>Not</th><th></th></tr></thead><tbody>${
+    ramatKayitlar.map(r => { const teo = rmTeorik(r.gram14, r.gram10), al = r.alinan_has != null && r.alinan_has !== '' ? parseFloat(r.alinan_has) : null, f = al != null ? teo - al : null;
+      return `<tr><td>${rmTarihTR(r.tarih)}</td><td>${rmGr(r.gram14)}</td><td>${rmGr(r.gram10)}</td><td><b>${rmGr((+r.gram14 || 0) + (+r.gram10 || 0))}</b></td><td>${rmGr(teo)}</td><td>${al != null ? rmGr(al) : '—'}</td>
+        <td style="color:${f == null ? 'inherit' : f > 0 ? 'var(--red)' : 'var(--green)'}">${f != null ? rmGr(f) : '—'}</td><td style="max-width:220px;white-space:normal">${rmEsc(r.notlar || '')}</td>
+        <td style="white-space:nowrap"><button class="btn btn-sm" onclick="ramatGirisleriGoster(${r.id})">Girişler</button> <button class="btn btn-sm" onclick="ramatKayitModal(${r.id})">Düzenle</button> <button class="btn btn-sm btn-danger" onclick="ramatKayitSil(${r.id})">Sil</button></td></tr>`; }).join('')
+  }</tbody></table>` : '<div class="hk-bos" style="padding:14px">Henüz ramat kaydı yok.</div>';
+}
+async function ramatGirisEkle(ayar) {
+  if (!ramatTabloVar) { alert('Önce ramat.sql dosyasını Supabase\'de çalıştırın.'); return; }
+  const inp = document.getElementById(ayar === '14K' ? 'ramatGram14' : 'ramatGram10');
+  const gram = parseFloat(String(inp.value).replace(',', '.'));
+  if (!gram || gram <= 0) { inp.focus(); return; }
+  const tarih = document.getElementById('ramatTarih').value || bugunTarihStr();
+  const acEl = document.getElementById('ramatAciklama');
+  try {
+    await api('ramat_girisleri', 'POST', { tarih, ayar, gram, aciklama: acEl.value.trim() || null, ekleyen: currentUser?.ad_soyad || currentUser?.kullanici_adi || null });
+    inp.value = ''; acEl.value = '';
+    showToast('✓ ' + ayar + ' ' + rmGr(gram) + ' gr eklendi');
+    await ramatYukle(); inp.focus();
+  } catch (e) { alert('Eklenemedi: ' + e.message); }
+}
+async function ramatGirisSil(id) {
+  if (!confirm('Bu giriş silinsin mi?')) return;
+  try { await api('ramat_girisleri?id=eq.' + id, 'DELETE'); await ramatYukle(); } catch (e) { alert('Silinemedi: ' + e.message); }
+}
+function rmModal(icerik) {
+  let ov = document.getElementById('rmModal');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'rmModal'; ov.onclick = e => { if (e.target === ov) rmModalKapat(); }; document.body.appendChild(ov); }
+  ov.style.display = 'flex';
+  ov.innerHTML = `<div class="card ds-kutu" style="width:min(560px,100%);max-height:92vh;overflow:auto;">${icerik}</div>`;
+}
+function rmModalKapat() { const ov = document.getElementById('rmModal'); if (ov) ov.style.display = 'none'; }
+// Ramat Yaptır: birikimi toplar, yeni ramat kaydı açar, girişleri ona bağlar → birikim sıfırlanır
+function ramatYaptirAc() {
+  if (!ramatTabloVar) { alert('Önce ramat.sql dosyasını Supabase\'de çalıştırın.'); return; }
+  const t14 = ramatBirikim.filter(x => x.ayar === '14K').reduce((s, x) => s + (parseFloat(x.gram) || 0), 0);
+  const t10 = ramatBirikim.filter(x => x.ayar === '10K').reduce((s, x) => s + (parseFloat(x.gram) || 0), 0);
+  if (!ramatBirikim.length && !confirm('Birikimde giriş yok. Yine de boş bir ramat kaydı açılsın mı?')) return;
+  rmModal(`<div class="ds-ust"><div class="ds-baslik">♻️ Ramat Yaptır</div><button class="ds-x" onclick="rmModalKapat()">✕</button></div>
+    <div class="ds-aciklama">Son ramattan beri biriken <b>${ramatBirikim.length}</b> giriş bu ramata bağlanacak ve birikim <b>sıfırlanacak</b>. Tartıda farklı çıktıysa gramları düzeltebilirsiniz.</div>
+    <div class="rm-form">
+      <label>Ramat tarihi<input type="date" id="rmTarih" class="form-control" value="${bugunTarihStr()}"></label>
+      <label>Alınan has <small>— rafineriden dönünce de girilebilir</small><input type="number" step="0.01" id="rmAlinan" class="form-control" placeholder="boş bırakılabilir"></label>
+      <label>14 Ayar gram<input type="number" step="0.01" id="rmG14" class="form-control" value="${t14 ? t14.toFixed(2) : 0}" oninput="rmTeorikGoster()"></label>
+      <label>10 Ayar gram<input type="number" step="0.01" id="rmG10" class="form-control" value="${t10 ? t10.toFixed(2) : 0}" oninput="rmTeorikGoster()"></label>
+      <label style="grid-column:1/-1">Not<input id="rmNot" class="form-control" placeholder="Rafineri adı, fiş no…"></label>
+    </div>
+    <div id="rmTeorik" class="rm-not"></div>
+    <div class="ds-butonlar"><button class="btn" onclick="rmModalKapat()">Vazgeç</button><button class="btn btn-primary" id="rmKaydetBtn" onclick="ramatYaptirKaydet()">♻️ Ramatı Kaydet ve Sıfırla</button></div>`);
+  rmTeorikGoster();
+}
+function rmTeorikGoster() {
+  const el = document.getElementById('rmTeorik'); if (!el) return;
+  const g14 = parseFloat(document.getElementById('rmG14').value) || 0, g10 = parseFloat(document.getElementById('rmG10').value) || 0;
+  el.innerHTML = `Toplam <b>${rmGr(g14 + g10)} gr</b> · Teorik has <b>${rmGr(rmTeorik(g14, g10))}</b> <span style="color:#7A7466">(14K ×${RAMAT_MILYEM['14K']}, 10K ×${RAMAT_MILYEM['10K']})</span>`;
+}
+async function ramatYaptirKaydet() {
+  const btn = document.getElementById('rmKaydetBtn'); btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+  const idler = ramatBirikim.map(x => x.id);
+  try {
+    const al = document.getElementById('rmAlinan').value;
+    const res = await api('ramat_kayitlari', 'POST', {
+      tarih: document.getElementById('rmTarih').value || bugunTarihStr(),
+      gram14: parseFloat(document.getElementById('rmG14').value) || 0, gram10: parseFloat(document.getElementById('rmG10').value) || 0,
+      alinan_has: al === '' ? null : parseFloat(al), notlar: document.getElementById('rmNot').value.trim() || null
+    });
+    const rid = res && res[0] && res[0].id;
+    if (!rid) throw new Error('Ramat kaydı oluşturulamadı');
+    if (idler.length) await api('ramat_girisleri?id=in.(' + idler.join(',') + ')', 'PATCH', { ramat_id: rid });
+    rmModalKapat(); showToast('✓ Ramat kaydedildi, birikim sıfırlandı'); await ramatYukle();
+  } catch (e) { alert('Kaydedilemedi: ' + e.message); btn.disabled = false; btn.textContent = '♻️ Ramatı Kaydet ve Sıfırla'; }
+}
+// Geçmiş ramat girme / düzenleme (girişleri etkilemez)
+function ramatKayitModal(id) {
+  if (!ramatTabloVar) { alert('Önce ramat.sql dosyasını Supabase\'de çalıştırın.'); return; }
+  const r = id ? ramatKayitlar.find(x => x.id === id) : null;
+  rmModal(`<div class="ds-ust"><div class="ds-baslik">${r ? '✏️ Ramatı Düzenle' : '＋ Geçmiş Ramat Gir'}</div><button class="ds-x" onclick="rmModalKapat()">✕</button></div>
+    <div class="ds-aciklama">${r ? 'Bu kaydın bilgilerini düzeltin; bağlı girişler değişmez.' : 'Sistemden önce yaptırdığınız son ramatın bilgilerini girin. Şu anki birikime dokunmaz.'}</div>
+    <div class="rm-form">
+      <label>Ramat tarihi<input type="date" id="rmTarih" class="form-control" value="${r ? String(r.tarih).slice(0, 10) : ''}"></label>
+      <label>Alınan has<input type="number" step="0.01" id="rmAlinan" class="form-control" value="${r && r.alinan_has != null ? r.alinan_has : ''}" placeholder="boş bırakılabilir"></label>
+      <label>14 Ayar gram<input type="number" step="0.01" id="rmG14" class="form-control" value="${r ? r.gram14 : ''}" oninput="rmTeorikGoster()"></label>
+      <label>10 Ayar gram<input type="number" step="0.01" id="rmG10" class="form-control" value="${r ? r.gram10 : ''}" oninput="rmTeorikGoster()"></label>
+      <label style="grid-column:1/-1">Not<input id="rmNot" class="form-control" value="${r ? rmEsc(r.notlar || '') : ''}"></label>
+    </div>
+    <div id="rmTeorik" class="rm-not"></div>
+    <div class="ds-butonlar"><button class="btn" onclick="rmModalKapat()">Vazgeç</button><button class="btn btn-primary" id="rmKaydetBtn" onclick="ramatKayitKaydet(${r ? r.id : 'null'})">Kaydet</button></div>`);
+  rmTeorikGoster();
+}
+async function ramatKayitKaydet(id) {
+  const tarih = document.getElementById('rmTarih').value;
+  if (!tarih) { alert('Ramat tarihini girin.'); return; }
+  const al = document.getElementById('rmAlinan').value;
+  const veri = { tarih, gram14: parseFloat(document.getElementById('rmG14').value) || 0, gram10: parseFloat(document.getElementById('rmG10').value) || 0,
+    alinan_has: al === '' ? null : parseFloat(al), notlar: document.getElementById('rmNot').value.trim() || null };
+  try {
+    if (id) await api('ramat_kayitlari?id=eq.' + id, 'PATCH', veri); else await api('ramat_kayitlari', 'POST', veri);
+    rmModalKapat(); showToast('✓ Kaydedildi'); await ramatYukle();
+  } catch (e) { alert('Kaydedilemedi: ' + e.message); }
+}
+async function ramatKayitSil(id) {
+  if (!confirm('Bu ramat kaydı silinsin mi?\nBu ramata bağlı girişler tekrar "Şu anki birikim"e döner.')) return;
+  try { await api('ramat_girisleri?ramat_id=eq.' + id, 'PATCH', { ramat_id: null }); await api('ramat_kayitlari?id=eq.' + id, 'DELETE'); await ramatYukle(); }
+  catch (e) { alert('Silinemedi: ' + e.message); }
+}
+async function ramatGirisleriGoster(id) {
+  try {
+    const r = ramatKayitlar.find(x => x.id === id);
+    const g = await api('ramat_girisleri?ramat_id=eq.' + id + '&order=tarih.asc,id.asc');
+    rmModal(`<div class="ds-ust"><div class="ds-baslik">♻️ ${rmTarihTR(r && r.tarih)} Ramatı — Girişler</div><button class="ds-x" onclick="rmModalKapat()">✕</button></div>
+      <div class="rm-liste" style="max-height:60vh">${(g || []).map(x => `<div><span>${rmTarihTR(x.tarih)} · <b>${x.ayar}</b> ${rmEsc(x.aciklama || '')}</span><span>${rmGr(x.gram)} gr</span></div>`).join('') || '<div><span>Bu ramat elle girilmiş, bağlı giriş yok.</span></div>'}</div>
+      <div class="ds-butonlar"><button class="btn" onclick="rmModalKapat()">Kapat</button></div>`);
+  } catch (e) { alert(e.message); }
 }
 
 // Ana sayfa ilk yüklenişinde init
