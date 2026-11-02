@@ -1,4 +1,4 @@
-<!-- SURUM-V117R-RAMAT --><!DOCTYPE html>
+<!-- SURUM-V117R3-RAMAT-MENU-ADMIN --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -620,6 +620,26 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .rm-not{margin-top:10px;font-size:13px;color:#C9BFA8}
 .rm-liste{border:1px solid rgba(212,175,55,.25);border-radius:10px;overflow:auto;margin:8px 0 12px}
 .rm-liste>div{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.06)}
+/* Menü sırası */
+.nav-tab.menu-gizli{display:none !important}
+.menu-duzen-btn{width:30px;height:30px;border-radius:8px;border:1px solid rgba(212,175,55,.3);background:rgba(212,175,55,.06);color:#D4AF37;font-size:15px;cursor:pointer;line-height:1}
+.menu-duzen-btn:hover{border-color:#D4AF37;background:rgba(212,175,55,.15)}
+#menuModal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.menu-kutu{width:min(460px,100%);max-height:92vh;overflow:auto}
+.menu-ust{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.menu-baslik{font-size:17px;font-weight:700;color:var(--gold)}
+.menu-x{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer}
+.menu-aciklama{font-size:12.5px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.menu-liste{display:flex;flex-direction:column;gap:6px}
+.menu-satir{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;border:1px solid rgba(212,175,55,.25);background:rgba(255,255,255,.03);cursor:grab;user-select:none}
+.menu-satir.surukle{opacity:.4}.menu-satir.uzerinde{border-color:#D4AF37;background:rgba(212,175,55,.12)}
+.menu-satir.gizli .menu-ad{opacity:.4;text-decoration:line-through}
+.menu-tutamak{color:#7A7466;letter-spacing:-2px}
+.menu-no{width:20px;font-size:12px;color:#A39A85;text-align:right}
+.menu-ad{flex:1;font-size:14px;color:var(--text)}
+.menu-ok,.menu-goz{width:30px;height:28px;border-radius:7px;border:1px solid rgba(212,175,55,.25);background:none;color:#E8DFC8;cursor:pointer;font-size:12px}
+.menu-ok:disabled{opacity:.25;cursor:default}
+.menu-butonlar{display:flex;gap:8px;margin-top:14px}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -2599,6 +2619,7 @@ function showPage(page) {
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.nav-tab')[idx]?.classList.add('active');
+  if (typeof menuSiraUygula === 'function' && menuAyar) menuSiraUygula();
   if (page === 'anasayfa') { asInit(); haremKurOtomatik(); }
   if (page === 'fiyat_hesaplama') { fhMecraDegis(); mhRender(); }
   if (page === 'rapor') {
@@ -4997,6 +5018,7 @@ function applyRol() {
   const kkBas = String(kkAd).trim().split(/\s+/).slice(0, 2).map(x => x[0] || '').join('').toLocaleUpperCase('tr-TR');
   userChip.innerHTML = `<span class="kk-avatar">${kkBas}</span><span class="kk-ad">${kkAd}</span><button class="kk-cikis" onclick="logout()">Çıkış</button>`;
   navRight.appendChild(userChip);
+  menuAyarYukle();
 }
 
 function logout() {
@@ -8796,6 +8818,89 @@ async function ramatGirisleriGoster(id) {
       <div class="rm-liste" style="max-height:60vh">${(g || []).map(x => `<div><span>${rmTarihTR(x.tarih)} · <b>${x.ayar}</b> ${rmEsc(x.aciklama || '')}</span><span>${rmGr(x.gram)} gr</span></div>`).join('') || '<div><span>Bu ramat elle girilmiş, bağlı giriş yok.</span></div>'}</div>
       <div class="ds-butonlar"><button class="btn" onclick="rmModalKapat()">Kapat</button></div>`);
   } catch (e) { alert(e.message); }
+}
+
+// ===== ÜST MENÜ SIRASI (admin herkes için ayarlar) =====
+// Sekmelerin DOM sırası değişmez (yetki sistemi sıra numarasına bağlı); görünüm CSS "order" ile değiştirilir.
+let menuAyar = null, menuAyarTablo = null;
+function menuSekmeleri() {
+  return [...document.querySelectorAll('.nav-tabs .nav-tab')].map(t => {
+    const m = (t.getAttribute('onclick') || '').match(/showPage\('([^']+)'\)/);
+    return { el: t, key: m ? m[1] : '', ad: t.textContent.trim() };
+  }).filter(x => x.key);
+}
+function menuLsOku() { try { return JSON.parse(localStorage.getItem('kkMenuSirasi') || 'null'); } catch (_) { return null; } }
+function menuAdminMi() { return typeof currentUser !== 'undefined' && currentUser && currentUser.rol === 'admin'; }
+function menuLsYaz(v) { try { localStorage.setItem('kkMenuSirasi', JSON.stringify(v)); } catch (_) {} }
+async function menuAyarYukle() {
+  try { const r = await api('genel_ayarlar?anahtar=eq.menu_sirasi&select=deger'); menuAyarTablo = true; menuAyar = (r && r[0] && r[0].deger) || null; }
+  catch (e) { menuAyarTablo = false; menuAyar = menuAdminMi() ? menuLsOku() : null; }
+  menuSiraUygula();
+}
+function menuSiraUygula() {
+  const sek = menuSekmeleri(), sira = (menuAyar && menuAyar.sira) || [], gizli = new Set((menuAyar && menuAyar.gizli) || []);
+  sek.forEach((s, i) => {
+    const k = sira.indexOf(s.key);
+    s.el.style.order = k >= 0 ? k : 100 + i;
+    s.el.classList.toggle('menu-gizli', gizli.has(s.key) && !s.el.classList.contains('active'));
+  });
+  const sag = document.querySelector('.nav-right');
+  if (sag && !document.getElementById('menuDuzenBtn') && menuAdminMi()) {
+    const b = document.createElement('button');
+    b.id = 'menuDuzenBtn'; b.className = 'menu-duzen-btn'; b.title = 'Menü sırasını düzenle (herkes için)'; b.textContent = '⇅';
+    b.onclick = menuDuzenAc; sag.insertBefore(b, sag.firstChild);
+  }
+}
+let menuTaslak = [];
+function menuDuzenAc() {
+  if (!menuAdminMi()) return;
+  const sek = menuSekmeleri();
+  const sira = (menuAyar && menuAyar.sira) || [], gizli = new Set((menuAyar && menuAyar.gizli) || []);
+  menuTaslak = sek.map((s, i) => ({ key: s.key, ad: s.ad, gizli: gizli.has(s.key), o: sira.indexOf(s.key) >= 0 ? sira.indexOf(s.key) : 100 + i })).sort((a, b) => a.o - b.o);
+  let ov = document.getElementById('menuModal');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'menuModal'; ov.onclick = e => { if (e.target === ov) menuDuzenKapat(); }; document.body.appendChild(ov); }
+  ov.style.display = 'flex';
+  menuDuzenCiz();
+}
+function menuDuzenKapat() { const ov = document.getElementById('menuModal'); if (ov) ov.style.display = 'none'; }
+function menuDuzenCiz() {
+  const ov = document.getElementById('menuModal');
+  ov.innerHTML = `<div class="card menu-kutu">
+    <div class="menu-ust"><div class="menu-baslik">⇅ Menü Sırası — Herkes İçin</div><button class="menu-x" onclick="menuDuzenKapat()">✕</button></div>
+    <div class="menu-aciklama">Sürükleyip bırakın ya da ▲ ▼ ile taşıyın. 👁 ile bir sekmeyi menüden gizleyebilirsiniz. ${menuAyarTablo ? 'Bu sıra <b>tüm çalışanların</b> menüsüne uygulanır; kimin hangi sekmeyi göreceği yine Rol İzinleri\'ne göre belirlenir.' : '<span style="color:#FDE68A">⚠️ menu-sirasi.sql çalıştırılmadığı için sıra şimdilik sadece bu tarayıcıya kaydedilir.</span>'}</div>
+    <div class="menu-liste" id="menuListe">${menuTaslak.map((s, i) => `
+      <div class="menu-satir ${s.gizli ? 'gizli' : ''}" draggable="true" data-i="${i}"
+        ondragstart="event.dataTransfer.setData('text/plain','${i}');this.classList.add('surukle')" ondragend="this.classList.remove('surukle')"
+        ondragover="event.preventDefault();this.classList.add('uzerinde')" ondragleave="this.classList.remove('uzerinde')"
+        ondrop="event.preventDefault();menuTasi(+event.dataTransfer.getData('text/plain'),${i})">
+        <span class="menu-tutamak">⋮⋮</span><span class="menu-no">${i + 1}</span><span class="menu-ad">${s.ad}</span>
+        <button class="menu-ok" ${i === 0 ? 'disabled' : ''} onclick="menuTasi(${i},${i - 1})">▲</button>
+        <button class="menu-ok" ${i === menuTaslak.length - 1 ? 'disabled' : ''} onclick="menuTasi(${i},${i + 1})">▼</button>
+        <button class="menu-goz" title="${s.gizli ? 'Göster' : 'Gizle'}" onclick="menuTaslak[${i}].gizli=!menuTaslak[${i}].gizli;menuDuzenCiz()">${s.gizli ? '🙈' : '👁'}</button>
+      </div>`).join('')}</div>
+    <div class="menu-butonlar"><button class="btn" onclick="menuVarsayilan()">Varsayılana dön</button><span style="flex:1"></span><button class="btn" onclick="menuDuzenKapat()">Vazgeç</button><button class="btn btn-primary" onclick="menuKaydet()">Kaydet</button></div>
+  </div>`;
+}
+function menuTasi(from, to) {
+  if (from === to || to < 0 || to >= menuTaslak.length) return;
+  const [x] = menuTaslak.splice(from, 1); menuTaslak.splice(to, 0, x); menuDuzenCiz();
+}
+function menuVarsayilan() {
+  const sek = menuSekmeleri();
+  menuTaslak = sek.map(s => ({ key: s.key, ad: s.ad, gizli: false })); menuDuzenCiz();
+}
+async function menuKaydet() {
+  if (menuTaslak.every(s => s.gizli)) { alert('En az bir sekme görünür kalmalı.'); return; }
+  const yeni = { sira: menuTaslak.map(s => s.key), gizli: menuTaslak.filter(s => s.gizli).map(s => s.key) };
+  menuAyar = yeni; menuLsYaz(yeni); menuSiraUygula(); menuDuzenKapat();
+  if (menuAyarTablo) {
+    try {
+      const r = await api('genel_ayarlar?anahtar=eq.menu_sirasi&select=anahtar');
+      if (r && r.length) await api('genel_ayarlar?anahtar=eq.menu_sirasi', 'PATCH', { deger: yeni, guncelleme: new Date().toISOString() });
+      else await api('genel_ayarlar', 'POST', { anahtar: 'menu_sirasi', deger: yeni });
+      showToast('✓ Menü sırası herkes için kaydedildi');
+    } catch (e) { showToast('Kaydedilemedi: ' + e.message); }
+  } else showToast('✓ Menü sırası bu tarayıcıya kaydedildi');
 }
 
 // Ana sayfa ilk yüklenişinde init
