@@ -1,4 +1,4 @@
-<!-- SURUM-V117R4-GMAIL --><!DOCTYPE html>
+<!-- SURUM-V117R5-GMAIL-FOTO --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -653,7 +653,9 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .gelen-satir{display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
 .gelen-bilgi{flex:1;min-width:0}
 .gelen-ust2{font-size:13.5px;color:var(--text)}
-.gelen-urun{font-size:13px;color:#E8DFC8;margin-top:5px}
+.gelen-urun{font-size:13px;color:#E8DFC8;margin-top:5px;overflow:hidden}
+.gelen-foto{float:left;width:64px;height:64px;object-fit:cover;border-radius:8px;margin:0 10px 4px 0;border:1px solid rgba(212,175,55,.35);background:#fff}
+.gelen-foto.buyuk{float:none;display:inline-block;vertical-align:middle;width:72px;height:72px;margin:0 10px 0 0}
 .gelen-var{font-size:12px;color:#A39A85;margin-top:2px}
 .gelen-tutar{font-size:12.5px;color:#C9BFA8;margin-top:6px}
 .gelen-not{font-size:12.5px;color:#FDE68A;margin-top:4px}
@@ -8962,6 +8964,9 @@ function gelenCozumle(m) {
     });
     if (u.baslik) urunler.push(u);
   });
+  // Ürün fotoğrafları (Gmail otomasyonu sona [[GORSEL]] satırı olarak ekler; sıra ürün sırasıyla aynı)
+  const gorseller = [...t.matchAll(/\[\[GORSEL\]\]\s*(\S+)/g)].map(x => x[1].replace(/il_\d+x\d+\./, 'il_570xN.'));
+  urunler.forEach((u, i) => { u.foto = gorseller[i] || ''; });
   // Tutarlar
   const tutar = ad => gelenPara(deger(new RegExp('^\\s*' + ad + ':\\s*(.+)$', 'im')));
   // Adres (HTML parçalarından)
@@ -9026,7 +9031,7 @@ async function gelenAc() {
     <div class="gelen-liste">${liste.length ? liste.map(m => { const c = m.c; return `<div class="gelen-satir">
       <div class="gelen-bilgi">
         <div class="gelen-ust2"><b>#${gelenEsc(c.siparisNo)}</b> · ${gelenEsc(c.alici)} · ${gelenEsc(c.ulke)} · ${gelenEsc(c.tarih.split('-').reverse().join('.'))}${c.sonGonderim ? ' · <span class="gelen-son">⏰ ' + gelenEsc(c.sonGonderim.split('-').reverse().slice(0, 2).join('.')) + '</span>' : ''}</div>
-        ${c.urunler.map(u => `<div class="gelen-urun">${u.adet > 1 ? '<b>' + u.adet + ' ×</b> ' : ''}${gelenEsc(u.baslik)}${u.varyasyon.length ? '<div class="gelen-var">' + u.varyasyon.map(gelenEsc).join(' · ') + '</div>' : ''}</div>`).join('') || '<div class="gelen-urun" style="color:#F87171">Ürün okunamadı — mail biçimi farklı olabilir</div>'}
+        ${c.urunler.map(u => `<div class="gelen-urun">${u.foto ? `<a href="${gelenEsc(u.foto)}" target="_blank" rel="noopener"><img class="gelen-foto" src="${gelenEsc(u.foto)}" alt="" loading="lazy"></a>` : ''}${u.adet > 1 ? '<b>' + u.adet + ' ×</b> ' : ''}${gelenEsc(u.baslik)}${u.varyasyon.length ? '<div class="gelen-var">' + u.varyasyon.map(gelenEsc).join(' · ') + '</div>' : ''}</div>`).join('') || '<div class="gelen-urun" style="color:#F87171">Ürün okunamadı — mail biçimi farklı olabilir</div>'}
         <div class="gelen-tutar">Ara toplam <b>$${c.araToplam.toFixed(2)}</b>${c.indirim ? ' · indirim $' + Math.abs(c.indirim).toFixed(2) : ''}${c.kargo ? ' · kargo $' + c.kargo.toFixed(2) : ''} · vergi $${c.vergi.toFixed(2)} · toplam $${c.toplam.toFixed(2)}</div>
         ${c.not ? '<div class="gelen-not">💬 ' + gelenEsc(c.not) + '</div>' : ''}
       </div>
@@ -9062,7 +9067,11 @@ async function gelenSipariseEkle(id) {
   set('psAdres', c.adres ? psAdresFormatla(c.adres, c.araToplam) : '');
   if (typeof psHesapla === 'function') psHesapla();
   const durum = document.getElementById('psEtsyPdfDurum');
-  if (durum) { durum.textContent = '📥 Mailden dolduruldu — gram ve sipariş no\'yu kontrol edin'; durum.style.color = 'var(--green)'; }
+  if (durum) {
+    const foto = c.urunler.map(u => u.foto).filter(Boolean)[0];
+    durum.innerHTML = (foto ? `<a href="${gelenEsc(foto)}" target="_blank" rel="noopener"><img class="gelen-foto buyuk" src="${gelenEsc(foto)}" alt=""></a>` : '') + '📥 Mailden dolduruldu — gram ve sipariş no\'yu kontrol edin';
+    durum.style.color = 'var(--green)';
+  }
   setTimeout(() => document.getElementById('psGram')?.focus(), 150);
 }
 // savePlatSiparis başarılı olunca çağrılır
