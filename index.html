@@ -1,4 +1,4 @@
-<!-- SURUM-V117R3-RAMAT-MENU-ADMIN --><!DOCTYPE html>
+<!-- SURUM-V117R7-TABLO-FOTO --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -640,6 +640,31 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .menu-ok,.menu-goz{width:30px;height:28px;border-radius:7px;border:1px solid rgba(212,175,55,.25);background:none;color:#E8DFC8;cursor:pointer;font-size:12px}
 .menu-ok:disabled{opacity:.25;cursor:default}
 .menu-butonlar{display:flex;gap:8px;margin-top:14px}
+/* Gelen siparişler */
+.gelen-say{display:inline-block;min-width:18px;padding:0 6px;border-radius:10px;background:#DC2626;color:#fff;font-size:11px;margin-left:4px}
+#gelenBtn.gelen-var{box-shadow:0 0 0 2px rgba(220,38,38,.45)}
+#gelenModal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.gelen-kutu{width:min(860px,100%);max-height:92vh;overflow:auto}
+.gelen-ust{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.gelen-baslik{font-size:17px;font-weight:700;color:var(--gold)}
+.gelen-x{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer}
+.gelen-aciklama{font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.gelen-liste{border:1px solid rgba(212,175,55,.25);border-radius:12px;overflow:hidden}
+.gelen-satir{display:flex;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.gelen-bilgi{flex:1;min-width:0}
+.gelen-ust2{font-size:13.5px;color:var(--text)}
+.gelen-urun{font-size:13px;color:#E8DFC8;margin-top:5px;overflow:hidden}
+.gelen-foto{float:left;width:64px;height:64px;object-fit:cover;border-radius:8px;margin:0 10px 4px 0;border:1px solid rgba(212,175,55,.35);background:#fff}
+.gelen-foto.buyuk{float:none;display:inline-block;vertical-align:middle;width:72px;height:72px;margin:0 10px 0 0}
+.gelen-var{font-size:12px;color:#A39A85;margin-top:2px}
+.gelen-tutar{font-size:12.5px;color:#C9BFA8;margin-top:6px}
+.gelen-not{font-size:12.5px;color:#FDE68A;margin-top:4px}
+.gelen-son{color:#FBBF24}
+.gelen-btn{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.gelen-butonlar{display:flex;justify-content:flex-end;margin-top:12px}
+@media(max-width:600px){.gelen-satir{flex-direction:column}.gelen-btn{flex-direction:row}}
+.gram-yok{font-size:11px;font-weight:700;color:#FBBF24;background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.4);padding:2px 8px;border-radius:20px;white-space:nowrap}
+.tablo-foto{width:34px;height:34px;object-fit:cover;border-radius:6px;vertical-align:middle;margin-right:8px;border:1px solid rgba(212,175,55,.35);background:#fff}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -1369,6 +1394,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
             <button onclick="essosFaturaUygula()" style="padding:4px 10px;background:var(--gold-dark);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;">Uygula</button>
           </div>
           <button class="btn btn-sm" onclick="openPlatReklamModal()">Reklam Gir</button>
+          <button class="btn btn-sm" id="gelenBtn" style="display:none" onclick="gelenAc()">📥 Gelen Siparişler</button>
           <button class="btn btn-primary btn-sm" onclick="openPlatSiparisModal()">+ Satış Ekle</button>
         </div>
       </div>
@@ -5229,6 +5255,8 @@ async function saveKargoFiyatlari() {
 }
 
 async function loadPlatformData() {
+  if (typeof gelenSayacGuncelle === 'function') gelenSayacGuncelle();
+  if (typeof gelenFotoYukle === 'function' && GELEN_AKTIF && (aktifPlatform === 'alfred_etsy' || aktifPlatform === 'essos_etsy')) gelenFotoYukle().then(() => { if (Object.keys(gelenFotoHarita).length && typeof renderPlatTablo === 'function') renderPlatTablo(); });
   const ay = document.getElementById('platAy').value;
   if (!ay) return;
 
@@ -5304,9 +5332,9 @@ function renderPlatTablo() {
     return `<tr>
       <td style="color:var(--text);font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
       <td>${s.tarih||'-'}</td>
-      <td style="font-weight:500;max-width:140px;overflow:hidden;text-overflow:ellipsis">${s.urun_adi||'-'}</td>
+      <td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(() => { const f = gelenSiparisFoto(s); return f ? `<a href="${gelenEsc(f)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()"><img class="tablo-foto" referrerpolicy="no-referrer" src="${gelenEsc(f)}" alt="" loading="lazy"></a>` : ''; })()}${s.urun_adi||'-'}</td>
       <td>${s.adet}</td>
-      <td>${parseFloat(s.gram).toString()}</td>
+      <td>${parseFloat(s.gram) ? parseFloat(s.gram).toString() : '<span class="gram-yok" title="Gram girilmedi — maliyet ve kâr eksik hesaplanıyor. Düz ile gramı girin.">⚖️ gram yok</span>'}</td>
       <td><span class="ayar-badge">${s.ayar}</span></td>
       <td>${parseFloat(s.milyem).toString()}</td>
       <td>${Number(s.has).toFixed(2)}</td>
@@ -5390,6 +5418,7 @@ function updatePlatOzet() {
 
 // ===== SİPARİŞ MODAL =====
 function openPlatSiparisModal() {
+  gelenAktifId = null;
   document.getElementById('platSipId').value = '';
   document.getElementById('platSiparisBaslik').textContent = PLATFORM_LABELS[aktifPlatform] + ' — Yeni Satış';
   document.getElementById('psTarih').value = bugunTarihStr();
@@ -5487,6 +5516,7 @@ async function savePlatSiparis() {
   const kargo = parseFloat(document.getElementById('psKargo').value) || 0;
   const adet = parseInt(document.getElementById('psAdet').value) || 1;
   const ayar = document.getElementById('psAyar').value;
+  if (!gram && !confirm('Gram girilmedi. Bu durumda maliyet $0 sayılır ve kâr olduğundan yüksek görünür.\n\nYine de kaydedilsin mi? (Sonra Düz ile gramı girebilirsiniz.)')) { document.getElementById('psGram').focus(); return; }
   const ulke = document.getElementById('psUlke').value;
 
   const has = gram * milyem;
@@ -5514,7 +5544,10 @@ async function savePlatSiparis() {
   if (editId) {
     await api('platform_siparisler?id=eq.' + editId, 'PATCH', sipData);
   } else {
-    await api('platform_siparisler', 'POST', sipData);
+    if (gelenAktifId) { const gm = gelenListe.find(x => x.id === gelenAktifId); if (gm && gm.c.siparisNo) sipData.harici_no = gm.c.siparisNo; }
+    try { await api('platform_siparisler', 'POST', sipData); }
+    catch (e) { if (sipData.harici_no && /harici_no/.test(e.message)) { delete sipData.harici_no; await api('platform_siparisler', 'POST', sipData); } else { alert('Kaydedilemedi: ' + e.message); return; } }
+    gelenKaydedildi();
   }
 
   closeModal('platSiparisModal');
@@ -8683,10 +8716,10 @@ function ramatCiz() {
   if (!son) sonEl.innerHTML = `<div class="rm-ust">♻️ Son Ramat</div><div class="rm-deger" style="font-size:18px">Kayıt yok</div><div class="rm-alt">Son yaptırdığınız ramatı <a href="#" onclick="ramatKayitModal();return false;" style="color:#F5C451">buradan girin</a>.</div>`;
   else {
     const teo = rmTeorik(son.gram14, son.gram10), al = son.alinan_has != null && son.alinan_has !== '' ? parseFloat(son.alinan_has) : null;
-    const fire = al != null ? teo - al : null;
+    const fire = al != null && teo ? al / teo * 100 : null;   // fire oranı = rafineriden dönen has ÷ teorik has
     sonEl.innerHTML = `<div class="rm-ust">♻️ Son Ramat · ${rmTarihTR(son.tarih)} <span style="color:#A39A85;font-weight:500">(${rmGunOnce(son.tarih)})</span></div>
       <div class="rm-iki"><div><span>14 Ayar</span><b>${rmGr(son.gram14)} gr</b></div><div><span>10 Ayar</span><b>${rmGr(son.gram10)} gr</b></div><div><span>Toplam</span><b>${rmGr((+son.gram14 || 0) + (+son.gram10 || 0))} gr</b></div></div>
-      <div class="rm-alt">Teorik has <b>${rmGr(teo)}</b> · Alınan has ${al != null ? '<b>' + rmGr(al) + '</b> · Fire <b style="color:' + (fire > 0 ? '#F87171' : '#34D399') + '">' + rmGr(fire) + ' has' + (teo ? ' (%' + (fire / teo * 100).toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ')' : '') + '</b>' : '<a href="#" onclick="ramatKayitModal(' + son.id + ');return false;" style="color:#F5C451">henüz girilmedi — gir</a>'}</div>
+      <div class="rm-alt">Teorik has <b>${rmGr(teo)}</b> · Alınan has ${al != null ? '<b>' + rmGr(al) + '</b> · Fire <b style="color:#F5C451">' + (fire != null ? '%' + fire.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—') + '</b>' : '<a href="#" onclick="ramatKayitModal(' + son.id + ');return false;" style="color:#F5C451">henüz girilmedi — gir</a>'}</div>
       ${son.notlar ? '<div class="rm-alt">📝 ' + rmEsc(son.notlar) + '</div>' : ''}`;
   }
   // Birikim kartı
@@ -8705,10 +8738,10 @@ function ramatCiz() {
     : '<div class="hk-bos">Son ramattan beri giriş yok.</div>';
   // Geçmiş ramatlar
   const gc = document.getElementById('ramatGecmis');
-  gc.innerHTML = ramatKayitlar.length ? `<table><thead><tr><th>Tarih</th><th>14 Ayar</th><th>10 Ayar</th><th>Toplam</th><th>Teorik Has</th><th>Alınan Has</th><th>Fire</th><th>Not</th><th></th></tr></thead><tbody>${
-    ramatKayitlar.map(r => { const teo = rmTeorik(r.gram14, r.gram10), al = r.alinan_has != null && r.alinan_has !== '' ? parseFloat(r.alinan_has) : null, f = al != null ? teo - al : null;
+  gc.innerHTML = ramatKayitlar.length ? `<table><thead><tr><th>Tarih</th><th>14 Ayar</th><th>10 Ayar</th><th>Toplam</th><th>Teorik Has</th><th>Alınan Has</th><th>Fire %</th><th>Not</th><th></th></tr></thead><tbody>${
+    ramatKayitlar.map(r => { const teo = rmTeorik(r.gram14, r.gram10), al = r.alinan_has != null && r.alinan_has !== '' ? parseFloat(r.alinan_has) : null, f = al != null && teo ? al / teo * 100 : null;
       return `<tr><td>${rmTarihTR(r.tarih)}</td><td>${rmGr(r.gram14)}</td><td>${rmGr(r.gram10)}</td><td><b>${rmGr((+r.gram14 || 0) + (+r.gram10 || 0))}</b></td><td>${rmGr(teo)}</td><td>${al != null ? rmGr(al) : '—'}</td>
-        <td style="color:${f == null ? 'inherit' : f > 0 ? 'var(--red)' : 'var(--green)'}">${f != null ? rmGr(f) : '—'}</td><td style="max-width:220px;white-space:normal">${rmEsc(r.notlar || '')}</td>
+        <td style="color:#F5C451;font-weight:600">${f != null ? '%' + f.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—'}</td><td style="max-width:220px;white-space:normal">${rmEsc(r.notlar || '')}</td>
         <td style="white-space:nowrap"><button class="btn btn-sm" onclick="ramatGirisleriGoster(${r.id})">Girişler</button> <button class="btn btn-sm" onclick="ramatKayitModal(${r.id})">Düzenle</button> <button class="btn btn-sm btn-danger" onclick="ramatKayitSil(${r.id})">Sil</button></td></tr>`; }).join('')
   }</tbody></table>` : '<div class="hk-bos" style="padding:14px">Henüz ramat kaydı yok.</div>';
 }
@@ -8901,6 +8934,171 @@ async function menuKaydet() {
       showToast('✓ Menü sırası herkes için kaydedildi');
     } catch (e) { showToast('Kaydedilemedi: ' + e.message); }
   } else showToast('✓ Menü sırası bu tarayıcıya kaydedildi');
+}
+
+// ===== GMAIL'DEN GELEN ETSY SİPARİŞLERİ =====
+// Gmail otomasyonu satış maillerinin düz metnini gelen_mailler tablosuna yazar; burada ayıklanıp
+// "Siparişe Ekle" ile tanıdık Satış Ekle penceresine doldurulur. Gram vb. elle girilir.
+const GELEN_AKTIF = false;   // Gmail'den gelen siparişler: canlıya alınınca true yapın
+const GELEN_MAGAZA = { alfred: 'alfred_etsy', essos: 'essos_etsy' };   // Etsy "Shop:" adı → platform
+let gelenListe = [], gelenAktifId = null, gelenTabloVar = null;
+const GELEN_AYLAR = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+function gelenEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function gelenHtmlCoz(s) { return String(s || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'"); }
+function gelenPara(s) { const m = String(s || '').match(/-?\$?\s*-?([\d,]+(?:\.\d+)?)/); if (!m) return 0; const v = parseFloat(m[1].replace(/,/g, '')); return /-/.test(s) ? -v : v; }
+function gelenYerelTarih(d) { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }
+// Etsy "You made a sale" mailinin düz metnini ayıklar
+function gelenCozumle(m) {
+  const t = gelenHtmlCoz(String(m.govde || '').replace(/\r/g, ''));
+  const deger = re => { const x = t.match(re); return x ? x[1].trim() : ''; };
+  const siparisNo = deger(/order number is\s*(\d+)/i) || (String(m.konu || '').match(/Order\s*#(\d+)/i) || [])[1] || '';
+  const magaza = deger(/^\s*Shop:\s*(.+)$/im);
+  const platform = Object.entries(GELEN_MAGAZA).find(([k]) => magaza.toLowerCase().includes(k))?.[1] || '';
+  // Ürünler: "Transaction ID" ile başlayan bloklar
+  const urunler = [];
+  t.split(/\n\s*Transaction ID:/i).slice(1).forEach(b => {
+    const blok = b.split(/\n-{10,}/)[0];
+    const satirlar = blok.split('\n').map(x => x.trim()).filter(Boolean);
+    const u = { baslik: '', varyasyon: [], adet: 1, fiyat: 0 };
+    satirlar.forEach(l => {
+      let x;
+      if ((x = l.match(/^Item:\s*(.+)$/i))) u.baslik = x[1].trim();
+      else if ((x = l.match(/^Quantity:\s*(\d+)/i))) u.adet = parseInt(x[1]) || 1;
+      else if ((x = l.match(/^Item price:\s*(.+)$/i))) u.fiyat = gelenPara(x[1]);
+      else if ((x = l.match(/^([^:]{2,60}):\s*(.+)$/)) && u.baslik && !/^\d+$/.test(x[1])) u.varyasyon.push(x[1].trim() + ': ' + x[2].trim());
+    });
+    if (u.baslik) urunler.push(u);
+  });
+  // Ürün fotoğrafları (Gmail otomasyonu sona [[GORSEL]] satırı olarak ekler; sıra ürün sırasıyla aynı)
+  const gorseller = [...t.matchAll(/\[\[GORSEL\]\]\s*(\S+)/g)].map(x => x[1].replace(/il_\d+x\d+\./, 'il_570xN.'));
+  urunler.forEach((u, i) => { u.foto = gorseller[i] || ''; });
+  // Tutarlar
+  const tutar = ad => gelenPara(deger(new RegExp('^\\s*' + ad + ':\\s*(.+)$', 'im')));
+  // Adres (HTML parçalarından)
+  const parca = cls => { const x = t.match(new RegExp("class='" + cls + "'>([^<]*)<")); return x ? x[1].trim() : ''; };
+  const ad = parca('name'), s1 = parca('first-line'), s2 = parca('second-line'), sehir = parca('city'), eyalet = parca('state'), posta = parca('zip'), ulke = parca('country-name');
+  const adres = [ad, s1, s2, [sehir, [eyalet, posta].filter(Boolean).join(' ')].filter(Boolean).join(', '), ulke].filter(Boolean).join('\n');
+  // Alıcı notu
+  let not = (t.match(/Note from[^\n]*:\s*\n-+\s*\n([\s\S]*?)\n-{10,}/i) || [])[1] || '';
+  not = not.trim(); if (/did not leave a note/i.test(not)) not = '';
+  // Son gönderim (konu: "Ship by Nov 9")
+  let sonGonderim = '';
+  const sb = String(m.konu || '').match(/Ship by\s+([A-Z][a-z]{2})[a-z]*\s+(\d{1,2})/);
+  if (sb && GELEN_AYLAR[sb[1]]) {
+    const md = new Date(m.mail_tarih || Date.now()); let y = md.getFullYear();
+    if (GELEN_AYLAR[sb[1]] < md.getMonth() + 1 - 6) y++;
+    sonGonderim = y + '-' + String(GELEN_AYLAR[sb[1]]).padStart(2, '0') + '-' + sb[2].padStart(2, '0');
+  }
+  return {
+    siparisNo, magaza, platform, urunler, not, adres, ulke, alici: ad, sonGonderim,
+    araToplam: tutar('Subtotal'), indirim: tutar('Discount'), kargo: tutar('Shipping'), vergi: tutar('Sales Tax'), toplam: tutar('Order Total'),
+    tarih: m.mail_tarih ? gelenYerelTarih(m.mail_tarih) : bugunTarihStr()
+  };
+}
+function gelenUlkeKod(ulke) {
+  const u = String(ulke || '').toLowerCase();
+  if (/united states|usa|^us$/.test(u)) return 'ABD';
+  if (/united kingdom|england|scotland|wales|northern ireland|^uk$/.test(u)) return 'İngiltere';
+  if (/australia/.test(u)) return 'Avustralya';
+  return 'Avrupa';
+}
+function gelenEtsyPlatformu() { return aktifPlatform === 'alfred_etsy' || aktifPlatform === 'essos_etsy'; }
+async function gelenYukle() {
+  try {
+    const r = await api('gelen_mailler?durum=eq.yeni&select=*&order=mail_tarih.desc&limit=200');
+    gelenTabloVar = true;
+    gelenListe = (r || []).map(m => ({ ...m, c: gelenCozumle(m) }));
+  } catch (e) { gelenTabloVar = false; gelenListe = []; }
+}
+async function gelenSayacGuncelle() {
+  const btn = document.getElementById('gelenBtn'); if (!btn) return;
+  if (!GELEN_AKTIF || !gelenEtsyPlatformu()) { btn.style.display = 'none'; return; }
+  await gelenYukle();
+  if (!gelenTabloVar) { btn.style.display = 'none'; return; }
+  const n = gelenListe.filter(m => m.c.platform === aktifPlatform).length;
+  btn.style.display = '';
+  btn.innerHTML = '📥 Gelen Siparişler' + (n ? ' <span class="gelen-say">' + n + '</span>' : '');
+  btn.classList.toggle('gelen-var', n > 0);
+}
+function gelenModal(icerik) {
+  let ov = document.getElementById('gelenModal');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'gelenModal'; ov.onclick = e => { if (e.target === ov) gelenModalKapat(); }; document.body.appendChild(ov); }
+  ov.style.display = 'flex';
+  ov.innerHTML = `<div class="card gelen-kutu">${icerik}</div>`;
+}
+function gelenModalKapat() { const ov = document.getElementById('gelenModal'); if (ov) ov.style.display = 'none'; }
+async function gelenAc() {
+  await gelenYukle();
+  const liste = gelenListe.filter(m => m.c.platform === aktifPlatform);
+  const diger = gelenListe.length - liste.length;
+  gelenModal(`<div class="gelen-ust"><div class="gelen-baslik">📥 Gelen Siparişler — ${gelenEsc(PLATFORM_LABELS[aktifPlatform] || aktifPlatform)}</div><button class="gelen-x" onclick="gelenModalKapat()">✕</button></div>
+    <div class="gelen-aciklama">Gmail'e düşen Etsy satış mailleri. <b>Siparişe Ekle</b> deyince Satış Ekle penceresi dolu açılır; gramı girip kaydedersiniz.${diger ? ' (Diğer mağazalara ait ' + diger + ' mail de var.)' : ''}</div>
+    <div class="gelen-liste">${liste.length ? liste.map(m => { const c = m.c; return `<div class="gelen-satir">
+      <div class="gelen-bilgi">
+        <div class="gelen-ust2"><b>#${gelenEsc(c.siparisNo)}</b> · ${gelenEsc(c.alici)} · ${gelenEsc(c.ulke)} · ${gelenEsc(c.tarih.split('-').reverse().join('.'))}${c.sonGonderim ? ' · <span class="gelen-son">⏰ ' + gelenEsc(c.sonGonderim.split('-').reverse().slice(0, 2).join('.')) + '</span>' : ''}</div>
+        ${c.urunler.map(u => `<div class="gelen-urun">${u.foto ? `<a href="${gelenEsc(u.foto)}" target="_blank" rel="noopener noreferrer"><img class="gelen-foto" referrerpolicy="no-referrer" src="${gelenEsc(u.foto)}" alt="" loading="lazy"></a>` : ''}${u.adet > 1 ? '<b>' + u.adet + ' ×</b> ' : ''}${gelenEsc(u.baslik)}${u.varyasyon.length ? '<div class="gelen-var">' + u.varyasyon.map(gelenEsc).join(' · ') + '</div>' : ''}</div>`).join('') || '<div class="gelen-urun" style="color:#F87171">Ürün okunamadı — mail biçimi farklı olabilir</div>'}
+        <div class="gelen-tutar">Ara toplam <b>$${c.araToplam.toFixed(2)}</b>${c.indirim ? ' · indirim $' + Math.abs(c.indirim).toFixed(2) : ''}${c.kargo ? ' · kargo $' + c.kargo.toFixed(2) : ''} · vergi $${c.vergi.toFixed(2)} · toplam $${c.toplam.toFixed(2)}</div>
+        ${c.not ? '<div class="gelen-not">💬 ' + gelenEsc(c.not) + '</div>' : ''}
+      </div>
+      <div class="gelen-btn"><button class="btn btn-primary btn-sm" onclick="gelenSipariseEkle(${m.id})">＋ Siparişe Ekle</button><button class="btn btn-sm" onclick="gelenYoksay(${m.id})">Yok say</button></div>
+    </div>`; }).join('') : '<div class="hk-bos" style="padding:16px">Yeni sipariş maili yok.</div>'}</div>
+    <div class="gelen-butonlar"><button class="btn" onclick="gelenModalKapat()">Kapat</button></div>`);
+}
+async function gelenYoksay(id) {
+  if (!confirm('Bu mail listeden kaldırılsın mı? (Sipariş eklenmez)')) return;
+  try { await api('gelen_mailler?id=eq.' + id, 'PATCH', { durum: 'yoksay' }); await gelenAc(); gelenSayacGuncelle(); } catch (e) { alert(e.message); }
+}
+async function gelenSipariseEkle(id) {
+  const m = gelenListe.find(x => x.id === id); if (!m) return;
+  const c = m.c;
+  gelenModalKapat();
+  openPlatSiparisModal();
+  gelenAktifId = id;
+  const ay = c.tarih.slice(0, 7);
+  let sonrakiNo = '';
+  try { const r = await api(`platform_siparisler?platform=eq.${aktifPlatform}&ay=eq.${ay}&select=musteri_adi`); sonrakiNo = String(Math.max(0, ...(r || []).map(x => parseInt(x.musteri_adi) || 0)) + 1); } catch (e) {}
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+  set('psTarih', c.tarih);
+  set('psSiparisNo', sonrakiNo);
+  set('psUrun', c.urunler.map(u => u.baslik).join(' + '));
+  set('psAdet', c.urunler.reduce((s, u) => s + u.adet, 0) || 1);
+  const metin = c.urunler.map(u => u.baslik + ' ' + u.varyasyon.join(' ')).join(' ');
+  const ayar = /\b10\s*K\b/i.test(metin) && !/\b14\s*K\b/i.test(metin) ? '10K' : '14K';
+  set('psAyar', ayar); if (typeof psAyarDegis === 'function') psAyarDegis();
+  set('psUlke', gelenUlkeKod(c.ulke)); if (typeof psUlkeDegis === 'function') psUlkeDegis();
+  set('psSatisFiyat', c.araToplam ? c.araToplam.toFixed(2) : '');
+  const notlar = ['Etsy #' + c.siparisNo].concat(c.urunler.map(u => u.varyasyon.join(' | ')).filter(Boolean)).concat(c.not ? ['Not: ' + c.not] : []);
+  set('psNot', notlar.join(' | '));
+  set('psAdres', c.adres ? psAdresFormatla(c.adres, c.araToplam) : '');
+  if (typeof psHesapla === 'function') psHesapla();
+  const durum = document.getElementById('psEtsyPdfDurum');
+  if (durum) {
+    const foto = c.urunler.map(u => u.foto).filter(Boolean)[0];
+    durum.innerHTML = (foto ? `<a href="${gelenEsc(foto)}" target="_blank" rel="noopener noreferrer"><img class="gelen-foto buyuk" referrerpolicy="no-referrer" src="${gelenEsc(foto)}" alt=""></a>` : '') + '📥 Mailden dolduruldu — gram ve sipariş no\'yu kontrol edin';
+    durum.style.color = 'var(--green)';
+  }
+  setTimeout(() => document.getElementById('psGram')?.focus(), 150);
+}
+// Tablodaki siparişlerin fotoğrafı: Etsy sipariş no → mailden gelen ürün fotoğrafı
+let gelenFotoHarita = {}, gelenFotoYuklendi = false;
+async function gelenFotoYukle() {
+  try {
+    const r = await api('gelen_mailler?select=id,konu,govde,mail_tarih&order=mail_tarih.desc&limit=500');
+    gelenFotoHarita = {};
+    (r || []).forEach(m => { const c = gelenCozumle(m); const f = c.urunler.map(u => u.foto).filter(Boolean)[0]; if (c.siparisNo && f && !gelenFotoHarita[c.siparisNo]) gelenFotoHarita[c.siparisNo] = f; });
+    gelenFotoYuklendi = true;
+  } catch (e) { gelenFotoHarita = {}; }
+}
+function gelenSiparisFoto(s) {
+  const no = s.harici_no || ((s.notlar || '').match(/Etsy\s*#(\d+)/) || [])[1];
+  return no ? gelenFotoHarita[no] || '' : '';
+}
+// savePlatSiparis başarılı olunca çağrılır
+async function gelenKaydedildi() {
+  if (!gelenAktifId) return;
+  const id = gelenAktifId; gelenAktifId = null;
+  try { await api('gelen_mailler?id=eq.' + id, 'PATCH', { durum: 'eklendi' }); } catch (e) {}
+  gelenSayacGuncelle();
 }
 
 // Ana sayfa ilk yüklenişinde init
