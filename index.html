@@ -1,4 +1,4 @@
-<!-- SURUM-V117R9-NAMAZ --><!DOCTYPE html>
+<!-- SURUM-V117R10-ANASAYFA-DUZEN --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -333,7 +333,7 @@ tbody tr:hover td { background:rgba(212,175,55,.04); }
 .gk-ad { display:inline-flex; align-items:center; gap:12px; }
 .gk-ikon { width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:#E9C46A; border:1.5px solid rgba(212,175,55,.6); background:radial-gradient(circle at 30% 25%,#2A2416,#141109); }
 .gk-ikon svg { width:18px; height:18px; }
-.koyu-tema .gorev-kolon { background:linear-gradient(180deg,#171511,#0F0E0C) !important; border:1px solid rgba(212,175,55,.26) !important; min-height:340px !important; max-height:360px !important; }
+.koyu-tema .gorev-kolon { background:linear-gradient(180deg,#171511,#0F0E0C) !important; border:1px solid rgba(212,175,55,.26) !important; min-height:190px !important; max-height:250px !important; }
 .koyu-tema .gorev-kolon:hover { border-color:rgba(212,175,55,.5) !important; }
 .koyu-tema .gorev-kolon-baslik { border-bottom:1px solid rgba(212,175,55,.2) !important; color:#F4EEDF !important; padding-bottom:12px !important; margin-bottom:12px !important; }
 .koyu-tema .gorev-kolon-baslik .btn { width:34px; height:34px; padding:0 !important; justify-content:center; font-size:18px; background:transparent !important; border:1.5px solid rgba(212,175,55,.6) !important; color:#E9C46A !important; border-radius:9px; }
@@ -682,22 +682,20 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .pao-lejant em{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
 .pao-lejant b{color:#F2ECDD}
 @media(max-width:700px){.pao-kart{min-width:0;width:100%}}
-/* Namaz vakitleri */
-.nv-kutu{display:flex;gap:18px;align-items:stretch;flex-wrap:wrap}
-.nv-sol{flex:0 0 230px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6px 10px;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid rgba(52,211,153,.3)}
-.nv-aktif{font-size:22px;font-weight:700;color:#6EE7B7}
-.nv-bar{width:100%;height:8px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden;margin:8px 0}
+/* Namaz vakti (tarih yanında) */
+.nv-chip{position:relative;display:inline-flex;align-items:center;gap:8px;margin-left:10px;padding:7px 14px 9px;border-radius:14px;border:1px solid rgba(52,211,153,.45);background:linear-gradient(150deg,rgba(16,185,129,.18),rgba(0,0,0,.25));overflow:hidden;cursor:default;white-space:nowrap}
+.nv-chip:empty{display:none}
+.nv-ikon{font-size:18px}
+.nv-ad{font-size:16px;font-weight:700;color:#6EE7B7}
+.nv-ayrac{width:1px;height:20px;background:rgba(255,255,255,.15)}
+.nv-kalan-yazi{font-size:12.5px;color:#A39A85}
+.nv-kalan-yazi b{color:#C9BFA8;font-weight:600}
+.nv-kalan{font-size:17px;font-weight:700;color:#F2ECDD;font-variant-numeric:tabular-nums}
+.nv-bar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.06)}
 .nv-bar i{display:block;height:100%;background:linear-gradient(90deg,#10B981,#6EE7B7)}
-.nv-kalan-yazi{font-size:12px;color:#A39A85}
-.nv-kalan{font-size:24px;font-weight:700;color:#F2ECDD;font-variant-numeric:tabular-nums;margin-top:2px}
-.nv-liste{flex:1;min-width:260px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.nv-vakit{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;border-radius:10px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.07)}
-.nv-vakit span{font-size:11.5px;color:#A39A85}
-.nv-vakit b{font-size:18px;color:#F2ECDD;font-variant-numeric:tabular-nums}
-.nv-vakit.aktif{background:linear-gradient(150deg,#F59E0B,#D97706);border-color:#FBBF24}
-.nv-vakit.aktif span,.nv-vakit.aktif b{color:#1A1408}
-.nv-vakit.kible{border-style:dashed;border-color:rgba(52,211,153,.35)}
-@media(max-width:700px){.nv-sol{flex:1 1 100%}.nv-liste{grid-template-columns:repeat(4,minmax(0,1fr));min-width:0}}
+@media(max-width:700px){.nv-chip{margin:8px 0 0;flex-wrap:wrap;white-space:normal}}
+.koyu-tema .gorev-kolon .gk-bos{padding:10px 0 !important}
+.koyu-tema .gorev-kolon .gk-bos svg{width:30px !important;height:30px !important;margin-bottom:4px !important}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -973,7 +971,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 <div class="page active koyu-tema" id="page-anasayfa">
   <div class="as-header">
     <div>
-      <div style="display:flex;align-items:center;gap:8px;"><div class="as-tarih" id="asTarih">—</div><button class="gizli-btn" onclick="toggleGizliMod()" title="Rakamları gizle">👁️</button></div>
+      <div style="display:flex;align-items:center;gap:8px;"><div class="as-tarih" id="asTarih">—</div><button class="gizli-btn" onclick="toggleGizliMod()" title="Rakamları gizle">👁️</button><div id="nvKutu" class="nv-chip"></div></div>
       <div class="as-tarih-sub">Kılıçoğlu Stok Yönetim Sistemi</div>
     </div>
     <div class="as-btn-group">
@@ -994,13 +992,14 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div id="haremKurKutu" class="hk-grid"><div class="hk-bos">Yükleniyor…</div></div>
   </div>
 
-  <!-- NAMAZ VAKİTLERİ -->
-  <div class="card as-renk k-yesil nv-panel" data-dekor="🕌" style="margin-bottom:1.25rem;">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
-      <div class="as-baslik" style="font-weight:600;font-size:14px;"><span class="as-baslik-ikon">🕌</span>Namaz Vakitleri</div>
-      <span class="hk-durum">İstanbul · namazvakti.com</span>
-    </div>
-    <div id="nvKutu" class="nv-kutu"><div class="hk-bos">Yükleniyor…</div></div>
+  <!-- HATIRLATMALAR -->
+  <div class="card as-renk k-kirmizi" data-dekor="🔔" style="margin-bottom:1.5rem;">
+    <div class="as-baslik" style="font-weight:600;font-size:14px;margin-bottom:12px;"><span class="as-baslik-ikon">🔔</span>Ödeme Hatırlatmaları</div>
+    <div class="hatirlatma-liste" id="asHatirlatmaListe"><div style="color:var(--text3);font-size:13px;">Henüz hatırlatma yok.</div></div>
+  </div>
+
+  <div style="margin-top:-1rem;margin-bottom:1.5rem;text-align:right;">
+    <button class="btn btn-sm" onclick="asTumOdemelerAc()">📋 Tüm Bekleyen Ödemeler</button>
   </div>
 
   <!-- GÖREV PANELİ -->
@@ -1055,16 +1054,6 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       </div>
       <div id="gk-emir"></div>
     </div>
-  </div>
-
-  <!-- HATIRLATMALAR -->
-  <div class="card as-renk k-kirmizi" data-dekor="🔔" style="margin-bottom:1.5rem;">
-    <div class="as-baslik" style="font-weight:600;font-size:14px;margin-bottom:12px;"><span class="as-baslik-ikon">🔔</span>Ödeme Hatırlatmaları</div>
-    <div class="hatirlatma-liste" id="asHatirlatmaListe"><div style="color:var(--text3);font-size:13px;">Henüz hatırlatma yok.</div></div>
-  </div>
-
-  <div style="margin-top:-1rem;margin-bottom:1.5rem;text-align:right;">
-    <button class="btn btn-sm" onclick="asTumOdemelerAc()">📋 Tüm Bekleyen Ödemeler</button>
   </div>
 
   <!-- ALIŞVERİŞ LİSTELERİ -->
@@ -9219,7 +9208,7 @@ async function nvCiz() {
   const el = document.getElementById('nvKutu'); if (!el) return;
   const simdi = new Date();
   const bugun = await nvGun(simdi);
-  if (!bugun) { el.innerHTML = '<div class="hk-bos">' + (nvHata || 'Bu yılın vakitleri yüklenemedi.') + '</div>'; return; }
+  if (!bugun) { el.innerHTML = '<span class="nv-ikon">🕌</span><span class="nv-kalan-yazi">' + (nvHata || 'Vakitler yüklenemedi') + '</span>'; return; }
   const vakit = bugun.slice(0, 7);
   let ai = -1; vakit.forEach((t, i) => { if (simdi >= t) ai = i; });
   let baslangic, sonraki, sonrakiAd;
@@ -9230,14 +9219,8 @@ async function nvCiz() {
   const sa = Math.floor(kalan / 3600e3), dk = Math.floor(kalan % 3600e3 / 60e3), sn = Math.floor(kalan % 60e3 / 1000);
   const NV_YONELME = { 'İmsâk': "İmsâk'a", 'Sabâh': "Sabâh'a", 'Güneş': "Güneş'e", 'Öğle': "Öğle'ye", 'İkindi': "İkindi'ye", 'Akşam': "Akşam'a", 'Yatsı': "Yatsı'ya" };
   const kalanYazi = (sa ? sa + ' sa ' : '') + String(dk).padStart(sa ? 2 : 1, '0') + ' dk ' + String(sn).padStart(2, '0') + ' sn';
-  el.innerHTML = `<div class="nv-sol">
-      <div class="nv-aktif">${NV_ADLAR[ai]}</div>
-      <div class="nv-bar"><i style="width:${(oran * 100).toFixed(1)}%"></i></div>
-      <div class="nv-kalan-yazi">${NV_YONELME[sonrakiAd] || sonrakiAd} kalan zaman</div>
-      <div class="nv-kalan">${kalanYazi}</div>
-    </div>
-    <div class="nv-liste">${vakit.map((t, i) => `<div class="nv-vakit ${i === ai ? 'aktif' : ''}"><span>${NV_ADLAR[i]}</span><b>${nvHHMM(t)}</b></div>`).join('')}
-      <div class="nv-vakit kible"><span>Kıble Sâati</span><b>${nvHHMM(bugun[7])}</b></div></div>`;
+  el.title = NV_ADLAR.map((ad, i) => ad + ' ' + nvHHMM(vakit[i])).join(' · ') + ' · Kıble Sâati ' + nvHHMM(bugun[7]) + ' — namazvakti.com, ' + NV_SEHIR.ad;
+  el.innerHTML = `<span class="nv-ikon">🕌</span><span class="nv-ad">${NV_ADLAR[ai]}</span><span class="nv-ayrac"></span><span class="nv-kalan-yazi">${NV_YONELME[sonrakiAd] || sonrakiAd} <b>(${nvHHMM(sonraki)})</b></span><span class="nv-kalan">${kalanYazi}</span><span class="nv-bar"><i style="width:${(oran * 100).toFixed(1)}%"></i></span>`;
 }
 function nvBaslat() { nvCiz(); if (!nvSaat) nvSaat = setInterval(() => { const s = document.getElementById('page-anasayfa'); if (s && s.classList.contains('active') && document.visibilityState === 'visible') nvCiz(); }, 1000); }
 
