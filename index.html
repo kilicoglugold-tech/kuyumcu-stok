@@ -1,4 +1,4 @@
-<!-- SURUM-V117R10-ANASAYFA-DUZEN --><!DOCTYPE html>
+<!-- SURUM-V117R12-FATURA-GMAIL --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -696,6 +696,49 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 @media(max-width:700px){.nv-chip{margin:8px 0 0;flex-wrap:wrap;white-space:normal}}
 .koyu-tema .gorev-kolon .gk-bos{padding:10px 0 !important}
 .koyu-tema .gorev-kolon .gk-bos svg{width:30px !important;height:30px !important;margin-bottom:4px !important}
+/* Fatura */
+.ft-mod{font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:20px}
+.ft-mod.test{background:rgba(96,165,250,.15);color:#93C5FD;border:1px solid rgba(96,165,250,.45)}
+.ft-mod.canli{background:rgba(220,38,38,.15);color:#FCA5A5;border:1px solid rgba(220,38,38,.5)}
+.ft-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:start}
+@media(max-width:1000px){.ft-grid{grid-template-columns:1fr}}
+.ft-form{display:flex;flex-direction:column;gap:10px;padding:18px}
+.ft-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#C9BFA8}
+.ft-form label small{color:#7A7466}
+.ft-satir2{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ft-satir2 .ft-genis{grid-column:span 2}
+.ft-satir3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ft-satir4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media(max-width:700px){.ft-satir2,.ft-satir3,.ft-satir4{grid-template-columns:1fr 1fr}.ft-satir2 .ft-genis{grid-column:1/-1}}
+.ft-baslik{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:13px;font-weight:700;color:#F5C451;text-transform:uppercase;letter-spacing:.05em}
+.ft-onceki{width:auto !important;margin-left:auto;padding:4px 8px !important;font-size:12px !important;text-transform:none;letter-spacing:0}
+.ft-rozet{font-size:11px;font-weight:700;padding:2px 9px;border-radius:12px;background:rgba(255,255,255,.08);color:#C9BFA8;text-transform:none;letter-spacing:0}
+.ft-rozet:empty{display:none}
+.ft-rozet.efatura{background:rgba(52,211,153,.15);color:#34D399}
+.ft-satici{font-size:12.5px;color:#A39A85}
+.ft-satici b{color:#E8DFC8}
+.ft-onizleme{border:1px solid rgba(212,175,55,.3);border-radius:12px;padding:10px 12px;background:rgba(0,0,0,.2)}
+.ft-tablo{width:100%;border-collapse:collapse;font-size:13px}
+.ft-tablo th{font-size:11px;color:#A39A85;text-align:right;padding:4px 6px;font-weight:600}
+.ft-tablo td{padding:6px;text-align:right;border-top:1px solid rgba(255,255,255,.06);color:#F2ECDD;font-variant-numeric:tabular-nums}
+.ft-tablo th:first-child,.ft-tablo td:first-child{text-align:left}
+.ft-tablo tr.ft-top td{font-weight:800;color:#F5C451;font-size:15px}
+.ft-butonlar{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+.ft-liste-kart{padding:16px}
+.ft-liste{display:flex;flex-direction:column;gap:8px;max-height:72vh;overflow:auto;margin-top:8px}
+.ft-kayit{border:1px solid rgba(212,175,55,.22);border-radius:10px;padding:9px 11px;background:rgba(0,0,0,.2)}
+.ft-kayit-ust{display:flex;align-items:center;gap:8px;font-size:13.5px;color:#F2ECDD}
+.ft-kayit-alt{font-size:12px;color:#A39A85;margin-top:3px}
+.ft-kayit-btn{display:flex;gap:6px;margin-top:7px}
+.ft-test{font-size:10px;font-weight:800;color:#93C5FD;background:rgba(96,165,250,.15);padding:1px 7px;border-radius:10px}
+.ft-kaynak{font-size:11px;color:#C9BFA8;background:rgba(255,255,255,.06);padding:1px 7px;border-radius:10px}
+#ftOnayModal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.ft-onay{width:min(440px,100%)}
+.ft-onay-baslik{font-size:17px;font-weight:700;color:#F5C451;margin-bottom:10px}
+.ft-onay-satir{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13.5px}
+.ft-onay-satir span{color:#A39A85}
+.ft-onay-uyari{margin-top:10px;font-size:12.5px;color:#FCA5A5;background:rgba(220,38,38,.12);border:1px solid rgba(220,38,38,.35);border-radius:8px;padding:8px 10px}
+.ft-siparis-btn{margin-right:4px}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -953,6 +996,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="nav-tab" onclick="showPage('giderler')" title="Kısayol: G"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>Giderler</button>
     <button class="nav-tab" onclick="showPage('borcalacak')" title="Kısayol: B"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>Cari Hesap</button><button class="nav-tab" onclick="showPage('parametreler')" title="Kısayol: Y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Parametreler</button><button class="nav-tab" onclick="showPage('sayim')" title="Kısayol: S"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>Sayım</button><button class="nav-tab" onclick="showPage('burak_ozel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Burak</button><button class="nav-tab" onclick="showPage('sifreler_ortak')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l2 2M15 8l2 2"/></svg>Şifreler</button>
     <button class="nav-tab" onclick="showPage('ramat')" title="Ramat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L5 13"/><path d="m8.5 16.5-1.5 2.5 1.5 2.5"/><path d="M17 19h2.2a1.8 1.8 0 0 0 1.6-2.7L19 13"/><path d="M9.5 6.5 11 4a1.8 1.8 0 0 1 3 0l1.6 2.7"/><path d="m13.5 6.8 2.1.3.6-2"/><path d="m17.5 13.5-.3 2.6 2.4.6"/></svg>Ramat</button>
+    <button class="nav-tab" onclick="showPage('fatura')" title="Fatura"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Fatura</button>
   </div>
   <div class="nav-right">
   </div>
@@ -2282,6 +2326,59 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 </div>
 </main>
 
+<!-- FATURA -->
+<div class="page" id="page-fatura">
+  <div class="page-header">
+    <div><div class="page-title">🧾 Fatura</div><div class="page-sub">Uyumsoft e-Arşiv / e-Fatura — altın satırı Özel Matrah 805, işçilik %20 KDV</div></div>
+    <div id="ftModRozet" class="ft-mod"></div>
+  </div>
+  <div class="ft-grid">
+    <div class="card ft-form">
+      <div class="ft-satir2">
+        <label>Şirket<select id="ftSirket" class="form-control" onchange="ftSirketDegisti()"><option value="burak">Burak Fehim Kılıç (BFA)</option><option value="furkan">Furkan Kılıç — Essos (KVA)</option></select></label>
+        <label>Kaynak<select id="ftKaynak" class="form-control" onchange="ftKaynakDegisti()"><option value="havale">Banka havalesi</option><option value="site">İnternet sitesi</option><option value="trendyol">Trendyol</option><option value="essos">Essos (Etsy)</option><option value="diger">Diğer</option></select></label>
+        <label>Fatura tarihi<input type="date" id="ftTarih" class="form-control"></label>
+      </div>
+      <div id="ftSatici" class="ft-satici"></div>
+
+      <div class="ft-baslik">Alıcı <span id="ftSenaryo" class="ft-rozet"></span>
+        <select id="ftOnceki" class="form-control ft-onceki" onchange="ftOncekiSec(this.value)"><option value="">Önceki müşteriler…</option></select></div>
+      <div class="ft-satir2">
+        <label>TC / Vergi No<div style="display:flex;gap:6px"><input id="ftVkn" class="form-control" value="22222222222" maxlength="11" inputmode="numeric"><button class="btn btn-sm" type="button" onclick="ftSorgula()" title="Mükellef ve adres sorgula">🔍</button></div></label>
+        <label class="ft-genis">Ad Soyad / Unvan<input id="ftAd" class="form-control" placeholder="HELIN FUNDA KARAKILIÇ"></label>
+      </div>
+      <label>Adres<input id="ftAdres" class="form-control"></label>
+      <div class="ft-satir4">
+        <label>İlçe<input id="ftIlce" class="form-control" value="MERKEZ"></label>
+        <label>İl<input id="ftIl" class="form-control"></label>
+        <label>Ülke<input id="ftUlke" class="form-control" value="TÜRKİYE"></label>
+        <label>Vergi dairesi<input id="ftVd" class="form-control"></label>
+      </div>
+      <div class="ft-satir3">
+        <label>Telefon<input id="ftTel" class="form-control"></label>
+        <label>E-posta<input id="ftEposta" class="form-control" oninput="ftGonderimOner()"></label>
+        <label>Gönderim<select id="ftGonderim" class="form-control"><option value="Paper">Kâğıt</option><option value="Electronic">E-posta ile</option></select></label>
+      </div>
+
+      <div class="ft-baslik">Ürün</div>
+      <div class="ft-satir4">
+        <label>Ayar<select id="ftAyar" class="form-control" onchange="ftHesapla()"><option>14</option><option>22</option><option>18</option><option>10</option><option>8</option></select></label>
+        <label>Gram<input type="number" step="0.0001" id="ftGram" class="form-control" oninput="ftHesapla()"></label>
+        <label>İşçilik (TL/gr, KDV hariç)<input type="number" step="0.01" id="ftIscilik" class="form-control" value="10" oninput="ftHesapla()"></label>
+        <label>Müşterinin ödediği (TL)<input type="number" step="0.01" id="ftToplam" class="form-control" oninput="ftHesapla()"></label>
+      </div>
+      <div id="ftOnizleme" class="ft-onizleme"></div>
+      <label>Notlar <small>(her satır faturada ayrı not olur)</small><textarea id="ftNotlar" class="form-control" rows="3"></textarea></label>
+      <input type="hidden" id="ftSiparisId">
+      <div class="ft-butonlar"><button class="btn" type="button" onclick="ftTemizle()">Temizle</button><button class="btn btn-primary" id="ftKesBtn" type="button" onclick="ftKesOnay()">🧾 Faturayı Kes</button></div>
+    </div>
+    <div class="card ft-liste-kart">
+      <div class="ft-baslik" style="margin-top:0">Son faturalar <select id="ftListeSirket" class="form-control ft-onceki" onchange="ftListeYukle()"><option value="">Tüm şirketler</option><option value="burak">Burak Fehim Kılıç</option><option value="furkan">Furkan Kılıç (Essos)</option></select></div>
+      <div id="ftListe" class="ft-liste"><div class="hk-bos">Yükleniyor…</div></div>
+    </div>
+  </div>
+</div>
+
 <!-- RAMAT -->
 <div class="page" id="page-ramat">
   <div class="page-header">
@@ -2665,7 +2762,7 @@ async function uploadFoto(file) {
 // NAV
 let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
-  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel','sifreler_ortak','ramat'];
+  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel','sifreler_ortak','ramat','fatura'];
   const idx = pages.indexOf(page);
   // Ana Sayfa'daki kısayol kartları, alt menüler vb. üzerinden de olsa,
   // yetkisi olmayan bir role sayfa açtırma (sadece üst menüyü gizlemek yetmiyordu).
@@ -2695,6 +2792,7 @@ function showPage(page) {
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { cariInit(); }
   if (page === 'ramat') { ramatInit(); }
+  if (page === 'fatura') { faturaInit(); }
   if (page === 'sayim') { fillAySec('sayimAy'); loadSayim(); loadSayimGecmisRaporlar(); }
   if (page === 'burak_ozel') { bozInit(); }
   if (page === 'sifreler_ortak') { sfpInit(); }
@@ -2835,7 +2933,7 @@ async function sifreSifirlaEmail(email) {
 
 const ROL_IZIN_ETIKETLERI = {
   anasayfa: 'Ana Sayfa', urunler: 'Ürünler', fiyat_hesaplama: 'Fiyat Hesaplama', rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
-  borcalacak: 'Cari Hesap (Borç/Alacak)', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu', sifreler_ortak: 'Şifreler (Paylaşılan)', ramat: 'Ramat'
+  borcalacak: 'Cari Hesap (Borç/Alacak)', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu', sifreler_ortak: 'Şifreler (Paylaşılan)', ramat: 'Ramat', fatura: 'Fatura (Uyumsoft)'
 };
 async function loadRolIzinPanel() {
   if (!isAdmin()) return;
@@ -5026,8 +5124,8 @@ async function doLogin() {
 // Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Giderler(4), Borç/Alacak(5), Parametreler(6)
 // Hepsi rol_izinleri tablosundan (admin > Parametreler > Rol İzinleri panelinden) ayarlanır.
 // admin her zaman hepsini görür ve buradan kısıtlanamaz (kilitlenmeyi önlemek için).
-const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8, burak_ozel:9, sifreler_ortak:10, ramat:11 };
-const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','sifreler_ortak','ramat'];
+const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8, burak_ozel:9, sifreler_ortak:10, ramat:11, fatura:12 };
+const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','sifreler_ortak','ramat','fatura'];
 let rolIzinleriCache = null;
 
 async function loadRolIzinleri() {
@@ -5040,7 +5138,7 @@ async function loadRolIzinleri() {
   }
 }
 function rolSekmeleri() {
-  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9,10,11];
+  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9,10,11,12];
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
   return izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
 }
@@ -5382,6 +5480,7 @@ function renderPlatTablo() {
         <td><input type="checkbox" ${s.fatura_kesildi ? 'checked' : ''} onchange="platFaturaKesil('${s.id}',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--gold);"></td>
       ` : ''}
       <td>
+        ${aktifPlatform === 'essos_etsy' ? `<button class="btn btn-sm ft-siparis-btn" title="${s.fatura_no ? 'Fatura: ' + s.fatura_no : 'Bu siparişe fatura kes'}" onclick="ftSiparistenAc(platSiparisler.find(x => x.id === '${s.id}'), 'essos')">${s.fatura_no ? '🧾✓' : '🧾'}</button>` : ''}
         <button class="btn btn-sm" onclick="editPlatSiparis('${s.id}')" style="margin-right:4px">Düz</button>
         <button class="btn btn-sm btn-danger" onclick="deletePlatSiparis('${s.id}')">Sil</button>
       </td>
@@ -6156,7 +6255,7 @@ function renderGrupCTablo() {
         <td style="font-size:12px;white-space:nowrap;">${s.fatura_kur ? '₺' + fmtPara((parseFloat(s.satis_fiyati_usd)||0) * s.fatura_kur) : '—'}</td>
         <td><input type="checkbox" ${s.fatura_kesildi ? 'checked' : ''} onchange="gcFaturaKesil('${s.id}',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--gold);"></td>
       ` : ''}
-      <td><button class="btn btn-sm" onclick="editGrupCSiparis('${s.id}')" style="margin-right:4px">Düz</button><button class="btn btn-sm btn-danger" onclick="deleteGrupCSiparis('${s.id}')">Sil</button></td>
+      <td style="white-space:nowrap">${aktifPlatformC === 'trendyol' || aktifPlatformC === 'kilicoglu_com' ? `<button class="btn btn-sm ft-siparis-btn" title="${s.fatura_no ? 'Fatura: ' + s.fatura_no : 'Bu siparişe fatura kes'}" onclick="ftSiparistenAc(grupcSiparisler.find(x => x.id === '${s.id}'), '${aktifPlatformC === 'trendyol' ? 'trendyol' : 'site'}')">${s.fatura_no ? '🧾✓' : '🧾'}</button>` : ''}<button class="btn btn-sm" onclick="editGrupCSiparis('${s.id}')" style="margin-right:4px">Düz</button><button class="btn btn-sm btn-danger" onclick="deleteGrupCSiparis('${s.id}')">Sil</button></td>
     </tr>`;
   }).join('');
 }
@@ -8977,7 +9076,7 @@ async function menuKaydet() {
 // ===== GMAIL'DEN GELEN ETSY SİPARİŞLERİ =====
 // Gmail otomasyonu satış maillerinin düz metnini gelen_mailler tablosuna yazar; burada ayıklanıp
 // "Siparişe Ekle" ile tanıdık Satış Ekle penceresine doldurulur. Gram vb. elle girilir.
-const GELEN_AKTIF = false;   // Gmail'den gelen siparişler: canlıya alınınca true yapın
+const GELEN_AKTIF = true;    // Gmail (Alfred) gelen siparişler açık
 const GELEN_MAGAZA = { alfred: 'alfred_etsy', essos: 'essos_etsy' };   // Etsy "Shop:" adı → platform
 let gelenListe = [], gelenAktifId = null, gelenTabloVar = null;
 const GELEN_AYLAR = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
@@ -9226,6 +9325,206 @@ async function nvCiz() {
   el.innerHTML = `<span class="nv-ikon">🕌</span><span class="nv-ad">${NV_ADLAR[ai]}</span><span class="nv-ayrac"></span><span class="nv-kalan-yazi">${NV_YONELME[sonrakiAd] || sonrakiAd} <b>(${nvHHMM(sonraki)})</b></span><span class="nv-kalan">${kalanYazi}</span><span class="nv-bar"><i style="width:${(oran * 100).toFixed(1)}%"></i></span>`;
 }
 function nvBaslat() { nvCiz(); if (!nvSaat) nvSaat = setInterval(() => { const s = document.getElementById('page-anasayfa'); if (s && s.classList.contains('active') && document.visibilityState === 'visible') nvCiz(); }, 1000); }
+
+// ===== FATURA (Uyumsoft e-Arşiv / e-Fatura — iki şirket, Cloudflare köprüsü /fatura) =====
+const FT_SIRKET = { burak: { ad: 'Burak Fehim Kılıç', iscilik: 10 }, furkan: { ad: 'Furkan Kılıç (Essos)', iscilik: 30 } };
+const FT_ETSY = { vkn: '22222222222', ad: 'ETSY IRELAND UC', adres: '66/67 Great Strand Street Dublin 1 Ireland', ilce: 'MERKEZ', il: 'DÜBLİN', ulke: 'İRLANDA', vd: 'MERKEZ VD' };
+const FT_KAYNAK_NOT = { havale: 'BANKA HAVALESI', site: 'INTERNET SITESI REF NO: ', trendyol: 'TRENDYOL SIPARIŞ ', essos: '', diger: '' };
+let ftGiris = {}, ftFaturalar = [], ftHazir = false;
+const ftR2 = v => Math.round((Number(v) + Number.EPSILON) * 100) / 100;
+const ftTL = v => (Number(v) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
+const ftEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ftEl = id => document.getElementById(id);
+async function ftIstek(veri) {
+  const s = await ensureValidSession(); if (!s) throw new Error('Oturum bulunamadı, tekrar giriş yapın.');
+  const r = await fetch(STL_URL + '/fatura', { method: 'POST', headers: { Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify(veri) });
+  let j = null; try { j = await r.json(); } catch (_) {}
+  if (r.status === 404 || (j && /Bilinmeyen istek/.test(j.hata || ''))) throw new Error('Cloudflare köprüsü güncellenmemiş (yeni stl-worker.js yapıştırıp Deploy edin).');
+  if (!r.ok) throw new Error((j && j.hata) || ('Hata ' + r.status));
+  return j;
+}
+async function faturaInit() {
+  if (!ftEl('ftTarih').value) ftEl('ftTarih').value = bugunTarihStr();
+  if (!ftHazir) { ftHazir = true; ftSirketDegisti(); ftKaynakDegisti(); }
+  ftListeYukle();
+}
+async function ftSirketDegisti() {
+  const s = ftEl('ftSirket').value;
+  ftEl('ftIscilik').value = FT_SIRKET[s].iscilik;
+  ftHesapla();
+  const el = ftEl('ftSatici'), rozet = ftEl('ftModRozet');
+  el.innerHTML = '<span class="hk-bos">Uyumsoft\'a bağlanılıyor…</span>';
+  try {
+    const g = ftGiris[s] || (ftGiris[s] = await ftIstek({ islem: 'giris', sirket: s }));
+    rozet.className = 'ft-mod ' + (g.canli ? 'canli' : 'test');
+    rozet.textContent = g.canli ? '● CANLI — gerçek fatura' : '● TEST — gerçek fatura kesilmez';
+    el.innerHTML = 'Satıcı: <b>' + ftEsc(g.satici.unvan || '') + '</b> · VKN ' + ftEsc(g.satici.vkn_tckn || '') + (g.seri ? ' · Seri ' + ftEsc(g.seri) : '');
+  } catch (e) { delete ftGiris[s]; el.innerHTML = '<span style="color:#F87171">⚠️ ' + ftEsc(e.message) + '</span>'; rozet.className = 'ft-mod'; rozet.textContent = ''; }
+}
+function ftKaynakDegisti() {
+  const k = ftEl('ftKaynak').value;
+  if (k === 'essos' && ftEl('ftSirket').value !== 'furkan') { ftEl('ftSirket').value = 'furkan'; ftSirketDegisti(); }
+  if (['havale', 'site', 'trendyol'].includes(k) && ftEl('ftSirket').value !== 'burak') { ftEl('ftSirket').value = 'burak'; ftSirketDegisti(); }
+  if (k === 'essos') ftAliciDoldur({ vkn_tckn: FT_ETSY.vkn, unvan: FT_ETSY.ad, adres: FT_ETSY.adres, ilce: FT_ETSY.ilce, il: FT_ETSY.il, ulke: FT_ETSY.ulke, vergi_dairesi: FT_ETSY.vd });
+  const n = ftEl('ftNotlar'); const ilk = n.value.split('\n')[0];
+  if (!n.value.trim() || Object.values(FT_KAYNAK_NOT).some(v => v && ilk.startsWith(v.trim()))) n.value = FT_KAYNAK_NOT[k] || '';
+  ftEl('ftGonderim').value = k === 'havale' || k === 'essos' ? 'Paper' : (ftEl('ftEposta').value ? 'Electronic' : 'Paper');
+}
+function ftGonderimOner() { if (ftEl('ftEposta').value.includes('@') && ftEl('ftKaynak').value !== 'essos') ftEl('ftGonderim').value = 'Electronic'; }
+function ftAliciDoldur(a) {
+  const set = (id, v) => { if (v != null) ftEl(id).value = v; };
+  set('ftVkn', a.vkn_tckn); set('ftAd', a.unvan || [a.ad, a.soyad].filter(Boolean).join(' ')); set('ftAdres', a.adres); set('ftIlce', a.ilce);
+  set('ftIl', a.il); set('ftUlke', a.ulke || 'TÜRKİYE'); set('ftVd', a.vergi_dairesi); set('ftTel', a.telefon || ''); set('ftEposta', a.eposta || '');
+}
+function ftHesap() {
+  const gram = parseFloat(ftEl('ftGram').value) || 0, isc = parseFloat(ftEl('ftIscilik').value) || 0, toplam = parseFloat(ftEl('ftToplam').value) || 0;
+  const iscT = ftR2(gram * isc), iscK = ftR2(iscT * 0.20), altin = ftR2(toplam - iscT - iscK);
+  return { gram, isc, toplam, iscT, iscK, altin, birim: gram ? altin / gram : 0, ayar: ftEl('ftAyar').value };
+}
+function ftHesapla() {
+  const h = ftHesap(), el = ftEl('ftOnizleme');
+  if (!h.gram || !h.toplam) { el.innerHTML = '<span class="hk-bos">Gram ve müşterinin ödediği tutarı girin.</span>'; return; }
+  if (h.altin <= 0) { el.innerHTML = '<span style="color:#F87171">Tutar işçilikten küçük olamaz.</span>'; return; }
+  el.innerHTML = `<table class="ft-tablo"><tr><th>Mal/Hizmet</th><th>Miktar</th><th>Birim fiyat</th><th>KDV</th><th>Toplam</th></tr>
+    <tr><td>${h.ayar} Ayar Altın</td><td>${h.gram.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} G</td><td>${h.birim.toLocaleString('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} ₺</td><td>%0 (805)</td><td>${ftTL(h.altin)}</td></tr>
+    <tr><td>${h.ayar} Ayar İşçilik</td><td>${h.gram.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} G</td><td>${ftTL(h.isc)}</td><td>%20 · ${ftTL(h.iscK)}</td><td>${ftTL(h.iscT)}</td></tr>
+    <tr class="ft-top"><td colspan="4">Ödenecek tutar</td><td>${ftTL(h.altin + h.iscT + h.iscK)}</td></tr></table>`;
+}
+async function ftSorgula() {
+  const vkn = ftEl('ftVkn').value.replace(/\D/g, ''), roz = ftEl('ftSenaryo');
+  if (!/^(\d{10}|\d{11})$/.test(vkn)) { alert('VKN 10, TCKN 11 haneli olmalı.'); return; }
+  if (/^(1{11}|2{10,11})$/.test(vkn)) { roz.textContent = 'e-Arşiv'; roz.className = 'ft-rozet'; return; }
+  roz.textContent = 'sorgulanıyor…';
+  try {
+    const m = await ftIstek({ islem: 'mukellef', sirket: ftEl('ftSirket').value, vkn_tckn: vkn });
+    roz.textContent = m.mukellef ? 'e-Fatura mükellefi' : 'e-Arşiv'; roz.className = 'ft-rozet ' + (m.mukellef ? 'efatura' : '');
+    const a = m.adres || {};
+    if (m.unvan && !ftEl('ftAd').value) ftEl('ftAd').value = m.unvan;
+    ['adres', 'ilce', 'il'].forEach(k => { const id = { adres: 'ftAdres', ilce: 'ftIlce', il: 'ftIl' }[k]; if (a[k] && !ftEl(id).value) ftEl(id).value = a[k]; });
+    if (a.vergi_dairesi && !ftEl('ftVd').value) ftEl('ftVd').value = a.vergi_dairesi;
+    if ((a.unvan || (a.ad && a.soyad)) && !ftEl('ftAd').value) ftEl('ftAd').value = a.unvan || a.ad + ' ' + a.soyad;
+  } catch (e) { roz.textContent = ''; alert('Sorgulanamadı: ' + e.message); }
+}
+function ftVeri() {
+  const h = ftHesap(), vkn = ftEl('ftVkn').value.replace(/\D/g, ''), adTam = ftEl('ftAd').value.trim();
+  const sahis = vkn.length === 11, parca = adTam.split(/\s+/).filter(Boolean);
+  const alici = { vkn_tckn: vkn, adres: ftEl('ftAdres').value.trim(), ilce: ftEl('ftIlce').value.trim(), il: ftEl('ftIl').value.trim(), ulke: ftEl('ftUlke').value.trim(),
+    vergi_dairesi: ftEl('ftVd').value.trim(), telefon: ftEl('ftTel').value.trim(), eposta: ftEl('ftEposta').value.trim() };
+  if (sahis) { alici.soyad = parca.length > 1 ? parca.pop() : ''; alici.ad = parca.join(' '); alici.unvan = ''; } else alici.unvan = adTam;
+  return {
+    h, alici, adTam,
+    istek: {
+      islem: 'gonder', sirket: ftEl('ftSirket').value, kaynak: ftEl('ftKaynak').value, tarih: ftEl('ftTarih').value,
+      notlar: ftEl('ftNotlar').value.split('\n').map(x => x.trim()).filter(Boolean), earsiv_gonderim: ftEl('ftGonderim').value, eposta_gonder: ftEl('ftGonderim').value === 'Electronic',
+      alici, gram: h.gram, platform_siparis_id: ftEl('ftSiparisId').value || null, kesen: currentUser?.ad_soyad || currentUser?.kullanici_adi || '',
+      kalemler: [
+        { ad: h.ayar + ' Ayar Altın', miktar: h.gram, birim: 'GRM', birim_fiyat: h.birim, tutar: h.altin, kdv: 0, kdv_muafiyet_kodu: '805' },
+        { ad: h.ayar + ' Ayar İşçilik', miktar: h.gram, birim: 'GRM', birim_fiyat: h.isc, kdv: 20 }
+      ]
+    }
+  };
+}
+function ftKesOnay() {
+  const v = ftVeri(), h = v.h, g = ftGiris[v.istek.sirket];
+  const eksik = [];
+  if (!/^(\d{10}|\d{11})$/.test(v.alici.vkn_tckn)) eksik.push('TC/Vergi No');
+  if (!v.adTam || (v.alici.vkn_tckn.length === 11 && (!v.alici.ad || !v.alici.soyad))) eksik.push('Ad ve soyad');
+  if (!v.alici.il) eksik.push('İl'); if (!v.alici.ilce) eksik.push('İlçe');
+  if (!h.gram) eksik.push('Gram'); if (!h.toplam || h.altin <= 0) eksik.push('Tutar');
+  if (v.istek.earsiv_gonderim === 'Electronic' && !v.alici.eposta) eksik.push('E-posta (e-posta ile gönderim için)');
+  if (eksik.length) { alert('Eksik: ' + eksik.join(', ')); return; }
+  if (!g) { alert('Uyumsoft bağlantısı kurulamadı; şirket seçimini kontrol edin.'); return; }
+  let ov = ftEl('ftOnayModal');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'ftOnayModal'; ov.onclick = e => { if (e.target === ov) ov.style.display = 'none'; }; document.body.appendChild(ov); }
+  ov.style.display = 'flex';
+  ov.innerHTML = `<div class="card ft-onay">
+    <div class="ft-onay-baslik">${g.canli ? '⚠️ GERÇEK fatura kesilecek' : '🧪 Test faturası kesilecek'}</div>
+    <div class="ft-onay-satir"><span>Şirket</span><b>${ftEsc(FT_SIRKET[v.istek.sirket].ad)}</b></div>
+    <div class="ft-onay-satir"><span>Alıcı</span><b>${ftEsc(v.adTam)} · ${ftEsc(v.alici.vkn_tckn)}</b></div>
+    <div class="ft-onay-satir"><span>Ürün</span><b>${h.ayar} Ayar · ${h.gram.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} gr</b></div>
+    <div class="ft-onay-satir"><span>Ödenecek</span><b>${ftTL(h.altin + h.iscT + h.iscK)}</b></div>
+    <div class="ft-onay-satir"><span>Gönderim</span><b>${v.istek.earsiv_gonderim === 'Electronic' ? 'E-posta: ' + ftEsc(v.alici.eposta) : 'Kâğıt'}</b></div>
+    ${g.canli ? '<div class="ft-onay-uyari">Kesilen fatura GİB\'e gider; geri almak için iptal işlemi gerekir.</div>' : ''}
+    <div class="ft-butonlar"><button class="btn" onclick="ftEl('ftOnayModal').style.display='none'">Vazgeç</button><button class="btn btn-primary" id="ftOnayBtn" onclick="ftKes()">🧾 Evet, kes</button></div></div>`;
+}
+async function ftKes() {
+  const btn = ftEl('ftOnayBtn'); btn.disabled = true; btn.textContent = 'Kesiliyor…';
+  const v = ftVeri();
+  try {
+    const s = await ftIstek(v.istek);
+    ftEl('ftOnayModal').style.display = 'none';
+    if (v.istek.platform_siparis_id) {
+      try { await api('platform_siparisler?id=eq.' + v.istek.platform_siparis_id, 'PATCH', { fatura_kesildi: true, fatura_no: s.numara }); }
+      catch (e) { try { await api('platform_siparisler?id=eq.' + v.istek.platform_siparis_id, 'PATCH', { fatura_kesildi: true }); } catch (_) {} }
+    }
+    showToast('✓ ' + (s.test ? 'TEST ' : '') + s.tur + ' kesildi: ' + (s.numara || s.id));
+    ftTemizle(); ftListeYukle();
+  } catch (e) { alert('Fatura kesilemedi: ' + e.message); btn.disabled = false; btn.textContent = '🧾 Evet, kes'; }
+}
+function ftTemizle() {
+  ['ftAd', 'ftAdres', 'ftIl', 'ftVd', 'ftTel', 'ftEposta', 'ftGram', 'ftToplam', 'ftSiparisId'].forEach(id => ftEl(id).value = '');
+  ftEl('ftVkn').value = '22222222222'; ftEl('ftIlce').value = 'MERKEZ'; ftEl('ftUlke').value = 'TÜRKİYE'; ftEl('ftSenaryo').textContent = '';
+  ftEl('ftTarih').value = bugunTarihStr(); ftEl('ftNotlar').value = ''; ftKaynakDegisti(); ftHesapla();
+}
+async function ftListeYukle() {
+  const el = ftEl('ftListe'); if (!el) return;
+  const s = ftEl('ftListeSirket').value;
+  try {
+    ftFaturalar = await api('faturalar?select=*&order=olusturma.desc&limit=100' + (s ? '&sirket=eq.' + s : '')) || [];
+  } catch (e) { el.innerHTML = '<div class="hk-bos">⚠️ Fatura kayıtları okunamadı. fatura.sql çalıştırıldı mı? (' + ftEsc(e.message).slice(0, 120) + ')</div>'; return; }
+  // önceki müşteriler (TC'si gerçek olanlar + ad)
+  const sec = ftEl('ftOnceki'), gor = new Set();
+  sec.innerHTML = '<option value="">Önceki müşteriler…</option>' + ftFaturalar.filter(f => f.alici && f.alici_ad && !/ETSY/i.test(f.alici_ad)).filter(f => { const k = (f.vkn || '') + '|' + f.alici_ad; if (gor.has(k)) return false; gor.add(k); return true; })
+    .map(f => `<option value="${f.id}">${ftEsc(f.alici_ad)}${f.vkn && !/^2+$/.test(f.vkn) ? ' · ' + ftEsc(f.vkn) : ''}</option>`).join('');
+  el.innerHTML = ftFaturalar.length ? ftFaturalar.map(f => `<div class="ft-kayit">
+      <div class="ft-kayit-ust"><b>${ftEsc(f.numara || '—')}</b>${f.test ? '<span class="ft-test">TEST</span>' : ''}<span class="ft-kaynak">${ftEsc(f.kaynak || '')}</span><span style="flex:1"></span><b>${ftTL(f.toplam)}</b></div>
+      <div class="ft-kayit-alt">${ftEsc((f.tarih || f.olusturma || '').slice(0, 10).split('-').reverse().join('.'))} · ${ftEsc(f.sirket === 'furkan' ? 'Furkan (Essos)' : 'Burak')} · ${ftEsc(f.alici_ad || '')}${f.gram ? ' · ' + Number(f.gram).toLocaleString('tr-TR', { maximumFractionDigits: 4 }) + ' gr' : ''}</div>
+      <div class="ft-kayit-btn"><button class="btn btn-sm" onclick="ftPdf(${f.id})">📄 PDF</button><button class="btn btn-sm" onclick="ftDurum(${f.id})">Durum</button></div></div>`).join('')
+    : '<div class="hk-bos">Henüz fatura yok.</div>';
+}
+function ftOncekiSec(id) { const f = ftFaturalar.find(x => String(x.id) === String(id)); if (f && f.alici) { ftAliciDoldur(Object.assign({ unvan: f.alici_ad }, f.alici, { unvan: f.alici.unvan || f.alici_ad })); ftGonderimOner(); } ftEl('ftOnceki').value = ''; }
+async function ftPdf(id) {
+  const f = ftFaturalar.find(x => x.id === id); if (!f) return;
+  const pencere = window.open('', '_blank');
+  if (pencere) pencere.document.write('<p style="font-family:sans-serif">Fatura PDF\'i hazırlanıyor…</p>');
+  try {
+    const r = await ftIstek({ islem: 'pdf', sirket: f.sirket, id: f.uyumsoft_id });
+    const bin = atob(r.pdf), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
+    if (pencere) pencere.location.href = url; else window.open(url, '_blank');
+  } catch (e) { if (pencere) pencere.close(); alert('PDF alınamadı: ' + e.message); }
+}
+async function ftDurum(id) {
+  const f = ftFaturalar.find(x => x.id === id); if (!f) return;
+  try {
+    const d = (await ftIstek({ islem: 'durum', sirket: f.sirket, id: f.uyumsoft_id })).durum || {};
+    const ad = { Queued: 'Sırada (GİB\'e iletilecek)', Approved: 'Onaylandı', Succeed: 'Başarılı', Succeeded: 'Başarılı', Error: 'Hata', Canceled: 'İptal edildi', Cancelled: 'İptal edildi' }[d.Status] || d.Status || 'bilinmiyor';
+    alert((f.numara || '') + '\nDurum: ' + ad + (d.Message ? '\n' + d.Message : ''));
+  } catch (e) { alert('Durum alınamadı: ' + e.message); }
+}
+// Siparişten fatura: Essos (Furkan) ve Trendyol / kilicoglugold.com (Burak)
+function ftSiparistenAc(s, kaynak) {
+  showPage('fatura');
+  setTimeout(() => {
+    ftTemizle();
+    ftEl('ftKaynak').value = kaynak; ftKaynakDegisti();
+    ftEl('ftSiparisId').value = s.id;
+    if (s.tarih) ftEl('ftTarih').value = bugunTarihStr();
+    ftEl('ftGram').value = parseFloat(s.gram) || '';
+    if (/22/.test(s.ayar || '')) ftEl('ftAyar').value = '22'; else if (/10/.test(s.ayar || '')) ftEl('ftAyar').value = '10'; else ftEl('ftAyar').value = '14';
+    if (kaynak === 'essos') {
+      const k = s.fatura_kur || (typeof platToolbarKur !== 'undefined' ? platToolbarKur : 0);
+      const tl = parseFloat(s.fatura_tl) || Math.round((parseFloat(s.satis_fiyati_usd) || 0) * (parseFloat(k) || 0));
+      ftEl('ftToplam').value = tl || '';
+      const satirlar = String(s.adres || '').split('\n').map(x => x.trim()).filter(x => x && !/^[\d.,]+\s*USD$/i.test(x));
+      ftEl('ftNotlar').value = satirlar.map(x => x.replace(/^Sevkiyat Bilgileri\s*:/i, 'SEVKIYAT BILGILERI :').toLocaleUpperCase('en-US')).join('\n');
+    } else {
+      ftEl('ftToplam').value = parseFloat(s.satis_try) || '';
+    }
+    ftHesapla();
+    showToast('🧾 Siparişten dolduruldu — alıcı bilgilerini kontrol edin');
+  }, 50);
+}
 
 // Ana sayfa ilk yüklenişinde init
 // ===== BORC / ALACAK =====
