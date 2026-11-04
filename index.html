@@ -1,4 +1,4 @@
-<!-- SURUM-V117R13-FATURA-GMAIL --><!DOCTYPE html>
+<!-- SURUM-V117R14-FATURA-GMAIL --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -742,7 +742,17 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .ft-kayit-btn{display:flex;gap:6px;margin-top:7px}
 .ft-test{font-size:10px;font-weight:800;color:#93C5FD;background:rgba(96,165,250,.15);padding:1px 7px;border-radius:10px}
 .ft-kaynak{font-size:11px;color:#C9BFA8;background:rgba(255,255,255,.06);padding:1px 7px;border-radius:10px}
-#ftOnayModal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+#ftOnayModal,#ftMusteriModal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.ft-musteri-kutu{width:min(720px,100%);display:flex;flex-direction:column;gap:10px;max-height:92vh;overflow:auto}
+.ft-musteri-kutu label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#A39A85}
+.ft-musteri-sec{display:flex;gap:8px;align-items:center}
+.ft-musteri-sec input{flex:1;min-width:0}
+.ft-alici-ozet{border:1px dashed rgba(212,175,55,.35);border-radius:10px;padding:9px 12px;font-size:13px;color:#E8DFC8;cursor:pointer;line-height:1.5}
+.ft-alici-ozet:hover{border-color:rgba(212,175,55,.7);background:rgba(212,175,55,.05)}
+.ft-alici-ozet .ft-ozet-ad{font-weight:700;color:#F7DA84;font-size:14px}
+.ft-alici-ozet .ft-ozet-alt{color:#A39A85;font-size:12px}
+.ft-kucuk{font-size:11px;color:#8F8672}
+.ft-hesap-not{font-size:11.5px;color:#8F8672;margin-top:6px}
 .ft-onay{width:min(440px,100%)}
 .ft-onay-baslik{font-size:17px;font-weight:700;color:#F5C451;margin-bottom:10px}
 .ft-onay-satir{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13.5px}
@@ -2351,31 +2361,44 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       </div>
       <div id="ftSatici" class="ft-satici"></div>
 
-      <div class="ft-baslik">Alıcı <span id="ftSenaryo" class="ft-rozet"></span>
-        <select id="ftOnceki" class="form-control ft-onceki" onchange="ftOncekiSec(this.value)"><option value="">Önceki müşteriler…</option></select></div>
-      <div class="ft-satir2">
-        <label>TC / Vergi No<div style="display:flex;gap:6px"><input id="ftVkn" class="form-control" value="22222222222" maxlength="11" inputmode="numeric"><button class="btn btn-sm" type="button" onclick="ftSorgula()" title="Mükellef ve adres sorgula">🔍</button></div></label>
-        <label class="ft-genis">Ad Soyad / Unvan<input id="ftAd" class="form-control" placeholder="HELIN FUNDA KARAKILIÇ"></label>
+      <div class="ft-baslik">Alıcı <span id="ftSenaryo" class="ft-rozet"></span></div>
+      <div class="ft-musteri-sec">
+        <input id="ftMusteriAra" class="form-control" list="ftMusteriListe" placeholder="🔍 Müşteri seç — adını ya da TC'sini yazın…" autocomplete="off" onchange="ftMusteriSec(this.value)">
+        <datalist id="ftMusteriListe"></datalist>
+        <button class="btn" type="button" onclick="ftMusteriModalAc(false)">✏️ Düzenle</button>
+        <button class="btn" type="button" onclick="ftMusteriModalAc(true)">＋ Ekle</button>
       </div>
-      <label>Adres<input id="ftAdres" class="form-control"></label>
-      <div class="ft-satir4">
-        <label>İlçe<input id="ftIlce" class="form-control" value="MERKEZ"></label>
-        <label>İl<input id="ftIl" class="form-control"></label>
-        <label>Ülke<input id="ftUlke" class="form-control" value="TÜRKİYE"></label>
-        <label>Vergi dairesi<input id="ftVd" class="form-control"></label>
-      </div>
+      <div id="ftAliciOzet" class="ft-alici-ozet" onclick="ftMusteriModalAc(false)" title="Bilgileri düzenlemek için tıklayın"></div>
+      <div id="ftMusteriModal"><div class="card ft-musteri-kutu">
+        <div class="ft-onay-baslik" id="ftMusteriBaslik">Müşteri</div>
+        <input type="hidden" id="ftMusteriId">
+        <div class="ft-satir2">
+          <label>TC / Vergi No<div style="display:flex;gap:6px"><input id="ftVkn" class="form-control" value="22222222222" maxlength="11" inputmode="numeric"><button class="btn btn-sm" type="button" onclick="ftSorgula()" title="Mükellef ve adres sorgula">🔍</button></div></label>
+          <label class="ft-genis">Ad Soyad / Unvan<input id="ftAd" class="form-control" placeholder="HELIN FUNDA KARAKILIÇ"></label>
+        </div>
+        <label>Adres<input id="ftAdres" class="form-control"></label>
+        <div class="ft-satir4">
+          <label>İlçe<input id="ftIlce" class="form-control" value="MERKEZ"></label>
+          <label>İl<input id="ftIl" class="form-control"></label>
+          <label>Ülke<input id="ftUlke" class="form-control" value="TÜRKİYE"></label>
+          <label>Vergi dairesi<input id="ftVd" class="form-control"></label>
+        </div>
+        <div class="ft-satir2">
+          <label>Telefon<input id="ftTel" class="form-control"></label>
+          <label>E-posta<input id="ftEposta" class="form-control" oninput="ftGonderimOner()"></label>
+        </div>
+        <div class="ft-butonlar"><button class="btn" type="button" onclick="ftMusteriModalKapat(false)">Vazgeç</button><button class="btn" type="button" onclick="ftMusteriModalKapat(true)">Sadece bu faturada kullan</button><button class="btn btn-primary" type="button" onclick="ftMusteriKaydet()">💾 Kaydet</button></div>
+      </div></div>
       <div class="ft-satir3">
-        <label>Telefon<input id="ftTel" class="form-control"></label>
-        <label>E-posta<input id="ftEposta" class="form-control" oninput="ftGonderimOner()"></label>
         <label>Gönderim<select id="ftGonderim" class="form-control"><option value="Paper">Kâğıt</option><option value="Electronic">E-posta ile</option></select></label>
       </div>
 
       <div class="ft-baslik">Ürün</div>
       <div class="ft-satir4">
-        <label>Ayar<select id="ftAyar" class="form-control" onchange="ftHesapla()"><option>14</option><option>22</option><option>18</option><option>10</option><option>8</option></select></label>
-        <label>Gram<input type="number" step="0.0001" id="ftGram" class="form-control" oninput="ftHesapla()"></label>
+        <label>Stok<select id="ftAyar" class="form-control" onchange="ftHesapla()"><option value="14">14 Ayar Altın (585)</option><option value="22">22 Ayar Altın (916)</option><option value="24">24 Ayar Altın (995)</option><option value="10">10 Ayar Altın (417)</option><option value="18">18 Ayar Altın (750)</option></select></label>
+        <label>Has altın kuru (TL/gr)<div style="display:flex;gap:6px"><input type="number" step="0.01" id="ftHas" class="form-control" oninput="this.dataset.elle='1';ftHesapla()"><button class="btn btn-sm" type="button" onclick="ftHasYukle(true)" title="Harem Altın has satış fiyatını al">↻</button></div><small id="ftHasKaynak" class="ft-kucuk"></small></label>
         <label>İşçilik (TL/gr, KDV hariç)<input type="number" step="0.01" id="ftIscilik" class="form-control" value="10" oninput="ftHesapla()"></label>
-        <label>Müşterinin ödediği (TL)<input type="number" step="0.01" id="ftToplam" class="form-control" oninput="ftHesapla()"></label>
+        <label>Fatura tutarı (TL)<input type="number" step="0.01" id="ftToplam" class="form-control" oninput="ftHesapla()" placeholder="10000"></label>
       </div>
       <div id="ftOnizleme" class="ft-onizleme"></div>
       <label>Notlar <small>(her satır faturada ayrı not olur)</small><textarea id="ftNotlar" class="form-control" rows="3"></textarea></label>
@@ -9340,7 +9363,9 @@ function nvBaslat() { nvCiz(); if (!nvSaat) nvSaat = setInterval(() => { const s
 const FT_SIRKET = { burak: { ad: 'Burak Fehim Kılıç', iscilik: 10 }, furkan: { ad: 'Furkan Kılıç (Essos)', iscilik: 30 } };
 const FT_ETSY = { vkn: '22222222222', ad: 'ETSY IRELAND UC', adres: '66/67 Great Strand Street Dublin 1 Ireland', ilce: 'MERKEZ', il: 'DÜBLİN', ulke: 'İRLANDA', vd: 'MERKEZ VD' };
 const FT_KAYNAK_NOT = { havale: 'BANKA HAVALESI', site: 'INTERNET SITESI REF NO: ', trendyol: 'TRENDYOL SIPARIŞ ', essos: '', diger: '' };
-let ftGiris = {}, ftFaturalar = [], ftHazir = false;
+let ftGiris = {}, ftFaturalar = [], ftHazir = false, ftMusteriler = [], ftMusteriTablo = true, ftMusteriYedek = null;
+const FT_MILYEM = { 14: 0.585, 22: 0.916, 24: 0.995, 10: 0.417, 18: 0.750 };
+const FT_DUMMY_TC = v => /^(1{11}|2{10,11})$/.test(String(v || ''));
 const ftR2 = v => Math.round((Number(v) + Number.EPSILON) * 100) / 100;
 const ftTL = v => (Number(v) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' ₺';
 const ftEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -9356,7 +9381,8 @@ async function ftIstek(veri) {
 async function faturaInit() {
   if (!ftEl('ftTarih').value) ftEl('ftTarih').value = bugunTarihStr();
   if (!ftHazir) { ftHazir = true; ftSirketDegisti(); ftKaynakDegisti(); }
-  ftListeYukle();
+  ftHasYukle(false); ftOzetCiz();
+  ftMusterilerYukle(); ftListeYukle();
 }
 async function ftSirketDegisti() {
   const s = ftEl('ftSirket').value;
@@ -9385,20 +9411,112 @@ function ftAliciDoldur(a) {
   const set = (id, v) => { if (v != null) ftEl(id).value = v; };
   set('ftVkn', a.vkn_tckn); set('ftAd', a.unvan || [a.ad, a.soyad].filter(Boolean).join(' ')); set('ftAdres', a.adres); set('ftIlce', a.ilce);
   set('ftIl', a.il); set('ftUlke', a.ulke || 'TÜRKİYE'); set('ftVd', a.vergi_dairesi); set('ftTel', a.telefon || ''); set('ftEposta', a.eposta || '');
+  ftEl('ftMusteriId').value = a.musteri_id || '';
+  ftOzetCiz();
+}
+function ftOzetCiz() {
+  const el = ftEl('ftAliciOzet'); if (!el) return;
+  const ad = ftEl('ftAd').value.trim(), vkn = ftEl('ftVkn').value.trim();
+  if (!ad) { el.innerHTML = '<span class="ft-ozet-alt">Müşteri seçilmedi — listeden seçin ya da ＋ Ekle ile girin.</span>'; return; }
+  const yer = [ftEl('ftAdres').value, ftEl('ftIlce').value, ftEl('ftIl').value, ftEl('ftUlke').value].map(x => x.trim()).filter(Boolean).join(' / ');
+  el.innerHTML = '<div class="ft-ozet-ad">' + ftEsc(ad) + '</div><div class="ft-ozet-alt">' + (FT_DUMMY_TC(vkn) ? 'TC girilmedi (' + ftEsc(vkn) + ')' : (vkn.length === 10 ? 'VKN ' : 'TC ') + ftEsc(vkn)) + (ftEl('ftVd').value.trim() ? ' · ' + ftEsc(ftEl('ftVd').value.trim()) : '') + '</div>' + (yer ? '<div class="ft-ozet-alt">' + ftEsc(yer) + '</div>' : '');
+}
+// ---- Müşteri listesi (fatura_musteriler; yoksa önceki faturalardan) ----
+async function ftMusterilerYukle() {
+  try { ftMusteriler = await api('fatura_musteriler?select=*&order=ad.asc&limit=2000') || []; ftMusteriTablo = true; }
+  catch (e) { ftMusteriler = []; ftMusteriTablo = false; }
+  ftMusteriListeCiz();
+}
+function ftMusteriEtiket(m) { return m.ad + (m.vkn && !FT_DUMMY_TC(m.vkn) ? ' — ' + m.vkn : '') + (m.il ? ' (' + m.il + ')' : ''); }
+function ftMusteriHavuz() {
+  const liste = ftMusteriler.map(m => Object.assign({ kaynak: 'liste' }, m)), gor = new Set(liste.map(m => (m.ad || '').toLocaleUpperCase('tr-TR') + '|' + (m.vkn || '')));
+  ftFaturalar.forEach(f => {
+    if (!f.alici || !f.alici_ad || /ETSY/i.test(f.alici_ad)) return;
+    const k = f.alici_ad.toLocaleUpperCase('tr-TR') + '|' + (f.vkn || ''); if (gor.has(k)) return; gor.add(k);
+    const a = f.alici;
+    liste.push({ kaynak: 'fatura', ad: f.alici_ad, vkn: f.vkn || a.vkn_tckn, adres: a.adres, ilce: a.ilce, il: a.il, ulke: a.ulke, vergi_dairesi: a.vergi_dairesi, telefon: a.telefon, eposta: a.eposta });
+  });
+  return liste.sort((x, y) => String(x.ad).localeCompare(String(y.ad), 'tr'));
+}
+function ftMusteriListeCiz() {
+  const dl = ftEl('ftMusteriListe'); if (!dl) return;
+  dl.innerHTML = ftMusteriHavuz().map(m => '<option value="' + ftEsc(ftMusteriEtiket(m)) + '"></option>').join('');
+}
+function ftMusteriSec(deger) {
+  const m = ftMusteriHavuz().find(x => ftMusteriEtiket(x) === deger);
+  if (!m) return;
+  ftAliciDoldur({ vkn_tckn: m.vkn || '22222222222', unvan: m.ad, adres: m.adres || '', ilce: m.ilce || 'MERKEZ', il: m.il || '', ulke: m.ulke || 'TÜRKİYE', vergi_dairesi: m.vergi_dairesi || '', telefon: m.telefon || '', eposta: m.eposta || '', musteri_id: m.kaynak === 'liste' ? m.id : '' });
+  ftEl('ftSenaryo').textContent = ''; ftGonderimOner();
+  ftEl('ftMusteriAra').value = '';
+}
+const FT_ALICI_ALAN = ['ftVkn', 'ftAd', 'ftAdres', 'ftIlce', 'ftIl', 'ftUlke', 'ftVd', 'ftTel', 'ftEposta', 'ftMusteriId'];
+function ftMusteriModalAc(yeni) {
+  ftMusteriYedek = FT_ALICI_ALAN.map(id => ftEl(id).value);
+  if (yeni) { FT_ALICI_ALAN.forEach(id => ftEl(id).value = ''); ftEl('ftVkn').value = '22222222222'; ftEl('ftIlce').value = 'MERKEZ'; ftEl('ftUlke').value = 'TÜRKİYE'; }
+  ftEl('ftMusteriBaslik').textContent = yeni ? '＋ Yeni müşteri' : (ftEl('ftMusteriId').value ? '✏️ Müşteriyi düzenle' : '✏️ Alıcı bilgileri');
+  ftEl('ftMusteriModal').style.display = 'flex';
+  setTimeout(() => ftEl(yeni ? 'ftAd' : 'ftVkn').focus(), 30);
+}
+function ftMusteriModalKapat(kullan) {
+  if (!kullan && ftMusteriYedek) FT_ALICI_ALAN.forEach((id, i) => ftEl(id).value = ftMusteriYedek[i]);
+  ftMusteriYedek = null; ftEl('ftMusteriModal').style.display = 'none'; ftOzetCiz();
+}
+function ftMusteriSatir() {
+  return { ad: ftEl('ftAd').value.trim().toLocaleUpperCase('tr-TR'), vkn: ftEl('ftVkn').value.replace(/\D/g, ''), adres: ftEl('ftAdres').value.trim(), ilce: ftEl('ftIlce').value.trim(), il: ftEl('ftIl').value.trim(),
+    ulke: ftEl('ftUlke').value.trim(), vergi_dairesi: ftEl('ftVd').value.trim(), telefon: ftEl('ftTel').value.trim(), eposta: ftEl('ftEposta').value.trim() };
+}
+async function ftMusteriKaydet() {
+  const m = ftMusteriSatir();
+  if (!m.ad) { alert('Ad soyad / unvan girin.'); return; }
+  ftEl('ftAd').value = m.ad;
+  if (!ftMusteriTablo) { alert('Müşteri listesi için fatura.sql dosyasını Supabase\'de bir kez daha çalıştırın. Bilgiler bu faturada kullanılacak.'); ftMusteriModalKapat(true); return; }
+  try {
+    const id = ftEl('ftMusteriId').value;
+    if (id) await api('fatura_musteriler?id=eq.' + id, 'PATCH', Object.assign({ guncelleme: new Date().toISOString() }, m));
+    else { const r = await api('fatura_musteriler', 'POST', m); if (r && r[0]) ftEl('ftMusteriId').value = r[0].id; }
+    showToast('✓ Müşteri kaydedildi');
+    ftMusteriModalKapat(true); ftMusterilerYukle();
+  } catch (e) { alert('Kaydedilemedi: ' + e.message); }
+}
+async function ftMusteriOtoKaydet(alici, adTam) {
+  if (!ftMusteriTablo || !adTam || /ETSY/i.test(adTam) || ftEl('ftMusteriId').value) return;
+  const ad = adTam.toLocaleUpperCase('tr-TR'), vkn = alici.vkn_tckn;
+  if (ftMusteriler.some(m => (m.ad || '').toLocaleUpperCase('tr-TR') === ad && (m.vkn || '') === vkn)) return;
+  try { await api('fatura_musteriler', 'POST', { ad, vkn, adres: alici.adres, ilce: alici.ilce, il: alici.il, ulke: alici.ulke, vergi_dairesi: alici.vergi_dairesi, telefon: alici.telefon, eposta: alici.eposta }); } catch (_) {}
+}
+// ---- Has altın kuru (Harem Altın has satış; elle değiştirilebilir) ----
+async function ftHasYukle(zorla) {
+  const inp = ftEl('ftHas'), k = ftEl('ftHasKaynak'); if (!inp) return;
+  if (!zorla && inp.value && inp.dataset.elle) return;
+  k.textContent = 'Harem Altın\'dan alınıyor…';
+  try {
+    const c = await haremCanliBekle(8000), h = c.ALTIN && (c.ALTIN.satis || c.ALTIN.alis);
+    if (!h) throw new Error('fiyat yok');
+    inp.value = h.toFixed(2); delete inp.dataset.elle;
+    k.textContent = 'Harem has satış · ' + new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  } catch (e) { k.textContent = 'Harem\'e ulaşılamadı — kuru elle yazın'; }
+  ftHesapla();
 }
 function ftHesap() {
-  const gram = parseFloat(ftEl('ftGram').value) || 0, isc = parseFloat(ftEl('ftIscilik').value) || 0, toplam = parseFloat(ftEl('ftToplam').value) || 0;
-  const iscT = ftR2(gram * isc), iscK = ftR2(iscT * 0.20), altin = ftR2(toplam - iscT - iscK);
-  return { gram, isc, toplam, iscT, iscK, altin, birim: gram ? altin / gram : 0, ayar: ftEl('ftAyar').value };
+  const ayar = ftEl('ftAyar').value, milyem = FT_MILYEM[ayar] || 0.585;
+  const has = parseFloat(ftEl('ftHas').value) || 0, isc = parseFloat(ftEl('ftIscilik').value) || 0, toplam = parseFloat(ftEl('ftToplam').value) || 0;
+  const birimAltin = Math.round(has * milyem * 1000) / 1000;                       // 6.506,14 × 0,585 = 3.806,092
+  const gram = toplam && birimAltin ? Math.round(toplam / (birimAltin + isc * 1.2) * 1000) / 1000 : 0;   // 10.000 ÷ (3.806,092 + 12) = 2,619
+  const iscT = ftR2(gram * isc), iscK = ftR2(iscT * 0.20), altin = ftR2(toplam - iscT - iscK);         // 26,19 · 5,24 · 9.968,57
+  const birim = gram ? Math.round(altin / gram * 1e6) / 1e6 : 0;                   // satırın kendi içinde tutarlı birim fiyatı
+  return { ayar, milyem, has, birimAltin, gram, isc, toplam, iscT, iscK, altin, birim };
 }
 function ftHesapla() {
   const h = ftHesap(), el = ftEl('ftOnizleme');
-  if (!h.gram || !h.toplam) { el.innerHTML = '<span class="hk-bos">Gram ve müşterinin ödediği tutarı girin.</span>'; return; }
-  if (h.altin <= 0) { el.innerHTML = '<span style="color:#F87171">Tutar işçilikten küçük olamaz.</span>'; return; }
-  el.innerHTML = `<table class="ft-tablo"><tr><th>Mal/Hizmet</th><th>Miktar</th><th>Birim fiyat</th><th>KDV</th><th>Toplam</th></tr>
-    <tr><td>${h.ayar} Ayar Altın</td><td>${h.gram.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} G</td><td>${h.birim.toLocaleString('tr-TR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })} ₺</td><td>%0 (805)</td><td>${ftTL(h.altin)}</td></tr>
-    <tr><td>${h.ayar} Ayar İşçilik</td><td>${h.gram.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} G</td><td>${ftTL(h.isc)}</td><td>%20 · ${ftTL(h.iscK)}</td><td>${ftTL(h.iscT)}</td></tr>
-    <tr class="ft-top"><td colspan="4">Ödenecek tutar</td><td>${ftTL(h.altin + h.iscT + h.iscK)}</td></tr></table>`;
+  if (!h.has) { el.innerHTML = '<span class="hk-bos">Has altın kurunu girin (↻ ile Harem\'den alınır).</span>'; return; }
+  if (!h.toplam) { el.innerHTML = '<span class="hk-bos">Fatura tutarını yazın — gram ve işçilik otomatik hesaplanır.</span>'; return; }
+  if (h.altin <= 0 || h.gram <= 0) { el.innerHTML = '<span style="color:#F87171">Tutar çok küçük.</span>'; return; }
+  const g = v => v.toLocaleString('tr-TR', { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  el.innerHTML = `<table class="ft-tablo"><tr><th>Ürün</th><th>Miktar</th><th>Birim fiyat</th><th>KDV</th><th>KDV hariç</th><th>Toplam</th></tr>
+    <tr><td>${h.ayar} Ayar Altın</td><td>${g(h.gram)} GR</td><td>${g(h.birimAltin)}</td><td>%0 (805)</td><td>${ftTL(h.altin)}</td><td>${ftTL(h.altin)}</td></tr>
+    <tr><td>${h.ayar} Ayar İşçilik</td><td>${g(h.gram)} GR</td><td>${g(h.isc)}</td><td>%20 · ${ftTL(h.iscK)}</td><td>${ftTL(h.iscT)}</td><td>${ftTL(h.iscT + h.iscK)}</td></tr>
+    <tr class="ft-top"><td colspan="5">Toplam · Özel matrah ${ftTL(h.altin)}</td><td>${ftTL(h.altin + h.iscT + h.iscK)}</td></tr></table>
+    <div class="ft-hesap-not">Has ${ftTL(h.has)} × ${String(h.milyem).replace('.', ',')} = ${g(h.birimAltin)} ₺/gr · gram = tutar ÷ (${g(h.birimAltin)} + ${g(h.isc)} × 1,20)</div>`;
 }
 async function ftSorgula() {
   const vkn = ftEl('ftVkn').value.replace(/\D/g, ''), roz = ftEl('ftSenaryo');
@@ -9413,6 +9531,7 @@ async function ftSorgula() {
     ['adres', 'ilce', 'il'].forEach(k => { const id = { adres: 'ftAdres', ilce: 'ftIlce', il: 'ftIl' }[k]; if (a[k] && !ftEl(id).value) ftEl(id).value = a[k]; });
     if (a.vergi_dairesi && !ftEl('ftVd').value) ftEl('ftVd').value = a.vergi_dairesi;
     if ((a.unvan || (a.ad && a.soyad)) && !ftEl('ftAd').value) ftEl('ftAd').value = a.unvan || a.ad + ' ' + a.soyad;
+    ftOzetCiz();
   } catch (e) { roz.textContent = ''; alert('Sorgulanamadı: ' + e.message); }
 }
 function ftVeri() {
@@ -9428,7 +9547,7 @@ function ftVeri() {
       notlar: ftEl('ftNotlar').value.split('\n').map(x => x.trim()).filter(Boolean), earsiv_gonderim: ftEl('ftGonderim').value, eposta_gonder: ftEl('ftGonderim').value === 'Electronic',
       alici, gram: h.gram, platform_siparis_id: ftEl('ftSiparisId').value || null, kesen: currentUser?.ad_soyad || currentUser?.kullanici_adi || '',
       kalemler: [
-        { ad: h.ayar + ' Ayar Altın', miktar: h.gram, birim: 'GRM', birim_fiyat: h.birim, tutar: h.altin, kdv: 0, kdv_muafiyet_kodu: '805' },
+        { ad: h.ayar + ' Ayar Altın', miktar: h.gram, birim: 'GRM', birim_fiyat: h.birim, tutar: h.altin, kdv: 0, kdv_muafiyet_kodu: '805', has_kur: h.has, milyem: h.milyem },
         { ad: h.ayar + ' Ayar İşçilik', miktar: h.gram, birim: 'GRM', birim_fiyat: h.isc, kdv: 20 }
       ]
     }
@@ -9438,9 +9557,9 @@ function ftKesOnay() {
   const v = ftVeri(), h = v.h, g = ftGiris[v.istek.sirket];
   const eksik = [];
   if (!/^(\d{10}|\d{11})$/.test(v.alici.vkn_tckn)) eksik.push('TC/Vergi No');
-  if (!v.adTam || (v.alici.vkn_tckn.length === 11 && (!v.alici.ad || !v.alici.soyad))) eksik.push('Ad ve soyad');
+  if (!v.adTam || (v.alici.vkn_tckn.length === 11 && (!v.alici.ad || !v.alici.soyad))) eksik.push('Ad ve soyad — TC ile kesilen faturada ad ve soyad ayrı olmalı (en az iki kelime)');
   if (!v.alici.il) eksik.push('İl'); if (!v.alici.ilce) eksik.push('İlçe');
-  if (!h.gram) eksik.push('Gram'); if (!h.toplam || h.altin <= 0) eksik.push('Tutar');
+  if (!h.has) eksik.push('Has altın kuru'); if (!h.toplam || h.altin <= 0 || !h.gram) eksik.push('Tutar');
   if (v.istek.earsiv_gonderim === 'Electronic' && !v.alici.eposta) eksik.push('E-posta (e-posta ile gönderim için)');
   if (eksik.length) { alert('Eksik: ' + eksik.join(', ')); return; }
   if (!g) { alert('Uyumsoft bağlantısı kurulamadı; şirket seçimini kontrol edin.'); return; }
@@ -9451,7 +9570,7 @@ function ftKesOnay() {
     <div class="ft-onay-baslik">${g.canli ? '⚠️ GERÇEK fatura kesilecek' : '🧪 Test faturası kesilecek'}</div>
     <div class="ft-onay-satir"><span>Şirket</span><b>${ftEsc(FT_SIRKET[v.istek.sirket].ad)}</b></div>
     <div class="ft-onay-satir"><span>Alıcı</span><b>${ftEsc(v.adTam)} · ${ftEsc(v.alici.vkn_tckn)}</b></div>
-    <div class="ft-onay-satir"><span>Ürün</span><b>${h.ayar} Ayar · ${h.gram.toLocaleString('tr-TR', { maximumFractionDigits: 4 })} gr</b></div>
+    <div class="ft-onay-satir"><span>Ürün</span><b>${h.ayar} Ayar · ${h.gram.toLocaleString('tr-TR', { maximumFractionDigits: 3 })} gr · işçilik ${ftTL(h.isc)}/gr</b></div>
     <div class="ft-onay-satir"><span>Ödenecek</span><b>${ftTL(h.altin + h.iscT + h.iscK)}</b></div>
     <div class="ft-onay-satir"><span>Gönderim</span><b>${v.istek.earsiv_gonderim === 'Electronic' ? 'E-posta: ' + ftEsc(v.alici.eposta) : 'Kâğıt'}</b></div>
     ${g.canli ? '<div class="ft-onay-uyari">Kesilen fatura GİB\'e gider; geri almak için iptal işlemi gerekir.</div>' : ''}
@@ -9463,6 +9582,7 @@ async function ftKes() {
   try {
     const s = await ftIstek(v.istek);
     ftEl('ftOnayModal').style.display = 'none';
+    ftMusteriOtoKaydet(v.alici, v.adTam).then(ftMusterilerYukle);
     if (v.istek.platform_siparis_id) {
       try { await api('platform_siparisler?id=eq.' + v.istek.platform_siparis_id, 'PATCH', { fatura_kesildi: true, fatura_no: s.numara }); }
       catch (e) { try { await api('platform_siparisler?id=eq.' + v.istek.platform_siparis_id, 'PATCH', { fatura_kesildi: true }); } catch (_) {} }
@@ -9472,9 +9592,9 @@ async function ftKes() {
   } catch (e) { alert('Fatura kesilemedi: ' + e.message); btn.disabled = false; btn.textContent = '🧾 Evet, kes'; }
 }
 function ftTemizle() {
-  ['ftAd', 'ftAdres', 'ftIl', 'ftVd', 'ftTel', 'ftEposta', 'ftGram', 'ftToplam', 'ftSiparisId'].forEach(id => ftEl(id).value = '');
+  ['ftAd', 'ftAdres', 'ftIl', 'ftVd', 'ftTel', 'ftEposta', 'ftToplam', 'ftSiparisId', 'ftMusteriId'].forEach(id => ftEl(id).value = '');
   ftEl('ftVkn').value = '22222222222'; ftEl('ftIlce').value = 'MERKEZ'; ftEl('ftUlke').value = 'TÜRKİYE'; ftEl('ftSenaryo').textContent = '';
-  ftEl('ftTarih').value = bugunTarihStr(); ftEl('ftNotlar').value = ''; ftKaynakDegisti(); ftHesapla();
+  ftEl('ftTarih').value = bugunTarihStr(); ftEl('ftNotlar').value = ''; ftKaynakDegisti(); ftHesapla(); ftOzetCiz();
 }
 async function ftListeYukle() {
   const el = ftEl('ftListe'); if (!el) return;
@@ -9482,17 +9602,13 @@ async function ftListeYukle() {
   try {
     ftFaturalar = await api('faturalar?select=*&order=olusturma.desc&limit=100' + (s ? '&sirket=eq.' + s : '')) || [];
   } catch (e) { el.innerHTML = '<div class="hk-bos">⚠️ Fatura kayıtları okunamadı. fatura.sql çalıştırıldı mı? (' + ftEsc(e.message).slice(0, 120) + ')</div>'; return; }
-  // önceki müşteriler (TC'si gerçek olanlar + ad)
-  const sec = ftEl('ftOnceki'), gor = new Set();
-  sec.innerHTML = '<option value="">Önceki müşteriler…</option>' + ftFaturalar.filter(f => f.alici && f.alici_ad && !/ETSY/i.test(f.alici_ad)).filter(f => { const k = (f.vkn || '') + '|' + f.alici_ad; if (gor.has(k)) return false; gor.add(k); return true; })
-    .map(f => `<option value="${f.id}">${ftEsc(f.alici_ad)}${f.vkn && !/^2+$/.test(f.vkn) ? ' · ' + ftEsc(f.vkn) : ''}</option>`).join('');
+  ftMusteriListeCiz();
   el.innerHTML = ftFaturalar.length ? ftFaturalar.map(f => `<div class="ft-kayit">
       <div class="ft-kayit-ust"><b>${ftEsc(f.numara || '—')}</b>${f.test ? '<span class="ft-test">TEST</span>' : ''}<span class="ft-kaynak">${ftEsc(f.kaynak || '')}</span><span style="flex:1"></span><b>${ftTL(f.toplam)}</b></div>
       <div class="ft-kayit-alt">${ftEsc((f.tarih || f.olusturma || '').slice(0, 10).split('-').reverse().join('.'))} · ${ftEsc(f.sirket === 'furkan' ? 'Furkan (Essos)' : 'Burak')} · ${ftEsc(f.alici_ad || '')}${f.gram ? ' · ' + Number(f.gram).toLocaleString('tr-TR', { maximumFractionDigits: 4 }) + ' gr' : ''}</div>
       <div class="ft-kayit-btn"><button class="btn btn-sm" onclick="ftPdf(${f.id})">📄 PDF</button><button class="btn btn-sm" onclick="ftDurum(${f.id})">Durum</button></div></div>`).join('')
     : '<div class="hk-bos">Henüz fatura yok.</div>';
 }
-function ftOncekiSec(id) { const f = ftFaturalar.find(x => String(x.id) === String(id)); if (f && f.alici) { ftAliciDoldur(Object.assign({ unvan: f.alici_ad }, f.alici, { unvan: f.alici.unvan || f.alici_ad })); ftGonderimOner(); } ftEl('ftOnceki').value = ''; }
 async function ftPdf(id) {
   const f = ftFaturalar.find(x => x.id === id); if (!f) return;
   const pencere = window.open('', '_blank');
@@ -9520,8 +9636,8 @@ function ftSiparistenAc(s, kaynak) {
     ftEl('ftKaynak').value = kaynak; ftKaynakDegisti();
     ftEl('ftSiparisId').value = s.id;
     if (s.tarih) ftEl('ftTarih').value = bugunTarihStr();
-    ftEl('ftGram').value = parseFloat(s.gram) || '';
-    if (/22/.test(s.ayar || '')) ftEl('ftAyar').value = '22'; else if (/10/.test(s.ayar || '')) ftEl('ftAyar').value = '10'; else ftEl('ftAyar').value = '14';
+    ftHasYukle(false);
+    if (/22/.test(s.ayar || '')) ftEl('ftAyar').value = '22'; else if (/24/.test(s.ayar || '')) ftEl('ftAyar').value = '24'; else if (/18/.test(s.ayar || '')) ftEl('ftAyar').value = '18'; else if (/10/.test(s.ayar || '')) ftEl('ftAyar').value = '10'; else ftEl('ftAyar').value = '14';
     if (kaynak === 'essos') {
       const k = s.fatura_kur || (typeof platToolbarKur !== 'undefined' ? platToolbarKur : 0);
       const tl = parseFloat(s.fatura_tl) || Math.round((parseFloat(s.satis_fiyati_usd) || 0) * (parseFloat(k) || 0));
