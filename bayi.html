@@ -23,8 +23,8 @@ header{display:flex;align-items:center;gap:14px;padding:6px 0 18px;border-bottom
 button{font:inherit;cursor:pointer}
 .btn{background:linear-gradient(135deg,#F3D27A,#C9A132);color:#1A1408;border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px}
 .btn:disabled{opacity:.6}
-.kartlar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
-@media(max-width:820px){.kartlar{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kartlar{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+@media(max-width:820px){.kartlar{grid-template-columns:1fr}}
 .k{--k:var(--altin);border-radius:16px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--k) 45%,transparent);background:radial-gradient(220px 110px at 100% 0%,color-mix(in srgb,var(--k) 18%,transparent),transparent 65%),var(--kart)}
 .k .u{font-size:12px;font-weight:700;color:var(--k);letter-spacing:.02em}
 .k .d{font-size:26px;font-weight:800;margin-top:4px}
@@ -82,7 +82,7 @@ footer{margin-top:26px;text-align:center;font-size:11.5px;color:#6F685A}
 <script>
 const SUPABASE_URL = 'https://xufyzwioeguudrynkjvc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_jQeVQUHMze43X1cwak2ELA_VHTCMqyV';
-let V = null, sekme = 'bekleyen', ara = '', ayFiltre = '';
+let V = null, sekme = 'tum', ara = '', ayFiltre = '';
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const n = v => Number(v) || 0;
@@ -216,13 +216,11 @@ function ciz() {
     <div class="kartlar">
       <div class="k mor"><div class="u">💳 Has borcu</div><div class="d">${hasF(h.hasBorc)} <small>has</small></div><div class="a">Tüm siparişler − ödemeler</div></div>
       <div class="k mavi"><div class="u">🚚 Kargo borcu</div><div class="d">${usdF(h.usdBorc)}</div><div class="a">Gönderi ücretleri − ödemeler</div></div>
-      <div class="k"><div class="u">⏳ Hazırlanan</div><div class="d">${h.bek.length} <small>sipariş</small></div><div class="a">${h.bek.length ? 'En eskisi ' + enEski + ' gün önce' : 'Bekleyen sipariş yok'}</div></div>
       <div class="k yesil"><div class="u">📦 Bu ay kargolanan</div><div class="d">${h.kargoAy} <small>sipariş</small></div><div class="a">${ayAd(h.buAy)}</div></div>
     </div>
     <div class="sekmeler">
-      <button class="${sekme === 'bekleyen' ? 'aktif' : ''}" onclick="sekmeSec('bekleyen')">⏳ Hazırlanan <span class="say">${h.bek.length}</span></button>
-      <button class="${sekme === 'kargolanan' ? 'aktif' : ''}" onclick="sekmeSec('kargolanan')">🚚 Gönderiler <span class="say">${h.gon.length}</span></button>
       <button class="${sekme === 'tum' ? 'aktif' : ''}" onclick="sekmeSec('tum')">📋 Tüm siparişler</button>
+      <button class="${sekme === 'kargolanan' ? 'aktif' : ''}" onclick="sekmeSec('kargolanan')">🚚 Gönderiler <span class="say">${h.gon.length}</span></button>
       <button class="${sekme === 'hesap' ? 'aktif' : ''}" onclick="sekmeSec('hesap')">💳 Hesap hareketleri</button>
     </div>
     <div class="arac">
