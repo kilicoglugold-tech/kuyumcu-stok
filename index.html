@@ -1,4 +1,4 @@
-<!-- SURUM-V117R16-MAGAZA --><!DOCTYPE html>
+<!-- SURUM-V134-BAYI-LINK --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -484,6 +484,21 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 #platformTabBar .ayar-tab.plat-magaza-ekle::after { display:none; }
 .plat-rozet-harf { flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; width:34px; height:32px; border-radius:10px; color:#fff; font-size:12px; font-weight:800; }
 .mg-tur-rozet { font-size:12px; font-weight:700; padding:4px 10px; border-radius:20px; background:rgba(245,196,81,.12); border:1px solid rgba(245,196,81,.35); color:#F5C451; }
+#bayiLinkModal, #magazaSiraModal { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:9999; display:none; align-items:center; justify-content:center; padding:16px; }
+.bl-link { display:flex; gap:8px; align-items:center; }
+.bl-link input { flex:1; min-width:0; font-family:ui-monospace,Menlo,monospace; font-size:12.5px; }
+.bl-durum { font-size:13px; padding:9px 12px; border-radius:10px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); line-height:1.55; }
+.bl-durum b { color:#F2ECDD; }
+.bl-kapali { color:#F87171; font-weight:700; }
+.ms-liste { display:flex; flex-direction:column; gap:6px; max-height:60vh; overflow:auto; }
+.ms-satir { display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); cursor:grab; }
+.ms-satir.surukle { opacity:.4; }
+.ms-satir.ustune { border-color:#F5C451; }
+.ms-satir img, .ms-satir .plat-rozet-harf { height:24px; max-width:56px; object-fit:contain; background:#fff; border-radius:6px; padding:2px 4px; }
+.ms-satir .plat-rozet-harf { width:32px; height:26px; padding:0; }
+.ms-satir span.ad { flex:1; font-weight:600; font-size:14px; }
+.ms-satir button { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18); color:#fff; border-radius:8px; width:30px; height:28px; cursor:pointer; }
+.ms-satir button:disabled { opacity:.3; cursor:default; }
 #magazaModal { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:9999; display:none; align-items:center; justify-content:center; padding:16px; }
 .mg-kutu { width:min(560px,100%); max-height:92vh; overflow:auto; display:flex; flex-direction:column; gap:14px; }
 .mg-kutu label.mg-lbl { display:flex; flex-direction:column; gap:5px; font-size:12px; color:#A39A85; }
@@ -597,6 +612,52 @@ td .btn:hover { background:rgba(212,175,55,.14) !important; }
 .ht-tablo td:first-child{text-align:left;font-size:13.5px;color:#E8DFC8;white-space:normal}
 .ht-tablo td.ht-fark{font-size:12px;color:#A39A85}
 .ht-tablo tbody tr:hover td{background:rgba(212,175,55,.07)}
+/* V118 Grup B kargo */
+.gb-uyari{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.45);color:#FDE68A;border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:1rem}
+.gb-pano{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:1rem}
+@media(max-width:900px){.gb-pano{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.gb-pano:empty{display:none}
+.gb-pano-kart{--k:#F5C451;cursor:pointer;border-radius:14px;padding:14px 16px;border:1px solid color-mix(in srgb,var(--k) 55%,transparent);background:linear-gradient(150deg,color-mix(in srgb,var(--k) 18%,#15130F),#100F0C);transition:transform .15s,box-shadow .15s}
+.gb-pano-kart:hover{transform:translateY(-2px);box-shadow:0 12px 28px -14px color-mix(in srgb,var(--k) 70%,transparent)}
+.gb-pano-kart.pk-sari{--k:#F5C451}.gb-pano-kart.pk-yesil{--k:#34D399}.gb-pano-kart.pk-mavi{--k:#60A5FA}.gb-pano-kart.pk-mor{--k:#A5B4FC;cursor:default}
+.gb-pano-ust{font-size:12px;font-weight:700;color:var(--k);letter-spacing:.02em}
+.gb-pano-deger{font-size:24px;font-weight:700;color:#F2ECDD;margin-top:4px}
+.gb-pano-deger small{font-size:13px;font-weight:500;color:#A39A85}
+.gb-pano-alt{font-size:12px;color:#A39A85;margin-top:2px}
+.gb-sekmeler{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.gb-sekmeler button{background:rgba(255,255,255,.04);border:1px solid rgba(212,175,55,.3);color:#E8DFC8;border-radius:20px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+.gb-sekmeler button.aktif{background:linear-gradient(135deg,#F3D27A,#C9A132);color:#1A1408;border-color:transparent;font-weight:700}
+.gb-say{display:inline-block;min-width:18px;padding:0 6px;border-radius:10px;background:rgba(0,0,0,.25);font-size:11px;margin-left:4px}
+.gb-secim{position:sticky;top:70px;z-index:5;align-items:center;gap:8px;flex-wrap:wrap;background:linear-gradient(135deg,#2A2212,#1A160E);border:1px solid #D4AF37;border-radius:12px;padding:8px 12px;margin-bottom:10px;font-size:13px;color:#F2ECDD;box-shadow:0 10px 26px -14px rgba(0,0,0,.9)}
+.gb-cb{width:17px;height:17px;accent-color:#D4AF37;cursor:pointer}
+tr.gb-secili td{background:rgba(212,175,55,.10) !important}
+.gb-durum{font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.gb-durum.db{background:rgba(245,196,81,.15);color:#F5C451}.gb-durum.dk{background:rgba(52,211,153,.14);color:#34D399}.gb-durum.dy{color:#7A7466}
+.gb-gonderi-link{margin-left:6px;font-size:11.5px;color:#60A5FA;cursor:pointer;text-decoration:underline dotted}
+#gbKargoModal{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
+.gb-kargo-liste{border:1px solid rgba(212,175,55,.25);border-radius:10px;max-height:190px;overflow:auto;margin:8px 0 12px}
+.gb-kargo-liste>div{display:flex;justify-content:space-between;gap:10px;padding:7px 10px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.06)}
+.gb-kargo-liste>div span:last-child{color:#A39A85;white-space:nowrap}
+.gb-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.gb-form{grid-template-columns:1fr}}
+.gb-form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#C9BFA8}
+.gb-form small{color:#7A7466}
+.gb-kargo-kar{margin-top:10px;font-size:13px;color:#C9BFA8}
+
+.gb-son-rozet{margin-left:6px;font-size:11px;font-weight:600;color:#A39A85;white-space:nowrap}
+.gb-son-rozet.yakin{color:#FBBF24}.gb-son-rozet.gecti{color:#F87171}
+.gb-son{color:#FBBF24}
+.gb-pdf-liste{max-height:58vh;overflow:auto;border:1px solid rgba(212,175,55,.25);border-radius:12px;margin:8px 0}
+.gb-pdf-satir{display:flex;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.07)}
+.gb-pdf-satir.zaten{opacity:.5}
+.gb-pdf-sec{padding-top:2px}
+.gb-pdf-bilgi{flex:1;min-width:0}
+.gb-pdf-ust{font-size:13px;color:#F2ECDD}
+.gb-pdf-alt{font-size:12px;color:#A39A85;margin:2px 0 6px}
+.gb-pdf-alanlar{display:grid;grid-template-columns:70px 1fr 90px 130px 80px;gap:8px}
+.gb-pdf-alanlar label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:#A39A85}
+.gb-pdf-alanlar .form-control{padding:6px 8px;font-size:13px}
+@media(max-width:700px){.gb-pdf-alanlar{grid-template-columns:1fr 1fr}.gb-pdf-alanlar .genis{grid-column:1/-1}}
 /* Ramat */
 .rm-uyari{background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.45);color:#FDE68A;border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:1rem}
 .rm-ust-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem}
@@ -1581,12 +1642,16 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
           <div>🪙 Altın: <span id="gbAltinDisp" class="param-val">-</span> $/gr</div>
         </div>
         <div style="display:flex;gap:8px;">
+          <button class="btn btn-sm" id="gbLinkBtn" onclick="bayiLinkModalAc()" style="display:none">🔗 Bayi Linki</button>
           <button class="btn btn-sm" onclick="gbJpgIndir()">📤 WhatsApp Gönder</button>
           <button class="btn btn-sm btn-success" onclick="openGrupBOdemeModal()">💰 Ödeme Al</button>
+          <label class="btn btn-sm" style="cursor:pointer;" title="Etsy sipariş fişi PDF'ini yükleyin; içindeki tüm siparişler tek seferde eklenir">📄 Fişten Ekle<input type="file" accept="application/pdf" style="display:none" onchange="gbFisPdfSec(this)"></label>
           <button class="btn btn-primary btn-sm" onclick="openGrupBModal()">+ Satış Ekle</button>
         </div>
       </div>
     </div>
+    <div id="gbKurulumUyari" class="gb-uyari" style="display:none;">⚠️ Sipariş durumu ve toplu kargo için <b>grupb-kargo.sql</b> dosyasını Supabase'de bir kez çalıştırın. Çalıştırana kadar sayfa eskisi gibi çalışır.</div>
+    <div id="gbPano" class="gb-pano"></div>
     <div style="display:flex;gap:10px;margin-bottom:1rem;align-items:stretch;">
       <div class="card" style="min-width:220px;max-width:280px;display:flex;flex-direction:column;padding:1rem 1.25rem;gap:4px;">
         <div style="display:flex;justify-content:space-between;align-items:center;"><div class="metric-label">BAKİYE</div><button onclick="acBakiyeDetayModal()" style="font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid #d97706;color:#d97706;background:transparent;cursor:pointer;">Detay</button></div>
@@ -1630,12 +1695,20 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
         </div>
       </div>
     </div>
-    <div class="card siparis-tablo-wrap" style="padding:0;margin-left:-1.5rem;margin-right:-1.5rem;border-radius:0;overflow-x:auto;" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+    <div id="gbSekmeler" class="gb-sekmeler">
+      <button data-sekme="ay" class="aktif" onclick="gbSekmeSec('ay')">📅 Bu Ay</button>
+      <button data-sekme="bekleyen" onclick="gbSekmeSec('bekleyen')">⏳ Bekleyen <span id="gbSekmeBekSay" class="gb-say">0</span></button>
+      <button data-sekme="kargolanan" onclick="gbSekmeSec('kargolanan')">🚚 Kargolanan</button>
+      <button data-sekme="gonderiler" onclick="gbSekmeSec('gonderiler')">📦 Gönderiler <span id="gbSekmeGonSay" class="gb-say">0</span></button>
+    </div>
+    <div id="gbSecimCubugu" class="gb-secim" style="display:none;"></div>
+    <div id="gbGonderiListe" style="display:none;"></div>
+    <div id="gbTabloKart" class="card siparis-tablo-wrap" style="padding:0;margin-left:-1.5rem;margin-right:-1.5rem;border-radius:0;overflow-x:auto;" style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
       <table>
         <thead>
-          <tr><th>#</th><th>Tarih</th><th>Ürün</th><th>Gram</th><th>Tip</th><th>Milyem</th><th>Satış Has</th><th>Maliyet Has</th><th>Has Kâr</th><th>Kâr $</th><th>İşlem</th></tr>
+          <tr><th style="width:34px;text-align:center;"><input type="checkbox" id="gbTumSecCb" class="gb-cb" title="Tümünü seç" onchange="gbTumunuSec(this)"></th><th>#</th><th>Durum</th><th>Tarih</th><th>Ürün</th><th>Gram</th><th>Tip</th><th>Milyem</th><th>Satış Has</th><th>Maliyet Has</th><th>Has Kâr</th><th>Kâr $</th><th>İşlem</th></tr>
           <tr>
-            <td colspan="3" style="font-weight:600;color:var(--text2);background:var(--bg2);padding:8px 12px;border-top:2px solid var(--border2);font-size:11px;text-transform:uppercase;letter-spacing:0.4px;">Toplam</td>
+            <td colspan="5" style="font-weight:600;color:var(--text2);background:var(--bg2);padding:8px 12px;border-top:2px solid var(--border2);font-size:11px;text-transform:uppercase;letter-spacing:0.4px;">Toplam</td>
             <td id="gbToplam_gram" style="font-weight:700;color:var(--gold-dark);background:var(--bg2);padding:8px 12px;border-top:2px solid var(--border2);font-size:12px;white-space:nowrap;min-width:80px;">—</td>
             <td style="background:var(--bg2);padding:8px 12px;border-top:2px solid var(--border2);"></td>
             <td id="gbToplam_milyem" style="font-weight:700;color:var(--gold-dark);background:var(--bg2);padding:8px 12px;border-top:2px solid var(--border2);font-size:12px;white-space:nowrap;min-width:80px;">—</td>
@@ -1646,7 +1719,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
             <td style="background:var(--bg2);padding:8px 12px;border-top:2px solid var(--border2);"></td>
           </tr>
         </thead>
-        <tbody id="gbTablo"><tr><td colspan="11" class="loading">Platform seçin...</td></tr></tbody>
+        <tbody id="gbTablo"><tr><td colspan="13" class="loading">Platform seçin...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -5070,6 +5143,12 @@ async function loadRapor() {
       g.brutKarUsd += s.net_kar_usd || 0;
     });
 
+    // Grup B kargo kârı (müşteriye yazılan − maliyet) gönderinin ayına yazılır
+    try {
+      const gon = await api(`grupb_gonderiler?tarih=gte.${bas}&tarih=lt.${bitStr}&select=platform,maliyet_usd,musteri_usd`);
+      (gon || []).forEach(g => { magazaGetir(g.platform).brutKarUsd += (parseFloat(g.musteri_usd) || 0) - (parseFloat(g.maliyet_usd) || 0); });
+    } catch (e) {}
+
     (platParam||[]).forEach(rd => {
       const g = gruplar[rd.platform];
       if (!g) return;
@@ -5394,15 +5473,18 @@ PLATFORM_ROZET.essos_etsy.isim = 'Essos Etsy';
 //   tur 'kendi' → Essos/Alfred sistemi (Grup A: kargo, adres, komisyon…); fatura: '' | 'furkan' | 'burak'
 //                 (fatura seçiliyse Essos gibi: reklam ₺, fatura kuru, 🧾 fatura kes)
 //   tur 'bayi'  → Bailey's sistemi (Grup B: has borcu, toplu kargo, ödemeler)
-let OZEL_MAGAZALAR = [], ozelMagazaYuklendi = false, ozelMagazaTablo = true, mgDuzenlenen = null, mgTaslak = null;
+let MAGAZA_SIRA = [], OZEL_MAGAZALAR = [], ozelMagazaYuklendi = false, ozelMagazaTablo = true, mgDuzenlenen = null, mgTaslak = null;
 function ozelMagazaBul(k) { return OZEL_MAGAZALAR.find(m => m.kod === k) || null; }
 function platEssosGibi(p) { if (p === 'essos_etsy') return true; const m = ozelMagazaBul(p); return !!(m && m.tur === 'kendi' && m.sirket); }
 function platAdresli(p) { if (p === 'essos_etsy' || p === 'alfred_etsy') return true; const m = ozelMagazaBul(p); return !!(m && m.tur === 'kendi'); }
 function mgEsc(x) { return String(x == null ? '' : x).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function mgHarf(ad) { return String(ad || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toLocaleUpperCase('tr-TR') || '?'; }
 async function ozelMagazalarYukle() {
-  try { const r = await api('genel_ayarlar?anahtar=eq.ozel_magazalar&select=deger'); OZEL_MAGAZALAR = (r && r[0] && r[0].deger && r[0].deger.liste) || []; ozelMagazaTablo = true; }
-  catch (e) { ozelMagazaTablo = false; }
+  try {
+    const r = await api('genel_ayarlar?anahtar=in.(ozel_magazalar,magaza_sirasi)&select=anahtar,deger') || [];
+    const bul = k => (r.find(x => x.anahtar === k) || {}).deger;
+    OZEL_MAGAZALAR = (bul('ozel_magazalar') || {}).liste || []; MAGAZA_SIRA = (bul('magaza_sirasi') || {}).sira || []; ozelMagazaTablo = true;
+  } catch (e) { ozelMagazaTablo = false; }
   ozelMagazaYuklendi = true;
   ozelMagazaUygula();
 }
@@ -5424,11 +5506,20 @@ function ozelMagazaUygula() {
     b.innerHTML = (m.logo ? `<img class="plat-rozet-img" src="${m.logo}">` : `<span class="plat-rozet-harf" style="background:${mgEsc(m.renk || '#8C6D23')}">${mgEsc(mgHarf(m.ad))}</span>`) + ' ' + mgEsc(m.ad);
     bar.appendChild(b);
   });
+  // kayıtlı sıraya diz (listede olmayanlar sonda, eski sıralarıyla)
+  const tabKod = b => ((b.getAttribute('onclick') || '').match(/secPlatformAll\('([^']+)'/) || [])[1];
+  const tablar = [...bar.querySelectorAll('.ayar-tab')], ilk = new Map(tablar.map((b, i) => [b, i]));
+  const yer = b => { const i = MAGAZA_SIRA.indexOf(tabKod(b)); return i < 0 ? 1000 + ilk.get(b) : i; };
+  tablar.sort((a, b) => yer(a) - yer(b)).forEach(b => bar.appendChild(b));
   if (menuAdminMi()) {
     const e = document.createElement('button');
     e.className = 'ayar-tab plat-magaza-ekle'; e.type = 'button'; e.textContent = '＋ Mağaza Aç';
     e.onclick = () => magazaModalAc(null);
     bar.appendChild(e);
+    const sr = document.createElement('button');
+    sr.className = 'ayar-tab plat-magaza-ekle'; sr.type = 'button'; sr.textContent = '⇅ Sırala';
+    sr.onclick = () => magazaSiraAc();
+    bar.appendChild(sr);
   }
   if (typeof platSayacGuncelle === 'function') platSayacGuncelle();
 }
@@ -5550,6 +5641,99 @@ async function mgKaydet() {
   } catch (e) { alert('Kaydedilemedi: ' + e.message); }
   btn.disabled = false;
 }
+// ---- Mağaza sıralaması (admin; herkese aynı) ----
+let msTaslak = [];
+function msTablar() { return [...document.querySelectorAll('#platformTabBar .ayar-tab:not(.plat-magaza-ekle)')].map(b => ({ kod: ((b.getAttribute('onclick') || '').match(/secPlatformAll\('([^']+)'/) || [])[1], ad: [...b.childNodes].filter(x => x.nodeType === 3).map(x => x.textContent).join(' ').trim(), gorsel: (b.querySelector('img') || {}).src || '', harf: (b.querySelector('.plat-rozet-harf') || {}).outerHTML || '' })).filter(x => x.kod); }
+function magazaSiraAc() {
+  if (!menuAdminMi()) return;
+  let m = document.getElementById('magazaSiraModal');
+  if (!m) { m = document.createElement('div'); m.id = 'magazaSiraModal'; document.body.appendChild(m); }
+  msTaslak = msTablar(); msCiz(); m.style.display = 'flex';
+}
+function msCiz() {
+  const m = document.getElementById('magazaSiraModal');
+  m.innerHTML = `<div class="card mg-kutu"><div class="mg-baslik">⇅ Mağaza sırası</div>
+    <div class="mg-not">Sürükleyip bırakın ya da oklarla taşıyın. Sıra herkes için aynı olur.</div>
+    <div class="ms-liste">${msTaslak.map((x, i) => `<div class="ms-satir" draggable="true" data-i="${i}">${x.gorsel ? `<img src="${x.gorsel}">` : x.harf}<span class="ad">${mgEsc(x.ad)}</span><button type="button" ${i ? '' : 'disabled'} onclick="msTasi(${i},-1)">▲</button><button type="button" ${i < msTaslak.length - 1 ? '' : 'disabled'} onclick="msTasi(${i},1)">▼</button></div>`).join('')}</div>
+    <div class="mg-butonlar"><button type="button" class="btn" onclick="document.getElementById('magazaSiraModal').style.display='none'">Vazgeç</button><button type="button" class="btn btn-primary" onclick="msKaydet(this)">💾 Kaydet</button></div></div>`;
+  let kaynak = null;
+  m.querySelectorAll('.ms-satir').forEach(el => {
+    el.addEventListener('dragstart', () => { kaynak = +el.dataset.i; el.classList.add('surukle'); });
+    el.addEventListener('dragend', () => el.classList.remove('surukle'));
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('ustune'); });
+    el.addEventListener('dragleave', () => el.classList.remove('ustune'));
+    el.addEventListener('drop', e => { e.preventDefault(); const h = +el.dataset.i; if (kaynak != null && kaynak !== h) { const [x] = msTaslak.splice(kaynak, 1); msTaslak.splice(h, 0, x); msCiz(); } });
+  });
+}
+function msTasi(i, y) { const j = i + y; if (j < 0 || j >= msTaslak.length) return; [msTaslak[i], msTaslak[j]] = [msTaslak[j], msTaslak[i]]; msCiz(); }
+async function msKaydet(btn) {
+  if (!ozelMagazaTablo) { alert('Ayar tablosuna ulaşılamadı (menu-sirasi.sql çalıştırılmış olmalı).'); return; }
+  btn.disabled = true;
+  const sira = msTaslak.map(x => x.kod);
+  try {
+    const r = await api('genel_ayarlar?anahtar=eq.magaza_sirasi&select=anahtar');
+    if (r && r.length) await api('genel_ayarlar?anahtar=eq.magaza_sirasi', 'PATCH', { deger: { sira }, guncelleme: new Date().toISOString() });
+    else await api('genel_ayarlar', 'POST', { anahtar: 'magaza_sirasi', deger: { sira } });
+    MAGAZA_SIRA = sira; ozelMagazaUygula();
+    document.getElementById('magazaSiraModal').style.display = 'none'; showToast('✓ Mağaza sırası kaydedildi');
+  } catch (e) { alert('Kaydedilemedi: ' + e.message); btn.disabled = false; }
+}
+
+// ---- Bayi takip linki (admin) — bayi.html#<anahtar>; veri bayi_portal() fonksiyonundan, sadece o bayinin kaydı ----
+let blKayit = null;
+function blAnahtarUret() { const b = new Uint8Array(32); crypto.getRandomValues(b); return btoa(String.fromCharCode(...b)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function blAdres(token) { return location.origin + location.pathname.replace(/[^/]*$/, '') + 'bayi.html#' + token; }
+async function bayiLinkModalAc() {
+  if (!menuAdminMi()) return;
+  let m = document.getElementById('bayiLinkModal');
+  if (!m) { m = document.createElement('div'); m.id = 'bayiLinkModal'; document.body.appendChild(m); }
+  m.innerHTML = '<div class="card mg-kutu"><div class="mg-baslik">🔗 Bayi linki</div><div class="mg-not">Yükleniyor…</div></div>';
+  m.style.display = 'flex';
+  try { const r = await api('bayi_linkleri?platform=eq.' + encodeURIComponent(aktifPlatformB) + '&select=*'); blKayit = r && r[0] || null; blCiz(); }
+  catch (e) { m.innerHTML = `<div class="card mg-kutu"><div class="mg-baslik">🔗 Bayi linki</div><div class="gb-uyari" style="display:block">Bayi linki için önce Supabase'de <b>bayi-portal.sql</b> dosyasını bir kez çalıştırın.</div><div class="mg-butonlar"><button class="btn" onclick="document.getElementById('bayiLinkModal').style.display='none'">Kapat</button></div></div>`; }
+}
+function blCiz() {
+  const m = document.getElementById('bayiLinkModal'), ad = PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB, k = blKayit;
+  const kapat = `<button class="btn" onclick="document.getElementById('bayiLinkModal').style.display='none'">Kapat</button>`;
+  if (!k) {
+    m.innerHTML = `<div class="card mg-kutu"><div class="mg-baslik">🔗 ${mgEsc(ad)} — bayi linki</div>
+      <div class="mg-not">${mgEsc(ad)} bu linkle kendi siparişlerini, kargo takip numaralarını, ödemelerini ve güncel has/kargo borcunu görür.<br>
+      <b style="color:#E8DFC8">Görmediği şeyler:</b> maliyet, kâr, diğer bayiler ve sitenin geri kalanı. Giriş şifresi gerekmez; link tahmin edilemeyecek kadar uzundur.</div>
+      <div class="mg-butonlar">${kapat}<button class="btn btn-primary" onclick="blOlustur(this)">🔗 Link oluştur</button></div></div>`;
+    return;
+  }
+  const url = blAdres(k.token), son = k.son_giris ? new Date(k.son_giris).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'henüz açılmadı';
+  const wa = 'https://wa.me/?text=' + encodeURIComponent('Merhaba, siparişlerinizi ve hesabınızı buradan takip edebilirsiniz:\n' + url);
+  m.innerHTML = `<div class="card mg-kutu"><div class="mg-baslik">🔗 ${mgEsc(ad)} — bayi linki</div>
+    <div class="bl-link"><input class="form-control" id="blUrl" readonly value="${mgEsc(url)}" onclick="this.select()"><button class="btn btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('blUrl').value).then(()=>showToast('✓ Link kopyalandı'))">📋 Kopyala</button></div>
+    <div class="bl-durum">${k.aktif ? 'Durum: <b style="color:#34D399">açık</b>' : 'Durum: <span class="bl-kapali">kapalı — link çalışmıyor</span>'}<br>Son açılış: <b>${son}</b> · Toplam açılış: <b>${k.giris_sayisi || 0}</b></div>
+    <div class="mg-butonlar" style="justify-content:flex-start">
+      <a class="btn btn-sm" href="${wa}" target="_blank" rel="noopener">💬 WhatsApp'ta gönder</a>
+      <a class="btn btn-sm" href="${mgEsc(url)}" target="_blank" rel="noopener">👁️ Bayi gibi gör</a>
+    </div>
+    <div class="mg-not">Link başkasının eline geçtiyse <b>Yenile</b> deyin: eski link anında çalışmaz olur, bayiye yenisini gönderirsiniz.</div>
+    <div class="mg-butonlar"><button class="btn" style="margin-right:auto" onclick="blAktif(this)">${k.aktif ? '⛔ Linki kapat' : '✅ Linki aç'}</button><button class="btn" onclick="blYenile(this)">🔄 Yenile</button>${kapat}</div></div>`;
+}
+function blMagazaBilgi() { const r = PLATFORM_ROZET[aktifPlatformB] || {}; return { ad: r.isim || PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB, logo: r.gorsel || null }; }
+async function blOlustur(btn) {
+  btn.disabled = true;
+  try { const r = await api('bayi_linkleri', 'POST', Object.assign({ platform: aktifPlatformB, token: blAnahtarUret(), aktif: true }, blMagazaBilgi())); blKayit = r && r[0]; if (!blKayit) { const g = await api('bayi_linkleri?platform=eq.' + encodeURIComponent(aktifPlatformB) + '&select=*'); blKayit = g && g[0]; } blCiz(); showToast('✓ Link oluşturuldu'); }
+  catch (e) { alert('Oluşturulamadı: ' + e.message); btn.disabled = false; }
+}
+async function blYenile(btn) {
+  if (!confirm('Yeni link oluşturulsun mu?\n\nEski link hemen çalışmaz olur; bayiye yeni linki göndermeniz gerekir.')) return;
+  btn.disabled = true;
+  const yeni = Object.assign({ token: blAnahtarUret(), aktif: true, giris_sayisi: 0, son_giris: null }, blMagazaBilgi());
+  try { await api('bayi_linkleri?platform=eq.' + encodeURIComponent(aktifPlatformB), 'PATCH', yeni); Object.assign(blKayit, yeni); blCiz(); showToast('✓ Yeni link hazır'); }
+  catch (e) { alert('Yenilenemedi: ' + e.message); btn.disabled = false; }
+}
+async function blAktif(btn) {
+  btn.disabled = true;
+  const aktif = !blKayit.aktif;
+  try { await api('bayi_linkleri?platform=eq.' + encodeURIComponent(aktifPlatformB), 'PATCH', Object.assign({ aktif }, blMagazaBilgi())); blKayit.aktif = aktif; blCiz(); showToast(aktif ? '✓ Link açıldı' : 'Link kapatıldı'); }
+  catch (e) { alert('Değiştirilemedi: ' + e.message); btn.disabled = false; }
+}
+
 async function mgGizleDegistir() {
   const m = ozelMagazaBul(mgDuzenlenen); if (!m) return;
   if (!m.gizli && !confirm(m.ad + ' sekmelerden gizlensin mi?\n\nSiparişleri silinmez, raporlarda görünmeye devam eder. İstediğiniz zaman ⚙️ ile tekrar gösterebilirsiniz.')) return;
@@ -5607,6 +5791,7 @@ function secPlatformAll(platform, btn) {
     loadPlatformData();
   } else if (grup === 'B') {
     aktifPlatformB = platform;
+    const lb = document.getElementById('gbLinkBtn'); if (lb) lb.style.display = menuAdminMi() ? '' : 'none';
     fillAySec('gbAy');
     loadGrupBData();
   } else if (grup === 'C') {
@@ -5650,7 +5835,7 @@ async function saveKargoFiyatlari() {
 async function loadPlatformData() {
   platSayacGuncelle();
   if (typeof gelenSayacGuncelle === 'function') gelenSayacGuncelle();
-  if (typeof gelenFotoYukle === 'function' && GELEN_AKTIF && (aktifPlatform === 'alfred_etsy' || aktifPlatform === 'essos_etsy')) gelenFotoYukle().then(() => { if (Object.keys(gelenFotoHarita).length && typeof renderPlatTablo === 'function') renderPlatTablo(); });
+  if (typeof gelenFotoYukle === 'function' && (aktifPlatform === 'alfred_etsy' || aktifPlatform === 'essos_etsy')) gelenFotoYukle().then(() => { if (Object.keys(gelenFotoHarita).length && typeof renderPlatTablo === 'function') renderPlatTablo(); });
   const ay = document.getElementById('platAy').value;
   if (!ay) return;
 
@@ -6058,26 +6243,39 @@ async function loadGrupBData() {
     try { _cache[odemeKey] = await api(`grupb_odemeler?platform=eq.${aktifPlatformB}&ay=eq.${ay}&order=tarih.asc`);
     } catch(e) { _cache[odemeKey] = []; }
   }
+  if (gbSonPlatform !== aktifPlatformB) { gbSecili.clear(); gbSonPlatform = aktifPlatformB; }
+  await gbEkVerileriYukle();
   renderGrupBTablo();
   updateGrupBOzet();
+  gbPanoCiz();
+  if (gbSekme === 'gonderiler') gbGonderiListeCiz();
+  gbSecimCubugu();
 }
+let gbSonPlatform = null;
 
 function renderGrupBTablo() {
   const tbody = document.getElementById('gbTablo');
-  if (!grupbSiparisler.length) {
-    tbody.innerHTML = '<tr><td colspan="11" class="empty">Bu ay henüz satış yok.</td></tr>';
+  const liste = gbGorunenListe();
+  const tumCb = document.getElementById('gbTumSecCb');
+  if (tumCb) { const secilebilir = liste.filter(x => x.durum !== 'kargolandi'); tumCb.checked = secilebilir.length > 0 && secilebilir.every(x => gbSecili.has(String(x.id))); tumCb.disabled = !gbDurumVar; }
+  if (!liste.length) {
+    const msj = gbSekme === 'bekleyen' ? 'Bekleyen sipariş yok.' : gbSekme === 'kargolanan' ? 'Bu ay kargoya verilen sipariş yok.' : 'Bu ay henüz satış yok.';
+    tbody.innerHTML = '<tr><td colspan="13" class="empty">' + msj + '</td></tr>';
     return;
   }
   const altin = parseFloat(grupbAylikParam?.altin_fiyati_usd) || 1;
-  tbody.innerHTML = grupbSiparisler.map((s, i) => {
+  tbody.innerHTML = liste.map((s, i) => {
     const satisHas   = parseFloat(s.has) || 0;
     const maliyetHas = (parseFloat(s.maliyet_usd) || 0) / altin;
     const hasKar     = satisHas - maliyetHas;
     const kar = parseFloat(s.kar_usd) || 0;
     const renk = kar >= 0 ? '#1B7A4A' : '#C0392B';
     const bg   = kar >= 0 ? '#EAF5EE' : '#FDF0EE';
-    return `<tr>
+    const secilebilir = gbDurumVar && s.durum !== 'kargolandi';
+    return `<tr class="${gbSecili.has(String(s.id)) ? 'gb-secili' : ''}">
+      <td style="width:34px;text-align:center;">${secilebilir ? `<input type="checkbox" class="gb-cb" ${gbSecili.has(String(s.id)) ? 'checked' : ''} onchange="gbSecToggle('${s.id}',this);this.closest('tr').classList.toggle('gb-secili',this.checked)">` : ''}</td>
       <td style="color:var(--text);font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
+      <td style="white-space:nowrap;">${gbDurumRozet(s)}</td>
       <td>${s.tarih||'-'}</td>
       <td style="font-weight:500">${s.urun_adi||'-'}</td>
       <td>${parseFloat(s.gram).toString()}</td>
@@ -6113,8 +6311,10 @@ function updateGrupBOzet() {
   document.getElementById('gbTopGram').textContent       = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('gbTopTasGr').textContent      = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   const gbKur = parseFloat(grupbAylikParam?.dolar_kuru) || 0;
+  const kargoKar = gbKargoKariAy();
+  ku += kargoKar;
   const el = document.getElementById('gbTopKarUsd');
-  el.innerHTML = '$' + fmtTLTam(ku) + tlAlti(ku, gbKur);
+  el.innerHTML = '$' + fmtTLTam(ku) + tlAlti(ku, gbKur) + (kargoKar ? `<div style="font-size:11px;font-weight:500;color:var(--text2);margin-top:2px;">ürün $${fmtTLTam(ku - kargoKar)} + kargo $${fmtTLTam(kargoKar)}</div>` : '');
   el.className = 'metric-value ' + (ku >= 0 ? 'green' : 'red');
   const bdgGB = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
   const gb = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = bdgGB(v); };
@@ -6141,7 +6341,7 @@ function renderGrupBOdemeListesi(containerEl, platform, ay) {
   containerEl.innerHTML = list.map(o => `
     <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;">
       <span style="color:var(--text3);white-space:nowrap;min-width:72px;">${o.tarih}</span>
-      <span style="font-weight:700;color:var(--gold-dark);white-space:nowrap;">${o.has} has</span>
+      <span style="font-weight:700;color:var(--gold-dark);white-space:nowrap;">${parseFloat(o.has) ? o.has + ' has' : ''}${parseFloat(o.has) && parseFloat(o.usd) ? ' + ' : ''}${parseFloat(o.usd) ? '<span style="color:#60A5FA">$' + o.usd + ' kargo</span>' : ''}</span>
       <span style="flex:1;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.aciklama||'-'}</span>
       <button onclick="deleteGrupBOdeme(${o.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:0 2px;line-height:1;flex-shrink:0;">🗑</button>
     </div>`).join('');
@@ -6157,6 +6357,7 @@ async function deleteGrupBOdeme(id) {
   if (modalEl) renderGrupBOdemeListesi(modalEl, aktifPlatformB, ay);
   try {
     await api('grupb_odemeler?id=eq.' + id, 'DELETE');
+    await gbEkVerileriYukle(); updateGrupBBakiye(); gbPanoCiz();
   } catch(e) {
     _cache[key] = onceki;
     updateGrupBBakiye();
@@ -6240,6 +6441,7 @@ function _gbJpgDownload(canvas, dosyaAdi) {
 
 function openGrupBOdemeModal() {
   document.getElementById('gbOdemeHas').value = '';
+  const usdEl = document.getElementById('gbOdemeUsd'); if (usdEl) usdEl.value = '';
   document.getElementById('gbOdemeAciklama').value = '';
   const ay = document.getElementById('gbAy').value;
   const modalEl = document.getElementById('gbOdemeModalListesi');
@@ -6247,12 +6449,15 @@ function openGrupBOdemeModal() {
   openModal('grupBOdemeModal');
 }
 async function saveGrupBOdeme() {
-  const has = parseFloat(document.getElementById('gbOdemeHas').value);
-  if (!has || has <= 0) { alert('Geçerli bir has miktarı giriniz.'); return; }
+  const has = parseFloat(document.getElementById('gbOdemeHas').value) || 0;
+  const usd = parseFloat((document.getElementById('gbOdemeUsd') || {}).value) || 0;
+  if (has < 0 || usd < 0 || (!has && !usd)) { alert('Has miktarı ya da kargo ödemesi ($) giriniz.'); return; }
+  if (usd && !gbGonderiTabloVar) { alert('Kargo ödemesi için önce grupb-kargo.sql dosyasını Supabase\'de çalıştırın.'); return; }
   const aciklama = document.getElementById('gbOdemeAciklama').value.trim();
   const ay = document.getElementById('gbAy').value;
   const key = 'odemeB:' + aktifPlatformB + ':' + ay;
   const yeni = { id: Date.now(), platform: aktifPlatformB, ay, has, aciklama, tarih: bugunTarihStr() };
+  if (usd) yeni.usd = usd;
   if (!_cache[key]) _cache[key] = [];
   _cache[key].push(yeni);
   closeModal('grupBOdemeModal');
@@ -6261,6 +6466,7 @@ async function saveGrupBOdeme() {
   if (modalEl) renderGrupBOdemeListesi(modalEl, aktifPlatformB, ay);
   try {
     await api('grupb_odemeler', 'POST', yeni);
+    await gbEkVerileriYukle(); updateGrupBBakiye(); gbPanoCiz();
   } catch(e) {
     _cache[key] = _cache[key].filter(o => o.id !== yeni.id);
     updateGrupBBakiye();
@@ -6302,13 +6508,21 @@ function updateGrupBBakiye() {
   const degerEl  = document.getElementById('gbBakiyeDeger');
   const detayEl  = document.getElementById('gbBakiyeDetay');
   if (!degerEl || !ay) return;
-  const satisHas   = grupbSiparisler.reduce((s, x) => s + (parseFloat(x.has) || 0), 0);
-  const odemeler   = gbOdemeGetList(aktifPlatformB, ay);
-  const odenenHas  = odemeler.reduce((s, x) => s + (parseFloat(x.has) || 0), 0);
-  const bakiye     = satisHas - odenenHas;
-  degerEl.textContent = parseFloat(bakiye.toFixed(2)).toString() + ' has';
-  degerEl.style.color = bakiye <= 0 ? 'var(--green)' : 'var(--gold-dark)';
-  if (detayEl) detayEl.innerHTML = `Alacak: <b>${satisHas.toFixed(2)}</b> has<br>Ödenen: <b>${odenenHas.toFixed(2)}</b> has`;
+  const b = gbBakiyeVeri;
+  if (b) {
+    // Sürekli bakiye: devreden + bu ayın hareketleri = güncel borç (has ve kargo $ ayrı)
+    degerEl.innerHTML = `${gbHas(b.hasBorc)} has<div style="font-size:15px;font-weight:600;margin-top:2px;color:${b.usdBorc > 0.004 ? '#60A5FA' : 'var(--green)'}">${gbUsd(b.usdBorc)} kargo</div>`;
+    degerEl.style.color = b.hasBorc <= 0.004 ? 'var(--green)' : 'var(--gold-dark)';
+    if (detayEl) detayEl.innerHTML = `<b>HAS</b><br>Devreden: <b>${gbHas(b.hasDevir)}</b><br>Bu ay satış: <b>+${gbHas(b.hasSatisAy)}</b><br>Bu ay ödeme: <b>−${gbHas(b.hasOdemeAy)}</b><br>Güncel: <b>${gbHas(b.hasBorc)} has</b><br><br><b>KARGO ($)</b><br>Devreden: <b>${gbUsd(b.usdDevir)}</b><br>Bu ay kargo: <b>+${gbUsd(b.usdKargoAy)}</b><br>Bu ay ödeme: <b>−${gbUsd(b.usdOdemeAy)}</b><br>Güncel: <b>${gbUsd(b.usdBorc)}</b>`;
+  } else {
+    const satisHas   = grupbSiparisler.reduce((s, x) => s + (parseFloat(x.has) || 0), 0);
+    const odemeler   = gbOdemeGetList(aktifPlatformB, ay);
+    const odenenHas  = odemeler.reduce((s, x) => s + (parseFloat(x.has) || 0), 0);
+    const bakiye     = satisHas - odenenHas;
+    degerEl.textContent = parseFloat(bakiye.toFixed(2)).toString() + ' has';
+    degerEl.style.color = bakiye <= 0 ? 'var(--green)' : 'var(--gold-dark)';
+    if (detayEl) detayEl.innerHTML = `Alacak: <b>${satisHas.toFixed(2)}</b> has<br>Ödenen: <b>${odenenHas.toFixed(2)}</b> has`;
+  }
   const listEl = document.getElementById('gbOdemeListesi');
   if (listEl) renderGrupBOdemeListesi(listEl, aktifPlatformB, ay);
 }
@@ -6318,7 +6532,7 @@ function openGrupBModal(id) {
   editingGrupBId = id || null;
   document.getElementById('gbModalBaslik').textContent = PLATFORM_LABELS[aktifPlatformB] + (id ? ' — Düzenle' : ' — Yeni Satış');
   if (id) {
-    const s = grupbSiparisler.find(x => x.id === id);
+    const s = gbSiparisBul(id);
     if (!s) return;
     document.getElementById('gbTarih').value = s.tarih;
     document.getElementById('gbUrun').value = s.urun_adi;
@@ -6426,15 +6640,16 @@ async function saveGrupBSiparis() {
     if (editingGrupBId) {
       res = await api('platform_siparisler?id=eq.' + editingGrupBId, 'PATCH', data);
     } else {
+      if (gbDurumVar) data.durum = 'bekliyor';
       res = await api('platform_siparisler', 'POST', data);
     }
     console.log('[saveGrupBSiparis] Response:', res);
     closeModal('grupbModal');
-    delete _cache['sipB:' + aktifPlatformB + ':' + tarih.slice(0,7)];
+    gbOnbellekTemizle();
     await loadGrupBData();
   } catch (err) {
     console.error('[saveGrupBSiparis] Hata:', err);
-    console.error('[saveGrupBSiparis] Hata mesajı:', err.message);
+    alert('Satış kaydedilemedi: ' + err.message);
   }
 }
 
@@ -6443,6 +6658,392 @@ async function deleteGrupBSiparis(id) {
   await api('platform_siparisler?id=eq.' + id, 'DELETE');
   delete _cache['sipB:' + aktifPlatformB + ':' + document.getElementById('gbAy').value];
   loadGrupBData();
+}
+
+// ===== GRUP B: SİPARİŞ DURUMU, TOPLU KARGO (GÖNDERİ), SÜREKLİ BAKİYE =====
+// Kurallar: ürün kârı siparişin ayında; kargo maliyeti/müşteriye yazılan/kargo kârı/borç gönderinin ayında.
+// Bakiye aydan bağımsız ve süreklidir: Has borcu = tüm satış has − tüm has ödemeleri; Kargo borcu ($) = tüm gönderilerde müşteriye yazılan − tüm kargo ödemeleri.
+let gbSekme = 'ay', gbSecili = new Set(), gbDurumVar = null, gbGonderiTabloVar = null;
+let gbBekleyenTum = [], gbGonderilerAy = [], gbKargolananAy = [], gbBakiyeVeri = null;
+const GB_KARGO_FIRMALARI = ['UPS', 'DHL', 'FedEx', 'Aras Kargo', 'Yurtiçi Kargo', 'MNG Kargo', 'PTT', 'Sürat Kargo'];
+function gbEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function gbUsd(v) { return '$' + (Number(v) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function gbHas(v) { return (Number(v) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+async function gbAltyapiKontrol() {
+  if (gbDurumVar === null) { try { await api('platform_siparisler?select=durum,gonderi_id&limit=1'); gbDurumVar = true; } catch (e) { gbDurumVar = false; } }
+  if (gbGonderiTabloVar === null) { try { await api('grupb_gonderiler?select=id&limit=1'); gbGonderiTabloVar = true; } catch (e) { gbGonderiTabloVar = false; } }
+  return gbDurumVar && gbGonderiTabloVar;
+}
+async function gbEkVerileriYukle() {
+  const ay = document.getElementById('gbAy').value, p = aktifPlatformB;
+  const hazir = await gbAltyapiKontrol();
+  const uyari = document.getElementById('gbKurulumUyari');
+  if (uyari) uyari.style.display = hazir ? 'none' : 'block';
+  const [yy, aa] = ay.split('-').map(Number), sonrakiAy = new Date(yy, aa, 1), ayBitis = sonrakiAy.getFullYear() + '-' + String(sonrakiAy.getMonth() + 1).padStart(2, '0') + '-01';
+  const [bekleyen, gonderilerAy, tumSatis, tumOdeme, tumGonderi, kargolananAy] = await Promise.all([
+    hazir ? api(`platform_siparisler?platform=eq.${p}&durum=eq.bekliyor&order=tarih.asc`).catch(() => []) : [],
+    hazir ? api(`grupb_gonderiler?platform=eq.${p}&ay=eq.${ay}&order=tarih.desc,id.desc`).catch(() => []) : [],
+    api(`platform_siparisler?platform=eq.${p}&select=has,tarih`).catch(() => null),
+    api(`grupb_odemeler?platform=eq.${p}&select=*`).catch(() => null),
+    hazir ? api(`grupb_gonderiler?platform=eq.${p}&select=musteri_usd,maliyet_usd,tarih`).catch(() => []) : [],
+    hazir ? api(`platform_siparisler?platform=eq.${p}&durum=eq.kargolandi&kargo_tarihi=gte.${ay}-01&kargo_tarihi=lt.${ayBitis}&order=kargo_tarihi.asc`).catch(() => []) : []
+  ]);
+  gbKargolananAy = kargolananAy || [];
+  gbBekleyenTum = bekleyen || [];
+  gbGonderilerAy = gonderilerAy || [];
+  // Sürekli bakiye
+  if (tumSatis && tumOdeme) {
+    const ayBas = ay + '-01';
+    const once = r => String(r.tarih || '') < ayBas, buAy = r => String(r.tarih || '').slice(0, 7) === ay;
+    const top = (l, f, k) => l.filter(f).reduce((s, x) => s + (parseFloat(x[k]) || 0), 0);
+    const hepsi = () => true;
+    gbBakiyeVeri = {
+      hasDevir: top(tumSatis, once, 'has') - top(tumOdeme, once, 'has'),
+      usdDevir: top(tumGonderi, once, 'musteri_usd') - top(tumOdeme, once, 'usd'),
+      hasSatisAy: top(tumSatis, buAy, 'has'), hasOdemeAy: top(tumOdeme, buAy, 'has'),
+      usdKargoAy: top(tumGonderi, buAy, 'musteri_usd'), usdOdemeAy: top(tumOdeme, buAy, 'usd'),
+      hasBorc: top(tumSatis, hepsi, 'has') - top(tumOdeme, hepsi, 'has'),
+      usdBorc: top(tumGonderi, hepsi, 'musteri_usd') - top(tumOdeme, hepsi, 'usd')
+    };
+  } else gbBakiyeVeri = null;
+}
+function gbKargoKariAy() { return gbGonderilerAy.reduce((s, g) => s + (parseFloat(g.musteri_usd) || 0) - (parseFloat(g.maliyet_usd) || 0), 0); }
+function gbPanoCiz() {
+  const el = document.getElementById('gbPano'); if (!el) return;
+  const bek = gbBekleyenTum, bugun = new Date();
+  const enEski = bek.length ? Math.floor((bugun - new Date(bek[0].tarih + 'T00:00:00')) / 86400000) : 0;
+  const bekHas = bek.reduce((s, x) => s + (parseFloat(x.has) || 0), 0), bekGram = bek.reduce((s, x) => s + (parseFloat(x.gram) || 0), 0);
+  const kargolananAy = gbKargolananAy.length;
+  const kk = gbKargoKariAy(), kMal = gbGonderilerAy.reduce((s, g) => s + (parseFloat(g.maliyet_usd) || 0), 0), kMus = gbGonderilerAy.reduce((s, g) => s + (parseFloat(g.musteri_usd) || 0), 0);
+  el.innerHTML = `
+    <div class="gb-pano-kart pk-sari" onclick="gbSekmeSec('bekleyen')"><div class="gb-pano-ust">⏳ Bekleyen</div><div class="gb-pano-deger">${bek.length} <small>sipariş</small></div>
+      <div class="gb-pano-alt">${bek.length ? gbHas(bekGram) + ' gr · ' + gbHas(bekHas) + ' has · en eski ' + enEski + ' gün' : 'Bekleyen sipariş yok'}</div>
+      ${(() => { const sonlar = bek.map(x => x.son_gonderim).filter(Boolean).sort(); if (!sonlar.length) return ''; const [y, a, g] = sonlar[0].split('-'); const yakin = sonlar.filter(x => (new Date(x + 'T23:59:59') - new Date()) / 86400000 <= 2).length; return `<div class="gb-pano-alt" style="color:${yakin ? '#F87171' : '#A39A85'}">⏰ En yakın son gönderim ${g}.${a}${yakin ? ' · ' + yakin + ' sipariş 2 gün içinde' : ''}</div>`; })()}</div>
+    <div class="gb-pano-kart pk-yesil" onclick="gbSekmeSec('kargolanan')"><div class="gb-pano-ust">🚚 Bu Ay Kargolanan</div><div class="gb-pano-deger">${kargolananAy} <small>sipariş</small></div>
+      <div class="gb-pano-alt">${gbGonderilerAy.length} gönderi</div></div>
+    <div class="gb-pano-kart pk-mavi" onclick="gbSekmeSec('gonderiler')"><div class="gb-pano-ust">📦 Bu Ay Kargo Kârı</div><div class="gb-pano-deger gizle-rakam">${gbUsd(kk)}</div>
+      <div class="gb-pano-alt gizle-rakam">Müşteriye ${gbUsd(kMus)} · Maliyet ${gbUsd(kMal)}</div></div>
+    <div class="gb-pano-kart pk-mor"><div class="gb-pano-ust">💳 Güncel Borç</div><div class="gb-pano-deger gizle-rakam">${gbBakiyeVeri ? gbHas(gbBakiyeVeri.hasBorc) + ' <small>has</small>' : '—'}</div>
+      <div class="gb-pano-alt gizle-rakam">${gbBakiyeVeri ? 'Kargo: ' + gbUsd(gbBakiyeVeri.usdBorc) : ''}</div></div>`;
+  const s = id => document.getElementById(id);
+  if (s('gbSekmeBekSay')) s('gbSekmeBekSay').textContent = bek.length;
+  if (s('gbSekmeGonSay')) s('gbSekmeGonSay').textContent = gbGonderilerAy.length;
+  document.querySelectorAll('#gbSekmeler [data-sekme]').forEach(b => b.classList.toggle('aktif', b.dataset.sekme === gbSekme));
+}
+function gbSekmeSec(s) {
+  gbSekme = s; gbSecili.clear();
+  const tablo = document.getElementById('gbTabloKart'), gl = document.getElementById('gbGonderiListe');
+  if (tablo) tablo.style.display = s === 'gonderiler' ? 'none' : '';
+  if (gl) gl.style.display = s === 'gonderiler' ? '' : 'none';
+  gbPanoCiz();
+  if (s === 'gonderiler') gbGonderiListeCiz(); else renderGrupBTablo();
+  gbSecimCubugu();
+}
+function gbGorunenListe() {
+  if (gbSekme === 'bekleyen') return gbBekleyenTum;
+  if (gbSekme === 'kargolanan') return gbKargolananAy;
+  return grupbSiparisler;
+}
+function gbSiparisBul(id) { id = String(id); return grupbSiparisler.find(x => String(x.id) === id) || gbBekleyenTum.find(x => String(x.id) === id) || gbKargolananAy.find(x => String(x.id) === id); }
+function gbDurumRozet(s) {
+  if (s.durum === 'kargolandi') {
+    const g = s.gonderi_id ? `<span class="gb-gonderi-link" onclick="gbGonderiDetay(${Number(s.gonderi_id)})">📦 #${Number(s.gonderi_id)}</span>` : '';
+    return `<span class="gb-durum dk">🟢 Kargolandı</span>${g}`;
+  }
+  if (s.durum === 'bekliyor') {
+    let son = '';
+    if (s.son_gonderim) {
+      const gun = Math.ceil((new Date(s.son_gonderim + 'T23:59:59') - new Date()) / 86400000);
+      const [y, a, g] = s.son_gonderim.split('-');
+      son = `<span class="gb-son-rozet ${gun <= 0 ? 'gecti' : gun <= 2 ? 'yakin' : ''}" title="Son gönderim tarihi">⏰ ${g}.${a}${gun < 0 ? ' (geçti)' : gun === 0 ? ' (bugün)' : ''}</span>`;
+    }
+    return '<span class="gb-durum db">🟡 Bekliyor</span>' + son;
+  }
+  return '<span class="gb-durum dy" title="Eski kayıt — durumu işaretlenmemiş">—</span>';
+}
+function gbSecToggle(id, cb) { id = String(id); if (cb.checked) gbSecili.add(id); else gbSecili.delete(id); gbSecimCubugu(); }
+function gbTumunuSec(cb) {
+  gbGorunenListe().forEach(s => { if (s.durum !== 'kargolandi') { if (cb.checked) gbSecili.add(String(s.id)); else gbSecili.delete(String(s.id)); } });
+  renderGrupBTablo(); gbSecimCubugu();
+}
+function gbSecimCubugu() {
+  const el = document.getElementById('gbSecimCubugu'); if (!el) return;
+  const n = gbSecili.size;
+  if (!n || !gbDurumVar) { el.style.display = 'none'; return; }
+  const liste = [...gbSecili].map(gbSiparisBul).filter(Boolean);
+  const gram = liste.reduce((s, x) => s + (parseFloat(x.gram) || 0), 0);
+  el.style.display = 'flex';
+  el.innerHTML = `<span><b>${n}</b> sipariş seçili · ${gbHas(gram)} gr</span>
+    <span style="flex:1"></span>
+    ${gbGonderiTabloVar ? '<button class="btn btn-primary btn-sm" onclick="gbKargoModalAc()">📦 Kargoya Ver</button>' : ''}
+    <button class="btn btn-sm" onclick="gbDurumYap(\'bekliyor\')" title="Seçilenleri bekleyen siparişlere ekle">⏳ Bekliyor yap</button>
+    <button class="btn btn-sm" onclick="gbDurumYap(\'kargolandi\')" title="Daha önce gönderilmiş eski kayıtlar için: kargo ücreti yazmadan kargolandı işaretler">✔ Gönderilmiş say</button>
+    <button class="btn btn-sm" onclick="gbSecili.clear();renderGrupBTablo();gbSecimCubugu()">Seçimi kaldır</button>`;
+}
+async function gbDurumYap(durum) {
+  const idler = [...gbSecili]; if (!idler.length) return;
+  try {
+    await api('platform_siparisler?id=in.(' + idler.join(',') + ')', 'PATCH', { durum, ...(durum === 'bekliyor' ? { gonderi_id: null, kargo_tarihi: null } : {}) });
+    showToast('✓ ' + idler.length + ' sipariş "' + (durum === 'bekliyor' ? 'Bekliyor' : 'Gönderilmiş') + '" yapıldı');
+    gbSecili.clear(); gbOnbellekTemizle(); await loadGrupBData();
+  } catch (e) { alert('Güncellenemedi: ' + e.message); }
+}
+function gbOnbellekTemizle() { Object.keys(_cache).forEach(k => { if (k.startsWith('sipB:' + aktifPlatformB + ':') || k.startsWith('odemeB:' + aktifPlatformB + ':')) delete _cache[k]; }); }
+
+// --- Kargoya ver (gönderi oluştur) ---
+function gbModal(icerik) {
+  let ov = document.getElementById('gbKargoModal');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'gbKargoModal'; ov.onclick = e => { if (e.target === ov) gbModalKapat(); }; document.body.appendChild(ov); }
+  ov.style.display = 'flex';
+  ov.innerHTML = `<div class="card ds-kutu" style="width:min(620px,100%);max-height:92vh;overflow:auto;">${icerik}</div>`;
+}
+function gbModalKapat() { const ov = document.getElementById('gbKargoModal'); if (ov) ov.style.display = 'none'; }
+function gbKargoModalAc() {
+  const liste = [...gbSecili].map(gbSiparisBul).filter(Boolean);
+  if (!liste.length) return;
+  const sonFirma = (() => { try { return localStorage.getItem('gbSonKargoFirma') || ''; } catch (_) { return ''; } })();
+  gbModal(`
+    <div class="ds-ust"><div class="ds-baslik">📦 Kargoya Ver — ${gbEsc(PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB)}</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
+    <div class="ds-aciklama">Bu <b>${liste.length}</b> sipariş tek kargoda gidiyor; kargo ücreti bu gönderiye <b>bir kez</b> yazılır.</div>
+    <div class="gb-kargo-liste">${liste.map(s => `<div><span>${gbEsc(s.musteri_adi ? s.musteri_adi + '.' : '')} ${gbEsc(s.urun_adi || '-')}</span><span>${gbEsc(s.tarih || '')} · ${parseFloat(s.gram) || 0} gr</span></div>`).join('')}</div>
+    <div class="gb-form">
+      <label>Gönderi tarihi<input type="date" id="gbkTarih" class="form-control" value="${bugunTarihStr()}"></label>
+      <label>Kargo firması<input id="gbkFirma" class="form-control" list="gbkFirmalar" value="${gbEsc(sonFirma)}" placeholder="UPS, DHL…"><datalist id="gbkFirmalar">${GB_KARGO_FIRMALARI.map(f => `<option value="${f}">`).join('')}</datalist></label>
+      <label>Takip no (isteğe bağlı)<input id="gbkTakip" class="form-control"></label>
+      <label>Kargo maliyeti ($) <small>— firmaya ödediğiniz</small><input type="number" step="0.01" min="0" id="gbkMaliyet" class="form-control" oninput="gbKargoKarGoster()"></label>
+      <label>Müşteriye yazılan ($) <small>— borcuna eklenir</small><input type="number" step="0.01" min="0" id="gbkMusteri" class="form-control" oninput="gbKargoKarGoster()"></label>
+      <label>Not<input id="gbkNot" class="form-control"></label>
+    </div>
+    <div id="gbkKar" class="gb-kargo-kar"></div>
+    <div class="ds-butonlar"><button class="btn" onclick="gbModalKapat()">Vazgeç</button><button class="btn btn-primary" id="gbkKaydet" onclick="gbKargoKaydet()">📦 Kargolandı olarak kaydet</button></div>`);
+  gbKargoKarGoster();
+}
+function gbKargoKarGoster() {
+  const m = parseFloat(document.getElementById('gbkMaliyet')?.value) || 0, u = parseFloat(document.getElementById('gbkMusteri')?.value) || 0;
+  const el = document.getElementById('gbkKar'); if (!el) return;
+  const k = u - m;
+  el.innerHTML = `Kargo kârı: <b style="color:${k >= 0 ? '#34D399' : '#F87171'}">${gbUsd(k)}</b> · Müşteri borcuna eklenecek: <b>${gbUsd(u)}</b>`;
+}
+async function gbKargoKaydet() {
+  const idler = [...gbSecili]; if (!idler.length) return;
+  const tarih = document.getElementById('gbkTarih').value;
+  if (!tarih) { alert('Gönderi tarihi seçin.'); return; }
+  const maliyet = parseFloat(document.getElementById('gbkMaliyet').value) || 0, musteri = parseFloat(document.getElementById('gbkMusteri').value) || 0;
+  if (!maliyet && !musteri && !confirm('Kargo maliyeti ve müşteriye yazılan tutar boş. Ücretsiz gönderi olarak kaydedilsin mi?')) return;
+  const firma = document.getElementById('gbkFirma').value.trim();
+  try { if (firma) localStorage.setItem('gbSonKargoFirma', firma); } catch (_) {}
+  const btn = document.getElementById('gbkKaydet'); btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+  try {
+    const res = await api('grupb_gonderiler', 'POST', {
+      platform: aktifPlatformB, tarih, ay: tarih.slice(0, 7), firma, takip_no: document.getElementById('gbkTakip').value.trim(),
+      maliyet_usd: maliyet, musteri_usd: musteri, siparis_sayisi: idler.length, notlar: document.getElementById('gbkNot').value.trim()
+    });
+    const gid = res && res[0] && res[0].id;
+    if (!gid) throw new Error('Gönderi numarası alınamadı');
+    await api('platform_siparisler?id=in.(' + idler.join(',') + ')', 'PATCH', { durum: 'kargolandi', gonderi_id: gid, kargo_tarihi: tarih });
+    gbModalKapat(); gbSecili.clear(); gbOnbellekTemizle();
+    showToast('✓ Gönderi #' + gid + ' kaydedildi — ' + idler.length + ' sipariş kargolandı');
+    await loadGrupBData();
+  } catch (e) { alert('Kaydedilemedi: ' + e.message); btn.disabled = false; btn.textContent = '📦 Kargolandı olarak kaydet'; }
+}
+// --- Gönderiler listesi / detay / geri al ---
+function gbGonderiListeCiz() {
+  const el = document.getElementById('gbGonderiListe'); if (!el) return;
+  if (!gbGonderiTabloVar) { el.innerHTML = '<div class="card"><div class="hk-bos">Önce grupb-kargo.sql dosyasını Supabase\'de çalıştırın.</div></div>'; return; }
+  if (!gbGonderilerAy.length) { el.innerHTML = '<div class="card"><div class="hk-bos">Bu ay gönderi yok.</div></div>'; return; }
+  el.innerHTML = `<div class="card" style="padding:0;overflow-x:auto;"><table><thead><tr><th>#</th><th>Tarih</th><th>Firma</th><th>Takip No</th><th>Sipariş</th><th>Maliyet $</th><th>Müşteriye $</th><th>Kargo Kârı</th><th></th></tr></thead><tbody>${
+    gbGonderilerAy.map(g => { const k = (parseFloat(g.musteri_usd) || 0) - (parseFloat(g.maliyet_usd) || 0); return `<tr>
+      <td style="font-weight:700">#${g.id}</td><td>${gbEsc(g.tarih)}</td><td>${gbEsc(g.firma || '-')}</td><td>${gbEsc(g.takip_no || '-')}</td>
+      <td>${g.siparis_sayisi || 0}</td><td class="gizle-rakam">${gbUsd(g.maliyet_usd)}</td><td class="gizle-rakam">${gbUsd(g.musteri_usd)}</td>
+      <td class="gizle-rakam" style="font-weight:600;color:${k >= 0 ? 'var(--green)' : 'var(--red)'}">${gbUsd(k)}</td>
+      <td style="white-space:nowrap"><button class="btn btn-sm" onclick="gbGonderiDetay(${g.id})">Detay</button> <button class="btn btn-sm btn-danger" onclick="gbGonderiGeriAl(${g.id})">Geri al</button></td></tr>`; }).join('')
+  }</tbody></table></div>`;
+}
+async function gbGonderiDetay(id) {
+  try {
+    const [g] = await api('grupb_gonderiler?id=eq.' + id);
+    const sip = await api('platform_siparisler?gonderi_id=eq.' + id + '&order=tarih.asc');
+    if (!g) return;
+    const k = (parseFloat(g.musteri_usd) || 0) - (parseFloat(g.maliyet_usd) || 0);
+    gbModal(`<div class="ds-ust"><div class="ds-baslik">📦 Gönderi #${g.id}</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
+      <div class="ds-aciklama">${gbEsc(g.tarih)} · ${gbEsc(g.firma || 'Firma yok')}${g.takip_no ? ' · Takip: <b>' + gbEsc(g.takip_no) + '</b>' : ''}</div>
+      <div class="ds-aciklama">Maliyet <b>${gbUsd(g.maliyet_usd)}</b> · Müşteriye <b>${gbUsd(g.musteri_usd)}</b> · Kargo kârı <b>${gbUsd(k)}</b>${g.notlar ? '<br>Not: ' + gbEsc(g.notlar) : ''}</div>
+      <div class="gb-kargo-liste">${(sip || []).map(s => `<div><span>${gbEsc(s.musteri_adi ? s.musteri_adi + '.' : '')} ${gbEsc(s.urun_adi || '-')}</span><span>${gbEsc(s.tarih || '')} · ${parseFloat(s.gram) || 0} gr · ${gbHas(s.has)} has</span></div>`).join('') || '<div>Sipariş bulunamadı</div>'}</div>
+      <div class="ds-butonlar">${g.takip_no ? `<button class="btn" onclick="navigator.clipboard.writeText('${gbEsc(g.takip_no)}');showToast('Takip no kopyalandı')">📋 Takip no kopyala</button>` : ''}<button class="btn" onclick="gbModalKapat()">Kapat</button></div>`);
+  } catch (e) { alert('Gönderi açılamadı: ' + e.message); }
+}
+async function gbGonderiGeriAl(id) {
+  if (!confirm('Gönderi #' + id + ' silinsin mi?\nİçindeki siparişler tekrar "Bekliyor" olur; kargo ücreti ve müşteri borcundaki kargo tutarı geri alınır.')) return;
+  try {
+    await api('platform_siparisler?gonderi_id=eq.' + id, 'PATCH', { durum: 'bekliyor', gonderi_id: null, kargo_tarihi: null });
+    await api('grupb_gonderiler?id=eq.' + id, 'DELETE');
+    gbOnbellekTemizle(); showToast('Gönderi #' + id + ' geri alındı'); await loadGrupBData();
+  } catch (e) { alert('Geri alınamadı: ' + e.message); }
+}
+
+// ===== GRUP B: SİPARİŞ FİŞİ PDF'İNDEN TOPLU EKLEME (Etsy packing slip, sayfa başına bir sipariş) =====
+const GB_AYLAR_EN = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+let gbPdfSatirlar = [], gbHariciVar = null;
+function gbEnTarih(s) {
+  const m = String(s || '').match(/([A-Z][a-z]{2})[a-z]*\.?\s+(\d{1,2}),\s*(\d{4})/);
+  if (!m || !GB_AYLAR_EN[m[1]]) return '';
+  return m[3] + '-' + String(GB_AYLAR_EN[m[1]]).padStart(2, '0') + '-' + m[2].padStart(2, '0');
+}
+function gbBlok(metin, bas, sonlar) {
+  const i = metin.search(new RegExp('(^|\\n)\\s*' + bas + '\\s*\\n')); if (i < 0) return '';
+  const kalan = metin.slice(i).replace(new RegExp('^\\n?\\s*' + bas + '\\s*\\n'), '');
+  let son = kalan.length;
+  sonlar.forEach(s => { const j = kalan.search(new RegExp('\\n\\s*' + s + '\\s*\\n')); if (j >= 0 && j < son) son = j; });
+  return kalan.slice(0, son).split('\n').map(x => x.trim()).filter(Boolean).join('\n');
+}
+// Bir siparişin metni → { siparisNo, alici, adresSatirlari, ulke, sonGonderim, tarih, magaza, urunler:[{baslik, sku, gram, adet, renk, ayar, uzunluk}] }
+function gbFisCozumle(metin) {
+  const no = (metin.match(/Order\s*#\s*(\d+)/i) || [])[1];
+  if (!no) return null;
+  const adres = gbBlok(metin, 'Ship to', ['Scheduled to ship by', 'Shop', 'Order date', 'Payment method']).split('\n').filter(Boolean);
+  const sonGonderim = gbEnTarih(gbBlok(metin, 'Scheduled to ship by', ['Shop', 'Order date', 'Payment method']));
+  const tarih = gbEnTarih(gbBlok(metin, 'Order date', ['Payment method', '\\d+\\s+items?']));
+  const magaza = gbBlok(metin, 'Shop', ['Order date', 'Payment method']).split('\n')[0] || '';
+  let bolum = metin.split(/\n\s*\d+\s+items?\s*\n/i)[1] || '';
+  bolum = bolum.split(/\n\s*Do the green thing/i)[0];
+  const urunler = [];
+  const re = /([\s\S]*?)\n\s*SKU:\s*([^\n]*)\n([\s\S]*?)(?=\n\s*\n|$)/g;
+  let m;
+  while ((m = re.exec(bolum))) {
+    const baslik = m[1].split('\n').map(x => x.trim()).filter(Boolean).join(' ');
+    if (!baslik && !m[2]) continue;
+    const ozellik = {};
+    m[3].split('\n').forEach(l => { const k = l.match(/^\s*([^:]+):\s*(.*)$/); if (k) ozellik[k[1].trim().toLowerCase()] = k[2].trim(); });
+    const sku = m[2].trim();
+    const gram = parseFloat(((sku.match(/(\d+(?:[.,]\d+)?)\s*gr/i) || [])[1] || '0').replace(',', '.')) || 0;
+    const renk = ozellik['gold color'] || ozellik['color'] || ozellik['material'] || '';
+    const ayar = (renk.match(/(10|14|18|22)\s*K/i) || baslik.match(/(10|14|18|22)\s*K/i) || [])[1] || '';
+    urunler.push({ baslik, sku, gram, adet: parseInt(ozellik['quantity']) || 1, renk, ayar: ayar ? ayar + 'K' : '', uzunluk: ozellik['necklace length'] || ozellik['length'] || '' });
+  }
+  return { siparisNo: no, alici: adres[0] || '', adresSatirlari: adres, ulke: adres[adres.length - 1] || '', sonGonderim, tarih, magaza, urunler };
+}
+function gbKisaAd(u) {
+  const ad = u.baslik.split(/\s*[,|]\s*/)[0].replace(/\b(14K|10K|18K)\s+Solid Gold\b/i, '').replace(/\bSolid Gold\b/i, '').replace(/\s+/g, ' ').trim();
+  const kod = (u.sku.match(/^(\d+)/) || [])[1];
+  const renk = /rose/i.test(u.renk) ? ' · Rose' : /white/i.test(u.renk) ? ' · White' : '';
+  return (ad || u.baslik) + (kod ? ' (' + kod + ')' : '') + renk;
+}
+async function gbFisPdfSec(input) {
+  const file = input.files && input.files[0]; input.value = '';
+  if (!file) return;
+  try {
+    if (!pdfjsHazirla()) throw new Error('PDF kütüphanesi yüklenemedi (internet bağlantısını kontrol edin)');
+    showToast('PDF okunuyor…');
+    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    // Sayfaları siparişlere ayır (Order # olmayan sayfa önceki siparişin devamıdır)
+    const parcalar = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const c = await (await pdf.getPage(i)).getTextContent();
+      const t = c.items.map(it => it.str).join('\n');
+      if (/Order\s*#\s*\d+/i.test(t) || !parcalar.length) parcalar.push(t); else parcalar[parcalar.length - 1] += '\n' + t.replace(/^[\s\S]*?\n\s*\d+\s+items?\s*\n/i, '\n');
+    }
+    const siparisler = parcalar.map(gbFisCozumle).filter(Boolean);
+    if (!siparisler.length) throw new Error('PDF\'te sipariş bulunamadı (Etsy sipariş fişi biçiminde olmalı).');
+    // Daha önce eklenmiş mi? (harici_no)
+    if (gbHariciVar === null) { try { await api('platform_siparisler?select=harici_no,son_gonderim&limit=1'); gbHariciVar = true; } catch (e) { gbHariciVar = false; } }
+    let mevcut = new Set();
+    if (gbHariciVar) {
+      const nolar = siparisler.map(s => s.siparisNo);
+      const r = await api(`platform_siparisler?platform=eq.${aktifPlatformB}&harici_no=in.(${nolar.join(',')})&select=harici_no`).catch(() => []);
+      mevcut = new Set((r || []).map(x => String(x.harici_no)));
+    }
+    // Ay bazında sıradaki sipariş numaraları
+    const aylar = [...new Set(siparisler.map(s => (s.tarih || bugunTarihStr()).slice(0, 7)))];
+    const sonNo = {};
+    for (const ay of aylar) {
+      const r = await api(`platform_siparisler?platform=eq.${aktifPlatformB}&ay=eq.${ay}&select=musteri_adi`).catch(() => []);
+      sonNo[ay] = Math.max(0, ...(r || []).map(x => parseInt(x.musteri_adi) || 0));
+    }
+    gbPdfSatirlar = [];
+    siparisler.sort((a, b) => String(a.tarih).localeCompare(String(b.tarih)) || String(a.siparisNo).localeCompare(String(b.siparisNo)));
+    siparisler.forEach(s => {
+      const tarih = s.tarih || bugunTarihStr(), ay = tarih.slice(0, 7), zatenVar = mevcut.has(String(s.siparisNo));
+      s.urunler.forEach(u => {
+        for (let k = 0; k < Math.max(1, u.adet); k++) {
+          gbPdfSatirlar.push({
+            sec: !zatenVar, zatenVar, siparis: s, urun: u, tarih,
+            no: zatenVar ? '' : String(++sonNo[ay]),
+            ad: gbKisaAd(u), gram: u.gram, tip: u.ayar === '10K' ? 'kolye10' : 'kolye14', tas: 0
+          });
+        }
+      });
+    });
+    gbPdfOnizle(file.name);
+  } catch (e) { alert('PDF okunamadı: ' + e.message); }
+}
+function gbPdfOnizle(dosya) {
+  const yeni = gbPdfSatirlar.filter(r => !r.zatenVar).length, eski = gbPdfSatirlar.length - yeni;
+  const tipSecenek = sec => Object.entries(GRUPB_TIPLER).map(([k, t]) => `<option value="${k}" ${k === sec ? 'selected' : ''}>${t.ad}</option>`).join('');
+  gbModal(`
+    <div class="ds-ust"><div class="ds-baslik">📄 Fişten Sipariş Ekle — ${gbEsc(PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB)}</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
+    <div class="ds-aciklama"><b>${gbEsc(dosya)}</b> · ${gbPdfSatirlar.length} ürün bulundu${eski ? ` · <span style="color:#F87171">${eski} tanesi zaten kayıtlı, işaretlenmedi</span>` : ''}. Gram ve tip kontrol edip <b>Ekle</b>'ye basın; hepsi <b>Bekliyor</b> olarak eklenir.</div>
+    ${gbHariciVar === false ? '<div class="gb-uyari">Aynı fişi iki kez eklemeyi önleme ve son gönderim tarihi için <b>grupb-kargo.sql</b> dosyasını (güncel hâlini) Supabase\'de çalıştırın.</div>' : ''}
+    <div class="gb-pdf-liste">${gbPdfSatirlar.map((r, i) => `
+      <div class="gb-pdf-satir ${r.zatenVar ? 'zaten' : ''}">
+        <label class="gb-pdf-sec"><input type="checkbox" class="gb-cb" ${r.sec ? 'checked' : ''} onchange="gbPdfSatirlar[${i}].sec=this.checked;gbPdfOzet()"></label>
+        <div class="gb-pdf-bilgi">
+          <div class="gb-pdf-ust"><b>#${gbEsc(r.siparis.siparisNo)}</b> · ${gbEsc(r.siparis.alici)} · ${gbEsc(r.siparis.ulke)} · ${gbEsc(r.tarih)}${r.siparis.sonGonderim ? ' · <span class="gb-son">⏰ ' + gbEsc(r.siparis.sonGonderim) + '</span>' : ''}${r.zatenVar ? ' · <b style="color:#F87171">zaten kayıtlı</b>' : ''}</div>
+          <div class="gb-pdf-alt">${gbEsc(r.urun.sku)} · ${gbEsc(r.urun.renk)}${r.urun.uzunluk ? ' · ' + gbEsc(r.urun.uzunluk) : ''}${/inch|cm/i.test(r.urun.uzunluk) && !/no chain/i.test(r.urun.uzunluk) ? ' <span class="gb-son">⛓ zincirli — gramı kontrol edin</span>' : ''}</div>
+          <div class="gb-pdf-alanlar">
+            <label>No<input class="form-control" value="${gbEsc(r.no)}" oninput="gbPdfSatirlar[${i}].no=this.value"></label>
+            <label class="genis">Ürün<input class="form-control" value="${gbEsc(r.ad)}" oninput="gbPdfSatirlar[${i}].ad=this.value"></label>
+            <label>Gram<input type="number" step="0.01" class="form-control" value="${r.gram || ''}" oninput="gbPdfSatirlar[${i}].gram=parseFloat(this.value)||0;gbPdfOzet()"></label>
+            <label>Tip<select class="form-control" onchange="gbPdfSatirlar[${i}].tip=this.value;gbPdfOzet()">${tipSecenek(r.tip)}</select></label>
+            <label>Taş gr<input type="number" step="0.001" class="form-control" value="0" oninput="gbPdfSatirlar[${i}].tas=parseFloat(this.value)||0"></label>
+          </div>
+        </div>
+      </div>`).join('')}</div>
+    <div id="gbPdfOzet" class="gb-kargo-kar"></div>
+    <div class="ds-butonlar"><button class="btn" onclick="gbModalKapat()">Vazgeç</button><button class="btn btn-primary" id="gbPdfEkleBtn" onclick="gbPdfEkle()">＋ Seçilenleri Ekle</button></div>`);
+  const kutu = document.querySelector('#gbKargoModal .ds-kutu'); if (kutu) kutu.style.width = 'min(900px,100%)';
+  gbPdfOzet();
+}
+function gbPdfOzet() {
+  const s = gbPdfSatirlar.filter(r => r.sec), el = document.getElementById('gbPdfOzet'); if (!el) return;
+  const gram = s.reduce((a, r) => a + (r.gram || 0), 0), has = s.reduce((a, r) => a + (r.gram || 0) * gbEfektifMilyem(r.tip, r.gram || 0).satis, 0);
+  el.innerHTML = `Eklenecek: <b>${s.length}</b> ürün · <b>${gbHas(gram)}</b> gr · satış has <b>${gbHas(has)}</b>`;
+}
+async function gbAyParam(ay) {
+  if (!_cache['param:' + ay]) {
+    try { const p = await api(`aylik_parametreler?ay=eq.${ay}&limit=1`); _cache['param:' + ay] = p && p.length ? p[0] : { altin_fiyati_usd: 0, dolar_kuru: 0 }; }
+    catch (e) { _cache['param:' + ay] = { altin_fiyati_usd: 0, dolar_kuru: 0 }; }
+  }
+  return _cache['param:' + ay];
+}
+async function gbPdfEkle() {
+  const secilen = gbPdfSatirlar.filter(r => r.sec);
+  if (!secilen.length) { alert('Eklenecek ürün seçilmedi.'); return; }
+  const eksikGram = secilen.filter(r => !r.gram);
+  if (eksikGram.length && !confirm(eksikGram.length + ' üründe gram boş. Yine de eklensin mi?')) return;
+  const btn = document.getElementById('gbPdfEkleBtn'); btn.disabled = true; btn.textContent = 'Ekleniyor…';
+  try {
+    const satirlar = [];
+    for (const r of secilen) {
+      const ay = r.tarih.slice(0, 7), altin = parseFloat((await gbAyParam(ay)).altin_fiyati_usd) || 0;
+      const gram = r.gram || 0, t = gbEfektifMilyem(r.tip, gram);
+      const satHas = gram * t.satis, malHas = gram * t.maliyet, karUsd = (satHas - malHas) * altin;
+      const tipAd = GRUPB_TIPLER[r.tip]?.ad || '';
+      const d = {
+        platform: aktifPlatformB, ay, tarih: r.tarih, islem_tipi: 'satis', urun_adi: r.ad.trim(), adet: 1, gram,
+        ayar: tipAd.match(/\d+K/)?.[0] || r.tip, milyem: t.satis, has: r4(satHas), ulke: r.siparis.ulke || '', kargo_usd: 0,
+        maliyet_usd: parseFloat((malHas * altin).toFixed(2)), satis_fiyati_usd: parseFloat((satHas * altin).toFixed(2)), komisyon_usd: 0,
+        kar_usd: parseFloat(karUsd.toFixed(2)), musteri_adi: String(r.no || '').trim(), notlar: notlarWithTas(tipAd, r.tas || 0),
+        adres: r.siparis.adresSatirlari.join('\n')
+      };
+      if (gbDurumVar) d.durum = 'bekliyor';
+      if (gbHariciVar) { d.harici_no = r.siparis.siparisNo; d.son_gonderim = r.siparis.sonGonderim || null; }
+      satirlar.push(d);
+    }
+    await api('platform_siparisler', 'POST', satirlar);
+    gbModalKapat(); gbOnbellekTemizle();
+    showToast('✓ ' + satirlar.length + ' sipariş fişten eklendi');
+    await loadGrupBData();
+  } catch (e) { alert('Eklenemedi: ' + e.message); btn.disabled = false; btn.textContent = '＋ Seçilenleri Ekle'; }
 }
 
 // ===== GRUP C =====
@@ -9306,7 +9907,6 @@ async function menuKaydet() {
 // ===== GMAIL'DEN GELEN ETSY SİPARİŞLERİ =====
 // Gmail otomasyonu satış maillerinin düz metnini gelen_mailler tablosuna yazar; burada ayıklanıp
 // "Siparişe Ekle" ile tanıdık Satış Ekle penceresine doldurulur. Gram vb. elle girilir.
-const GELEN_AKTIF = true;    // Gmail (Alfred) gelen siparişler açık
 const GELEN_MAGAZA = { alfred: 'alfred_etsy', essos: 'essos_etsy' };   // Etsy "Shop:" adı → platform
 let gelenListe = [], gelenAktifId = null, gelenTabloVar = null;
 const GELEN_AYLAR = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
@@ -9379,7 +9979,7 @@ async function gelenYukle() {
 }
 async function gelenSayacGuncelle() {
   const btn = document.getElementById('gelenBtn'); if (!btn) return;
-  if (!GELEN_AKTIF || !gelenEtsyPlatformu()) { btn.style.display = 'none'; return; }
+  if (!gelenEtsyPlatformu()) { btn.style.display = 'none'; return; }
   await gelenYukle();
   if (!gelenTabloVar) { btn.style.display = 'none'; return; }
   const n = gelenListe.filter(m => m.c.platform === aktifPlatform).length;
@@ -10207,10 +10807,17 @@ document.addEventListener('DOMContentLoaded', () => { asInit(); setTimeout(apply
       <button class="modal-close" onclick="closeModal('grupBOdemeModal')">×</button>
     </div>
     <div class="modal-body">
-      <div class="form-group">
-        <label class="form-label">Has Miktarı *</label>
-        <input type="number" class="form-control" id="gbOdemeHas" step="0.01" placeholder="0.00" min="0">
+      <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="form-group">
+          <label class="form-label">Has Miktarı</label>
+          <input type="number" class="form-control" id="gbOdemeHas" step="0.01" placeholder="0.00" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Kargo Ödemesi ($)</label>
+          <input type="number" class="form-control" id="gbOdemeUsd" step="0.01" placeholder="0.00" min="0">
+        </div>
       </div>
+      <div style="font-size:11.5px;color:var(--text3);margin:-4px 0 10px;">Has ödemesi has borcundan, kargo ödemesi kargo borcundan düşer. İkisi birlikte de girilebilir.</div>
       <div class="form-group">
         <label class="form-label">Açıklama (opsiyonel)</label>
         <input type="text" class="form-control" id="gbOdemeAciklama" placeholder="Not...">
