@@ -1,4 +1,4 @@
-<!-- SURUM-V137b-BAYI-FOTO --><!DOCTYPE html>
+<!-- SURUM-V138-FOTO-3AY --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -6232,8 +6232,17 @@ async function savePlatReklam() {
 
 
 // ===== GRUP B =====
+// Bayi sipariş fotoğrafları 3 aydan eski olunca silinir (sipariş kalır, sadece küçük resim gider).
+// Bailey's/Bella/Buse sayfası açıldığında oturum başına bir kez çalışır.
+let gbFotoTemizlendi = false;
+async function gbEskiFotoTemizle() {
+  if (gbFotoTemizlendi) return; gbFotoTemizlendi = true;
+  const d = new Date(); d.setMonth(d.getMonth() - 3);
+  try { await api(`platform_siparisler?foto=not.is.null&tarih=lt.${bugunTarihStr(d)}`, 'PATCH', { foto: null }); } catch (e) {}
+}
 async function loadGrupBData() {
   platSayacGuncelle();
+  gbEskiFotoTemizle();
   const ay = document.getElementById('gbAy').value;
   if (!ay) return;
   grupbAylikParam = await ayParamGetir(ay);
