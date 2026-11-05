@@ -51,6 +51,12 @@ tr.top td{font-weight:800;color:var(--altin);background:rgba(245,196,81,.05)}
 .son{font-size:11.5px;color:var(--soluk);margin-top:3px}.son.yakin{color:var(--sari)}.son.gecti{color:var(--kirmizi)}
 .alt{font-size:12px;color:var(--soluk)}
 .tip{font-size:12px;color:#C9BFA8}
+.urun{display:flex;align-items:center;gap:10px;min-width:170px}
+.foto{width:44px;height:44px;border-radius:9px;object-fit:cover;background:#fff;flex-shrink:0;cursor:zoom-in}
+.foto.k{width:34px;height:34px;border-radius:7px}
+.buyuk{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:zoom-out}
+.buyuk img{width:min(260px,80vw);border-radius:14px;background:#fff}
+.gonderi li .sol{display:flex;align-items:center;gap:9px}
 .gonderi{background:var(--kart);border:1px solid var(--cizgi);border-radius:16px;padding:14px 16px;margin-bottom:12px}
 .gonderi .ust{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
 .gonderi .ust b{font-size:15px}
@@ -142,6 +148,8 @@ function takipLink(g) {
     : f.includes('fedex') ? 'https://www.fedex.com/fedextrack/?trknbr=' + no : '';
   return url ? `<a class="takip" href="${url}" target="_blank" rel="noopener noreferrer">${esc(g.takip_no)} ↗</a>` : `<span class="takip" style="border:none">${esc(g.takip_no)}</span>`;
 }
+function fotoImg(s, k) { return /^data:image\//.test(s.foto || '') ? `<img class="foto ${k || ''}" src="${s.foto}" alt="" onclick="buyut(this.src)">` : ''; }
+function buyut(src) { const d = document.createElement('div'); d.className = 'buyuk'; d.onclick = () => d.remove(); const i = document.createElement('img'); i.src = src; d.appendChild(i); document.body.appendChild(d); }
 function siparisTablo(liste, kargoKolon) {
   if (!liste.length) return `<div class="tablo"><div class="bos">${ara ? 'Aramanızla eşleşen sipariş yok.' : 'Burada gösterilecek sipariş yok.'}</div></div>`;
   const gonHarita = Object.fromEntries((V.gonderiler || []).map(g => [String(g.id), g]));
@@ -151,7 +159,7 @@ function siparisTablo(liste, kargoKolon) {
     ${liste.map(s => { const g = s.gonderi_id != null ? gonHarita[String(s.gonderi_id)] : null; const tas = tasGr(s.tip); return `<tr>
       <td style="white-space:nowrap">${tarihF(s.tarih)}</td>
       <td style="white-space:nowrap">${s.siparis_no ? '#' + esc(s.siparis_no) : '<span class="alt">—</span>'}</td>
-      <td>${esc(s.urun || '')}<div class="tip">${esc(tipAd(s.tip))}${tas ? ' · taş ' + grF(tas) + ' gr' : ''}</div></td>
+      <td><div class="urun">${fotoImg(s)}<div>${esc(s.urun || '')}<div class="tip">${esc(tipAd(s.tip))}${tas ? ' · taş ' + grF(tas) + ' gr' : ''}</div></div></div></td>
       <td class="s">${grF(s.gram)}</td>
       <td class="s gizle-m">${n(s.milyem) ? n(s.milyem).toFixed(3) : '—'}</td>
       <td class="s"><b>${hasF(s.has)}</b></td>
@@ -167,7 +175,7 @@ function gonderilerHtml(h) {
     const sip = h.sip.filter(s => String(s.gonderi_id) === String(g.id) && eslesir(s));
     if (ara && !sip.length) return '';
     return `<div class="gonderi"><div class="ust"><b>📦 ${tarihF(g.tarih)}</b><span>${esc(g.firma || '')}</span>${takipLink(g)}<span style="margin-left:auto" class="alt">${sip.length || g.siparis_sayisi || 0} sipariş · kargo ${usdF(g.kargo_usd)}</span></div>
-      <ul>${sip.map(s => `<li><span>${s.siparis_no ? '#' + esc(s.siparis_no) + ' · ' : ''}${esc(s.urun || '')} <span class="alt">${esc(tipAd(s.tip))}</span></span><span>${grF(s.gram)} gr · <b>${hasF(s.has)}</b> has</span></li>`).join('') || '<li><span class="alt">Sipariş bilgisi yok</span></li>'}</ul></div>`;
+      <ul>${sip.map(s => `<li><span class="sol">${fotoImg(s, 'k')}<span>${s.siparis_no ? '#' + esc(s.siparis_no) + ' · ' : ''}${esc(s.urun || '')} <span class="alt">${esc(tipAd(s.tip))}</span></span></span><span>${grF(s.gram)} gr · <b>${hasF(s.has)}</b> has</span></li>`).join('') || '<li><span class="alt">Sipariş bilgisi yok</span></li>'}</ul></div>`;
   }).join('') || '<div class="tablo"><div class="bos">Aramanızla eşleşen gönderi yok.</div></div>';
 }
 function hareketlerHtml(h) {
