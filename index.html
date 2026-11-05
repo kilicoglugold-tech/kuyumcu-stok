@@ -1,4 +1,4 @@
-<!-- SURUM-V138-FOTO-3AY --><!DOCTYPE html>
+<!-- SURUM-V139-GONDERI-TEMIZLE --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -6243,6 +6243,10 @@ async function gbEskiFotoTemizle() {
 async function loadGrupBData() {
   platSayacGuncelle();
   gbEskiFotoTemizle();
+  if (!gbGonderiKontrolEdildi.has(aktifPlatformB)) {
+    if (gbGonderiTabloVar === null) { try { await api('grupb_gonderiler?select=id&limit=1'); gbGonderiTabloVar = true; } catch (e) { gbGonderiTabloVar = false; } }
+    await gbBosGonderileriTemizle(false);
+  }
   const ay = document.getElementById('gbAy').value;
   if (!ay) return;
   grupbAylikParam = await ayParamGetir(ay);
@@ -6678,6 +6682,7 @@ async function deleteGrupBSiparis(id) {
   if (!confirm('Kaydı silmek istediğinize emin misiniz?')) return;
   await api('platform_siparisler?id=eq.' + id, 'DELETE');
   delete _cache['sipB:' + aktifPlatformB + ':' + document.getElementById('gbAy').value];
+  await gbBosGonderileriTemizle(true);
   loadGrupBData();
 }
 
@@ -6807,8 +6812,31 @@ async function gbDurumYap(durum) {
   try {
     await api('platform_siparisler?id=in.(' + idler.join(',') + ')', 'PATCH', { durum, ...(durum === 'bekliyor' ? { gonderi_id: null, kargo_tarihi: null } : {}) });
     showToast('✓ ' + idler.length + ' sipariş "' + (durum === 'bekliyor' ? 'Bekliyor' : 'Gönderilmiş') + '" yapıldı');
+    if (durum === 'bekliyor') await gbBosGonderileriTemizle(true);
     gbSecili.clear(); gbOnbellekTemizle(); await loadGrupBData();
   } catch (e) { alert('Güncellenemedi: ' + e.message); }
+}
+// İçinde sipariş kalmayan gönderiler (siparişler geri alındı / silindi) silinir; kalanların sipariş sayısı düzeltilir.
+// Böylece boş gönderinin kargo ücreti borçta ve bayi linkinde görünmez.
+const gbGonderiKontrolEdildi = new Set();
+async function gbBosGonderileriTemizle(zorla) {
+  const p = aktifPlatformB;
+  if (!gbGonderiTabloVar || (!zorla && gbGonderiKontrolEdildi.has(p))) return;
+  gbGonderiKontrolEdildi.add(p);
+  try {
+    const [gon, bagli] = await Promise.all([
+      api(`grupb_gonderiler?platform=eq.${p}&select=id,siparis_sayisi`),
+      api(`platform_siparisler?platform=eq.${p}&gonderi_id=not.is.null&select=gonderi_id`)
+    ]);
+    const say = {}; (bagli || []).forEach(x => { say[x.gonderi_id] = (say[x.gonderi_id] || 0) + 1; });
+    let silinen = 0;
+    for (const g of gon || []) {
+      const n = say[g.id] || 0;
+      if (!n) { await api('grupb_gonderiler?id=eq.' + g.id, 'DELETE'); silinen++; }
+      else if (n !== g.siparis_sayisi) await api('grupb_gonderiler?id=eq.' + g.id, 'PATCH', { siparis_sayisi: n });
+    }
+    if (silinen) { gbOnbellekTemizle(); showToast('🧹 İçi boş ' + silinen + ' gönderi silindi'); }
+  } catch (e) {}
 }
 function gbOnbellekTemizle() { Object.keys(_cache).forEach(k => { if (k.startsWith('sipB:' + aktifPlatformB + ':') || k.startsWith('odemeB:' + aktifPlatformB + ':')) delete _cache[k]; }); }
 
