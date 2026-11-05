@@ -1,4 +1,4 @@
-<!-- SURUM-V136-BAYI-KASIM --><!DOCTYPE html>
+<!-- SURUM-V137b-BAYI-FOTO --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -7003,10 +7003,14 @@ async function gbFisPdfSec(input) {
     let mevcut = new Set(); gbPdfGuncelle = [];
     if (gbHariciVar) {
       const nolar = siparisler.map(s => s.siparisNo);
-      const r = await api(`platform_siparisler?platform=eq.${aktifPlatformB}&harici_no=in.(${nolar.join(',')})&select=id,harici_no${gbFotoVar ? ',foto' : ''}&order=id.asc`).catch(() => []);
+      const r = await api(`platform_siparisler?platform=eq.${aktifPlatformB}&harici_no=in.(${nolar.join(',')})&select=id,harici_no,gram,notlar,tarih${gbFotoVar ? ',foto' : ''}&order=id.asc`).catch(() => []);
       mevcut = new Set((r || []).map(x => String(x.harici_no)));
-      // numarası kayıtlı ama fotoğrafı olmayanlar
-      if (gbFotoVar) siparisler.forEach(sp => (r || []).filter(x => String(x.harici_no) === String(sp.siparisNo) && !x.foto).forEach((x, k) => { const ft = sp.fotolar[k] || sp.fotolar[0]; if (ft) gbPdfGuncelle.push({ id: x.id, veri: { foto: ft }, etiket: '#' + sp.siparisNo }); }));
+      // numarası kayıtlı ama fotoğrafı ya da gramı eksik olanlar
+      siparisler.forEach(sp => (r || []).filter(x => String(x.harici_no) === String(sp.siparisNo)).forEach((x, k) => {
+        const veri = {}, ft = sp.fotolar[k] || sp.fotolar[0], u = sp.urunler[k] || sp.urunler[0] || {};
+        if (gbFotoVar && !x.foto && ft) veri.foto = ft;
+        if (Object.keys(veri).length) gbPdfGuncelle.push({ id: x.id, veri, etiket: '#' + sp.siparisNo });
+      }));
       // numarasız eski kayıtlar: aynı tarih + aynı alıcı (adresin ilk satırı)
       const tarihler = [...new Set(siparisler.filter(sp => !mevcut.has(String(sp.siparisNo)) && sp.tarih).map(sp => sp.tarih))];
       if (tarihler.length) {
@@ -7037,7 +7041,7 @@ async function gbFisPdfSec(input) {
           gbPdfSatirlar.push({
             sec: !zatenVar, zatenVar, siparis: s, urun: u, tarih, foto: s.fotolar[ui] || s.fotolar[0] || '',
             no: zatenVar ? '' : String(++sonNo[ay]),
-            ad: gbKisaAd(u), gram: u.gram, tip: u.ayar === '10K' ? 'kolye10' : 'kolye14', tas: 0
+            ad: gbKisaAd(u), gram: 0, tip: u.ayar === '10K' ? 'kolye10' : 'kolye14', tas: 0
           });
         }
       });
@@ -7051,7 +7055,8 @@ function gbPdfOnizle(dosya) {
   gbModal(`
     <div class="ds-ust"><div class="ds-baslik">📄 Fişten Sipariş Ekle — ${gbEsc(PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB)}</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
     <div class="ds-aciklama"><b>${gbEsc(dosya)}</b> · ${gbPdfSatirlar.length} ürün bulundu${eski ? ` · <span style="color:#F87171">${eski} tanesi zaten kayıtlı, işaretlenmedi</span>` : ''}${gbPdfGuncelle.length ? ` · <span style="color:#34D399">${gbPdfGuncelle.length} kayıtlı siparişe sipariş no / fotoğraf eklenecek</span>` : ''}. Gram ve tip kontrol edip <b>Ekle</b>'ye basın; hepsi <b>Bekliyor</b> olarak eklenir.</div>
-    ${gbFotoVar === false ? '<div class="gb-uyari">Ürün fotoğraflarını kaydetmek için <b>bayi-foto.sql</b> dosyasını Supabase\'de bir kez çalıştırın.</div>' : ''}
+    ${gbFotoVar === false ? '<div class="gb-uyari">📷 Fotoğraflar fişte bulundu ama <b>kaydedilemiyor</b>: Supabase\'de <b>bayi-foto.sql</b> dosyasını bir kez çalıştırın, sonra fişi tekrar yükleyin.</div>' : ''}
+    <div class="gb-kargo-kar" style="margin:0 0 6px">📷 Fişte bulunan fotoğraf: <b>${gbPdfSatirlar.filter(r => r.foto).length}</b> / ${gbPdfSatirlar.length}${gbFotoVar ? ' · kaydedilecek' : ''}</div>
     ${gbHariciVar === false ? '<div class="gb-uyari">Aynı fişi iki kez eklemeyi önleme ve son gönderim tarihi için <b>grupb-kargo.sql</b> dosyasını (güncel hâlini) Supabase\'de çalıştırın.</div>' : ''}
     <div class="gb-pdf-liste">${gbPdfSatirlar.map((r, i) => `
       <div class="gb-pdf-satir ${r.zatenVar ? 'zaten' : ''}">
@@ -7094,13 +7099,16 @@ async function gbPdfEkle() {
   const secilen = gbPdfSatirlar.filter(r => r.sec);
   if (!secilen.length && !gbPdfGuncelle.length) { alert('Eklenecek ürün seçilmedi.'); return; }
   const eksikGram = secilen.filter(r => !r.gram);
-  if (eksikGram.length && !confirm(eksikGram.length + ' üründe gram boş. Yine de eklensin mi?')) return;
   const btn = document.getElementById('gbPdfEkleBtn'); btn.disabled = true; btn.textContent = 'Ekleniyor…';
   try {
     let tamamlanan = 0;
-    for (const g of gbPdfGuncelle) { try { await api('platform_siparisler?id=eq.' + g.id, 'PATCH', g.veri); tamamlanan++; } catch (e) {} }
+    for (const g of gbPdfGuncelle) {
+      try {
+        await api('platform_siparisler?id=eq.' + g.id, 'PATCH', g.veri); tamamlanan++;
+      } catch (e) {}
+    }
     gbPdfGuncelle = [];
-    if (!secilen.length) { gbModalKapat(); gbOnbellekTemizle(); showToast('✓ ' + tamamlanan + ' siparişe numara/fotoğraf eklendi'); await loadGrupBData(); return; }
+    if (!secilen.length) { gbModalKapat(); gbOnbellekTemizle(); showToast('✓ ' + tamamlanan + ' siparişin eksikleri tamamlandı'); await loadGrupBData(); return; }
     const satirlar = [];
     for (const r of secilen) {
       const ay = r.tarih.slice(0, 7), altin = parseFloat((await gbAyParam(ay)).altin_fiyati_usd) || 0;
@@ -7116,12 +7124,12 @@ async function gbPdfEkle() {
       };
       if (gbDurumVar) d.durum = 'bekliyor';
       if (gbHariciVar) { d.harici_no = r.siparis.siparisNo; d.son_gonderim = r.siparis.sonGonderim || null; }
-      if (gbFotoVar && r.foto) d.foto = r.foto;
+      if (gbFotoVar) d.foto = r.foto || null;   // toplu eklemede tüm satırlar aynı alanlara sahip olmalı
       satirlar.push(d);
     }
     await api('platform_siparisler', 'POST', satirlar);
     gbModalKapat(); gbOnbellekTemizle();
-    showToast('✓ ' + satirlar.length + ' sipariş fişten eklendi' + (tamamlanan ? ' · ' + tamamlanan + ' kayda numara/fotoğraf eklendi' : ''));
+    showToast('✓ ' + satirlar.length + ' sipariş fişten eklendi' + (tamamlanan ? ' · ' + tamamlanan + ' kaydın eksikleri tamamlandı' : ''));
     await loadGrupBData();
   } catch (e) { alert('Eklenemedi: ' + e.message); btn.disabled = false; btn.textContent = '＋ Seçilenleri Ekle'; }
 }
