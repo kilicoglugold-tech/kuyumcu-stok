@@ -1,4 +1,4 @@
-<!-- SURUM-V139-GONDERI-TEMIZLE --><!DOCTYPE html>
+<!-- SURUM-V140-DIGER-EKBORC --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -652,6 +652,7 @@ tr.gb-secili td{background:rgba(212,175,55,.10) !important}
 .gb-pdf-satir.zaten{opacity:.5}
 .gb-foto{width:42px;height:42px;border-radius:8px;object-fit:cover;background:#fff;flex-shrink:0;cursor:zoom-in}
 .gb-foto-b{width:56px;height:56px;cursor:default}
+#gbTabloKart.gb-durumsuz th:nth-child(1),#gbTabloKart.gb-durumsuz th:nth-child(3),#gbTabloKart.gb-durumsuz #gbTablo td:nth-child(1),#gbTabloKart.gb-durumsuz #gbTablo td:nth-child(3){display:none}
 .gb-urun-hucre{display:flex;align-items:center;gap:10px;min-width:180px}
 .gb-etsy-no{font-size:11.5px;color:#A39A85;font-weight:500;margin-top:2px}
 .gb-foto-buyuk{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:zoom-out}
@@ -1650,6 +1651,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
         <div style="display:flex;gap:8px;">
           <button class="btn btn-sm" id="gbLinkBtn" onclick="bayiLinkModalAc()" style="display:none">🔗 Bayi Linki</button>
           <button class="btn btn-sm" onclick="gbJpgIndir()">📤 WhatsApp Gönder</button>
+          <button class="btn btn-sm" onclick="gbEkBorcAc()">➕ Ek Borç</button>
           <button class="btn btn-sm btn-success" onclick="openGrupBOdemeModal()">💰 Ödeme Al</button>
           <label class="btn btn-sm" style="cursor:pointer;" title="Etsy sipariş fişi PDF'ini yükleyin; içindeki tüm siparişler tek seferde eklenir">📄 Fişten Ekle<input type="file" accept="application/pdf" style="display:none" onchange="gbFisPdfSec(this)"></label>
           <button class="btn btn-primary btn-sm" onclick="openGrupBModal()">+ Satış Ekle</button>
@@ -5154,6 +5156,12 @@ async function loadRapor() {
       const gon = await api(`grupb_gonderiler?tarih=gte.${bas}&tarih=lt.${bitStr}&select=platform,maliyet_usd,musteri_usd`);
       (gon || []).forEach(g => { magazaGetir(g.platform).brutKarUsd += (parseFloat(g.musteri_usd) || 0) - (parseFloat(g.maliyet_usd) || 0); });
     } catch (e) {}
+    // Grup B ek borç kârı (tasarım ücreti vb.: tutar − maliyet) kaydın ayına yazılır
+    try {
+      const ek = await api(`grupb_odemeler?tarih=gte.${bas}&tarih=lt.${bitStr}&or=(has.lt.0,usd.lt.0)&select=platform,has,usd,maliyet_usd`);
+      const altinR = Number(p.altin_fiyati_usd) || 0;
+      (ek || []).forEach(o => { magazaGetir(o.platform).brutKarUsd += Math.max(0, -(parseFloat(o.usd) || 0)) + Math.max(0, -(parseFloat(o.has) || 0)) * altinR - (parseFloat(o.maliyet_usd) || 0); });
+    } catch (e) {}
 
     (platParam||[]).forEach(rd => {
       const g = gruplar[rd.platform];
@@ -5542,6 +5550,7 @@ function mgModalHazirla() {
       </div>
       <div id="mgTurKilit" class="mg-not" style="display:none;margin-top:6px">Tür, mağaza açıldıktan sonra değiştirilemez (siparişler buna göre tutuluyor).</div>
     </div>
+    <label id="mgKargoSatir" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#E8DFC8;cursor:pointer"><input type="checkbox" id="mgKargoTakip"> 📦 Sipariş durumu ve kargo takibi (Bailey's gibi: bekliyor / kargolandı, toplu kargo)</label>
     <label class="mg-lbl" id="mgFaturaSatir">Fatura
       <select id="mgSirket" class="form-control">
         <option value="">Fatura kesilmez — Alfred gibi (reklam $)</option>
@@ -5576,6 +5585,7 @@ function magazaModalAc(kod) {
   document.getElementById('mgBaslik').textContent = m ? '⚙️ ' + m.ad : '＋ Yeni mağaza';
   document.getElementById('mgAd').value = mgTaslak.ad;
   document.getElementById('mgSirket').value = mgTaslak.sirket || '';
+  document.getElementById('mgKargoTakip').checked = !!mgTaslak.kargoTakip;
   document.getElementById('mgRenk').value = mgTaslak.renk || '#8C6D23';
   document.getElementById('mgLogoDosya').value = '';
   document.getElementById('mgTurKilit').style.display = m ? '' : 'none';
@@ -5592,6 +5602,7 @@ function mgTurSec(tur, ilk) {
   mgTaslak.tur = tur;
   document.querySelectorAll('#magazaModal .mg-tur-sec').forEach(b => { b.classList.toggle('secili', b.dataset.tur === tur); b.disabled = !!mgDuzenlenen && b.dataset.tur !== tur; b.style.opacity = b.disabled ? .45 : 1; });
   document.getElementById('mgFaturaSatir').style.display = tur === 'kendi' ? '' : 'none';
+  document.getElementById('mgKargoSatir').style.display = tur === 'bayi' ? 'flex' : 'none';
 }
 function mgOnizle() {
   const el = document.getElementById('mgLogoOnizleme');
@@ -5631,7 +5642,7 @@ async function mgKaydet() {
   if (!ad) { alert('Mağaza adını yazın.'); return; }
   if (!mgTaslak.tur) { alert('Mağaza türünü seçin: Kendi mağazam ya da Bayi.'); return; }
   if (!ozelMagazaTablo) { alert('Ayar tablosuna ulaşılamadı. Supabase\'de menu-sirasi.sql dosyasının çalıştırılmış olması gerekiyor.'); return; }
-  const kayit = { ad, tur: mgTaslak.tur, sirket: mgTaslak.tur === 'kendi' ? document.getElementById('mgSirket').value : '', logo: mgTaslak.logo || '', renk: mgTaslak.renk || '#8C6D23', gizli: !!mgTaslak.gizli };
+  const kayit = { ad, tur: mgTaslak.tur, sirket: mgTaslak.tur === 'kendi' ? document.getElementById('mgSirket').value : '', kargoTakip: mgTaslak.tur === 'bayi' && document.getElementById('mgKargoTakip').checked, logo: mgTaslak.logo || '', renk: mgTaslak.renk || '#8C6D23', gizli: !!mgTaslak.gizli };
   const liste = OZEL_MAGAZALAR.map(m => Object.assign({}, m));
   let kod = mgDuzenlenen;
   if (kod) Object.assign(liste.find(m => m.kod === kod), kayit);
@@ -6264,6 +6275,7 @@ async function loadGrupBData() {
   }
   if (gbSonPlatform !== aktifPlatformB) { gbSecili.clear(); gbSonPlatform = aktifPlatformB; }
   await gbEkVerileriYukle();
+  gbTakipArayuz();
   renderGrupBTablo();
   updateGrupBOzet();
   gbPanoCiz();
@@ -6276,7 +6288,7 @@ function renderGrupBTablo() {
   const tbody = document.getElementById('gbTablo');
   const liste = gbGorunenListe();
   const tumCb = document.getElementById('gbTumSecCb');
-  if (tumCb) { const secilebilir = liste.filter(x => x.durum !== 'kargolandi'); tumCb.checked = secilebilir.length > 0 && secilebilir.every(x => gbSecili.has(String(x.id))); tumCb.disabled = !gbDurumVar; }
+  if (tumCb) { const secilebilir = liste.filter(x => x.durum !== 'kargolandi'); tumCb.checked = secilebilir.length > 0 && secilebilir.every(x => gbSecili.has(String(x.id))); tumCb.disabled = !gbDurumAktif(); }
   if (!liste.length) {
     const msj = gbSekme === 'bekleyen' ? 'Bekleyen sipariş yok.' : gbSekme === 'kargolanan' ? 'Bu ay kargoya verilen sipariş yok.' : 'Bu ay henüz satış yok.';
     tbody.innerHTML = '<tr><td colspan="13" class="empty">' + msj + '</td></tr>';
@@ -6290,7 +6302,7 @@ function renderGrupBTablo() {
     const kar = parseFloat(s.kar_usd) || 0;
     const renk = kar >= 0 ? '#1B7A4A' : '#C0392B';
     const bg   = kar >= 0 ? '#EAF5EE' : '#FDF0EE';
-    const secilebilir = gbDurumVar && s.durum !== 'kargolandi';
+    const secilebilir = gbDurumAktif() && s.durum !== 'kargolandi';
     return `<tr class="${gbSecili.has(String(s.id)) ? 'gb-secili' : ''}">
       <td style="width:34px;text-align:center;">${secilebilir ? `<input type="checkbox" class="gb-cb" ${gbSecili.has(String(s.id)) ? 'checked' : ''} onchange="gbSecToggle('${s.id}',this);this.closest('tr').classList.toggle('gb-secili',this.checked)">` : ''}</td>
       <td style="color:var(--text);font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
@@ -6330,10 +6342,10 @@ function updateGrupBOzet() {
   document.getElementById('gbTopGram').textContent       = parseFloat(topGram.toFixed(3)).toString() + ' gr';
   document.getElementById('gbTopTasGr').textContent      = parseFloat(topTasGr.toFixed(3)).toString() + ' gr';
   const gbKur = parseFloat(grupbAylikParam?.dolar_kuru) || 0;
-  const kargoKar = gbKargoKariAy();
-  ku += kargoKar;
+  const kargoKar = gbKargoKariAy(), ekKar = gbEkKarAy();
+  ku += kargoKar + ekKar;
   const el = document.getElementById('gbTopKarUsd');
-  el.innerHTML = '$' + fmtTLTam(ku) + tlAlti(ku, gbKur) + (kargoKar ? `<div style="font-size:11px;font-weight:500;color:var(--text2);margin-top:2px;">ürün $${fmtTLTam(ku - kargoKar)} + kargo $${fmtTLTam(kargoKar)}</div>` : '');
+  el.innerHTML = '$' + fmtTLTam(ku) + tlAlti(ku, gbKur) + (kargoKar || ekKar ? `<div style="font-size:11px;font-weight:500;color:var(--text2);margin-top:2px;">ürün $${fmtTLTam(ku - kargoKar - ekKar)}${kargoKar ? ' + kargo $' + fmtTLTam(kargoKar) : ''}${ekKar ? ' + ek $' + fmtTLTam(ekKar) : ''}</div>` : '');
   el.className = 'metric-value ' + (ku >= 0 ? 'green' : 'red');
   const bdgGB = v => `<span style="background:var(--gold-light);color:var(--gold-dark);border-radius:20px;padding:3px 10px;font-weight:700;font-size:13px;display:inline-block;">${v}</span>`;
   const gb = (id, v) => { const e = document.getElementById(id); if(e) e.innerHTML = bdgGB(v); };
@@ -6357,7 +6369,13 @@ function renderGrupBOdemeListesi(containerEl, platform, ay) {
     containerEl.innerHTML = '<div style="color:var(--text3);font-size:12px;">Henüz ödeme yok.</div>';
     return;
   }
-  containerEl.innerHTML = list.map(o => `
+  containerEl.innerHTML = list.map(o => gbEkBorcMu(o) ? `
+    <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;">
+      <span style="color:var(--text3);white-space:nowrap;min-width:72px;">${o.tarih}</span>
+      <span style="font-weight:700;color:#F87171;white-space:nowrap;">➕ ${-parseFloat(o.has) > 0 ? gbHas(-o.has) + ' has' : ''}${-parseFloat(o.usd) > 0 ? gbUsd(-o.usd) : ''}</span>
+      <span style="flex:1;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Ek borç · ${gbEsc(o.aciklama || '-')}${parseFloat(o.maliyet_usd) ? ' <span class="gizle-rakam" style="color:var(--text3)">(maliyet ' + gbUsd(o.maliyet_usd) + ')</span>' : ''}</span>
+      <button onclick="deleteGrupBOdeme(${o.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:0 2px;line-height:1;flex-shrink:0;">🗑</button>
+    </div>` : `
     <div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:0.5px solid var(--border);font-size:12px;">
       <span style="color:var(--text3);white-space:nowrap;min-width:72px;">${o.tarih}</span>
       <span style="font-weight:700;color:var(--gold-dark);white-space:nowrap;">${parseFloat(o.has) ? o.has + ' has' : ''}${parseFloat(o.has) && parseFloat(o.usd) ? ' + ' : ''}${parseFloat(o.usd) ? '<span style="color:#60A5FA">$' + o.usd + ' kargo</span>' : ''}</span>
@@ -6365,8 +6383,52 @@ function renderGrupBOdemeListesi(containerEl, platform, ay) {
       <button onclick="deleteGrupBOdeme(${o.id})" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:0 2px;line-height:1;flex-shrink:0;">🗑</button>
     </div>`).join('');
 }
+function gbEkBorcMu(o) { return o && (o.tur === 'ek_borc' || parseFloat(o.has) < 0 || parseFloat(o.usd) < 0); }
+function gbEkKarAy() {
+  const ay = document.getElementById('gbAy').value, altin = parseFloat(grupbAylikParam?.altin_fiyati_usd) || 0;
+  return gbOdemeGetList(aktifPlatformB, ay).filter(gbEkBorcMu).reduce((t, o) => t + Math.max(0, -(parseFloat(o.usd) || 0)) + Math.max(0, -(parseFloat(o.has) || 0)) * altin - (parseFloat(o.maliyet_usd) || 0), 0);
+}
+function gbEkBorcAc() {
+  let m = document.getElementById('gbEkBorcModal');
+  if (!m) {
+    m = document.createElement('div'); m.id = 'gbEkBorcModal'; m.className = 'gb-modal-arka';
+    m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px';
+    document.body.appendChild(m);
+  }
+  m.innerHTML = `<div class="card mg-kutu"><div class="mg-baslik">➕ Ek borç — ${gbEsc(PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB)}</div>
+    <div class="mg-not">Tasarım ücreti gibi sipariş dışı bir tutarı bayinin borcuna ekler. Bayi bunu hesap hareketlerinde açıklamasıyla görür; maliyeti görmez.</div>
+    <label class="mg-lbl">Açıklama *<input id="ebAciklama" class="form-control" placeholder="Tasarım ücreti — Medusa kolye"></label>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <label class="mg-lbl">Tarih<input type="date" id="ebTarih" class="form-control" value="${bugunTarihStr()}"></label>
+      <label class="mg-lbl">Tutar *<input type="number" step="0.01" min="0" id="ebTutar" class="form-control" placeholder="50"></label>
+      <label class="mg-lbl">Birim<select id="ebBirim" class="form-control"><option value="usd">$ (dolar)</option><option value="has">has</option></select></label>
+    </div>
+    <label class="mg-lbl">Maliyetim ($) — isteğe bağlı<input type="number" step="0.01" min="0" id="ebMaliyet" class="form-control" placeholder="0"></label>
+    <div class="mg-butonlar"><button class="btn" onclick="document.getElementById('gbEkBorcModal').style.display='none'">Vazgeç</button><button class="btn btn-primary" id="ebKaydet" onclick="gbEkBorcKaydet()">💾 Borca ekle</button></div></div>`;
+  m.style.display = 'flex';
+  setTimeout(() => document.getElementById('ebAciklama').focus(), 30);
+}
+async function gbEkBorcKaydet() {
+  const aciklama = document.getElementById('ebAciklama').value.trim(), tutar = parseFloat(document.getElementById('ebTutar').value) || 0;
+  const birim = document.getElementById('ebBirim').value, tarih = document.getElementById('ebTarih').value || bugunTarihStr(), maliyet = parseFloat(document.getElementById('ebMaliyet').value) || 0;
+  if (!aciklama) { alert('Açıklama yazın.'); return; }
+  if (!(tutar > 0)) { alert('Tutarı girin.'); return; }
+  if (birim === 'usd' && !gbGonderiTabloVar) { alert('Dolar borç için önce grupb-kargo.sql / bayi-portal.sql dosyasını Supabase\'de çalıştırın.'); return; }
+  const btn = document.getElementById('ebKaydet'); btn.disabled = true;
+  const satir = { id: Date.now(), platform: aktifPlatformB, ay: tarih.slice(0, 7), tarih, aciklama, has: birim === 'has' ? -tutar : 0, tur: 'ek_borc', maliyet_usd: maliyet };
+  if (birim === 'usd') satir.usd = -tutar;
+  try {
+    await api('grupb_odemeler', 'POST', satir);
+    document.getElementById('gbEkBorcModal').style.display = 'none';
+    gbOnbellekTemizle(); showToast('✓ Ek borç eklendi: ' + (birim === 'usd' ? gbUsd(tutar) : gbHas(tutar) + ' has'));
+    await loadGrupBData();
+  } catch (e) {
+    btn.disabled = false;
+    alert(/tur|maliyet_usd|check|violates/i.test(e.message) ? 'Ek borç için önce Supabase\'de bayi-ekborc.sql dosyasını bir kez çalıştırın.\n\n(' + e.message + ')' : 'Kaydedilemedi: ' + e.message);
+  }
+}
 async function deleteGrupBOdeme(id) {
-  if (!confirm('Bu ödeme silinsin mi?')) return;
+  if (!confirm('Bu kayıt silinsin mi?')) return;
   const ay = document.getElementById('gbAy').value;
   const key = 'odemeB:' + aktifPlatformB + ':' + ay;
   const onceki = _cache[key] || [];
@@ -6402,7 +6464,7 @@ async function gbJpgIndir() {
     <div style="font-size:18px;font-weight:700;color:#1A1A18;margin-bottom:2px;">${platAdi} — ${ayAdi}</div>
     ${surekli
       ? `<div style="font-size:14px;font-weight:600;color:#1A1A18;">Bu ay: ${toplamHas.toFixed(2)} has · ${grupbSiparisler.length} sipariş</div>
-         <div style="font-size:15px;font-weight:700;color:#B8860B;margin-top:3px;">Güncel borç: ${gbBakiyeVeri.hasBorc.toFixed(2)} has${Math.abs(gbBakiyeVeri.usdBorc) > 0.004 ? ' · Kargo: $' + gbBakiyeVeri.usdBorc.toFixed(2) : ''}</div>`
+         <div style="font-size:15px;font-weight:700;color:#B8860B;margin-top:3px;">Güncel borç: ${gbBakiyeVeri.hasBorc.toFixed(2)} has${Math.abs(gbBakiyeVeri.usdBorc) > 0.004 ? ' · Dolar: $' + gbBakiyeVeri.usdBorc.toFixed(2) : ''}</div>`
       : `<div style="font-size:14px;font-weight:600;color:#B8860B;">Toplam Borç: ${toplamHas.toFixed(2)} has</div>`}`;
   wrapper.appendChild(baslik);
 
@@ -6536,9 +6598,9 @@ function updateGrupBBakiye() {
   const b = gbBakiyeVeri;
   if (b) {
     // Sürekli bakiye: devreden + bu ayın hareketleri = güncel borç (has ve kargo $ ayrı)
-    degerEl.innerHTML = `${gbHas(b.hasBorc)} has<div style="font-size:15px;font-weight:600;margin-top:2px;color:${b.usdBorc > 0.004 ? '#60A5FA' : 'var(--green)'}">${gbUsd(b.usdBorc)} kargo</div>`;
+    degerEl.innerHTML = `${gbHas(b.hasBorc)} has<div style="font-size:15px;font-weight:600;margin-top:2px;color:${b.usdBorc > 0.004 ? '#60A5FA' : 'var(--green)'}">${gbUsd(b.usdBorc)} $ borç</div>`;
     degerEl.style.color = b.hasBorc <= 0.004 ? 'var(--green)' : 'var(--gold-dark)';
-    if (detayEl) detayEl.innerHTML = `<b>HAS</b><br>Devreden: <b>${gbHas(b.hasDevir)}</b><br>Bu ay satış: <b>+${gbHas(b.hasSatisAy)}</b><br>Bu ay ödeme: <b>−${gbHas(b.hasOdemeAy)}</b><br>Güncel: <b>${gbHas(b.hasBorc)} has</b><br><br><b>KARGO ($)</b><br>Devreden: <b>${gbUsd(b.usdDevir)}</b><br>Bu ay kargo: <b>+${gbUsd(b.usdKargoAy)}</b><br>Bu ay ödeme: <b>−${gbUsd(b.usdOdemeAy)}</b><br>Güncel: <b>${gbUsd(b.usdBorc)}</b>`;
+    if (detayEl) detayEl.innerHTML = `<b>HAS</b><br>Devreden: <b>${gbHas(b.hasDevir)}</b><br>Bu ay satış: <b>+${gbHas(b.hasSatisAy)}</b>${b.hasEkAy ? `<br>Bu ay ek borç: <b>+${gbHas(b.hasEkAy)}</b>` : ''}<br>Bu ay ödeme: <b>−${gbHas(b.hasOdemeAy)}</b><br>Güncel: <b>${gbHas(b.hasBorc)} has</b><br><br><b>DOLAR (kargo + ek)</b><br>Devreden: <b>${gbUsd(b.usdDevir)}</b><br>Bu ay kargo: <b>+${gbUsd(b.usdKargoAy)}</b>${b.usdEkAy ? `<br>Bu ay ek borç: <b>+${gbUsd(b.usdEkAy)}</b>` : ''}<br>Bu ay ödeme: <b>−${gbUsd(b.usdOdemeAy)}</b><br>Güncel: <b>${gbUsd(b.usdBorc)}</b>`;
   } else {
     const satisHas   = grupbSiparisler.reduce((s, x) => s + (parseFloat(x.has) || 0), 0);
     const odemeler   = gbOdemeGetList(aktifPlatformB, ay);
@@ -6563,8 +6625,14 @@ function openGrupBModal(id) {
     document.getElementById('gbUrun').value = s.urun_adi;
     document.getElementById('gbGram').value = s.gram;
     const baseNotlar = (s.notlar||'').replace(/\|?TAŞ:[\d.]+/, '').trim();
-    const tipKey = Object.keys(GRUPB_TIPLER).find(k => GRUPB_TIPLER[k].ad === baseNotlar) || 'kolye14';
+    const tipKey = Object.keys(GRUPB_TIPLER).find(k => GRUPB_TIPLER[k].ad === baseNotlar) || (/^Diğer/.test(baseNotlar) ? 'diger' : 'kolye14');
     document.getElementById('gbTip').value = tipKey;
+    if (tipKey === 'diger') {
+      const altinD = parseFloat(grupbAylikParam?.altin_fiyati_usd) || 0, gr = parseFloat(s.gram) || 0;
+      document.getElementById('gbDigerAyar').value = baseNotlar.replace(/^Diğer\s*/, '');
+      document.getElementById('gbDigerSatis').value = parseFloat(s.milyem) || '';
+      document.getElementById('gbDigerMaliyet').value = gr && altinD ? (parseFloat(s.maliyet_usd) / (gr * altinD)).toFixed(3) : '';
+    }
     gbTipRenkle();
     document.getElementById('gbTasGr').value = parseTasGr(s.notlar) || 0;
     document.getElementById('gbSiparisNo').value = s.musteri_adi || '';
@@ -6574,6 +6642,7 @@ function openGrupBModal(id) {
     document.getElementById('gbGram').value = '';
     document.getElementById('gbTip').value = 'kolye14';
     gbTipRenkle();
+    ['gbDigerAyar', 'gbDigerSatis', 'gbDigerMaliyet'].forEach(x => document.getElementById(x).value = '');
     document.getElementById('gbTasGr').value = '0';
     document.getElementById('gbSiparisNo').value = '';
   }
@@ -6589,6 +6658,10 @@ function editGrupBSiparis(id) { openGrupBModal(id); }
 // değiştiriyoruz). Diğer tipler (Su Yolu, Damla, Kolye 10K, İşçiliksiz...) elle seçildiğinde
 // bu kuraldan etkilenmez, kendi sabit S/M değerleriyle hesaplanır.
 function gbEfektifMilyem(tip, gram) {
+  if (tip === 'diger') {
+    const v = id => parseFloat((document.getElementById(id) || {}).value) || 0;
+    return { satis: v('gbDigerSatis'), maliyet: v('gbDigerMaliyet') };
+  }
   if (tip === 'kolye14') {
     return { satis: gram > 1 ? 0.725 : 0.745, maliyet: 0.615 };
   }
@@ -6610,6 +6683,7 @@ function gbHesapla() {
   const el = document.getElementById('gbKarUsdDisp');
   el.textContent = '$' + karUsd.toFixed(2);
   el.className = 'hesap-val ' + (karUsd >= 0 ? 'kar-pozitif' : 'kar-negatif');
+  const da = document.getElementById('gbDigerAlan'); if (da) da.style.display = tip === 'diger' ? '' : 'none';
   const not = document.getElementById('gbMilyemNot');
   if (not) {
     not.textContent = (tip === 'kolye14')
@@ -6631,12 +6705,14 @@ async function saveGrupBSiparis() {
   const altin = parseFloat(grupbAylikParam?.altin_fiyati_usd) || 0;
   const tarih = document.getElementById('gbTarih').value;
   const t     = gbEfektifMilyem(tip, gram);
+  if (tip === 'diger' && (!(t.satis > 0) || !(t.maliyet > 0))) { alert('"Diğer" için satış ve maliyet milyemini girin.'); return; }
   const satHas = gram * t.satis;
   const malHas = gram * t.maliyet;
   const hasKar = satHas - malHas;
   const karUsd = hasKar * altin;
-  const tipAd = GRUPB_TIPLER[tip]?.ad || '';
-  const ayar  = tipAd.match(/\d+K/)?.[0] || tip;
+  const digerAyar = (document.getElementById('gbDigerAyar').value || '').trim();
+  const tipAd = tip === 'diger' ? ('Diğer' + (digerAyar ? ' ' + digerAyar : '')) : (GRUPB_TIPLER[tip]?.ad || '');
+  const ayar  = tip === 'diger' ? (digerAyar || 'Diğer') : (tipAd.match(/\d+K/)?.[0] || tip);
   const data = {
     platform:         aktifPlatformB,
     ay:               tarih.slice(0, 7),
@@ -6665,7 +6741,7 @@ async function saveGrupBSiparis() {
     if (editingGrupBId) {
       res = await api('platform_siparisler?id=eq.' + editingGrupBId, 'PATCH', data);
     } else {
-      if (gbDurumVar) data.durum = 'bekliyor';
+      if (gbDurumAktif()) data.durum = 'bekliyor';
       res = await api('platform_siparisler', 'POST', data);
     }
     console.log('[saveGrupBSiparis] Response:', res);
@@ -6696,6 +6772,21 @@ const GB_KARGO_FIRMALARI = ['UPS', 'DHL', 'FedEx', 'Aras Kargo', 'Yurtiçi Kargo
 function gbEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function gbUsd(v) { return '$' + (Number(v) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 function gbHas(v) { return (Number(v) || 0).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function gbKargoTakip(p) { p = p || aktifPlatformB; if (p === 'baileys') return true; const m = typeof ozelMagazaBul === 'function' && ozelMagazaBul(p); return !!(m && m.kargoTakip); }
+function gbDurumAktif() { return !!gbDurumVar && gbKargoTakip(); }
+function gbTakipArayuz() {
+  const ac = gbKargoTakip();
+  if (!ac && gbSekme !== 'ay') { gbSekme = 'ay'; gbSecili.clear(); }
+  const g = id => document.getElementById(id);
+  if (g('gbPano')) g('gbPano').style.display = ac ? '' : 'none';
+  if (g('gbSekmeler')) g('gbSekmeler').style.display = ac ? '' : 'none';
+  if (!ac) { if (g('gbGonderiListe')) g('gbGonderiListe').style.display = 'none'; if (g('gbTabloKart')) g('gbTabloKart').style.display = ''; if (g('gbSecimCubugu')) g('gbSecimCubugu').style.display = 'none'; }
+  const kart = g('gbTabloKart');
+  if (kart) {
+    kart.classList.toggle('gb-durumsuz', !ac);
+    const ilk = kart.querySelector('thead tr:nth-child(2) td'); if (ilk) ilk.colSpan = ac ? 5 : 3;
+  }
+}
 async function gbAltyapiKontrol() {
   if (gbDurumVar === null) { try { await api('platform_siparisler?select=durum,gonderi_id&limit=1'); gbDurumVar = true; } catch (e) { gbDurumVar = false; } }
   if (gbGonderiTabloVar === null) { try { await api('grupb_gonderiler?select=id&limit=1'); gbGonderiTabloVar = true; } catch (e) { gbGonderiTabloVar = false; } }
@@ -6724,11 +6815,12 @@ async function gbEkVerileriYukle() {
     const once = r => String(r.tarih || '') < ayBas, buAy = r => String(r.tarih || '').slice(0, 7) === ay;
     const top = (l, f, k) => l.filter(f).reduce((s, x) => s + (parseFloat(x[k]) || 0), 0);
     const hepsi = () => true;
+    const topPoz = (l, f, k) => l.filter(f).reduce((s, x) => s + Math.max(0, parseFloat(x[k]) || 0), 0), topNeg = (l, f, k) => l.filter(f).reduce((s, x) => s + Math.max(0, -(parseFloat(x[k]) || 0)), 0);
     gbBakiyeVeri = {
       hasDevir: top(tumSatis, once, 'has') - top(tumOdeme, once, 'has'),
       usdDevir: top(tumGonderi, once, 'musteri_usd') - top(tumOdeme, once, 'usd'),
-      hasSatisAy: top(tumSatis, buAy, 'has'), hasOdemeAy: top(tumOdeme, buAy, 'has'),
-      usdKargoAy: top(tumGonderi, buAy, 'musteri_usd'), usdOdemeAy: top(tumOdeme, buAy, 'usd'),
+      hasSatisAy: top(tumSatis, buAy, 'has'), hasOdemeAy: topPoz(tumOdeme, buAy, 'has'), hasEkAy: topNeg(tumOdeme, buAy, 'has'),
+      usdKargoAy: top(tumGonderi, buAy, 'musteri_usd'), usdOdemeAy: topPoz(tumOdeme, buAy, 'usd'), usdEkAy: topNeg(tumOdeme, buAy, 'usd'),
       hasBorc: top(tumSatis, hepsi, 'has') - top(tumOdeme, hepsi, 'has'),
       usdBorc: top(tumGonderi, hepsi, 'musteri_usd') - top(tumOdeme, hepsi, 'usd')
     };
@@ -6758,6 +6850,7 @@ function gbPanoCiz() {
   document.querySelectorAll('#gbSekmeler [data-sekme]').forEach(b => b.classList.toggle('aktif', b.dataset.sekme === gbSekme));
 }
 function gbSekmeSec(s) {
+  if (!gbKargoTakip()) s = 'ay';
   gbSekme = s; gbSecili.clear();
   const tablo = document.getElementById('gbTabloKart'), gl = document.getElementById('gbGonderiListe');
   if (tablo) tablo.style.display = s === 'gonderiler' ? 'none' : '';
@@ -6796,7 +6889,7 @@ function gbTumunuSec(cb) {
 function gbSecimCubugu() {
   const el = document.getElementById('gbSecimCubugu'); if (!el) return;
   const n = gbSecili.size;
-  if (!n || !gbDurumVar) { el.style.display = 'none'; return; }
+  if (!n || !gbDurumAktif()) { el.style.display = 'none'; return; }
   const liste = [...gbSecili].map(gbSiparisBul).filter(Boolean);
   const gram = liste.reduce((s, x) => s + (parseFloat(x.gram) || 0), 0);
   el.style.display = 'flex';
@@ -7159,7 +7252,7 @@ async function gbPdfEkle() {
         kar_usd: parseFloat(karUsd.toFixed(2)), musteri_adi: String(r.no || '').trim(), notlar: notlarWithTas(tipAd, r.tas || 0),
         adres: r.siparis.adresSatirlari.join('\n')
       };
-      if (gbDurumVar) d.durum = 'bekliyor';
+      if (gbDurumAktif()) d.durum = 'bekliyor';
       if (gbHariciVar) { d.harici_no = r.siparis.siparisNo; d.son_gonderim = r.siparis.sonGonderim || null; }
       if (gbFotoVar) d.foto = r.foto || null;   // toplu eklemede tüm satırlar aynı alanlara sahip olmalı
       satirlar.push(d);
@@ -10905,9 +10998,15 @@ document.addEventListener('DOMContentLoaded', () => { asInit(); setTimeout(apply
             <option value="kolye10"      style="background:#DBEAFE;color:#1E3A8A;font-weight:600;">Kolye 10K (S:0.577 / M:0.447)</option>
             <option value="isciliksis14" style="background:#FEE2E2;color:#991B1B;font-weight:600;">İşçiliksiz 14K (S:0.585 / M:0.600)</option>
             <option value="isciliksis10" style="background:#FFEDD5;color:#9A3412;font-weight:600;">İşçiliksiz 10K (S:0.417 / M:0.427)</option>
+            <option value="diger" style="background:#F3F4F6;color:#374151;font-weight:600;">Diğer — milyemi elle gir</option>
           </select>
           <div id="gbMilyemNot" style="font-size:11px;color:var(--text3);margin-top:4px;"></div>
         </div>
+      </div>
+      <div id="gbDigerAlan" class="form-row" style="display:none;margin-top:8px">
+        <div class="form-group"><label class="form-label">Ayar / açıklama</label><input class="form-control" id="gbDigerAyar" placeholder="18K" oninput="gbHesapla()"></div>
+        <div class="form-group"><label class="form-label">Satış milyem *</label><input type="number" class="form-control" id="gbDigerSatis" step="0.001" placeholder="0.800" oninput="gbHesapla()"></div>
+        <div class="form-group"><label class="form-label">Maliyet milyem *</label><input type="number" class="form-control" id="gbDigerMaliyet" step="0.001" placeholder="0.760" oninput="gbHesapla()"></div>
       </div>
       <div class="form-group" style="margin-top:8px"><label class="form-label">Taş Gr</label><input type="number" class="form-control" id="gbTasGr" step="0.001" value="0" placeholder="0.000"></div>
       <div class="hesap-box" style="margin-top:8px;">

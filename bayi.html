@@ -88,7 +88,7 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&a
 const n = v => Number(v) || 0;
 const hasF = v => n(v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 3 });
 const grF = v => n(v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const usdF = v => '$' + n(v).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const usdF = v => (n(v) < -0.004 ? '−$' : '$') + Math.abs(n(v)).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const tarihF = t => { if (!t) return '—'; const [y, a, g] = String(t).slice(0, 10).split('-'); return g + '.' + a + '.' + y; };
 const ayAd = ay => { const [y, a] = ay.split('-').map(Number); return new Date(y, a - 1, 1).toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' }); };
 const tipAd = t => String(t || '').replace(/\|?TAŞ:[\d.]+/, '').replace(/\|$/, '').trim();
@@ -150,12 +150,14 @@ function takipLink(g) {
 }
 function fotoImg(s, k) { return /^data:image\//.test(s.foto || '') ? `<img class="foto ${k || ''}" src="${s.foto}" alt="" onclick="buyut(this.src)">` : ''; }
 function buyut(src) { const d = document.createElement('div'); d.className = 'buyuk'; d.onclick = () => d.remove(); const i = document.createElement('img'); i.src = src; d.appendChild(i); document.body.appendChild(d); }
+function kargoVar() { return (V.gonderiler || []).length > 0 || (V.siparisler || []).some(s => s.durum); }
 function siparisTablo(liste, kargoKolon) {
+  const durumKolon = kargoVar(); kargoKolon = kargoKolon && durumKolon;
   if (!liste.length) return `<div class="tablo"><div class="bos">${ara ? 'Aramanızla eşleşen sipariş yok.' : 'Burada gösterilecek sipariş yok.'}</div></div>`;
   const gonHarita = Object.fromEntries((V.gonderiler || []).map(g => [String(g.id), g]));
   const tg = liste.reduce((t, s) => t + n(s.gram), 0), th = liste.reduce((t, s) => t + n(s.has), 0);
   return `<div class="tablo"><div class="tablo-ic"><table>
-    <tr><th>Tarih</th><th>Sipariş</th><th>Ürün</th><th class="s">Gram</th><th class="s gizle-m">Milyem</th><th class="s">Has</th><th>Durum</th>${kargoKolon ? '<th>Kargo</th>' : ''}</tr>
+    <tr><th>Tarih</th><th>Sipariş</th><th>Ürün</th><th class="s">Gram</th><th class="s gizle-m">Milyem</th><th class="s">Has</th>${durumKolon ? '<th>Durum</th>' : ''}${kargoKolon ? '<th>Kargo</th>' : ''}</tr>
     ${liste.map(s => { const g = s.gonderi_id != null ? gonHarita[String(s.gonderi_id)] : null; const tas = tasGr(s.tip); return `<tr>
       <td style="white-space:nowrap">${tarihF(s.tarih)}</td>
       <td style="white-space:nowrap">${s.siparis_no ? '#' + esc(s.siparis_no) : '<span class="alt">—</span>'}</td>
@@ -163,10 +165,10 @@ function siparisTablo(liste, kargoKolon) {
       <td class="s">${grF(s.gram)}</td>
       <td class="s gizle-m">${n(s.milyem) ? n(s.milyem).toFixed(3) : '—'}</td>
       <td class="s"><b>${hasF(s.has)}</b></td>
-      <td>${durumRozet(s)}${sonRozet(s)}${s.durum === 'kargolandi' && s.kargo_tarihi ? `<div class="son">${tarihF(s.kargo_tarihi)}</div>` : ''}</td>
+      ${durumKolon ? `<td>${durumRozet(s)}${sonRozet(s)}${s.durum === 'kargolandi' && s.kargo_tarihi ? `<div class="son">${tarihF(s.kargo_tarihi)}</div>` : ''}</td>` : ''}
       ${kargoKolon ? `<td>${g ? esc(g.firma || '') + ' ' + takipLink(g) : '<span class="alt">—</span>'}</td>` : ''}
     </tr>`; }).join('')}
-    <tr class="top"><td colspan="3">Toplam · ${liste.length} sipariş</td><td class="s">${grF(tg)}</td><td class="gizle-m"></td><td class="s">${hasF(th)}</td><td colspan="${kargoKolon ? 2 : 1}"></td></tr>
+    <tr class="top"><td colspan="3">Toplam · ${liste.length} sipariş</td><td class="s">${grF(tg)}</td><td class="gizle-m"></td><td class="s">${hasF(th)}</td><td colspan="${(durumKolon ? 1 : 0) + (kargoKolon ? 1 : 0)}"></td></tr>
   </table></div></div>`;
 }
 function gonderilerHtml(h) {
@@ -182,14 +184,14 @@ function hareketlerHtml(h) {
   const har = [];
   h.sip.forEach(s => har.push({ t: s.tarih, ac: 'Sipariş' + (s.siparis_no ? ' #' + s.siparis_no : '') + ' · ' + (s.urun || ''), has: n(s.has), usd: 0 }));
   h.gon.forEach(g => n(g.kargo_usd) && har.push({ t: g.tarih, ac: 'Kargo · ' + (g.firma || '') + (g.takip_no ? ' ' + g.takip_no : ''), has: 0, usd: n(g.kargo_usd) }));
-  h.od.forEach(o => har.push({ t: o.tarih, ac: 'Ödeme' + (o.aciklama ? ' · ' + o.aciklama : ''), has: -n(o.has), usd: -n(o.usd), odeme: true }));
+  h.od.forEach(o => { const ek = n(o.has) < 0 || n(o.usd) < 0; har.push({ t: o.tarih, ac: (ek ? 'Ek borç' : 'Ödeme') + (o.aciklama ? ' · ' + o.aciklama : ''), has: -n(o.has), usd: -n(o.usd), odeme: !ek }); });
   har.sort((a, b) => String(a.t).localeCompare(String(b.t)));
   let bh = 0, bu = 0; har.forEach(x => { bh += x.has; bu += x.usd; x.bh = bh; x.bu = bu; });
   const liste = har.reverse().filter(x => !ayFiltre || String(x.t).slice(0, 7) === ayFiltre).filter(x => !ara || x.ac.toLocaleLowerCase('tr-TR').includes(ara.toLocaleLowerCase('tr-TR')));
   if (!liste.length) return '<div class="tablo"><div class="bos">Hareket yok.</div></div>';
   const isaret = (v, f) => v ? `<span class="${v > 0 ? 'arti' : 'eksi'}">${v > 0 ? '+' : '−'}${f(Math.abs(v))}</span>` : '<span class="alt">—</span>';
   return `<div class="tablo"><div class="tablo-ic"><table>
-    <tr><th>Tarih</th><th>Açıklama</th><th class="s">Has</th><th class="s">Kargo $</th><th class="s">Has bakiye</th><th class="s gizle-m">Kargo bakiye</th></tr>
+    <tr><th>Tarih</th><th>Açıklama</th><th class="s">Has</th><th class="s">Dolar</th><th class="s">Has bakiye</th><th class="s gizle-m">Dolar bakiye</th></tr>
     ${liste.map(x => `<tr${x.odeme ? ' style="background:rgba(52,211,153,.04)"' : ''}><td style="white-space:nowrap">${tarihF(x.t)}</td><td>${esc(x.ac)}</td><td class="s">${isaret(x.has, hasF)}</td><td class="s">${isaret(x.usd, usdF)}</td><td class="s"><b>${hasF(x.bh)}</b></td><td class="s gizle-m">${usdF(x.bu)}</td></tr>`).join('')}
   </table></div></div>`;
 }
@@ -215,12 +217,13 @@ function ciz() {
     </header>
     <div class="kartlar">
       <div class="k mor"><div class="u">💳 Has borcu</div><div class="d">${hasF(h.hasBorc)} <small>has</small></div><div class="a">Tüm siparişler − ödemeler</div></div>
-      <div class="k mavi"><div class="u">🚚 Kargo borcu</div><div class="d">${usdF(h.usdBorc)}</div><div class="a">Gönderi ücretleri − ödemeler</div></div>
-      <div class="k yesil"><div class="u">📦 Bu ay kargolanan</div><div class="d">${h.kargoAy} <small>sipariş</small></div><div class="a">${ayAd(h.buAy)}</div></div>
+      <div class="k mavi"><div class="u">💵 Dolar borcu</div><div class="d">${usdF(h.usdBorc)}</div><div class="a">${kargoVar() ? 'Kargo + ek borç − ödemeler' : 'Ek borç − ödemeler'}</div></div>
+      ${kargoVar() ? `<div class="k yesil"><div class="u">📦 Bu ay kargolanan</div><div class="d">${h.kargoAy} <small>sipariş</small></div><div class="a">${ayAd(h.buAy)}</div></div>`
+        : `<div class="k yesil"><div class="u">📋 Bu ay sipariş</div><div class="d">${h.sip.filter(s => String(s.tarih || '').slice(0, 7) === h.buAy).length} <small>sipariş</small></div><div class="a">${ayAd(h.buAy)}</div></div>`}
     </div>
     <div class="sekmeler">
       <button class="${sekme === 'tum' ? 'aktif' : ''}" onclick="sekmeSec('tum')">📋 Tüm siparişler</button>
-      <button class="${sekme === 'kargolanan' ? 'aktif' : ''}" onclick="sekmeSec('kargolanan')">🚚 Gönderiler <span class="say">${h.gon.length}</span></button>
+      ${kargoVar() ? `<button class="${sekme === 'kargolanan' ? 'aktif' : ''}" onclick="sekmeSec('kargolanan')">🚚 Gönderiler <span class="say">${h.gon.length}</span></button>` : ''}
       <button class="${sekme === 'hesap' ? 'aktif' : ''}" onclick="sekmeSec('hesap')">💳 Hesap hareketleri</button>
     </div>
     <div class="arac">
