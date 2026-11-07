@@ -1,4 +1,4 @@
-<!-- SURUM-V140-DIGER-EKBORC --><!DOCTYPE html>
+<!-- SURUM-V141-URUN-META-KORUMA --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -3148,8 +3148,8 @@ async function loadParamTablo() {
 // ===== ÜRÜNLER =====
 async function loadUrunler() {
   try {
-    allUrunler = await api('urunler?select=*&order=olusturma_tarihi.desc');
-    allVaryantlar = await api('varyantlar?select=*');
+    allUrunler = await apiTumSatirlar('urunler?select=*&order=olusturma_tarihi.desc,id.asc');
+    allVaryantlar = await apiTumSatirlar('varyantlar?select=*&order=id.asc');
     allUrunler = sortUrunler(allUrunler);
     await loadUrunMetaCache();
     await kategorileriYukle();
@@ -3545,6 +3545,7 @@ async function kategoriSil(kod) {
 }
 
 function otomatikKategoriAta() {
+  if (!urunMetaYuklendi) return;
   const degisenler = [];
   allUrunler.forEach(u => {
     const meta = getUrunMeta(u.id);
@@ -3553,7 +3554,7 @@ function otomatikKategoriAta() {
     if (meta.kategori !== yeniKat) {
       meta.kategori = yeniKat;
       urunMetaCache[u.id] = meta;
-      degisenler.push(metaToRow(u.id, meta));
+      degisenler.push({ urun_id: u.id, kategori: yeniKat });   // sadece kategori: taş/durum/ölçü bilgilerine dokunmaz
     }
   });
   if (degisenler.length) bulkUpsertUrunMeta(degisenler);
@@ -4312,13 +4313,25 @@ async function bulkUpsertUrunMeta(rows) {
         'Prefer': 'resolution=merge-duplicates,return=minimal'
       },
       body: JSON.stringify(rows)
-    });
-  } catch(e) { console.error('urun_meta kaydedilemedi', e); }
+    }).then(async r => { if (!r.ok) { const t = await r.text(); console.error('urun_meta', t); showToast('⚠️ Ürün bilgisi kaydedilemedi: ' + t.slice(0, 120)); } });
+  } catch(e) { console.error('urun_meta kaydedilemedi', e); showToast('⚠️ Ürün bilgisi kaydedilemedi'); }
 }
+// Supabase bir istekte en fazla 1000 satır verir: hepsini parça parça çek
+async function apiTumSatirlar(endpoint) {
+  let sonuc = [], off = 0;
+  while (true) {
+    const r = await api(endpoint + (endpoint.includes('?') ? '&' : '?') + 'limit=1000&offset=' + off);
+    sonuc = sonuc.concat(r || []);
+    if (!r || r.length < 1000) break;
+    off += 1000;
+  }
+  return sonuc;
+}
+let urunMetaYuklendi = false;   // false iken ürün bilgilerinin (taş, kategori…) üzerine ASLA yazılmaz
 async function loadUrunMetaCache() {
-  urunMetaCache = {};
+  urunMetaCache = {}; urunMetaYuklendi = false;
   try {
-    const rows = await api('urun_meta?select=*');
+    const rows = await apiTumSatirlar('urun_meta?select=*&order=urun_id.asc');
     (rows || []).forEach(r => {
       urunMetaCache[r.urun_id] = {
         durum: r.durum || [],
@@ -4332,12 +4345,17 @@ async function loadUrunMetaCache() {
         fotoYuklendi: !!r.foto_yuklendi
       };
     });
-  } catch(e) { urunMetaCache = {}; }
+    urunMetaYuklendi = true;
+  } catch(e) {
+    urunMetaCache = {};
+    showToast('⚠️ Ürün bilgileri (taş, kategori) yüklenemedi — sayfayı yenileyin. Bu sırada hiçbir bilgi değiştirilmeyecek.');
+  }
 }
 function getUrunMeta(urunId) {
   return urunMetaCache[urunId] || {};
 }
 function setUrunMeta(urunId, data) {
+  if (!urunMetaYuklendi) { alert('Ürün bilgileri yüklenemediği için bu değişiklik kaydedilmedi. Sayfayı yenileyip tekrar deneyin.'); return; }
   urunMetaCache[urunId] = data;
   bulkUpsertUrunMeta([metaToRow(urunId, data)]);
 }
@@ -5023,7 +5041,7 @@ async function saveUrun() {
     if (/23505|duplicate key|urunler_kod_key/.test(e.message || '')) { urunKodCakisma(kod, null); return; }
     throw e;
   }
-  setUrunMeta(urunId, { durum: getDurumValues(), tur: getTurValues(), mecralar: getMecraValues(), tas: getTasBilgisi(), olcu: getOlcuBilgisi(), kategori: document.getElementById('urunKategori').value || '' });
+  setUrunMeta(urunId, Object.assign({}, getUrunMeta(urunId), { durum: getDurumValues(), tur: getTurValues(), mecralar: getMecraValues(), tas: getTasBilgisi(), olcu: getOlcuBilgisi(), kategori: document.getElementById('urunKategori').value || '' }));
   if (id) await api('varyantlar?urun_id=eq.'+id, 'DELETE');
   const tumVaryantlar = [];
   for (const ayar of ['925','10','14']) {
