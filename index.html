@@ -1,4 +1,4 @@
-<!-- SURUM-V141-URUN-META-KORUMA --><!DOCTYPE html>
+<!-- SURUM-V142-VERI-KORUMA --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1065,6 +1065,75 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   #a4PrintArea { display:block; position: absolute; top: 0; left: 0; width: 190mm; }
 }
 </style>
+<style>
+/* ===== V142: Veri koruma, geçmiş, yedek, toplu düzenleme ===== */
+.vk-durum { display:grid; gap:8px; font-size:13px; }
+.vk-satir { display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:9px 12px; border-radius:10px; background:rgba(255,255,255,.025); border:1px solid var(--border); }
+.vk-satir .vk-ik { width:22px; text-align:center; }
+.vk-satir .vk-et { color:var(--text3); min-width:150px; }
+.vk-satir b { color:var(--text); font-weight:600; }
+.vk-satir .vk-sag { margin-left:auto; display:flex; gap:6px; }
+.vk-uyari { color:#FBBF24 !important; }
+.vk-kirmizi { color:var(--red) !important; }
+.vk-yesil { color:var(--green) !important; }
+.vk-not { background:rgba(251,191,36,.10); border:1px solid rgba(251,191,36,.35); color:#FDE68A; border-radius:10px; padding:10px 12px; font-size:12.5px; line-height:1.5; }
+.vk-ilerleme-kutu { position:fixed; left:20px; bottom:20px; z-index:9998; background:#1B1810; border:1px solid var(--border2); border-radius:12px; padding:12px 16px; font-size:13px; color:var(--text); box-shadow:0 10px 30px rgba(0,0,0,.45); display:flex; align-items:center; gap:10px; max-width:min(420px, calc(100vw - 40px)); }
+.vk-don { width:16px; height:16px; border:2px solid rgba(212,175,55,.3); border-top-color:var(--gold); border-radius:50%; animation:vkDon 1s linear infinite; flex-shrink:0; }
+@keyframes vkDon { to { transform:rotate(360deg); } }
+.vk-hatirlat { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 1.25rem; padding:12px 16px; border-radius:14px; border:1px solid rgba(251,191,36,.45); background:radial-gradient(260px 120px at 0% 0%, rgba(251,191,36,.16), transparent 70%), var(--card); font-size:13px; }
+.vk-hatirlat .vk-hik { font-size:22px; }
+.vk-hatirlat .vk-hmetin { flex:1; min-width:200px; display:flex; flex-direction:column; gap:2px; }
+.vk-hatirlat .vk-hmetin span { color:var(--text3); font-size:12px; }
+
+.vk-modal { max-width:min(1100px, 96vw) !important; }
+.vk-modal.vk-genis { max-width:min(1500px, 98vw) !important; height:92vh; }
+.vk-modal .modal-body { padding:1rem 1.25rem; }
+.vk-arac { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+.vk-arac .form-control { width:auto; }
+.vk-tablo-sar { overflow:auto; border:1px solid var(--border); border-radius:12px; }
+.vk-tablo { width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px; }
+.vk-tablo th { position:sticky; top:0; z-index:2; background:#1E1B14; color:var(--text2); font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; padding:7px 6px; border-bottom:1px solid var(--border2); text-align:left; white-space:nowrap; }
+.vk-tablo thead tr:nth-child(2) th { top:27px; }
+.vk-tablo th.vk-ort, .vk-tablo td.vk-ort { text-align:center; }
+.vk-tablo th.vk-tik { cursor:pointer; }
+.vk-tablo th.vk-tik:hover { color:var(--gold-dark); }
+.vk-tablo th.vk-grup { border-left:1px solid var(--border2); }
+.vk-tablo td { padding:5px 6px; border-bottom:1px solid rgba(255,255,255,.05); white-space:nowrap; vertical-align:middle; }
+.vk-tablo td.vk-sol { border-left:1px solid var(--border); }
+.vk-tablo tr:hover td { background:rgba(212,175,55,.04); }
+.vk-tablo input[type=text] { width:100%; min-width:0; padding:5px 7px; border:1px solid var(--border2); border-radius:7px; background:var(--bg); color:var(--text); font:inherit; font-size:12.5px; }
+.vk-tablo input[type=text]:focus { outline:none; border-color:var(--gold); background:var(--card); }
+.vk-tablo input[type=text]:disabled { opacity:.35; }
+.vk-tablo input[type=checkbox] { width:16px; height:16px; accent-color:#D4AF37; cursor:pointer; vertical-align:middle; }
+.vk-tablo .vk-degisti { box-shadow:0 0 0 2px #60A5FA; border-color:#60A5FA !important; border-radius:5px; }
+.vk-tablo tr.vk-satir-degisti td:first-child { box-shadow:inset 3px 0 0 #60A5FA; }
+.vk-foto { width:38px; height:38px; border-radius:7px; object-fit:cover; background:#fff; display:block; }
+.vk-foto-bos { width:38px; height:38px; border-radius:7px; background:rgba(255,255,255,.05); display:flex; align-items:center; justify-content:center; color:var(--text3); font-size:14px; }
+.vk-kod { font-weight:700; color:#F7DA84; }
+.vk-ad { max-width:200px; overflow:hidden; text-overflow:ellipsis; color:var(--text2); }
+.vk-alt { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.vk-sayac { font-size:12.5px; color:var(--text3); }
+.vk-rozet { display:inline-block; font-size:11px; font-weight:700; padding:2px 8px; border-radius:20px; white-space:nowrap; }
+.vk-r-sil { background:rgba(240,118,107,.15); color:var(--red); }
+.vk-r-ekle { background:rgba(74,222,128,.13); color:var(--green); }
+.vk-r-deg { background:rgba(96,165,250,.15); color:#93C5FD; }
+.vk-grup-kart { border:1px solid var(--border); border-radius:12px; padding:10px 12px; margin-bottom:8px; background:rgba(255,255,255,.02); }
+.vk-grup-kart.vk-secili { border-color:rgba(96,165,250,.6); background:rgba(96,165,250,.05); }
+.vk-grup-ust { display:flex; align-items:center; gap:10px; }
+.vk-grup-ust label { display:flex; align-items:center; gap:10px; cursor:pointer; flex:1; min-width:0; }
+.vk-bolum { margin:8px 0 0 26px; padding:7px 10px; border-left:2px solid var(--border2); font-size:12.5px; }
+.vk-bolum label { display:flex; gap:8px; align-items:flex-start; cursor:pointer; }
+.vk-bolum ul { list-style:none; margin:4px 0 0 24px; display:flex; flex-direction:column; gap:2px; color:var(--text2); }
+.vk-bolum .vk-eski { color:var(--red); }
+.vk-bolum .vk-yeni { color:var(--green); }
+.vk-detay { font-size:12px; color:var(--text2); margin-top:6px; }
+.vk-detay li { margin-left:16px; }
+@media (max-width: 700px) {
+  .vk-modal.vk-genis { height:96vh; }
+  .vk-satir .vk-et { min-width:0; }
+}
+
+</style>
 </head>
 <body>
 
@@ -1131,6 +1200,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <button class="btn" onclick="asHatirlatmaAc()">🔔 Ödeme Hatırlatma (Ö)</button>
     </div>
   </div>
+  <div id="yedekHatirlatma" style="display:none;"></div>
 
   <!-- CANLI KUR -->
   <div class="card as-renk hk-panel" data-dekor="📈" style="margin-bottom:1.25rem;">
@@ -1387,6 +1457,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div class="page-header">
     <div><div class="page-title">Ürün Kartları</div><div class="page-sub" id="urunSayac">Yükleniyor...</div></div>
     <button class="btn btn-primary" id="yeniUrunBtn" onclick="openUrunModal()">+ Yeni Ürün</button>
+    <button class="btn" id="topluDuzenBtn" onclick="topluDuzenAc()" style="display:none;">📝 Toplu düzenle</button>
     <button class="btn" id="secModBtn" onclick="toggleSecimModu()" style="display:none;">☑ Seç</button>
     <button class="btn" id="kopyaBulBtn" onclick="olasiKopyalariBul()" style="display:none;">🔍 Olası Kopyaları Bul</button>
     <button class="btn btn-danger" id="topluSilBtn" onclick="topluSilSecilenler()" style="display:none;">🗑 Seçilenleri Sil (<span id="topluSilSayi">0</span>)</button>
@@ -2046,6 +2117,22 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div style="display:flex;gap:10px;align-items:center;margin-top:10px;">
       <button class="btn btn-primary" onclick="saveZincirFormulleri()">Kaydet ↵</button>
       <span id="zincirMsg" style="font-size:13px;color:var(--green);display:none;">✓ Kaydedildi!</span>
+    </div>
+  </div>
+
+  <!-- VERİ KORUMA VE YEDEK - sadece admin -->
+  <div id="veriKorumaPanel" style="display:none;margin-top:1.5rem;">
+    <div class="param-panel vk-panel">
+      <div style="font-size:15px;font-weight:600;margin-bottom:0.25rem;">🛡️ Veri Koruma ve Yedek</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:1rem;">Toplu silmeler veritabanında engellenir; ürün, ürün bilgisi ve varyant değişiklikleri 90 gün geriye kadar geri alınabilir. Yedek dosyasını bilgisayarınızda ve bir bulut klasöründe saklayın.</div>
+      <div id="vkDurum" class="vk-durum">Yükleniyor…</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+        <button class="btn btn-primary" id="vkYedekBtn" onclick="yedekAl()">💾 Tüm verileri yedekle</button>
+        <button class="btn" onclick="document.getElementById('vkYedekDosya').click()">📂 Yedekten geri yükle</button>
+        <button class="btn" onclick="gecmisModalAc()">🕘 Geri yükle</button>
+        <input type="file" id="vkYedekDosya" accept=".json,application/json" style="display:none" onchange="yedekDosyaSecildi(this)">
+      </div>
+      <div id="vkIlerleme" class="vk-ilerleme" style="display:none;"></div>
     </div>
   </div>
 
@@ -2820,6 +2907,11 @@ async function ensureValidSession() {
   return authSession;
 }
 
+// Veritabanı bekçisinin (veri-koruma.sql) Türkçe hata mesajını okunur hâle getirir
+function korumaHataMetni(t) {
+  try { const j = JSON.parse(t); if (j && j.message && /VERİ KORUMASI/.test(j.message)) return j.message + (j.hint ? '\n\n' + j.hint : ''); } catch (e) {}
+  return null;
+}
 async function api(endpoint, method='GET', body=null) {
   const session = await ensureValidSession();
   if (!session) throw new Error('Oturum bulunamadi. Lutfen giris yapin.');
@@ -2834,7 +2926,7 @@ async function api(endpoint, method='GET', body=null) {
   };
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(SUPABASE_URL + '/rest/v1/' + endpoint, opts);
-  if (!r.ok) { const e = await r.text(); throw new Error(e); }
+  if (!r.ok) { const e = await r.text(); throw new Error(korumaHataMetni(e) || e); }
   const t = await r.text();
   return t ? JSON.parse(t) : null;
 }
@@ -2921,7 +3013,7 @@ function showPage(page) {
     }
     loadRapor();
   }
-  if (page === 'parametreler') { loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('hatirlatmaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('grupBOdemeMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('giderAyarMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
+  if (page === 'parametreler') { veriKorumaPanelYukle(); loadParamTablo(); loadKullanicilar(); loadRolIzinPanel(); loadZincirFormulleri(); document.getElementById('metaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('kkMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('gorevMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('calisanMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('baMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('dokumMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('hatirlatmaMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('grupBOdemeMigratePanel').style.display = isAdmin() ? 'block' : 'none'; document.getElementById('giderAyarMigratePanel').style.display = isAdmin() ? 'block' : 'none'; }
   if (page === 'giderler') { fillAySec('giderAy'); loadGiderler(); }
   if (page === 'platformlar') { initPlatformlar(); }
   if (page === 'borcalacak') { cariInit(); }
@@ -3366,7 +3458,7 @@ async function topluSilSecilenler() {
         const vids = varList.map(v => v.id).join(',');
         try { await api('siparisler?varyant_id=in.(' + vids + ')', 'DELETE'); } catch(e) {}
       }
-      await api('varyantlar?urun_id=eq.' + urunId, 'DELETE');
+      await varyantlariSil((varList || []).map(v => v.id));
       await api('urunler?id=eq.' + urunId, 'DELETE');
       basarili++;
     } catch(e) {
@@ -4313,8 +4405,13 @@ async function bulkUpsertUrunMeta(rows) {
         'Prefer': 'resolution=merge-duplicates,return=minimal'
       },
       body: JSON.stringify(rows)
-    }).then(async r => { if (!r.ok) { const t = await r.text(); console.error('urun_meta', t); showToast('⚠️ Ürün bilgisi kaydedilemedi: ' + t.slice(0, 120)); } });
+    }).then(async r => { if (!r.ok) { const t = await r.text(); console.error('urun_meta', t); const k = korumaHataMetni(t); if (k) { alert(k); loadUrunMetaCache().then(() => { if (typeof filterUrunler === 'function') filterUrunler(); }); } else showToast('⚠️ Ürün bilgisi kaydedilemedi: ' + t.slice(0, 120)); } });
   } catch(e) { console.error('urun_meta kaydedilemedi', e); showToast('⚠️ Ürün bilgisi kaydedilemedi'); }
+}
+// Varyantları kimliğiyle, 25'erli parçalar hâlinde siler (veri bekçisi tek seferde 30'dan fazlasını reddeder)
+async function varyantlariSil(ids) {
+  ids = (ids || []).filter(x => x != null);
+  for (let i = 0; i < ids.length; i += 25) await api('varyantlar?id=in.(' + ids.slice(i, i + 25).join(',') + ')', 'DELETE');
 }
 // Supabase bir istekte en fazla 1000 satır verir: hepsini parça parça çek
 async function apiTumSatirlar(endpoint) {
@@ -5042,7 +5139,6 @@ async function saveUrun() {
     throw e;
   }
   setUrunMeta(urunId, Object.assign({}, getUrunMeta(urunId), { durum: getDurumValues(), tur: getTurValues(), mecralar: getMecraValues(), tas: getTasBilgisi(), olcu: getOlcuBilgisi(), kategori: document.getElementById('urunKategori').value || '' }));
-  if (id) await api('varyantlar?urun_id=eq.'+id, 'DELETE');
   const tumVaryantlar = [];
   for (const ayar of ['925','10','14']) {
     if (!document.getElementById('cb'+ayar).checked) continue;
@@ -5050,7 +5146,15 @@ async function saveUrun() {
       tumVaryantlar.push({ urun_id: urunId, ayar, urun_tipi: v.urun_tipi, gram: v.gram, stok: 0, uyari_esigi: 5, maliyet: 0, satis_fiyati: 0 });
     }
   }
-  if (tumVaryantlar.length) await api('varyantlar', 'POST', tumVaryantlar);
+  // Önce yeni varyantlar eklenir, sonra eskiler silinir: ekleme başarısız olursa eski varyantlar kaybolmaz
+  const eskiVaryantIdleri = id ? ((await apiTumSatirlar('varyantlar?urun_id=eq.' + id + '&select=id&order=id.asc')) || []).map(v => v.id) : [];
+  let eklendi = false;
+  if (tumVaryantlar.length) {
+    try { await api('varyantlar', 'POST', tumVaryantlar); eklendi = true; }
+    catch (e) { if (!/23505|duplicate key/.test(e.message || '')) throw e; }   // aynı ayar/tip kısıtı varsa eski yönteme dön
+  }
+  await varyantlariSil(eskiVaryantIdleri);
+  if (tumVaryantlar.length && !eklendi) await api('varyantlar', 'POST', tumVaryantlar);
   closeModal('urunModal'); currentFotoFile = null;
   await loadUrunler();
   } catch (e) {
@@ -5090,8 +5194,8 @@ async function deleteUrun(urunId) {
       const ids = varList.map(v => v.id).join(',');
       try { await api('siparisler?varyant_id=in.(' + ids + ')', 'DELETE'); } catch(e) {}
     }
-    // 2. varyantları sil
-    await api('varyantlar?urun_id=eq.' + urunId, 'DELETE');
+    // 2. varyantları sil (25'erli parçalar hâlinde)
+    await varyantlariSil((varList || []).map(v => v.id));
     // 3. ürünü sil
     await api('urunler?id=eq.' + urunId, 'DELETE');
     closeModal('detayModal');
@@ -5268,6 +5372,7 @@ async function showMainApp() {
   if (currentUser.rol === 'admin' && typeof bozAlarmYukle === 'function') {
     bozAlarmYukle().then(bozAlarmBaslat);
   }
+  if (typeof yedekHatirlatmaKontrol === 'function') yedekHatirlatmaKontrol();
 }
 
 function checkOtomatikGiris() {
@@ -5363,6 +5468,8 @@ function applyRol() {
     if (btn) btn.style.display = urunYetkiVar() ? '' : 'none';
     const secBtn = document.getElementById('secModBtn');
     if (secBtn) secBtn.style.display = urunYetkiVar() ? '' : 'none';
+    const tdBtn = document.getElementById('topluDuzenBtn');
+    if (tdBtn) tdBtn.style.display = urunYetkiVar() ? '' : 'none';
   }, 500);
   // Kullanıcı adını navda göster (tekrar tekrar çağrılırsa eski etiketi temizle)
   const navRight = document.querySelector('.nav-right');
@@ -13711,6 +13818,689 @@ async function cariEskiBorcAlacakAktar() {
   cariMusteriListeRender();
   showToast('✓ ' + satirlar.length + ' eski kayıt cari hesaplara taşındı');
 }
+</script>
+<script>
+// =====================================================================
+// V142 — VERİ KORUMA: bekçi durumu, değişiklik geçmişi (🕘 Geri yükle),
+// yedek al / yedekten geri yükle, Ana Sayfa hatırlatması, 📝 Toplu düzenle
+// Veritabanı tarafı: veri-koruma.sql
+// =====================================================================
+function vkEsc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+async function vkRpc(ad, args) { return api('rpc/' + ad, 'POST', args || {}); }
+function vkKurulumYok(e) { return /PGRST202|Could not find the function|does not exist|404/.test(String(e && e.message || e)); }
+function vkHata(e) {
+  const m = String(e && e.message || e || '');
+  try { const j = JSON.parse(m); if (j && j.message) return j.message + (j.hint ? '\n' + j.hint : ''); } catch (x) {}
+  return m;
+}
+function vkTarih(z, saatli) {
+  if (!z) return '—';
+  const d = new Date(z);
+  return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }) + (saatli === false ? '' : ' ' + d.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }));
+}
+function vkGunOnce(z) { return z ? Math.floor((Date.now() - new Date(z).getTime()) / 864e5) : null; }
+function vkSayi(n) { return Number(n || 0).toLocaleString('tr-TR'); }
+function vkIlerleme(metin) {
+  let k = document.getElementById('vkIlerlemeKutu');
+  if (!metin) { if (k) k.remove(); return; }
+  if (!k) { k = document.createElement('div'); k.id = 'vkIlerlemeKutu'; k.className = 'vk-ilerleme-kutu'; document.body.appendChild(k); }
+  k.innerHTML = '<div class="vk-don"></div><div>' + vkEsc(metin) + '</div>';
+}
+function vkModal(id, genis) {
+  let ov = document.getElementById(id);
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = id; ov.className = 'modal-overlay';
+    ov.innerHTML = '<div class="modal vk-modal' + (genis ? ' vk-genis' : '') + '"></div>';
+    document.body.appendChild(ov);
+  }
+  ov.classList.add('open');
+  return ov.querySelector('.modal');
+}
+function vkModalKapat(id) { const ov = document.getElementById(id); if (ov) ov.classList.remove('open'); }
+
+// ---------------- Parametreler › 🛡️ Veri Koruma ----------------
+let vkDurumBilgi = null, vkBekciZamanlayici = null;
+async function veriKorumaPanelYukle() {
+  const p = document.getElementById('veriKorumaPanel'); if (!p) return;
+  if (!isAdmin()) { p.style.display = 'none'; return; }
+  p.style.display = 'block';
+  const d = document.getElementById('vkDurum');
+  try {
+    vkDurumBilgi = await vkRpc('veri_koruma_durum');
+    d.innerHTML = vkDurumHtml(vkDurumBilgi);
+  } catch (e) {
+    vkDurumBilgi = null;
+    d.innerHTML = vkKurulumYok(e)
+      ? '<div class="vk-not">Veri koruması henüz kurulmamış. Supabase › SQL Editor\'de <b>veri-koruma.sql</b> dosyasını bir kez çalıştırın, sonra bu sayfayı yenileyin.</div>'
+      : '<div class="vk-not">Durum okunamadı: ' + vkEsc(vkHata(e)) + '</div>';
+  }
+}
+function vkDurumHtml(d) {
+  const sy = d && d.son_yedek, gun = sy ? vkGunOnce(sy.zaman) : null;
+  const yedek = sy
+    ? `<b class="${gun >= 7 ? 'vk-uyari' : ''}">${vkTarih(sy.zaman)}</b> <span style="color:var(--text3)">· ${vkEsc(sy.kisi || '')} · ${gun === 0 ? 'bugün' : gun + ' gün önce'}${sy.satir ? ' · ' + vkSayi(sy.satir) + ' kayıt' : ''}</span>`
+    : '<b class="vk-uyari">Henüz yedek alınmadı</b>';
+  const bitis = d && d.bekci_bitis ? new Date(d.bekci_bitis) : null;
+  clearTimeout(vkBekciZamanlayici);
+  if (bitis) vkBekciZamanlayici = setTimeout(veriKorumaPanelYukle, Math.max(1000, bitis - Date.now() + 1500));
+  const bekci = bitis
+    ? `<b class="vk-kirmizi">Kapalı</b> <span style="color:var(--text3)">· ${bitis.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}'e kadar (sadece sizin için)</span><span class="vk-sag"><button class="btn btn-sm" onclick="bekciAc()">🔒 Şimdi aç</button></span>`
+    : `<b class="vk-yesil">Açık</b> <span style="color:var(--text3)">· toplu silme ve toplu bilgi boşaltma engellenir</span><span class="vk-sag"><button class="btn btn-sm" onclick="bekciKapat()" title="Bilinçli bir toplu silme için korumayı sadece sizin için 10 dakika kapatır">🔓 10 dk kapat</button></span>`;
+  return `<div class="vk-satir"><span class="vk-ik">💾</span><span class="vk-et">Son yedek</span>${yedek}</div>
+    <div class="vk-satir"><span class="vk-ik">🕘</span><span class="vk-et">Değişiklik geçmişi</span><b>${vkSayi(d && d.gecmis_sayisi)} kayıt</b><span style="color:var(--text3)">${d && d.gecmis_en_eski ? '· ' + vkTarih(d.gecmis_en_eski, false) + '\'den beri (90 gün saklanır)' : '· henüz değişiklik yok'}</span></div>
+    <div class="vk-satir"><span class="vk-ik">🛡️</span><span class="vk-et">Toplu silme koruması</span>${bekci}</div>`;
+}
+async function bekciKapat() {
+  if (!confirm('Koruma SADECE SİZİN için 10 dakika kapatılacak.\n\nBu sürede yaptığınız toplu silmeler ve toplu bilgi boşaltmaları engellenmez. Sadece ne yaptığınızı biliyorsanız devam edin.\n\nKapatılsın mı?')) return;
+  try { await vkRpc('bekci_kapat', { p_dakika: 10 }); showToast('🔓 Koruma 10 dakika kapalı'); }
+  catch (e) { alert('Kapatılamadı: ' + vkHata(e)); }
+  veriKorumaPanelYukle();
+}
+async function bekciAc() {
+  try { await vkRpc('bekci_ac'); showToast('🔒 Koruma açıldı'); } catch (e) { alert('Açılamadı: ' + vkHata(e)); }
+  veriKorumaPanelYukle();
+}
+
+// ---------------- Ana Sayfa: yedek hatırlatması ----------------
+async function yedekHatirlatmaKontrol() {
+  const kutu = document.getElementById('yedekHatirlatma');
+  if (!kutu || !isAdmin()) return;
+  try { if (sessionStorage.getItem('kk_yedek_hatirlatma') === bugunTarihStr()) return; } catch (e) {}
+  let d;
+  try { d = await vkRpc('veri_koruma_durum'); } catch (e) { return; }   // SQL kurulmamışsa sessiz kal
+  vkDurumBilgi = d;
+  const sy = d && d.son_yedek, gun = sy ? vkGunOnce(sy.zaman) : null;
+  if (sy && gun < 7) { kutu.style.display = 'none'; return; }
+  kutu.innerHTML = `<div class="vk-hatirlat"><span class="vk-hik">💾</span>
+    <div class="vk-hmetin"><b>${sy ? 'Son yedek ' + gun + ' gün önce alındı' : 'Henüz hiç yedek alınmadı'}</b><span>Tüm verilerin yedeğini alıp dosyayı güvenli bir yerde saklayın (haftada bir önerilir).</span></div>
+    <button class="btn btn-primary btn-sm" onclick="yedekAl()">💾 Şimdi yedekle</button>
+    <button class="btn btn-sm" onclick="yedekHatirlatmaGizle()">Bugün gizle</button></div>`;
+  kutu.style.display = 'block';
+}
+function yedekHatirlatmaGizle() {
+  try { sessionStorage.setItem('kk_yedek_hatirlatma', bugunTarihStr()); } catch (e) {}
+  const k = document.getElementById('yedekHatirlatma'); if (k) k.style.display = 'none';
+}
+
+// ---------------- 💾 Yedek al ----------------
+async function vkTabloyuOku(tablo, ilerle) {
+  let satirlar = [], off = 0;
+  while (true) {
+    const r = (await vkRpc('yedek_oku', { p_tablo: tablo, p_offset: off, p_limit: 1000 })) || [];
+    satirlar = satirlar.concat(r);
+    if (ilerle) ilerle(satirlar.length);
+    if (r.length < 1000) break;
+    off += 1000;
+  }
+  return satirlar;
+}
+function vkDosyaIndir(metin, ad) {
+  const url = URL.createObjectURL(new Blob([metin], { type: 'application/json' }));
+  const a = document.createElement('a'); a.href = url; a.download = ad; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+let vkYedekSuruyor = false;
+async function yedekAl(sessizBitir) {
+  if (!isAdmin()) { alert('Yedek sadece yönetici tarafından alınabilir.'); return false; }
+  if (vkYedekSuruyor) return false;
+  vkYedekSuruyor = true;
+  const btn = document.getElementById('vkYedekBtn'); if (btn) btn.disabled = true;
+  try {
+    vkIlerleme('Tablo listesi alınıyor…');
+    const tablolar = await vkRpc('yedek_tablolari');
+    const yedek = { tur: 'kilicoglu-yedek', surum: 1, uygulama: 'V142', tarih: new Date().toISOString(), olusturan: (currentUser && (currentUser.ad_soyad || currentUser.kullanici_adi)) || '', tablolar: {} };
+    let toplam = 0; const eksik = [];
+    for (let i = 0; i < tablolar.length; i++) {
+      const t = tablolar[i];
+      vkIlerleme(`Yedekleniyor ${i + 1}/${tablolar.length}: ${t.tablo}`);
+      const satirlar = await vkTabloyuOku(t.tablo, n => { if (n >= 1000) vkIlerleme(`Yedekleniyor ${i + 1}/${tablolar.length}: ${t.tablo} (${vkSayi(n)} satır)`); });
+      if (satirlar.length < Number(t.satir)) eksik.push(t.tablo + ' (' + satirlar.length + '/' + t.satir + ')');
+      yedek.tablolar[t.tablo] = { pk: t.pk, sira: t.sira, satirlar };
+      toplam += satirlar.length;
+    }
+    yedek.ozet = { tablo: tablolar.length, satir: toplam };
+    const metin = JSON.stringify(yedek);
+    const z = new Date(), iki = n => String(n).padStart(2, '0');
+    vkDosyaIndir(metin, `kilicoglu-yedek-${bugunTarihStr(z)}-${iki(z.getHours())}${iki(z.getMinutes())}.json`);
+    try { await vkRpc('yedek_alindi', { p_bilgi: { tablo: tablolar.length, satir: toplam, boyut: metin.length } }); } catch (e) {}
+    vkIlerleme('');
+    const k = document.getElementById('yedekHatirlatma'); if (k) k.style.display = 'none';
+    if (!sessizBitir) {
+      if (eksik.length) alert('Yedek indirildi, ancak okunurken değişen tablolar oldu: ' + eksik.join(', ') + '\nGerekirse yedeği tekrar alın.');
+      else showToast(`✓ Yedek indirildi: ${tablolar.length} tablo, ${vkSayi(toplam)} kayıt (${(metin.length / 1048576).toFixed(1)} MB)`);
+    }
+    veriKorumaPanelYukle();
+    return true;
+  } catch (e) {
+    vkIlerleme('');
+    alert(vkKurulumYok(e) ? 'Önce Supabase\'de veri-koruma.sql dosyasını çalıştırın.' : 'Yedek alınamadı: ' + vkHata(e));
+    return false;
+  } finally {
+    vkYedekSuruyor = false; if (btn) btn.disabled = false;
+  }
+}
+
+// ---------------- 📂 Yedekten geri yükle ----------------
+const VK_TABLO_AD = {
+  urunler: 'Ürünler', urun_meta: 'Ürün bilgileri (taş, durum, ölçü…)', varyantlar: 'Varyantlar (ayar/gram)', platform_siparisler: 'Platform siparişleri',
+  giderler: 'Giderler', genel_ayarlar: 'Genel ayarlar', kullanicilar: 'Kullanıcılar', bayi_linkleri: 'Bayi linkleri', grupb_odemeler: 'Bayi ödemeleri / ek borç',
+  grupb_gonderiler: 'Bayi gönderileri', cari_islemler: 'Cari işlemler', cari_musteriler: 'Cari müşteriler', faturalar: 'Faturalar', aylik_parametreler: 'Aylık parametreler'
+};
+function vkAnahtar(row, pk) { return pk.map(k => { const v = row[k]; return v == null ? '' : (typeof v === 'object' ? JSON.stringify(v) : String(v)); }).join('\u001f'); }
+function vkEtiket(row, pk) {
+  const parca = [row.kod, row.ad, row.siparis_no, row.anahtar, row.platform, row.aciklama].filter(x => x != null && x !== '').slice(0, 2).map(x => String(x).slice(0, 40));
+  return parca.length ? parca.join(' · ') : pk.map(k => String(row[k])).join(' / ').slice(0, 40);
+}
+let vkGeri = null;
+async function yedekDosyaSecildi(input) {
+  const f = input.files && input.files[0]; input.value = '';
+  if (!f) return;
+  if (!isAdmin()) { alert('Geri yükleme sadece yönetici içindir.'); return; }
+  let y;
+  try { y = JSON.parse(await f.text()); } catch (e) { alert('Dosya okunamadı. Bu sistemin "💾 Tüm verileri yedekle" ile indirdiği .json dosyasını seçin.'); return; }
+  if (!y || y.tur !== 'kilicoglu-yedek' || !y.tablolar) { alert('Bu bir Kılıçoğlu yedek dosyası değil.'); return; }
+  const m = vkModal('vkGeriModal');
+  m.innerHTML = `<div class="modal-header"><div class="modal-title">📂 Yedekten geri yükle</div><button class="modal-close" onclick="vkModalKapat('vkGeriModal')">×</button></div>
+    <div class="modal-body"><div style="display:flex;gap:10px;align-items:center;color:var(--text2)"><div class="vk-don"></div><span id="vkGeriYuk">Şimdiki verilerle karşılaştırılıyor…</span></div></div>`;
+  try {
+    const mevcut = await vkRpc('yedek_tablolari');
+    const harita = Object.fromEntries(mevcut.map(t => [t.tablo, t]));
+    const analiz = [];
+    const adlar = Object.keys(y.tablolar).sort((a, b) => ((harita[a] || {}).sira || 0) - ((harita[b] || {}).sira || 0) || a.localeCompare(b));
+    for (let i = 0; i < adlar.length; i++) {
+      const ad = adlar[i], yt = y.tablolar[ad] || {}, satirlar = Array.isArray(yt.satirlar) ? yt.satirlar : [];
+      const el = document.getElementById('vkGeriYuk'); if (el) el.textContent = `Karşılaştırılıyor ${i + 1}/${adlar.length}: ${ad}`;
+      const h = harita[ad];
+      if (!h) { analiz.push({ tablo: ad, yok: true, yedekSayi: satirlar.length }); continue; }
+      const pk = h.pk || [];
+      if (!pk.length) { analiz.push({ tablo: ad, pksiz: true, yedekSayi: satirlar.length }); continue; }
+      const simdi = await vkTabloyuOku(ad);
+      const simdiMap = new Map(simdi.map(r => [vkAnahtar(r, pk), r]));
+      const gorulen = new Set(), yeni = [], degisen = []; let ayni = 0;
+      satirlar.forEach(r => {
+        const k = vkAnahtar(r, pk); gorulen.add(k);
+        const c = simdiMap.get(k);
+        if (!c) { yeni.push(r); return; }
+        const alanlar = Object.keys(r).filter(a => JSON.stringify(r[a]) !== JSON.stringify(c[a]));
+        if (alanlar.length) degisen.push({ r, c, alanlar }); else ayni++;
+      });
+      const fazla = simdi.filter(r => !gorulen.has(vkAnahtar(r, pk)));
+      analiz.push({ tablo: ad, pk, sira: h.sira || 0, yedekSayi: satirlar.length, simdiSayi: simdi.length, satirlar, yeni, degisen, ayni, fazla,
+        sec: (yeni.length > 0 || degisen.length > 0) && ad !== 'kullanicilar' });
+    }
+    vkGeri = { y, analiz };
+    vkGeriCiz();
+  } catch (e) {
+    m.querySelector('.modal-body').innerHTML = '<div class="vk-not">' + vkEsc(vkKurulumYok(e) ? 'Önce Supabase\'de veri-koruma.sql dosyasını çalıştırın.' : 'Karşılaştırılamadı: ' + vkHata(e)) + '</div>';
+  }
+}
+function vkGeriCiz() {
+  const m = vkModal('vkGeriModal'), { y, analiz } = vkGeri;
+  const farkli = analiz.filter(a => !a.yok && !a.pksiz && (a.yeni.length || a.degisen.length || a.fazla.length));
+  const ayni = analiz.filter(a => !a.yok && !a.pksiz && !(a.yeni.length || a.degisen.length || a.fazla.length));
+  const sorunlu = analiz.filter(a => a.yok || a.pksiz);
+  const satir = a => {
+    const i = analiz.indexOf(a);
+    const detay = [
+      ...a.degisen.slice(0, 40).map(d => `<li>✏️ <b>${vkEsc(vkEtiket(d.r, a.pk))}</b>: ${vkEsc(d.alanlar.join(', '))}</li>`),
+      ...a.yeni.slice(0, 20).map(r => `<li>➕ ${vkEsc(vkEtiket(r, a.pk))}${a.tablo === 'bayi_linkleri' ? ' <i>(link anahtarı yedekte yok, eklenmez)</i>' : ''}</li>`),
+      ...a.fazla.slice(0, 20).map(r => `<li>➖ ${vkEsc(vkEtiket(r, a.pk))}</li>`)
+    ].join('');
+    const fazlasi = (a.degisen.length > 40 || a.yeni.length > 20 || a.fazla.length > 20) ? '<li>…</li>' : '';
+    return `<tr>
+      <td class="vk-ort"><input type="checkbox" ${a.sec ? 'checked' : ''} onchange="vkGeri.analiz[${i}].sec=this.checked;vkGeriOzet()"></td>
+      <td><b>${vkEsc(VK_TABLO_AD[a.tablo] || a.tablo)}</b><div style="font-size:11px;color:var(--text3)">${vkEsc(a.tablo)}</div>
+        ${detay ? `<details class="vk-detay"><summary style="cursor:pointer">Ayrıntı</summary><ul>${detay}${fazlasi}</ul></details>` : ''}</td>
+      <td class="vk-ort">${vkSayi(a.yedekSayi)}</td><td class="vk-ort">${vkSayi(a.simdiSayi)}</td>
+      <td class="vk-ort">${a.yeni.length ? '<span class="vk-rozet vk-r-ekle">+' + vkSayi(a.yeni.length) + '</span>' : '—'}</td>
+      <td class="vk-ort">${a.degisen.length ? '<span class="vk-rozet vk-r-deg">' + vkSayi(a.degisen.length) + '</span>' : '—'}</td>
+      <td class="vk-ort">${a.fazla.length ? '<span class="vk-rozet vk-r-sil">' + vkSayi(a.fazla.length) + '</span>' : '—'}</td></tr>`;
+  };
+  m.innerHTML = `<div class="modal-header"><div class="modal-title">📂 Yedekten geri yükle</div><button class="modal-close" onclick="vkModalKapat('vkGeriModal')">×</button></div>
+    <div class="modal-body">
+      <div class="vk-satir" style="margin-bottom:10px"><span class="vk-ik">💾</span><span>Yedek: <b>${vkTarih(y.tarih)}</b> · ${vkEsc(y.olusturan || '')} · ${vkSayi(Object.keys(y.tablolar).length)} tablo</span></div>
+      ${farkli.length ? `<div style="font-size:12.5px;color:var(--text2);margin-bottom:8px">Aşağıda yedek ile <b>şu anki</b> veriler arasındaki farklar var. Geri yüklenecek tabloları seçin. <span class="vk-rozet vk-r-ekle">+</span> yedekte olup şu an olmayan (eklenecek), <span class="vk-rozet vk-r-deg">✏️</span> değişmiş (yedekteki hâline dönecek), <span class="vk-rozet vk-r-sil">−</span> yedekten sonra eklenmiş kayıtlar.</div>
+      <div class="vk-tablo-sar" style="max-height:48vh"><table class="vk-tablo"><thead><tr><th class="vk-ort">Seç</th><th>Tablo</th><th class="vk-ort">Yedekte</th><th class="vk-ort">Şu an</th><th class="vk-ort">➕ Eklenecek</th><th class="vk-ort">✏️ Değişecek</th><th class="vk-ort">➖ Yedekte yok</th></tr></thead>
+        <tbody>${farkli.map(satir).join('')}</tbody></table></div>
+      <label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:13px;cursor:pointer"><input type="checkbox" id="vkGeriFazlaSil" onchange="vkGeriOzet()" style="margin-top:3px"> <span><b>Yedekte olmayan kayıtları da sil</b> <span style="color:var(--text3)">— işaretlemezseniz yedekten sonra eklenen kayıtlar olduğu gibi kalır (önerilen).</span></span></label>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="vkGeriOnceYedek" checked> Geri yüklemeden önce şimdiki hâlin yedeğini indir (önerilir)</label>`
+      : '<div class="vk-not" style="background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.35);color:#BBF7D0">Yedekteki veriler şu anki verilerle aynı; geri yüklenecek bir şey yok.</div>'}
+      ${ayni.length ? `<div style="font-size:12px;color:var(--text3);margin-top:10px">Aynı olan tablolar: ${ayni.map(a => vkEsc(a.tablo)).join(', ')}</div>` : ''}
+      ${sorunlu.length ? `<div style="font-size:12px;color:#FBBF24;margin-top:6px">Atlanacak: ${sorunlu.map(a => vkEsc(a.tablo) + (a.yok ? ' (veritabanında yok)' : ' (anahtarı yok)')).join(', ')}</div>` : ''}
+    </div>
+    <div class="modal-footer"><span class="vk-sayac" id="vkGeriOzet" style="margin-right:auto"></span><button class="btn" onclick="vkModalKapat('vkGeriModal')">Vazgeç</button>${farkli.length ? '<button class="btn btn-primary" id="vkGeriBtn" onclick="vkGeriUygula()">✓ Seçilenleri geri yükle</button>' : ''}</div>`;
+  vkGeriOzet();
+}
+function vkGeriOzet() {
+  const el = document.getElementById('vkGeriOzet'); if (!el || !vkGeri) return;
+  const sil = document.getElementById('vkGeriFazlaSil') && document.getElementById('vkGeriFazlaSil').checked;
+  const s = vkGeri.analiz.filter(a => a.sec && !a.yok && !a.pksiz);
+  const e = s.reduce((t, a) => t + a.yeni.length, 0), d = s.reduce((t, a) => t + a.degisen.length, 0), f = sil ? s.reduce((t, a) => t + a.fazla.length, 0) : 0;
+  el.textContent = s.length ? `${s.length} tablo · ${vkSayi(e)} eklenecek · ${vkSayi(d)} değişecek${sil ? ' · ' + vkSayi(f) + ' silinecek' : ''}` : 'Tablo seçilmedi';
+}
+async function vkGeriUygula() {
+  const sil = document.getElementById('vkGeriFazlaSil').checked, onceYedek = document.getElementById('vkGeriOnceYedek').checked;
+  const s = vkGeri.analiz.filter(a => a.sec && !a.yok && !a.pksiz).sort((a, b) => a.sira - b.sira);
+  if (!s.length) { alert('Önce en az bir tablo seçin.'); return; }
+  const e = s.reduce((t, a) => t + a.yeni.length, 0), d = s.reduce((t, a) => t + a.degisen.length, 0), f = sil ? s.reduce((t, a) => t + a.fazla.length, 0) : 0;
+  if (!confirm(`${s.length} tablo yedekteki hâline dönecek:\n\n• ${vkSayi(e)} kayıt eklenecek\n• ${vkSayi(d)} kayıt değişecek${sil ? '\n• ' + vkSayi(f) + ' kayıt SİLİNECEK' : ''}\n\nTablolar: ${s.map(a => a.tablo).join(', ')}\n\nDevam edilsin mi?`)) return;
+  const btn = document.getElementById('vkGeriBtn'); if (btn) btn.disabled = true;
+  const sonuc = [];
+  try {
+    if (onceYedek) {
+      const ok = await yedekAl(true);
+      if (!ok && !confirm('Şimdiki hâlin yedeği alınamadı. Yine de geri yüklensin mi?')) { if (btn) btn.disabled = false; return; }
+    }
+    if (sil) {
+      for (const a of [...s].reverse()) {
+        if (!a.fazla.length) continue;
+        vkIlerleme('Yedekte olmayanlar siliniyor: ' + a.tablo);
+        const n = await vkRpc('yedek_fazlalari_sil', { p_tablo: a.tablo, p_anahtarlar: a.satirlar.map(r => vkAnahtar(r, a.pk)) });
+        sonuc.push(`${a.tablo}: ${n} silindi`);
+      }
+    }
+    for (const a of s) {
+      const yaz = [...a.yeni, ...a.degisen.map(x => x.r)];
+      let eklenen = 0, guncellenen = 0, atlanan = 0;
+      for (let i = 0; i < yaz.length; i += 200) {
+        vkIlerleme(`Geri yükleniyor: ${a.tablo} ${Math.min(i + 200, yaz.length)}/${yaz.length}`);
+        const r = await vkRpc('yedek_yaz', { p_tablo: a.tablo, p_satirlar: yaz.slice(i, i + 200) });
+        eklenen += r.eklenen || 0; guncellenen += r.guncellenen || 0; atlanan += r.atlanan || 0;
+      }
+      if (yaz.length) sonuc.push(`${a.tablo}: ${eklenen} eklendi, ${guncellenen} güncellendi${atlanan ? ', ' + atlanan + ' atlandı' : ''}`);
+    }
+    vkIlerleme('');
+    vkModalKapat('vkGeriModal');
+    alert('✓ Geri yükleme tamamlandı.\n\n' + sonuc.join('\n') + '\n\nSayfa yenilenecek.');
+    location.reload();
+  } catch (err) {
+    vkIlerleme('');
+    if (btn) btn.disabled = false;
+    alert('Geri yükleme yarıda kaldı: ' + vkHata(err) + (sonuc.length ? '\n\nTamamlananlar:\n' + sonuc.join('\n') : ''));
+  }
+}
+
+// ---------------- 🕘 Geri yükle (değişiklik geçmişi) ----------------
+let gmVeri = null, gmZaman = null, gmSecim = new Set();
+const GM_META_ALAN = { kategori: 'Kategori', tas: 'Taş', durum: 'Durum', tur: 'Tür', mecralar: 'Mecralar', olcu: 'Ölçü', tas_bitti: 'Taşı bitti', mum_bitti: 'Mumu bitti', foto_yuklendi: 'Foto yüklendi' };
+const GM_URUN_ALAN = { kod: 'Kod', ad: 'Ad', aciklama: 'Açıklama', fotograf_url: 'Fotoğraf' };
+function gmDeger(alan, v) {
+  if (v == null || v === '') return 'boş';
+  if (alan === 'tas') { if (v.tasSiz) return 'taşsız'; const p = [v.gram ? v.gram + ' gr' : '', v.olculer || ''].filter(Boolean); return p.length ? p.join(' · ') : 'boş'; }
+  if (alan === 'olcu') { const p = [['en', 'En'], ['yukseklik', 'Boy'], ['boy', 'Boy'], ['kalinlik', 'Kal.']].filter(([k]) => v[k]).map(([k, l]) => l + ' ' + v[k]); return p.length ? p.join(' · ') + ' mm' : 'boş'; }
+  if (alan === 'mecralar') { const p = Object.entries(v || {}).filter(([, l]) => (l || []).length).map(([g, l]) => g + ': ' + l.join('/')); return p.length ? p.join(' · ') : 'boş'; }
+  if (Array.isArray(v)) return v.length ? v.join(', ') : 'boş';
+  if (typeof v === 'boolean') return v ? 'evet' : 'hayır';
+  if (alan === 'fotograf_url') return 'fotoğraf';
+  return String(v).slice(0, 60);
+}
+function gmAlanFark(eski, yeni, alanlar) {
+  return Object.keys(alanlar).filter(a => JSON.stringify(eski ? eski[a] : null) !== JSON.stringify(yeni ? yeni[a] : null))
+    .map(a => ({ a, ad: alanlar[a], eski: gmDeger(a, eski && eski[a]), yeni: gmDeger(a, yeni && yeni[a]) }))
+    .filter(f => f.eski !== f.yeni && !(!yeni && /^(boş|hayır)$/.test(f.eski)) && !(!eski && /^(boş|hayır)$/.test(f.yeni)));
+}
+function gmDurum(k) {
+  if (JSON.stringify(k.o_an) === JSON.stringify(k.simdi)) return null;   // değişip eski hâline dönmüş
+  if (!k.o_an) return 'eklendi';
+  if (!k.simdi) return 'silindi';
+  return 'degisti';
+}
+function gmVaryantAd(v) { return v ? `${v.ayar === '925' ? '925' : (v.ayar || '') + 'K'} ${v.urun_tipi || ''} · ${v.gram != null ? v.gram + ' gr' : ''}` : ''; }
+function gecmisModalAc() {
+  if (!isAdmin()) { alert('Geri yükleme sadece yönetici içindir.'); return; }
+  const m = vkModal('gmModal', true);
+  const z = new Date(Date.now() - 864e5); z.setMinutes(z.getMinutes() - z.getTimezoneOffset());
+  m.innerHTML = `<div class="modal-header"><div class="modal-title">🕘 Geri yükle — değişiklik geçmişi</div><button class="modal-close" onclick="vkModalKapat('gmModal')">×</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;min-height:0">
+      <div style="font-size:12.5px;color:var(--text2);margin-bottom:10px">Bir tarih ve saat seçin: o andan <b>sonra</b> değişen, silinen ya da eklenen ürünler, ürün bilgileri ve varyantlar listelenir. Seçtikleriniz <b>o anki</b> hâline döner. (Son 90 gün; bu özellik kurulmadan önceki değişiklikler geri getirilemez.)</div>
+      <div class="vk-arac">
+        <input type="datetime-local" class="form-control" id="gmZaman" value="${z.toISOString().slice(0, 16)}">
+        <button class="btn btn-sm" onclick="gmHizli(1/24)">1 saat önce</button>
+        <button class="btn btn-sm" onclick="gmHizli('bugun')">Bugün başı</button>
+        <button class="btn btn-sm" onclick="gmHizli(1)">Dün bu saat</button>
+        <button class="btn btn-sm" onclick="gmHizli(7)">1 hafta önce</button>
+        <button class="btn btn-primary" onclick="gmListele()">Listele</button>
+      </div>
+      <div class="vk-arac" id="gmFiltre" style="display:none">
+        <input type="text" class="form-control" id="gmAra" placeholder="🔍 Ürün kodu ya da adı…" oninput="gmCiz()" style="min-width:200px">
+        <select class="form-control" id="gmTur" onchange="gmCiz()"><option value="">Hepsi</option><option value="silindi">Silinenler</option><option value="degisti">Değişenler</option><option value="eklendi">Sonradan eklenenler</option></select>
+        <label style="display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer"><input type="checkbox" id="gmHepsi" onchange="gmHepsiniSec(this.checked)"> Görünenlerin hepsini seç</label>
+      </div>
+      <div id="gmListe" style="flex:1;overflow:auto;min-height:120px"></div>
+    </div>
+    <div class="modal-footer"><span class="vk-sayac" id="gmSayac" style="margin-right:auto"></span><button class="btn" onclick="vkModalKapat('gmModal')">Kapat</button><button class="btn btn-primary" id="gmBtn" onclick="gmUygula()" disabled>↩ Seçilenleri o ana döndür</button></div>`;
+}
+function gmHizli(g) {
+  const z = g === 'bugun' ? new Date(new Date().setHours(0, 0, 0, 0)) : new Date(Date.now() - g * 864e5);
+  z.setMinutes(z.getMinutes() - z.getTimezoneOffset());
+  document.getElementById('gmZaman').value = z.toISOString().slice(0, 16);
+  gmListele();
+}
+async function gmListele() {
+  const v = document.getElementById('gmZaman').value;
+  if (!v) { alert('Tarih ve saat seçin.'); return; }
+  gmZaman = new Date(v).toISOString();
+  gmSecim = new Set();
+  const l = document.getElementById('gmListe');
+  l.innerHTML = '<div style="display:flex;gap:10px;align-items:center;color:var(--text2);padding:20px"><div class="vk-don"></div>Yükleniyor…</div>';
+  try {
+    const r = await vkRpc('gecmis_liste', { p_zaman: gmZaman });
+    gmVeri = gmGrupla(r.kayitlar || []);
+    gmVeri.toplam = r.toplam;
+    document.getElementById('gmFiltre').style.display = '';
+    gmCiz();
+  } catch (e) {
+    l.innerHTML = '<div class="vk-not">' + vkEsc(vkKurulumYok(e) ? 'Önce Supabase\'de veri-koruma.sql dosyasını çalıştırın.' : 'Okunamadı: ' + vkHata(e)) + '</div>';
+  }
+}
+function gmGrupla(kayitlar) {
+  const gruplar = new Map();
+  kayitlar.forEach(k => {
+    const d = gmDurum(k); if (!d) return;
+    // sadece görünmeyen bir ayrıntı değiştiyse (ör. boş açıklama → "") listeleme
+    if (d === 'degisti' && k.tablo !== 'varyantlar' && !gmAlanFark(k.o_an, k.simdi, k.tablo === 'urunler' ? GM_URUN_ALAN : GM_META_ALAN).length) return;
+    k.durum = d;
+    const gid = k.urun_id || ('?' + k.anahtar);
+    if (!gruplar.has(gid)) gruplar.set(gid, { gid, urun: k.urun || {}, kart: null, meta: null, var: [], son: k.son });
+    const g = gruplar.get(gid);
+    if (k.son > g.son) g.son = k.son;
+    if (k.tablo === 'urunler') g.kart = k; else if (k.tablo === 'urun_meta') g.meta = k; else g.var.push(k);
+  });
+  const liste = [...gruplar.values()].sort((a, b) => String(b.son).localeCompare(String(a.son)));
+  liste.forEach(g => { g.tur = g.kart ? g.kart.durum : g.meta && g.meta.durum === 'silindi' ? 'silindi' : 'degisti'; });
+  return { liste };
+}
+function gmGorunen() {
+  if (!gmVeri) return [];
+  const q = (document.getElementById('gmAra').value || '').toLocaleLowerCase('tr-TR').trim(), tur = document.getElementById('gmTur').value;
+  return gmVeri.liste.filter(g => {
+    if (q && !((g.urun.kod || '') + ' ' + (g.urun.ad || '')).toLocaleLowerCase('tr-TR').includes(q)) return false;
+    if (tur) {
+      const hepsi = [g.kart, g.meta, ...g.var].filter(Boolean).map(k => k.durum);
+      if (!hepsi.includes(tur)) return false;
+    }
+    return true;
+  });
+}
+function gmBolumler(g) { return [g.kart ? 'kart' : null, g.meta ? 'meta' : null, g.var.length ? 'var' : null].filter(Boolean); }
+function gmCiz() {
+  const l = document.getElementById('gmListe'); if (!l || !gmVeri) return;
+  const liste = gmGorunen();
+  if (!gmVeri.liste.length) { l.innerHTML = '<div class="vk-not" style="background:rgba(74,222,128,.08);border-color:rgba(74,222,128,.35);color:#BBF7D0">Bu tarihten sonra ürünlerde bir değişiklik yok.</div>'; gmSayacGuncelle(); return; }
+  const rozet = d => d === 'silindi' ? '<span class="vk-rozet vk-r-sil">silinmiş</span>' : d === 'eklendi' ? '<span class="vk-rozet vk-r-ekle">sonradan eklenmiş</span>' : '<span class="vk-rozet vk-r-deg">değişmiş</span>';
+  const cb = (g, b) => `<input type="checkbox" ${gmSecim.has(g.gid + '|' + b) ? 'checked' : ''} onchange="gmSec('${vkEsc(g.gid)}','${b}',this.checked)">`;
+  l.innerHTML = (gmVeri.liste.length > liste.length ? `<div class="vk-sayac" style="margin-bottom:6px">${liste.length} / ${gmVeri.liste.length} ürün gösteriliyor</div>` : '') + liste.map(g => {
+    const hepsiSecili = gmBolumler(g).every(b => gmSecim.has(g.gid + '|' + b));
+    const foto = g.urun.foto ? `<img class="vk-foto" src="${vkEsc(g.urun.foto)}" loading="lazy" alt="">` : '<div class="vk-foto-bos">💎</div>';
+    let ic = '';
+    if (g.kart) {
+      const k = g.kart;
+      const fark = k.durum === 'degisti' ? gmAlanFark(k.o_an, k.simdi, GM_URUN_ALAN) : [];
+      ic += `<div class="vk-bolum"><label>${cb(g, 'kart')}<span><b>Ürün kartı</b> ${rozet(k.durum)} <span style="color:var(--text3)">${k.durum === 'silindi' ? '→ geri gelecek' : k.durum === 'eklendi' ? '→ silinecek (ürün bilgileri ve varyantlarıyla)' : '→ eski hâline dönecek'}</span></span></label>
+        ${fark.length ? '<ul>' + fark.map(f => `<li>${f.ad}: <span class="vk-eski">${vkEsc(f.yeni)}</span> → <span class="vk-yeni">${vkEsc(f.eski)}</span></li>`).join('') + '</ul>' : ''}</div>`;
+    }
+    if (g.meta) {
+      const k = g.meta;
+      const fark = gmAlanFark(k.o_an, k.simdi, GM_META_ALAN);
+      ic += `<div class="vk-bolum"><label>${cb(g, 'meta')}<span><b>Ürün bilgileri</b> ${rozet(k.durum)}</span></label>
+        ${fark.length ? '<ul>' + fark.map(f => `<li>${f.ad}: şimdi <span class="vk-eski">${vkEsc(f.yeni)}</span> → <span class="vk-yeni">${vkEsc(f.eski)}</span></li>`).join('') + '</ul>' : ''}</div>`;
+    }
+    if (g.var.length) {
+      const say = d => g.var.filter(k => k.durum === d).length;
+      const satir = g.var.slice(0, 60).map(k => k.durum === 'silindi' ? `<li><span class="vk-yeni">＋ ${vkEsc(gmVaryantAd(k.o_an))}</span> <span style="color:var(--text3)">(silinmiş, geri gelecek)</span></li>`
+        : k.durum === 'eklendi' ? `<li><span class="vk-eski">− ${vkEsc(gmVaryantAd(k.simdi))}</span> <span style="color:var(--text3)">(sonradan eklenmiş, silinecek)</span></li>`
+        : `<li>✏️ ${vkEsc(gmVaryantAd(k.simdi))} → <span class="vk-yeni">${vkEsc(gmVaryantAd(k.o_an))}</span></li>`).join('');
+      ic += `<div class="vk-bolum"><label>${cb(g, 'var')}<span><b>Varyantlar</b> ${say('silindi') ? '<span class="vk-rozet vk-r-sil">' + say('silindi') + ' silinmiş</span> ' : ''}${say('eklendi') ? '<span class="vk-rozet vk-r-ekle">' + say('eklendi') + ' sonradan eklenmiş</span> ' : ''}${say('degisti') ? '<span class="vk-rozet vk-r-deg">' + say('degisti') + ' değişmiş</span>' : ''}</span></label>
+        <details><summary style="cursor:pointer;font-size:12px;color:var(--text3);margin:4px 0 0 24px">Ayrıntı</summary><ul>${satir}${g.var.length > 60 ? '<li>…</li>' : ''}</ul></details></div>`;
+    }
+    const son = new Date(Math.max(...[g.kart, g.meta, ...g.var].filter(Boolean).map(k => new Date(k.son).getTime())));
+    const kisiler = [...new Set([g.kart, g.meta, ...g.var].filter(Boolean).map(k => k.kisiler).filter(Boolean))].join(', ');
+    return `<div class="vk-grup-kart ${hepsiSecili ? 'vk-secili' : ''}"><div class="vk-grup-ust"><label><input type="checkbox" ${hepsiSecili ? 'checked' : ''} onchange="gmGrupSec('${vkEsc(g.gid)}',this.checked)">${foto}
+      <span style="min-width:0"><span class="vk-kod">${vkEsc(g.urun.kod || '?')}</span> <span style="color:var(--text2)">${vkEsc(g.urun.ad || '')}</span>${g.urun.silinmis ? ' <span class="vk-rozet vk-r-sil">ürün silinmiş</span>' : ''}
+      <div style="font-size:11.5px;color:var(--text3)">Son değişiklik ${vkTarih(son)}${kisiler ? ' · ' + vkEsc(kisiler) : ''}</div></span></label></div>${ic}</div>`;
+  }).join('');
+  gmSayacGuncelle();
+}
+function gmGrupBul(gid) { return gmVeri && gmVeri.liste.find(g => g.gid === gid); }
+function gmSec(gid, b, acik) { const k = gid + '|' + b; if (acik) gmSecim.add(k); else gmSecim.delete(k); gmCiz(); }
+function gmGrupSec(gid, acik) { const g = gmGrupBul(gid); if (!g) return; gmBolumler(g).forEach(b => { if (acik) gmSecim.add(gid + '|' + b); else gmSecim.delete(gid + '|' + b); }); gmCiz(); }
+function gmHepsiniSec(acik) { gmGorunen().forEach(g => gmBolumler(g).forEach(b => { if (acik) gmSecim.add(g.gid + '|' + b); else gmSecim.delete(g.gid + '|' + b); })); gmCiz(); }
+function gmSeciliKayitlar() {
+  const out = [];
+  (gmVeri ? gmVeri.liste : []).forEach(g => {
+    let kart = gmSecim.has(g.gid + '|kart'), meta = gmSecim.has(g.gid + '|meta'), vr = gmSecim.has(g.gid + '|var');
+    // silinmiş bir ürünün bilgisi/varyantı geri gelecekse ürün kartı da gelmeli
+    if ((meta || vr) && g.kart && g.kart.durum === 'silindi') kart = true;
+    // sonradan eklenmiş ürün siliniyorsa bilgileri ve varyantları da silinmeli
+    if (kart && g.kart && g.kart.durum === 'eklendi') { meta = !!g.meta; vr = g.var.length > 0; }
+    if (kart && g.kart) out.push({ tablo: 'urunler', anahtar: g.kart.anahtar });
+    if (meta && g.meta) out.push({ tablo: 'urun_meta', anahtar: g.meta.anahtar });
+    if (vr) g.var.forEach(k => out.push({ tablo: 'varyantlar', anahtar: k.anahtar }));
+  });
+  return out;
+}
+function gmSayacGuncelle() {
+  const n = gmSeciliKayitlar().length, el = document.getElementById('gmSayac'), btn = document.getElementById('gmBtn');
+  const urunSay = new Set([...gmSecim].map(k => k.split('|')[0])).size;
+  if (el) el.textContent = gmVeri ? (n ? `${urunSay} ürün · ${n} kayıt seçildi` : `${gmVeri.liste.length} üründe değişiklik var`) : '';
+  if (btn) btn.disabled = !n;
+}
+async function gmUygula() {
+  const kayitlar = gmSeciliKayitlar();
+  if (!kayitlar.length) return;
+  const zamanStr = vkTarih(gmZaman);
+  if (!confirm(`${kayitlar.length} kayıt ${zamanStr} anındaki hâline döndürülecek.\n\nBu işlemin kendisi de geçmişe yazılır; gerekirse tekrar geri alabilirsiniz.\n\nDevam edilsin mi?`)) return;
+  const btn = document.getElementById('gmBtn'); btn.disabled = true;
+  try {
+    vkIlerleme('Geri yükleniyor…');
+    const r = await vkRpc('gecmis_geri_yukle', { p_zaman: gmZaman, p_kayitlar: kayitlar });
+    vkIlerleme('');
+    showToast(`✓ Geri yüklendi: ${r.yazilan || 0} kayıt eski hâline döndü${r.silinen ? ', ' + r.silinen + ' sonradan eklenen kayıt silindi' : ''}`);
+    if (typeof loadUrunler === 'function') loadUrunler();
+    gmListele();
+  } catch (e) {
+    vkIlerleme('');
+    btn.disabled = false;
+    alert('Geri yüklenemedi: ' + vkHata(e));
+  }
+}
+
+// ---------------- 📝 Toplu düzenle (Ürünler) ----------------
+let tdDeg = {}, tdListe = [];
+const TD_DURUM_KISA = { 'Ana Kalıp': 'AK', 'Yeşil Mum': 'YM', '3D Project': '3D' };
+const TD_MECRA_KISA = { Site: 'S', Trendyol: 'T', Etsy: 'E', Amazon: 'A' };
+function tdAlanlar() {
+  return ['tasGram', 'tasOlcu', 'tasSiz', ...DURUM_IDS.map(d => 'dur:' + d.lbl), ...MECRA_CONFIG.flatMap(g => g.items.map(i => 'mec:' + g.grup + ':' + i.lbl)), 'en', 'yukseklik', 'kalinlik'];
+}
+function tdOrijinal(id) {
+  const m = getUrunMeta(id), t = m.tas || {}, o = m.olcu || {}, mc = m.mecralar || {}, d = m.durum || [];
+  const v = { tasGram: t.gram == null ? '' : String(t.gram), tasOlcu: t.olculer == null ? '' : String(t.olculer), tasSiz: !!t.tasSiz,
+    en: o.en == null ? '' : String(o.en), yukseklik: String(o.yukseklik || o.boy || ''), kalinlik: o.kalinlik == null ? '' : String(o.kalinlik) };
+  DURUM_IDS.forEach(x => { v['dur:' + x.lbl] = d.includes(x.lbl); });
+  MECRA_CONFIG.forEach(g => g.items.forEach(i => { v['mec:' + g.grup + ':' + i.lbl] = (mc[g.grup] || []).includes(i.lbl); }));
+  return v;
+}
+function tdDeger(id, f) { const d = tdDeg[id]; return d && f in d ? d[f] : tdOrijinal(id)[f]; }
+function tdDegisenSayisi() { return Object.keys(tdDeg).filter(id => Object.keys(tdDeg[id]).length).length; }
+function topluDuzenAc() {
+  if (!urunYetkiVar()) return;
+  if (!urunMetaYuklendi) { alert('Ürün bilgileri yüklenemedi. Sayfayı yenileyip tekrar deneyin.'); return; }
+  tdDeg = {};
+  const m = vkModal('tdModal', true);
+  const kat = (typeof urunKategorileri !== 'undefined' ? urunKategorileri : []);
+  m.innerHTML = `<div class="modal-header"><div class="modal-title">📝 Toplu düzenle</div><button class="modal-close" onclick="topluDuzenKapat()">×</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;min-height:0">
+      <div class="vk-arac">
+        <select class="form-control" id="tdKat" onchange="tdCiz()"><option value="">Tüm kategoriler</option>${kat.map(k => `<option value="${vkEsc(k.kod)}" ${k.kod === (typeof aktifKategori !== 'undefined' ? aktifKategori : '') ? 'selected' : ''}>(${vkEsc(k.kod)}) ${vkEsc(k.ad)}</option>`).join('')}<option value="__yok">Kategorisiz</option></select>
+        <input type="text" class="form-control" id="tdAra" placeholder="🔍 Kod ya da ad…" oninput="tdCiz()" style="min-width:180px">
+        <select class="form-control" id="tdGoster" onchange="tdCiz()"><option value="">Hepsini göster</option><option value="tas">Taş gramı boş olanlar</option><option value="durum">Durumu boş olanlar</option><option value="mecra">Mecrası boş olanlar</option><option value="olcu">Ölçüsü boş olanlar</option><option value="degisen">Sadece değiştirdiklerim</option></select>
+        <span class="vk-sayac" id="tdBilgi"></span>
+      </div>
+      <div class="vk-tablo-sar" style="flex:1;min-height:0" id="tdSar"></div>
+      <div style="font-size:11.5px;color:var(--text3);margin-top:6px">Enter: alttaki ürünün aynı kutusuna geçer · Sütun başlığındaki kutu adlarına tıklayınca görünen ürünlerin hepsi işaretlenir/kaldırılır · Sadece değiştirdiğiniz alanlar kaydedilir; kategori ve diğer bilgilere dokunulmaz.</div>
+    </div>
+    <div class="modal-footer"><span class="vk-sayac" id="tdSayac" style="margin-right:auto"></span><button class="btn" onclick="topluDuzenKapat()">Kapat</button><button class="btn btn-primary" id="tdKaydetBtn" onclick="tdKaydet()" disabled>💾 Değişenleri kaydet</button></div>`;
+  const ov = document.getElementById('tdModal');
+  if (!ov._tdKur) {
+    ov._tdKur = true;
+    ov.addEventListener('input', e => { if (e.target.matches('input[type=text][data-f]')) tdAlanDegisti(e.target); });
+    ov.addEventListener('change', e => { if (e.target.matches('input[type=checkbox][data-f]')) tdAlanDegisti(e.target); });
+    ov.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target.matches('input[type=text][data-f]')) { e.preventDefault(); tdSonraki(e.target, e.shiftKey ? -1 : 1); }
+      if (e.key === 'Escape') { e.stopPropagation(); topluDuzenKapat(); }
+    });
+  }
+  tdCiz();
+  setTimeout(() => { const a = document.getElementById('tdAra'); if (a) a.focus(); }, 50);
+}
+function topluDuzenKapat() {
+  const n = tdDegisenSayisi();
+  if (n && !confirm(n + ' üründe kaydedilmemiş değişiklik var. Kaydetmeden kapatılsın mı?')) return;
+  tdDeg = {};
+  vkModalKapat('tdModal');
+}
+function tdBosMu(id, tur) {
+  const v = f => tdDeger(id, f);
+  if (tur === 'tas') return !v('tasSiz') && !String(v('tasGram')).trim();
+  if (tur === 'durum') return !DURUM_IDS.some(d => v('dur:' + d.lbl));
+  if (tur === 'mecra') return !MECRA_CONFIG.some(g => g.items.some(i => v('mec:' + g.grup + ':' + i.lbl)));
+  if (tur === 'olcu') return !String(v('en')).trim() && !String(v('yukseklik')).trim() && !String(v('kalinlik')).trim();
+  return false;
+}
+function tdCiz() {
+  const sar = document.getElementById('tdSar'); if (!sar) return;
+  const kat = document.getElementById('tdKat').value, q = (document.getElementById('tdAra').value || '').toLocaleLowerCase('tr-TR').trim(), gos = document.getElementById('tdGoster').value;
+  tdListe = sortUrunler(allUrunler).filter(u => {
+    const mk = getUrunMeta(u.id).kategori || '';
+    if (kat === '__yok' ? mk : (kat && mk !== kat)) return false;
+    if (q && !((u.kod || '') + ' ' + (u.ad || '')).toLocaleLowerCase('tr-TR').includes(q)) return false;
+    if (gos === 'degisen') return !!(tdDeg[u.id] && Object.keys(tdDeg[u.id]).length);
+    if (gos && !tdBosMu(u.id, gos)) return false;
+    return true;
+  });
+  const mecBas = MECRA_CONFIG.map(g => `<th class="vk-ort vk-grup" colspan="${g.items.length}">${vkEsc(g.grup)}</th>`).join('');
+  const mecAlt = MECRA_CONFIG.map(g => g.items.map((i, j) => `<th class="vk-ort vk-tik ${j === 0 ? 'vk-grup' : ''}" title="${vkEsc(g.grup + ' ' + i.lbl)} — tıkla: görünenlerin hepsi" onclick="tdSutunTik('mec:${vkEsc(g.grup)}:${vkEsc(i.lbl)}')">${TD_MECRA_KISA[i.lbl] || vkEsc(i.lbl.slice(0, 2))}</th>`).join('')).join('');
+  const durAlt = DURUM_IDS.map((d, j) => `<th class="vk-ort vk-tik ${j === 0 ? 'vk-grup' : ''}" title="${vkEsc(d.lbl)} — tıkla: görünenlerin hepsi" onclick="tdSutunTik('dur:${vkEsc(d.lbl)}')">${TD_DURUM_KISA[d.lbl] || vkEsc(d.lbl)}</th>`).join('');
+  sar.innerHTML = `<table class="vk-tablo"><thead>
+    <tr><th rowspan="2"></th><th rowspan="2">Kod</th><th rowspan="2">Ad</th><th class="vk-grup" colspan="3">Taş</th><th class="vk-ort vk-grup" colspan="${DURUM_IDS.length}">Durum</th>${mecBas}<th class="vk-ort vk-grup" colspan="3">Ölçü (mm)</th></tr>
+    <tr><th class="vk-grup">Gram</th><th>Ölçüleri</th><th class="vk-ort vk-tik" title="Taşsız — tıkla: görünenlerin hepsi" onclick="tdSutunTik('tasSiz')">Taşsız</th>${durAlt}${mecAlt}<th class="vk-grup">En</th><th>Boy</th><th>Kalınlık</th></tr></thead>
+    <tbody>${tdListe.map(u => tdSatirHtml(u)).join('') || `<tr><td colspan="40" style="text-align:center;padding:30px;color:var(--text3)">Eşleşen ürün yok</td></tr>`}</tbody></table>`;
+  document.getElementById('tdBilgi').textContent = tdListe.length + ' / ' + allUrunler.length + ' ürün';
+  tdSayacGuncelle();
+}
+function tdSatirHtml(u) {
+  const id = u.id, o = tdOrijinal(id), d = tdDeg[id] || {}, v = f => f in d ? d[f] : o[f];
+  const cls = f => f in d ? ' vk-degisti' : '';
+  const siz = v('tasSiz');
+  const txt = (f, w, ph, dis) => `<input type="text" data-u="${vkEsc(id)}" data-f="${f}" value="${vkEsc(v(f))}" style="width:${w}px" class="${cls(f).trim()}" ${ph ? `placeholder="${ph}"` : ''} ${dis ? 'disabled' : ''} inputmode="${/tasGram|en|yukseklik|kalinlik/.test(f) ? 'decimal' : 'text'}">`;
+  const chk = (f, sol) => `<td class="vk-ort${sol ? ' vk-sol' : ''}"><input type="checkbox" data-u="${vkEsc(id)}" data-f="${vkEsc(f)}" ${v(f) ? 'checked' : ''} class="${cls(f).trim()}"></td>`;
+  const foto = u.fotograf_url ? `<img class="vk-foto" src="${vkEsc(u.fotograf_url)}" loading="lazy" alt="">` : '<div class="vk-foto-bos">💎</div>';
+  return `<tr data-u="${vkEsc(id)}" class="${Object.keys(d).length ? 'vk-satir-degisti' : ''}">
+    <td>${foto}</td><td class="vk-kod">${vkEsc(u.kod)}</td><td><div class="vk-ad" title="${vkEsc(u.ad)}">${vkEsc(u.ad)}</div></td>
+    <td class="vk-sol">${txt('tasGram', 64, 'gr', siz)}</td><td>${txt('tasOlcu', 120, 'örn. 2mm x 4', siz)}</td>${chk('tasSiz')}
+    ${DURUM_IDS.map((x, j) => chk('dur:' + x.lbl, j === 0)).join('')}
+    ${MECRA_CONFIG.map(g => g.items.map((i, j) => chk('mec:' + g.grup + ':' + i.lbl, j === 0)).join('')).join('')}
+    <td class="vk-sol">${txt('en', 52)}</td><td>${txt('yukseklik', 52)}</td><td>${txt('kalinlik', 52)}</td></tr>`;
+}
+function tdAlanDegisti(el) {
+  const id = el.dataset.u, f = el.dataset.f;
+  const deger = el.type === 'checkbox' ? el.checked : el.value;
+  const orj = tdOrijinal(id)[f];
+  const ayni = el.type === 'checkbox' ? deger === orj : String(deger).trim() === String(orj).trim();
+  tdDeg[id] = tdDeg[id] || {};
+  if (ayni) delete tdDeg[id][f]; else tdDeg[id][f] = deger;
+  if (!Object.keys(tdDeg[id]).length) delete tdDeg[id];
+  el.classList.toggle('vk-degisti', !ayni);
+  const tr = el.closest('tr'); if (tr) tr.classList.toggle('vk-satir-degisti', !!tdDeg[id]);
+  if (f === 'tasSiz' && tr) tr.querySelectorAll('input[data-f=tasGram],input[data-f=tasOlcu]').forEach(i => { i.disabled = el.checked; });
+  tdSayacGuncelle();
+}
+function tdSutunTik(f) {
+  const kutular = [...document.querySelectorAll('#tdSar input[type=checkbox]')].filter(i => i.dataset.f === f);
+  if (!kutular.length) return;
+  const hepsi = kutular.every(i => i.checked);
+  kutular.forEach(i => { if (i.checked === hepsi) { i.checked = !hepsi; tdAlanDegisti(i); } });
+}
+function tdSonraki(el, yon) {
+  const tr = el.closest('tr'); let h = yon > 0 ? tr.nextElementSibling : tr.previousElementSibling;
+  while (h) { const i = h.querySelector(`input[data-f="${el.dataset.f}"]`); if (i && !i.disabled) { i.focus(); i.select(); return; } h = yon > 0 ? h.nextElementSibling : h.previousElementSibling; }
+}
+function tdSayacGuncelle() {
+  const n = tdDegisenSayisi(), el = document.getElementById('tdSayac'), btn = document.getElementById('tdKaydetBtn');
+  if (el) el.textContent = n ? n + ' üründe değişiklik var' : 'Değişiklik yok';
+  if (btn) { btn.disabled = !n; btn.textContent = n ? '💾 Değişenleri kaydet (' + n + ')' : '💾 Değişenleri kaydet'; }
+}
+// Bir ürünün değişikliklerinden urun_meta'ya yazılacak satırı üretir (sadece değişen sütunlar)
+function tdSatirUret(id) {
+  const d = tdDeg[id]; if (!d) return null;
+  const m = getUrunMeta(id), v = f => tdDeger(id, f), var_ = on => Object.keys(d).some(f => f.startsWith(on));
+  const row = { urun_id: id };
+  if ('tasGram' in d || 'tasOlcu' in d || 'tasSiz' in d) {
+    const siz = !!v('tasSiz');
+    row.tas = Object.assign({}, m.tas || {}, { tasSiz: siz, olculer: siz ? '' : String(v('tasOlcu')).trim(), gram: siz ? '' : String(v('tasGram')).trim().replace(',', '.') });
+  }
+  if (var_('dur:')) {
+    const bilinen = DURUM_IDS.map(x => x.lbl);
+    row.durum = (m.durum || []).filter(l => !bilinen.includes(l)).concat(DURUM_IDS.filter(x => v('dur:' + x.lbl)).map(x => x.lbl));
+  }
+  if (var_('mec:')) {
+    const mc = JSON.parse(JSON.stringify(m.mecralar || {}));
+    MECRA_CONFIG.forEach(g => {
+      const sec = g.items.filter(i => v('mec:' + g.grup + ':' + i.lbl)).map(i => i.lbl);
+      const diger = (mc[g.grup] || []).filter(l => !g.items.some(i => i.lbl === l));
+      const hepsi = diger.concat(sec);
+      if (hepsi.length) mc[g.grup] = hepsi; else delete mc[g.grup];
+    });
+    row.mecralar = mc;
+  }
+  if ('en' in d || 'yukseklik' in d || 'kalinlik' in d) {
+    const t = x => String(v(x)).trim().replace(',', '.');
+    row.olcu = Object.assign({}, m.olcu || {}, { en: t('en'), yukseklik: t('yukseklik'), kalinlik: t('kalinlik') });
+  }
+  return row;
+}
+async function tdKaydet() {
+  if (!urunMetaYuklendi) { alert('Ürün bilgileri yüklenemediği için kaydedilmedi. Sayfayı yenileyin.'); return; }
+  const satirlar = Object.keys(tdDeg).map(tdSatirUret).filter(Boolean);
+  if (!satirlar.length) return;
+  const gram = satirlar.find(r => r.tas && r.tas.gram && !/^\d+(\.\d+)?$/.test(r.tas.gram));
+  if (gram) { const u = allUrunler.find(x => x.id === gram.urun_id); alert('Taş gramı sayı olmalı: ' + (u ? u.kod : '') + ' → "' + gram.tas.gram + '"'); return; }
+  const btn = document.getElementById('tdKaydetBtn'); btn.disabled = true; btn.textContent = 'Kaydediliyor…';
+  // Supabase toplu yazmada her satırın aynı sütunları olmalı: sütun takımına göre grupla
+  const gruplar = {};
+  satirlar.forEach(r => { const k = Object.keys(r).sort().join(','); (gruplar[k] = gruplar[k] || []).push(r); });
+  try {
+    const session = await ensureValidSession();
+    if (!session) throw new Error('Oturum bulunamadı. Lütfen tekrar giriş yapın.');
+    for (const liste of Object.values(gruplar)) {
+      for (let i = 0; i < liste.length; i += 200) {
+        const r = await fetch(SUPABASE_URL + '/rest/v1/urun_meta?on_conflict=urun_id', {
+          method: 'POST',
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + session.access_token, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+          body: JSON.stringify(liste.slice(i, i + 200))
+        });
+        if (!r.ok) { const t = await r.text(); throw new Error(korumaHataMetni(t) || t); }
+        liste.slice(i, i + 200).forEach(row => {
+          const m = Object.assign({}, getUrunMeta(row.urun_id));
+          ['tas', 'durum', 'mecralar', 'olcu'].forEach(k => { if (k in row) m[k] = row[k]; });
+          urunMetaCache[row.urun_id] = m;
+          delete tdDeg[row.urun_id];
+        });
+      }
+    }
+    showToast('✓ ' + satirlar.length + ' ürün kaydedildi');
+    tdCiz();
+    if (typeof filterUrunler === 'function') filterUrunler();
+    if (typeof updateOzelFiltreCounts === 'function') updateOzelFiltreCounts();
+  } catch (e) {
+    alert('Kaydedilemedi: ' + vkHata(e) + (Object.keys(tdDeg).length < satirlar.length ? '\n\n(Bir kısmı kaydedildi; kalanlar tabloda işaretli duruyor.)' : ''));
+    tdCiz();
+  } finally {
+    tdSayacGuncelle();
+  }
+}
+
 </script>
 </body>
 </html>
