@@ -1,4 +1,4 @@
-<!-- SURUM-V144-DUNYA-SAATLERI --><!DOCTYPE html>
+<!-- SURUM-V145-STL-PARCALI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -3969,6 +3969,50 @@ async function stlIstek(yol, ayar = {}) {
   return r;
 }
 function stlBoyut(b) { return b >= 1048576 ? (b / 1048576).toLocaleString('tr-TR', { maximumFractionDigits: 1 }) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+// 90 MB'tan büyük dosyalar 50 MB'lık parçalar hâlinde yüklenir (Cloudflare tek istek sınırı ~100 MB; böylece boyut sınırı kalmaz)
+const STL_TEK_PARCA_SINIR = 90 * 1048576, STL_PARCA_BOYUT = 50 * 1048576;
+function stlParcaIstek(yontem, yol, govde, tip, ilerle) {
+  return ensureValidSession().then(s => new Promise((ok, hata) => {
+    if (!s) return hata(new Error('Oturum bulunamadı, tekrar giriş yapın.'));
+    const x = new XMLHttpRequest();
+    x.open(yontem, STL_URL + yol);
+    x.setRequestHeader('Authorization', 'Bearer ' + s.access_token);
+    if (tip) x.setRequestHeader('Content-Type', tip);
+    if (ilerle) x.upload.onprogress = e => { if (e.lengthComputable) ilerle(e.loaded); };
+    x.onload = () => { let j = null; try { j = JSON.parse(x.responseText); } catch (_) {}
+      if (x.status < 300) ok(j || {});
+      else hata(new Error(x.status === 404 || (j && /Bilinmeyen istek/.test(j.hata || '')) ? 'Worker güncellenmemiş: büyük dosya yüklemek için Cloudflare\'daki kodu güncelleyin.' : ((j && j.hata) || 'HTTP ' + x.status))); };
+    x.onerror = () => hata(new Error('Bağlantı hatası'));
+    x.send(govde == null ? null : govde);
+  }));
+}
+async function stlParcaliYukle(f, urunId, bar) {
+  const kok = '/parcali/' + encodeURIComponent(urunId) + '/' + encodeURIComponent(f.name);
+  const tip = f.type || 'application/octet-stream';
+  const { uploadId } = await stlParcaIstek('POST', kok + '/basla', null, tip);
+  if (!uploadId) throw new Error('Yükleme başlatılamadı');
+  const q = '?uploadId=' + encodeURIComponent(uploadId);
+  const adet = Math.ceil(f.size / STL_PARCA_BOYUT), parcalar = [];
+  try {
+    for (let i = 0; i < adet; i++) {
+      const bas = i * STL_PARCA_BOYUT, parca = f.slice(bas, Math.min(bas + STL_PARCA_BOYUT, f.size));
+      let son;
+      for (let deneme = 1; deneme <= 3; deneme++) {
+        try {
+          son = await stlParcaIstek('PUT', kok + '/' + (i + 1) + q, parca, 'application/octet-stream',
+            y => { if (bar) bar.style.width = Math.min(99, Math.round((bas + y) / f.size * 100)) + '%'; });
+          break;
+        } catch (e) { if (deneme === 3 || /Worker güncellenmemiş|Yetkisiz/.test(e.message)) throw e; await new Promise(r => setTimeout(r, 1500 * deneme)); }
+      }
+      parcalar.push({ partNumber: son.partNumber, etag: son.etag });
+    }
+    await stlParcaIstek('POST', kok + '/bitir' + q, JSON.stringify({ parcalar }), 'application/json');
+    if (bar) bar.style.width = '100%';
+  } catch (e) {
+    stlParcaIstek('DELETE', kok + q).catch(() => {});
+    throw e;
+  }
+}
 function stlYol(urunId, ad) { return '/dosya/' + encodeURIComponent(urunId) + '/' + encodeURIComponent(ad); }
 
 async function stlPanelYukle(urunId) {
@@ -4011,7 +4055,6 @@ async function stlDosyalariYukle(dosyalar, urunId) {
   if (!s) { alert('Oturum bulunamadı.'); return; }
   const l = document.getElementById('stlListe');
   for (const f of dosyalar) {
-    if (f.size > 95 * 1048576) { alert(f.name + ': 95 MB sınırını aşıyor. Dosyayı zip\'leyip tekrar deneyin.'); continue; }
     const satir = document.createElement('div');
     satir.className = 'stl-dosya';
     satir.innerHTML = `<span class="stl-dosya-ikon">⏫</span><div class="stl-dosya-bilgi"><div class="stl-dosya-ad">${bozEsc(f.name)}</div>
@@ -4019,6 +4062,7 @@ async function stlDosyalariYukle(dosyalar, urunId) {
     if (l) { if (l.querySelector('.stl-bos')) l.innerHTML = ''; l.prepend(satir); }
     const bar = satir.querySelector('.stl-ilerleme div');
     try {
+      if (f.size > STL_TEK_PARCA_SINIR) { await stlParcaliYukle(f, urunId, bar); basarili++; continue; }
       await new Promise((ok, hata) => {
         const x = new XMLHttpRequest();
         x.open('PUT', STL_URL + stlYol(urunId, f.name));
