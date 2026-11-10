@@ -1,4 +1,4 @@
-<!-- SURUM-V142-VERI-KORUMA --><!DOCTYPE html>
+<!-- SURUM-V144-DUNYA-SAATLERI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1133,6 +1133,30 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   .vk-satir .vk-et { min-width:0; }
 }
 
+
+/* V143: ürün detayında sürükle-bırak */
+#detayModal .db-ortu { display:none; position:absolute; inset:14px; z-index:50; border:2.5px dashed #F5C451; border-radius:18px; background:rgba(11,10,9,.86); align-items:center; justify-content:center; text-align:center; pointer-events:none; }
+#detayModal.db-uzerinde .db-ortu { display:flex; }
+#detayModal .db-ortu > div { display:flex; flex-direction:column; align-items:center; gap:8px; color:#F7DA84; font-size:18px; }
+#detayModal .db-ortu span { color:#C9BFA8; font-size:13.5px; }
+.detay-foto-kart { position:relative; }
+.db-foto-btn { position:absolute; right:8px; bottom:8px; z-index:3; width:34px; height:34px; border-radius:50%; background:rgba(20,18,14,.78); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; box-shadow:0 2px 8px rgba(0,0,0,.35); transition:transform .15s; }
+.db-foto-btn:hover { transform:scale(1.1); }
+.detay-foto-kart.db-yukleniyor img, .detay-foto-kart.db-yukleniyor .detay-foto-placeholder-inner { opacity:.35; }
+.db-ipucu { font-size:11.5px; color:rgba(220,230,255,.72); margin:-4px 0 8px; }
+
+/* V144: Ana Sayfa dünya saatleri */
+.ds-serit { display:flex; gap:8px; margin:-0.5rem 0 1.25rem; overflow-x:auto; padding-bottom:2px; scrollbar-width:thin; }
+.ds-serit:empty { display:none; }
+.ds-kart { flex:1 0 118px; min-width:118px; padding:8px 12px 9px; border-radius:12px; border:1px solid rgba(212,175,55,.22); background:linear-gradient(150deg,rgba(212,175,55,.08),rgba(0,0,0,.22)); display:flex; flex-direction:column; gap:1px; }
+.ds-kart.ds-tr { border-color:rgba(212,175,55,.5); background:linear-gradient(150deg,rgba(212,175,55,.18),rgba(0,0,0,.22)); }
+.ds-ust { display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600; color:#C9BFA8; white-space:nowrap; }
+.ds-nokta { width:7px; height:7px; border-radius:50%; background:#6B6456; flex-shrink:0; margin-left:auto; }
+.ds-nokta.acik { background:#34D399; box-shadow:0 0 6px #34D399; }
+.ds-saat { font-size:20px; font-weight:800; color:#F7DA84; font-variant-numeric:tabular-nums; letter-spacing:.01em; line-height:1.25; }
+.ds-alt { font-size:11px; color:#8F8775; white-space:nowrap; }
+.ds-alt b { color:#FBBF24; font-weight:700; }
+@media (max-width:700px) { .ds-kart { flex:0 0 108px; min-width:108px; } .ds-saat { font-size:18px; } }
 </style>
 </head>
 <body>
@@ -1200,6 +1224,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       <button class="btn" onclick="asHatirlatmaAc()">🔔 Ödeme Hatırlatma (Ö)</button>
     </div>
   </div>
+  <div id="dunyaSaatleri" class="ds-serit" aria-label="Dünya saatleri"></div>
   <div id="yedekHatirlatma" style="display:none;"></div>
 
   <!-- CANLI KUR -->
@@ -3878,6 +3903,7 @@ function openDetay(urunId) {
         : `<div class="detay-foto-placeholder-inner">💍</div>`}
       ${olcuEnCizgiHtml}${olcuYukseklikCizgiHtml}
     </div>
+    ${urunYetkiVar() ? `<label class="db-foto-btn" title="Fotoğrafı değiştir (sürükleyip bırakabilir ya da Ctrl+V ile yapıştırabilirsiniz)">📷<input type="file" accept="image/*" hidden onchange="detayDosyalariIsle([...this.files]);this.value=''"></label>` : ''}
   </div>`;
 
   const kolyeUcuDetayHtml = (() => {
@@ -3909,7 +3935,7 @@ function openDetay(urunId) {
       ${urunYetkiVar() ? `<button class="btn btn-sm btn-danger" onclick="deleteUrun('${u.id}')">Sil</button>` : ''}
     </div>`;
   openModal('detayModal');
-  if (urunYetkiVar()) stlPanelYukle(u.id);
+  if (urunYetkiVar()) { stlPanelYukle(u.id); detayBirakKur(u.id); }
 }
 
 // ===== STL DOSYALARI (Cloudflare R2 — kilicoglu-stl Worker üzerinden, sadece "Ürünler" yetkilisi) =====
@@ -3951,6 +3977,7 @@ async function stlPanelYukle(urunId) {
   if (!el) return;
   el.innerHTML = `<div class="stl-ust"><div class="stl-baslik">🧊 STL Dosyaları</div>
       <label class="btn btn-sm" style="cursor:pointer;" title="Birden fazla dosya seçebilirsiniz">＋ STL Yükle (çoklu)<input type="file" multiple accept=".stl,.zip,.obj,.3dm,.step,.stp" style="display:none" onchange="stlYukle(this)"></label></div>
+    <div class="db-ipucu">💡 Fotoğrafı ya da STL dosyalarını bu pencereye sürükleyip bırakabilirsiniz (fotoğraf için Ctrl+V de olur).</div>
     <div id="stlListe" class="stl-liste"><div class="stl-bos">Yükleniyor...</div></div>`;
   try {
     const liste = await (await stlIstek('/liste/' + encodeURIComponent(urunId))).json();
@@ -3975,8 +4002,11 @@ async function stlPanelYukle(urunId) {
 async function stlYukle(inp) {
   const dosyalar = [...(inp.files || [])];
   inp.value = '';
-  const urunId = stlAktifUrun;
+  return stlDosyalariYukle(dosyalar, stlAktifUrun);
+}
+async function stlDosyalariYukle(dosyalar, urunId) {
   if (!dosyalar.length || !urunId) return;
+  let basarili = 0;
   const s = await ensureValidSession();
   if (!s) { alert('Oturum bulunamadı.'); return; }
   const l = document.getElementById('stlListe');
@@ -3999,9 +4029,10 @@ async function stlYukle(inp) {
         x.onerror = () => hata(new Error('Bağlantı hatası'));
         x.send(f);
       });
+      basarili++;
     } catch (e) { alert(f.name + ' yüklenemedi: ' + e.message); }
   }
-  showToast('STL yüklendi');
+  if (basarili) showToast('🧊 ' + basarili + ' STL dosyası yüklendi');
   if (stlAktifUrun === urunId) stlPanelYukle(urunId);
 }
 
@@ -14501,6 +14532,120 @@ async function tdKaydet() {
   }
 }
 
+</script>
+<script>
+// ===== V143: Ürün detayında sürükle-bırak / yapıştır (fotoğraf + STL) =====
+const DB_STL_RE = /\.(stl|zip|obj|3dm|step|stp|7z|rar)$/i;
+const DB_FOTO_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
+let dbUrunId = null, dbSayac = 0, dbMesgul = false;
+function dbDetayAcik() { const m = document.getElementById('detayModal'); return !!(m && m.classList.contains('open')); }
+function dbDosyaVar(e) { return [...((e.dataTransfer && e.dataTransfer.types) || [])].includes('Files'); }
+function dbAktif(e) { return dbUrunId && dbDetayAcik() && urunYetkiVar() && dbDosyaVar(e); }
+function detayBirakKur(urunId) {
+  dbUrunId = urunId;
+  const ov = document.getElementById('detayModal');
+  if (!ov || ov._dbKur) return;
+  ov._dbKur = true;
+  const ortu = document.createElement('div');
+  ortu.className = 'db-ortu';
+  ortu.innerHTML = '<div><div style="font-size:42px;line-height:1">⤓</div><b>Dosyaları bırakın</b><span>📷 Fotoğraf → ürün fotoğrafı &nbsp;·&nbsp; 🧊 STL / zip → STL dosyaları</span></div>';
+  ov.appendChild(ortu);
+  ov.addEventListener('dragenter', e => { if (!dbAktif(e)) return; e.preventDefault(); dbSayac++; ov.classList.add('db-uzerinde'); });
+  ov.addEventListener('dragover', e => { if (!dbAktif(e)) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+  ov.addEventListener('dragleave', e => { if (!dbAktif(e)) return; if (--dbSayac <= 0) { dbSayac = 0; ov.classList.remove('db-uzerinde'); } });
+  ov.addEventListener('drop', e => {
+    if (!dbAktif(e)) return;
+    e.preventDefault(); dbSayac = 0; ov.classList.remove('db-uzerinde');
+    detayDosyalariIsle([...e.dataTransfer.files]);
+  });
+}
+// Ctrl+V: panodaki fotoğraf (ekran görüntüsü vb.) ya da kopyalanmış dosyalar
+document.addEventListener('paste', e => {
+  if (!dbUrunId || !dbDetayAcik() || !urunYetkiVar()) return;
+  if (document.querySelectorAll('.modal-overlay.open').length > 1) return;
+  const a = document.activeElement;
+  if (a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA' || a.isContentEditable)) return;
+  const dosyalar = [...((e.clipboardData && e.clipboardData.files) || [])];
+  if (!dosyalar.length) return;
+  e.preventDefault();
+  detayDosyalariIsle(dosyalar);
+});
+async function detayDosyalariIsle(dosyalar) {
+  const urunId = dbUrunId;
+  if (!urunId || !dosyalar.length) return;
+  if (dbMesgul) { showToast('⏳ Önceki yükleme sürüyor…'); return; }
+  const fotolar = dosyalar.filter(f => (/^image\//.test(f.type) && !/heic|heif/i.test(f.type)) || DB_FOTO_RE.test(f.name));
+  const stller = dosyalar.filter(f => !fotolar.includes(f) && DB_STL_RE.test(f.name));
+  const diger = dosyalar.filter(f => !fotolar.includes(f) && !stller.includes(f));
+  if (diger.length) alert('Bu dosyalar yüklenmedi: ' + diger.map(f => f.name).join(', ')
+    + (diger.some(f => /\.hei[cf]$/i.test(f.name)) ? '\n\niPhone fotoğrafı (HEIC) ise JPG olarak kaydedip tekrar deneyin.' : '\n\nFotoğraf (JPG/PNG/WEBP) ya da STL/zip/OBJ/3DM/STEP olmalı.'));
+  dbMesgul = true;
+  try {
+    if (fotolar.length) {
+      if (fotolar.length > 1) showToast('Ürünün tek fotoğrafı var; ilk fotoğraf kullanıldı');
+      await detayFotoYukle(urunId, fotolar[0]);
+    }
+    if (stller.length) await stlDosyalariYukle(stller, urunId);
+  } finally { dbMesgul = false; }
+}
+async function detayFotoYukle(urunId, dosya) {
+  const u = allUrunler.find(x => x.id === urunId);
+  if (!u) return;
+  if (u.fotograf_url && !confirm(u.kod + ' ürününün mevcut fotoğrafı yenisiyle değiştirilsin mi?')) return;
+  const kart = document.querySelector('#detayBody .detay-foto-kart');
+  if (kart) kart.classList.add('db-yukleniyor');
+  try {
+    const url = await uploadFoto(dosya);
+    if (!url) throw new Error('Fotoğraf depoya yüklenemedi');
+    await api('urunler?id=eq.' + urunId, 'PATCH', { fotograf_url: url });
+    u.fotograf_url = url;
+    showToast('📷 ' + u.kod + ' fotoğrafı güncellendi');
+    if (typeof filterUrunler === 'function') filterUrunler();
+    if (dbDetayAcik() && dbUrunId === urunId) openDetay(urunId);
+  } catch (e) {
+    alert('Fotoğraf yüklenemedi: ' + e.message);
+  } finally {
+    const k = document.querySelector('#detayBody .detay-foto-kart'); if (k) k.classList.remove('db-yukleniyor');
+  }
+}
+
+</script>
+<script>
+// ===== V144: Ana Sayfa dünya saatleri (yaz/kış saati otomatik) =====
+const DUNYA_SAATLERI = [
+  { ad: 'İstanbul', bayrak: '🇹🇷', tz: 'Europe/Istanbul', tr: true },
+  { ad: 'New York', bayrak: '🇺🇸', tz: 'America/New_York', not: 'Doğu (NY, FL, GA…)' },
+  { ad: 'Chicago', bayrak: '🇺🇸', tz: 'America/Chicago', not: 'Orta (TX, IL…)' },
+  { ad: 'Denver', bayrak: '🇺🇸', tz: 'America/Denver', not: 'Dağ (CO, UT…)' },
+  { ad: 'Los Angeles', bayrak: '🇺🇸', tz: 'America/Los_Angeles', not: 'Pasifik (CA, WA…)' },
+  { ad: 'Londra', bayrak: '🇬🇧', tz: 'Europe/London' },
+  { ad: 'Berlin', bayrak: '🇩🇪', tz: 'Europe/Berlin' }
+];
+function dsParcalar(tz, t) {
+  const p = {}; new Intl.DateTimeFormat('en-GB', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', weekday: 'short' }).formatToParts(t).forEach(x => { p[x.type] = x.value; });
+  return p;
+}
+function dsFarkDakika(tz, t) {   // o şehrin İstanbul'a göre farkı (dakika)
+  const z = x => { const p = dsParcalar(x, t); return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute) / 60000; };
+  return z(tz) - z('Europe/Istanbul');
+}
+function dunyaSaatleriCiz() {
+  const kutu = document.getElementById('dunyaSaatleri'); if (!kutu) return;
+  const t = new Date(), trGun = dsParcalar('Europe/Istanbul', t).day;
+  kutu.innerHTML = DUNYA_SAATLERI.map(s => {
+    const p = dsParcalar(s.tz, t), saat = +p.hour;
+    const fark = dsFarkDakika(s.tz, t), fs = Math.abs(fark) / 60;
+    const farkYazi = s.tr ? 'Türkiye' : (fark === 0 ? 'aynı saat' : (fark < 0 ? '−' : '+') + (fs % 1 ? fs.toFixed(1).replace('.', ',') : fs) + ' sa');
+    const gun = !s.tr && p.day !== trGun ? (fark < 0 ? ' · <b>dün</b>' : ' · <b>yarın</b>') : '';
+    const acik = saat >= 9 && saat < 18 && !/Sat|Sun/.test(p.weekday);
+    return `<div class="ds-kart${s.tr ? ' ds-tr' : ''}" title="${s.ad}${s.not ? ' — ' + s.not : ''} · ${acik ? 'mesai saati' : 'mesai dışı'}">
+      <div class="ds-ust"><span>${s.bayrak}</span><span>${s.ad}</span><span class="ds-nokta${acik ? ' acik' : ''}"></span></div>
+      <div class="ds-saat">${p.hour}:${p.minute}</div>
+      <div class="ds-alt">${farkYazi}${gun}</div></div>`;
+  }).join('');
+}
+dunyaSaatleriCiz();
+setTimeout(() => { dunyaSaatleriCiz(); setInterval(dunyaSaatleriCiz, 60000); }, (60 - new Date().getSeconds()) * 1000 + 50);
 </script>
 </body>
 </html>
