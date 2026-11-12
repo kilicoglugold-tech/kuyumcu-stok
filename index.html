@@ -1,4 +1,4 @@
-<!-- SURUM-V154-FIS-OKUYUCU --><!DOCTYPE html>
+<!-- SURUM-V155-KART-MAGAZA --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1267,6 +1267,16 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .sk-not-metin + .sk-not-baslik { margin-top:8px; }
 .fis-gram { font-size:10.5px; font-weight:700; color:#93C5FD; margin-left:4px; text-decoration:underline dotted; }
 .stok-satir .stok-miktar { min-width:76px; }
+
+/* V155: kartta mağaza */
+.sk-magaza-bant { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:-18px -18px 14px; padding:12px 18px; border-radius:16px 16px 0 0; background:#1F1B14; color:#F7DA84; }
+.sk-magaza-et { font-size:10.5px; font-weight:800; letter-spacing:.12em; color:#A39A85; }
+.sk-magaza-ad { font-size:22px; font-weight:900; letter-spacing:.03em; text-transform:uppercase; }
+.sk-magaza-alt { margin-left:auto; font-size:12px; font-weight:700; color:#C9BFA8; }
+.gb-magaza-rozet.sorunlu { background:rgba(248,113,113,.2); color:#FCA5A5; outline:1px solid #F87171; }
+.gb-magaza-uyari { border-color:#F87171 !important; }
+.gb-magaza-uyari ul { margin:6px 0 0 18px; padding:0; }
+.gb-magaza-rozet { display:inline-block; padding:1px 8px; border-radius:20px; background:rgba(212,175,55,.18); color:#F7DA84; font-size:11px; font-weight:800; }
 </style>
 </head>
 <body>
@@ -6769,7 +6779,7 @@ function renderGrupBTablo() {
       <td style="color:var(--text);font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
       <td style="white-space:nowrap;">${gbDurumRozet(s)}</td>
       <td>${s.tarih||'-'}</td>
-      <td style="font-weight:500"><div class="gb-urun-hucre">${(() => { const f = gbSiparisFoto(s); return f ? `<img class="gb-foto" src="${f}" alt="" title="Sipariş kartı" onclick="gbSiparisKartAc('${s.id}')">` : ''; })()}<div style="min-width:0"><span class="gb-urun-ad" title="${gbEsc(s.urun_adi||'')}">${gbEsc(s.urun_adi||'-')}</span>${(() => { const u = gbSiparisUrun(s); const kod = (u && u.kod) || (s.detay && s.detay.kod); return kod ? ` <span class="gb-kod-rozet">${gbEsc(kod)}${s.detay && s.detay.boy ? ' · ' + stokBoyAd(s.detay.boy) : ''}</span>` : ''; })()}${s.harici_no ? `<div class="gb-etsy-no">#${gbEsc(s.harici_no)}</div>` : ''}</div></div></td>
+      <td style="font-weight:500"><div class="gb-urun-hucre">${(() => { const f = gbSiparisFoto(s); return f ? `<img class="gb-foto" src="${f}" alt="" title="Sipariş kartı" onclick="gbSiparisKartAc('${s.id}')">` : ''; })()}<div style="min-width:0"><span class="gb-urun-ad" title="${gbEsc(s.urun_adi||'')}">${gbEsc(s.urun_adi||'-')}</span>${(() => { const u = gbSiparisUrun(s); const kod = (u && u.kod) || (s.detay && s.detay.kod); return kod ? ` <span class="gb-kod-rozet">${gbEsc(kod)}${s.detay && s.detay.boy ? ' · ' + stokBoyAd(s.detay.boy) : ''}</span>` : ''; })()}${s.harici_no || (s.detay && s.detay.magaza) ? `<div class="gb-etsy-no">${s.detay && s.detay.magaza ? '🏪 ' + gbEsc(s.detay.magaza) + (s.harici_no ? ' · ' : '') : ''}${s.harici_no ? '#' + gbEsc(s.harici_no) : ''}</div>` : ''}</div></div></td>
       <td>${parseFloat(s.gram).toString()}</td>
       <td>${(()=>{const r=gbNotlarRenk(s.notlar);const lbl=(s.notlar||'-').replace(/\|?TAŞ:[\d.]+/,'').trim();return `<span style="background:${r.bg};color:${r.clr};font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">${lbl}</span>`;})()}</td>
       <td>${parseFloat(s.milyem||0).toString()}</td>
@@ -7696,7 +7706,7 @@ function gbFisCozumle(metin, ogeler) {
   const adres = gbBlok(metin, 'Ship to', ['Scheduled to ship by', 'Shop', 'Order date', 'Payment method']).split('\n').filter(Boolean);
   const sonGonderim = gbEnTarih(gbBlok(metin, 'Scheduled to ship by', ['Shop', 'Order date', 'Payment method']));
   const tarih = gbEnTarih(gbBlok(metin, 'Order date', ['Payment method', '\\d+\\s+items?']));
-  const magaza = gbBlok(metin, 'Shop', ['Order date', 'Payment method']).split('\n')[0] || '';
+  const magaza = gbBlok(metin, 'Shop', ['Order date', 'Payment method', 'Ship to', 'Scheduled to ship by']).split('\n').map(x => x.trim()).filter(Boolean)[0] || '';
   let bolum = metin.split(/\n\s*\d+\s+items?\s*\n/i)[1] || '';
   bolum = bolum.split(/\n\s*Do the green thing/i)[0];
   const urunler = [];
@@ -7812,15 +7822,53 @@ async function gbFisPdfSec(input) {
       });
     });
     await gbPdfStokHazirla();
+    await gbPdfMagazaKontrol();
     gbPdfOnizle(file.name);
   } catch (e) { alert('PDF okunamadı: ' + e.message); }
 }
+// V155: fişteki Etsy mağazası bu mağazaya mı ait? (önceki kayıtlardan öğrenilir)
+let gbPdfMagazaUyari = null;
+const gbMagNorm = x => String(x || '').trim().toLowerCase();
+async function gbPdfMagazaKontrol() {
+  gbPdfMagazaUyari = null;
+  const fisMag = [...new Set(gbPdfSatirlar.filter(r => !r.zatenVar && r.siparis.magaza).map(r => r.siparis.magaza.trim()))];
+  if (!fisMag.length || !(await gbDetayKontrol())) return;
+  try {
+    const q = fisMag.map(m => '"' + m.replace(/"/g, '') + '"').join(',');
+    const [baska, bura] = await Promise.all([
+      api(`platform_siparisler?detay->>magaza=in.(${encodeURIComponent(q)})&select=platform,magaza:detay->>magaza&limit=5000`).catch(() => []),
+      api(`platform_siparisler?platform=eq.${aktifPlatformB}&detay->>magaza=not.is.null&select=magaza:detay->>magaza&order=id.desc&limit=1000`).catch(() => [])
+    ]);
+    const buranin = new Set((bura || []).map(x => gbMagNorm(x.magaza)).filter(Boolean));
+    const sorunlu = {};
+    fisMag.forEach(m => {
+      const n = gbMagNorm(m);
+      if (buranin.has(n)) return;
+      const digerleri = [...new Set((baska || []).filter(x => gbMagNorm(x.magaza) === n && x.platform !== aktifPlatformB).map(x => PLATFORM_LABELS[x.platform] || x.platform))];
+      if (digerleri.length || buranin.size) sorunlu[n] = { ad: m, digerleri, buranin: [...new Set((bura || []).map(x => x.magaza))] };
+    });
+    if (Object.keys(sorunlu).length) gbPdfMagazaUyari = { sorunlu, yoksay: false };
+  } catch (e) {}
+}
+function gbPdfMagazaSorunlu(r) { return !!(gbPdfMagazaUyari && !gbPdfMagazaUyari.yoksay && !r.zatenVar && gbPdfMagazaUyari.sorunlu[gbMagNorm(r.siparis.magaza)]); }
+function gbPdfMagazaUyariHtml() {
+  if (!gbPdfMagazaUyari || gbPdfMagazaUyari.yoksay) return '';
+  const bu = gbEsc(PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB);
+  const satir = Object.values(gbPdfMagazaUyari.sorunlu).map(x => `<li>🏪 <b>${gbEsc(x.ad)}</b> fişi${x.digerleri.length ? ` daha önce <b>${gbEsc(x.digerleri.join(', '))}</b> mağazasına eklenmiş` : ''}${x.buranin.length ? `${x.digerleri.length ? '; ' : ' '}<b>${bu}</b> mağazasında şimdiye kadar <b>${gbEsc(x.buranin.slice(0, 3).join(', '))}</b> fişleri var` : ''}.</li>`).join('');
+  return `<div class="gb-uyari gb-magaza-uyari">⚠️ <b>Mağaza tutmuyor olabilir</b> — şu an <b>${bu}</b> mağazasına ekliyorsunuz:<ul>${satir}</ul>
+    <div class="ds-butonlar" style="justify-content:flex-start;margin-top:6px"><button class="btn" onclick="gbPdfMagazaCikar()">Bu fişleri çıkar</button><button class="btn" onclick="gbPdfMagazaUyari.yoksay=true;gbPdfOnizleYenile()">Yok say, ekle</button></div></div>`;
+}
+function gbPdfMagazaCikar() { gbPdfSatirlar.forEach(r => { if (gbPdfMagazaSorunlu(r)) r.sec = false; }); gbPdfMagazaUyari.yoksay = true; gbPdfOnizleYenile(); showToast('Farklı mağazanın fişleri seçimden çıkarıldı'); }
+let gbPdfSonDosya = '';
+function gbPdfOnizleYenile() { gbPdfOnizle(gbPdfSonDosya); }
 function gbPdfOnizle(dosya) {
+  gbPdfSonDosya = dosya;
   const yeni = gbPdfSatirlar.filter(r => !r.zatenVar).length, eski = gbPdfSatirlar.length - yeni;
   const tipSecenek = sec => Object.entries(GRUPB_TIPLER).map(([k, t]) => `<option value="${k}" ${k === sec ? 'selected' : ''}>${t.ad}</option>`).join('');
   gbModal(`
     <div class="ds-ust"><div class="ds-baslik">📄 Fişten Sipariş Ekle — ${gbEsc(PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB)}</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
     <div class="ds-aciklama"><b>${gbEsc(dosya)}</b> · ${gbPdfSatirlar.length} ürün bulundu${eski ? ` · <span style="color:#F87171">${eski} tanesi zaten kayıtlı, işaretlenmedi</span>` : ''}${gbPdfGuncelle.length ? ` · <span style="color:#34D399">${gbPdfGuncelle.length} kayıtlı siparişe sipariş no / fotoğraf eklenecek</span>` : ''}. Gram ve tip kontrol edip <b>Ekle</b>'ye basın; hepsi <b>Bekliyor</b> olarak eklenir.</div>
+    ${gbPdfMagazaUyariHtml()}
     ${gbFotoVar === false ? '<div class="gb-uyari">📷 Fotoğraflar fişte bulundu ama <b>kaydedilemiyor</b>: Supabase\'de <b>bayi-foto.sql</b> dosyasını bir kez çalıştırın, sonra fişi tekrar yükleyin.</div>' : ''}
     <div class="gb-kargo-kar" style="margin:0 0 6px">📷 Fişte bulunan fotoğraf: <b>${gbPdfSatirlar.filter(r => r.foto).length}</b> / ${gbPdfSatirlar.length}${gbFotoVar ? ' · kaydedilecek' : ''}</div>
     ${gbHariciVar === false ? '<div class="gb-uyari">Aynı fişi iki kez eklemeyi önleme ve son gönderim tarihi için <b>grupb-kargo.sql</b> dosyasını (güncel hâlini) Supabase\'de çalıştırın.</div>' : ''}
@@ -7829,7 +7877,7 @@ function gbPdfOnizle(dosya) {
         <label class="gb-pdf-sec"><input type="checkbox" class="gb-cb" ${r.sec ? 'checked' : ''} onchange="gbPdfSatirlar[${i}].sec=this.checked;gbPdfOzet();gbPdfStokCiz()"></label>
         ${r.foto ? `<img class="gb-foto gb-foto-b" src="${r.foto}" alt="">` : ''}
         <div class="gb-pdf-bilgi">
-          <div class="gb-pdf-ust"><b>#${gbEsc(r.siparis.siparisNo)}</b> · ${gbEsc(r.siparis.alici)} · ${gbEsc(r.siparis.ulke)} · ${gbEsc(r.tarih)}${r.siparis.sonGonderim ? ' · <span class="gb-son">⏰ ' + gbEsc(r.siparis.sonGonderim) + '</span>' : ''}${r.zatenVar ? ' · <b style="color:#F87171">zaten kayıtlı</b>' : ''}</div>
+          <div class="gb-pdf-ust">${r.siparis.magaza ? `<span class="gb-magaza-rozet${gbPdfMagazaSorunlu(r) ? ' sorunlu' : ''}">${gbPdfMagazaSorunlu(r) ? '⚠️' : '🏪'} ${gbEsc(r.siparis.magaza)}</span> ` : ''}<b>#${gbEsc(r.siparis.siparisNo)}</b> · ${gbEsc(r.siparis.alici)} · ${gbEsc(r.siparis.ulke)} · ${gbEsc(r.tarih)}${r.siparis.sonGonderim ? ' · <span class="gb-son">⏰ ' + gbEsc(r.siparis.sonGonderim) + '</span>' : ''}${r.zatenVar ? ' · <b style="color:#F87171">zaten kayıtlı</b>' : ''}</div>
           <div class="gb-pdf-alt">${r.urun.renkKod ? `<span class="renk-rozet renk-${r.urun.renkKod}">${gbRenkAd(r.urun.renkKod)}</span> ` : ''}${r.urun.parca > 1 ? `<span class="renk-rozet" style="background:#1F1B14;color:#F7DA84">${gbEsc(r.urun.adetMetin || 'çift')} → ${r.urun.parca} parça</span> ` : ''}${r.siparis.notlar && r.siparis.notlar.length ? '<span title="Fişte not var; sipariş kartında görünür">📝</span> ' : ''}${r.siparis.hediye ? '<span title="Hediye olarak işaretli">🎁</span> ' : ''}${gbEsc(r.urun.sku)} · ${gbEsc(r.urun.renk)}${r.urun.uzunluk ? ' · ' + gbEsc(r.urun.uzunluk) : ''}${/inch|cm/i.test(r.urun.uzunluk) && !/no chain/i.test(r.urun.uzunluk) ? ' <span class="gb-son">⛓ zincirli — gramı kontrol edin</span>' : ''}</div>
           ${gbPdfStokHtml(r, i)}
           <div class="gb-pdf-alanlar">
@@ -7877,6 +7925,8 @@ async function gbPdfEkle() {
   await gbDetayKontrol();
   const secilen = gbPdfSatirlar.filter(r => r.sec);
   if (!secilen.length && !gbPdfGuncelle.length) { alert('Eklenecek ürün seçilmedi.'); return; }
+  const farkli = secilen.filter(gbPdfMagazaSorunlu);
+  if (farkli.length && !confirm(`⚠️ ${farkli.length} ürünün fişi başka bir Etsy mağazasından görünüyor (${[...new Set(farkli.map(r => r.siparis.magaza))].join(', ')}).\n\nYine de ${PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB} mağazasına eklensin mi?`)) return;
   const eksikGram = secilen.filter(r => !r.gram);
   const btn = document.getElementById('gbPdfEkleBtn'); btn.disabled = true; btn.textContent = 'Ekleniyor…';
   try {
@@ -15601,7 +15651,8 @@ function gbSiparisKartAc(id) {
   gbModal(`
     <div class="ds-ust"><div class="ds-baslik">📇 Sipariş kartı</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
     <div id="skKart" class="sk-kart">
-      <div class="sk-ust"><div><div class="sk-magaza">${gbEsc(magaza)}</div><div class="sk-no">Sipariş ${s.musteri_adi ? '<b>' + gbEsc(s.musteri_adi) + '</b>' : ''}${s.harici_no ? ' · Etsy #' + gbEsc(s.harici_no) : ''}</div></div>
+      <div class="sk-magaza-bant"><span class="sk-magaza-et">MAĞAZA</span><span class="sk-magaza-ad">${gbEsc(d.magaza || magaza)}</span>${d.magaza && d.magaza !== magaza ? `<span class="sk-magaza-alt">${gbEsc(magaza)}</span>` : ''}</div>
+      <div class="sk-ust"><div><div class="sk-magaza">${gbEsc(d.alici || '')}</div><div class="sk-no">Sipariş ${s.musteri_adi ? '<b>' + gbEsc(s.musteri_adi) + '</b>' : ''}${s.harici_no ? ' · Etsy #' + gbEsc(s.harici_no) : ''}</div></div>
         <div style="text-align:right"><div class="sk-no">📅 ${gbEsc(s.tarih || '')}</div>${s.son_gonderim ? `<div class="sk-no" style="color:#B45309;font-weight:700">⏰ Son gönderim ${gbEsc(s.son_gonderim)}</div>` : ''}${durum ? `<div class="sk-no">${durum}</div>` : ''}</div></div>
       <div class="sk-govde">
         <div>${u && u.fotograf_url ? `<img class="sk-foto" src="${gbEsc(u.fotograf_url)}" crossorigin="anonymous" alt="">` : s.foto ? `<img class="sk-foto" src="${s.foto}" alt="">` : '<div class="sk-foto-bos">💎</div>'}
