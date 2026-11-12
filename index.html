@@ -1,4 +1,4 @@
-<!-- SURUM-V149-PILOT-TOPLU-GELEN --><!DOCTYPE html>
+<!-- SURUM-V150-STOK --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1197,6 +1197,25 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .gelen-cb { margin:2px 10px 0 0; flex-shrink:0; }
 .gelen-satir.secili { border-color:rgba(212,175,55,.6) !important; background:rgba(212,175,55,.07); }
 .gelen-sira { display:inline-block; margin-left:8px; padding:2px 9px; border-radius:20px; background:rgba(96,165,250,.15); color:#93C5FD; font-weight:700; font-size:11.5px; }
+
+/* V150: stok */
+.stok-satir { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:6px 0 2px; padding:6px 10px; border-radius:10px; background:rgba(96,165,250,.06); border:1px solid rgba(96,165,250,.25); font-size:12.5px; }
+.stok-satir .form-control { width:auto; min-width:90px; padding:4px 8px; font-size:12.5px; }
+.stok-satir .stok-ayar { min-width:70px; }
+.stok-et { font-weight:700; color:#93C5FD; }
+.stok-dus { display:flex; align-items:center; gap:4px; cursor:pointer; color:#C9BFA8; }
+.stok-bulundu { color:#86EFAC; }
+.stok-uyari { color:#FBBF24; }
+.stok-adet { font-weight:700; color:#E8DFC8; padding:1px 8px; border-radius:20px; background:rgba(255,255,255,.06); }
+.stok-adet.sifir { color:#FBBF24; background:rgba(251,191,36,.12); }
+.stok-adet.eksi { color:#F87171; background:rgba(248,113,113,.14); }
+.stok-hucre.stok-bitti { border-color:#F87171 !important; color:#FCA5A5 !important; background:rgba(248,113,113,.08) !important; }
+.stok-hucre.stok-az { border-color:#FBBF24 !important; color:#FDE68A !important; }
+.stok-rozet { display:inline-block; min-width:18px; padding:0 6px; margin-left:4px; border-radius:10px; background:#DC2626; color:#fff; font-size:11px; font-weight:800; }
+.stok-alan-sec { display:inline-flex; gap:4px; margin-left:12px; vertical-align:middle; }
+.stok-alan-sec button { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; padding:4px 12px; border-radius:20px; border:1px solid rgba(212,175,55,.35); background:transparent; color:#C9BFA8; cursor:pointer; }
+.stok-alan-sec button.aktif { background:linear-gradient(135deg,#F3D27A,#C9A132); color:#1A1408; border-color:transparent; }
+.stok-alan-sec button.pilot.aktif { background:#7C3AED; color:#fff; }
 </style>
 </head>
 <body>
@@ -1522,6 +1541,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   <div class="page-header">
     <div><div class="page-title">Ürün Kartları</div><div class="page-sub" id="urunSayac">Yükleniyor...</div></div>
     <button class="btn btn-primary" id="yeniUrunBtn" onclick="openUrunModal()">+ Yeni Ürün</button>
+    <button class="btn" id="stokBtn" onclick="stokModalAc()" style="display:none;" title="Ürün stokları (ürün + ayar)">📦 Stok <span id="stokBtnSay" class="stok-rozet" style="display:none" title="Stoğu biten ürün"></span></button>
     <button class="btn" id="topluDuzenBtn" onclick="topluDuzenAc()" style="display:none;">📝 Toplu düzenle</button>
     <button class="btn" id="secModBtn" onclick="toggleSecimModu()" style="display:none;">☑ Seç</button>
     <button class="btn" id="kopyaBulBtn" onclick="olasiKopyalariBul()" style="display:none;">🔍 Olası Kopyaları Bul</button>
@@ -5594,6 +5614,8 @@ function applyRol() {
     if (secBtn) secBtn.style.display = urunYetkiVar() ? '' : 'none';
     const tdBtn = document.getElementById('topluDuzenBtn');
     if (tdBtn) tdBtn.style.display = urunYetkiVar() ? '' : 'none';
+    const skBtn = document.getElementById('stokBtn');
+    if (skBtn) { skBtn.style.display = urunYetkiVar() ? '' : 'none'; if (urunYetkiVar()) stokRozetGuncelle(); }
   }, 500);
   // Kullanıcı adını navda göster (tekrar tekrar çağrılırsa eski etiketi temizle)
   const navRight = document.querySelector('.nav-right');
@@ -7624,7 +7646,7 @@ function gbFisCozumle(metin) {
     const gram = parseFloat(((sku.match(/(\d+(?:[.,]\d+)?)\s*gr/i) || [])[1] || '0').replace(',', '.')) || 0;
     const renk = ozellik['gold color'] || ozellik['color'] || ozellik['material'] || '';
     const ayar = (renk.match(/(10|14|18|22)\s*K/i) || baslik.match(/(10|14|18|22)\s*K/i) || [])[1] || '';
-    urunler.push({ baslik, sku, gram, adet: parseInt(ozellik['quantity']) || 1, renk, ayar: ayar ? ayar + 'K' : '', uzunluk: ozellik['necklace length'] || ozellik['length'] || '' });
+    urunler.push({ baslik, sku, gram, adet: parseInt(ozellik['quantity']) || 1, renk, ayar: ayar ? ayar + 'K' : '', uzunluk: ozellik['necklace length'] || ozellik['length'] || '', ozellik });
   }
   return { siparisNo: no, alici: adres[0] || '', adresSatirlari: adres, ulke: adres[adres.length - 1] || '', sonGonderim, tarih, magaza, urunler };
 }
@@ -7702,6 +7724,7 @@ async function gbFisPdfSec(input) {
         }
       });
     });
+    await gbPdfStokHazirla();
     gbPdfOnizle(file.name);
   } catch (e) { alert('PDF okunamadı: ' + e.message); }
 }
@@ -7716,11 +7739,12 @@ function gbPdfOnizle(dosya) {
     ${gbHariciVar === false ? '<div class="gb-uyari">Aynı fişi iki kez eklemeyi önleme ve son gönderim tarihi için <b>grupb-kargo.sql</b> dosyasını (güncel hâlini) Supabase\'de çalıştırın.</div>' : ''}
     <div class="gb-pdf-liste">${gbPdfSatirlar.map((r, i) => `
       <div class="gb-pdf-satir ${r.zatenVar ? 'zaten' : ''}">
-        <label class="gb-pdf-sec"><input type="checkbox" class="gb-cb" ${r.sec ? 'checked' : ''} onchange="gbPdfSatirlar[${i}].sec=this.checked;gbPdfOzet()"></label>
+        <label class="gb-pdf-sec"><input type="checkbox" class="gb-cb" ${r.sec ? 'checked' : ''} onchange="gbPdfSatirlar[${i}].sec=this.checked;gbPdfOzet();gbPdfStokCiz()"></label>
         ${r.foto ? `<img class="gb-foto gb-foto-b" src="${r.foto}" alt="">` : ''}
         <div class="gb-pdf-bilgi">
           <div class="gb-pdf-ust"><b>#${gbEsc(r.siparis.siparisNo)}</b> · ${gbEsc(r.siparis.alici)} · ${gbEsc(r.siparis.ulke)} · ${gbEsc(r.tarih)}${r.siparis.sonGonderim ? ' · <span class="gb-son">⏰ ' + gbEsc(r.siparis.sonGonderim) + '</span>' : ''}${r.zatenVar ? ' · <b style="color:#F87171">zaten kayıtlı</b>' : ''}</div>
           <div class="gb-pdf-alt">${gbEsc(r.urun.sku)} · ${gbEsc(r.urun.renk)}${r.urun.uzunluk ? ' · ' + gbEsc(r.urun.uzunluk) : ''}${/inch|cm/i.test(r.urun.uzunluk) && !/no chain/i.test(r.urun.uzunluk) ? ' <span class="gb-son">⛓ zincirli — gramı kontrol edin</span>' : ''}</div>
+          ${gbPdfStokHtml(r, i)}
           <div class="gb-pdf-alanlar">
             <label>No<input class="form-control" value="${gbEsc(r.no)}" oninput="gbPdfSatirlar[${i}].no=this.value"></label>
             <label class="genis">Ürün<input class="form-control" value="${gbEsc(r.ad)}" oninput="gbPdfSatirlar[${i}].ad=this.value"></label>
@@ -7734,6 +7758,7 @@ function gbPdfOnizle(dosya) {
     <div class="ds-butonlar"><button class="btn" onclick="gbModalKapat()">Vazgeç</button><button class="btn btn-primary" id="gbPdfEkleBtn" onclick="gbPdfEkle()">＋ Seçilenleri Ekle</button></div>`);
   const kutu = document.querySelector('#gbKargoModal .ds-kutu'); if (kutu) kutu.style.width = 'min(900px,100%)';
   gbPdfOzet();
+  gbPdfStokCiz();
 }
 function gbFotoBuyut(src) {
   const d = document.createElement('div'); d.className = 'gb-foto-buyuk'; d.onclick = () => d.remove();
@@ -7783,9 +7808,10 @@ async function gbPdfEkle() {
       if (gbFotoVar) d.foto = r.foto || null;   // toplu eklemede tüm satırlar aynı alanlara sahip olmalı
       satirlar.push(d);
     }
-    await api('platform_siparisler', 'POST', satirlar);
+    const eklenen = (await api('platform_siparisler', 'POST', satirlar)) || [];
+    const stokNot = await gbPdfStokDus(secilen, eklenen);
     gbModalKapat(); gbOnbellekTemizle();
-    showToast('✓ ' + satirlar.length + ' sipariş fişten eklendi' + (tamamlanan ? ' · ' + tamamlanan + ' kaydın eksikleri tamamlandı' : ''));
+    showToast('✓ ' + satirlar.length + ' sipariş fişten eklendi' + stokNot + (tamamlanan ? ' · ' + tamamlanan + ' kaydın eksikleri tamamlandı' : ''));
     await loadGrupBData();
   } catch (e) { alert('Eklenemedi: ' + e.message); btn.disabled = false; btn.textContent = '＋ Seçilenleri Ekle'; }
 }
@@ -15054,6 +15080,238 @@ function dunyaSaatleriCiz() {
 }
 dunyaSaatleriCiz();
 setTimeout(() => { dunyaSaatleriCiz(); setInterval(dunyaSaatleriCiz, 60000); }, (60 - new Date().getSeconds()) * 1000 + 50);
+</script>
+<script>
+// =====================================================================
+// V150 — STOK (ürün + ayar). Veritabanı: stok.sql
+//  • SKU: "D12" ya da iki boylu ürünlerde "D12/D13" (küçük/büyük sırasıyla).
+//    Siparişte Small/Mini/Küçük → ilk kod, Big/Large/Büyük → ikinci kod.
+//  • Ayar fişteki Gold Color satırından (14K/10K), gümüşse 925.
+//  • Şimdilik sadece 🧪 pilot mağazaların fişleri stoktan düşer (pilot stoğundan).
+// =====================================================================
+const STOK_AYARLAR = ['14K', '10K', '925'];
+const STOK = { harita: {}, yuklendi: {}, tabloYok: false };
+function stokAlani(p) { const m = ozelMagazaBul(p); return m && m.pilot ? 'pilot' : (m && m.stokDus ? 'gercek' : null); }
+function stokKodNorm(k) { return String(k || '').toLocaleUpperCase('tr-TR').replace(/\s+/g, ''); }
+function stokUrunBul(kod) { const n = stokKodNorm(kod); return n ? (allUrunler || []).find(u => stokKodNorm(u.kod) === n) || null : null; }
+function stokKodlari(sku) { return String(sku || '').split(/[\/|,;]+/).map(p => (p.trim().split(/\s+/)[0] || '').replace(/[.:]+$/, '')).filter(Boolean); }
+function stokBoyut(u) {
+  const t = Object.entries(u.ozellik || {}).filter(([k]) => !/gold color|color|material|quantity|personali/i.test(k)).map(([, v]) => v).join(' ') + ' ' + (u.ozellik && u.ozellik.size || '');
+  if (/\b(small|mini|petite|tiny|küçük|kucuk)\b/i.test(t)) return 'kucuk';
+  if (/\b(big|large|büyük|buyuk|maxi)\b/i.test(t)) return 'buyuk';
+  return '';
+}
+function stokKodSec(u) {
+  const kodlar = stokKodlari(u.sku);
+  if (kodlar.length <= 1) return { kod: kodlar[0] || '', kodlar, boyut: '' };
+  const boyut = stokBoyut(u);
+  return { kod: boyut === 'kucuk' ? kodlar[0] : boyut === 'buyuk' ? kodlar[kodlar.length - 1] : '', kodlar, boyut };
+}
+function stokAyarBul(u, tip) {
+  if (/silver|gümüş|925/i.test((u.renk || '') + ' ' + (u.baslik || ''))) return '925';
+  if (u.ayar) return u.ayar;
+  return tip === 'kolye10' ? '10K' : '14K';
+}
+async function stokYukle(alan) {
+  try {
+    const r = await apiTumSatirlar('urun_stok?alan=eq.' + alan + '&select=urun_id,ayar,adet&order=urun_id.asc,ayar.asc');
+    const h = {}; (r || []).forEach(x => { h[x.urun_id + '|' + x.ayar] = x.adet; });
+    STOK.harita[alan] = h; STOK.yuklendi[alan] = true; STOK.tabloYok = false;
+  } catch (e) { STOK.harita[alan] = {}; STOK.tabloYok = true; }
+  return STOK.harita[alan];
+}
+function stokAdet(alan, id, ayar) { const v = (STOK.harita[alan] || {})[id + '|' + ayar]; return v == null ? null : v; }
+
+// ---- Fişten ekleme: eşleştirme önizlemesi ----
+let gbPdfStokAlan = null;
+async function gbPdfStokHazirla() {
+  gbPdfStokAlan = stokAlani(aktifPlatformB);
+  if (!gbPdfStokAlan) return;
+  if (!allUrunler || !allUrunler.length) { try { allUrunler = await apiTumSatirlar('urunler?select=*&order=olusturma_tarihi.desc,id.asc'); } catch (e) {} }
+  await stokYukle(gbPdfStokAlan);
+  gbPdfSatirlar.forEach(r => {
+    const s = stokKodSec(r.urun);
+    r.stokKodlar = s.kodlar; r.stokBoyut = s.boyut; r.stokKod = s.kod;
+    r.stokAyar = stokAyarBul(r.urun, r.tip);
+    const u = stokUrunBul(r.stokKod); r.stokUrunId = u ? u.id : null; r.stokDus = !!u && r.sec;
+  });
+}
+function gbPdfStokHtml(r, i) {
+  if (!gbPdfStokAlan) return '';
+  return `<div class="stok-satir" id="stokSatir${i}"></div>`;
+}
+function gbPdfStokCiz() {
+  if (!gbPdfStokAlan) return;
+  const kullanilan = {};
+  gbPdfSatirlar.forEach((r, i) => {
+    const el = document.getElementById('stokSatir' + i); if (!el) return;
+    const u = r.stokUrunId ? allUrunler.find(x => x.id === r.stokUrunId) : null;
+    let bilgi;
+    if (STOK.tabloYok) bilgi = '<span class="stok-uyari">Stok tablosu yok: Supabase\'de stok.sql çalıştırın</span>';
+    else if (!r.stokKod && r.stokKodlar.length > 1) bilgi = `<span class="stok-uyari">⚠️ SKU'da ${r.stokKodlar.length} kod var (${gbEsc(r.stokKodlar.join(' / '))}) ama siparişte boy (Small/Big) bulunamadı — kodu seçin</span>`;
+    else if (!u) bilgi = `<span class="stok-uyari">⚠️ ${r.stokKod ? '"' + gbEsc(r.stokKod) + '" kodlu ürün bulunamadı' : 'SKU\'da ürün kodu yok'} — stoktan düşmeyecek</span>`;
+    else {
+      const k = u.id + '|' + r.stokAyar, mevcut = stokAdet(gbPdfStokAlan, u.id, r.stokAyar) || 0;
+      const once = mevcut - (kullanilan[k] || 0), sonra = r.sec && r.stokDus ? once - 1 : once;
+      if (r.sec && r.stokDus) kullanilan[k] = (kullanilan[k] || 0) + 1;
+      bilgi = `<span class="stok-bulundu">✓ ${gbEsc(u.kod)} · ${gbEsc(u.ad)}${r.stokBoyut ? ' · ' + (r.stokBoyut === 'kucuk' ? 'küçük' : 'büyük') : ''}</span> <span class="stok-adet ${sonra < 0 ? 'eksi' : sonra === 0 ? 'sifir' : ''}">stok ${once}${r.sec && r.stokDus ? ' → ' + sonra : ''}${sonra < 0 ? ' (eksik!)' : sonra === 0 ? ' (bitiyor)' : ''}</span>`;
+    }
+    const kodSec = r.stokKodlar.length > 1
+      ? `<select class="form-control" onchange="gbPdfStokDegis(${i},'kod',this.value)"><option value="">kod seçin</option>${r.stokKodlar.map((k, j) => `<option value="${gbEsc(k)}" ${k === r.stokKod ? 'selected' : ''}>${gbEsc(k)}${j === 0 ? ' (küçük)' : j === r.stokKodlar.length - 1 ? ' (büyük)' : ''}</option>`).join('')}</select>`
+      : `<input class="form-control" list="stokKodListe" value="${gbEsc(r.stokKod)}" placeholder="ürün kodu" onchange="gbPdfStokDegis(${i},'kod',this.value)">`;
+    el.innerHTML = `<span class="stok-et">📦 Stok</span>${kodSec}
+      <select class="form-control stok-ayar" onchange="gbPdfStokDegis(${i},'ayar',this.value)">${STOK_AYARLAR.map(a => `<option ${a === r.stokAyar ? 'selected' : ''}>${a}</option>`).join('')}</select>
+      <label class="stok-dus"><input type="checkbox" ${r.stokDus ? 'checked' : ''} ${u ? '' : 'disabled'} onchange="gbPdfStokDegis(${i},'dus',this.checked)"> düş</label> ${bilgi}`;
+  });
+  if (!document.getElementById('stokKodListe')) {
+    const dl = document.createElement('datalist'); dl.id = 'stokKodListe';
+    dl.innerHTML = (allUrunler || []).map(u => `<option value="${gbEsc(u.kod)}">${gbEsc(u.ad)}</option>`).join('');
+    document.body.appendChild(dl);
+  }
+}
+function gbPdfStokDegis(i, alan, deger) {
+  const r = gbPdfSatirlar[i];
+  if (alan === 'kod') { r.stokKod = String(deger || '').trim(); const u = stokUrunBul(r.stokKod); r.stokUrunId = u ? u.id : null; r.stokDus = !!u; }
+  else if (alan === 'ayar') r.stokAyar = deger;
+  else r.stokDus = !!deger;
+  gbPdfStokCiz();
+}
+async function gbPdfStokDus(secilen, eklenen) {
+  if (!gbPdfStokAlan || STOK.tabloYok) return '';
+  const hareketler = [];
+  secilen.forEach((r, k) => {
+    if (!r.stokDus || !r.stokUrunId || !eklenen[k]) return;
+    hareketler.push({ alan: gbPdfStokAlan, urun_id: String(r.stokUrunId), ayar: r.stokAyar, miktar: -1, tur: 'siparis', siparis_id: String(eklenen[k].id), platform: aktifPlatformB, aciklama: ('#' + (r.siparis.siparisNo || '') + ' ' + (r.ad || '')).trim().slice(0, 200) });
+  });
+  if (!hareketler.length) return '';
+  try { await api('stok_hareketleri', 'POST', hareketler); }
+  catch (e) { alert('Siparişler eklendi ama stoktan düşülemedi: ' + e.message); return ''; }
+  await stokYukle(gbPdfStokAlan);
+  const biten = [...new Set(hareketler.map(h => h.urun_id + '|' + h.ayar))].map(k => { const [id, ayar] = k.split('|'); return { u: allUrunler.find(x => String(x.id) === id), ayar, adet: stokAdet(gbPdfStokAlan, id, ayar) }; }).filter(x => x.adet <= 0);
+  stokRozetGuncelle();
+  if (biten.length) setTimeout(() => alert('📦 Stoğu biten ürünler' + (gbPdfStokAlan === 'pilot' ? ' (🧪 pilot stoğu)' : '') + ':\n\n' + biten.map(x => '• ' + (x.u ? x.u.kod + ' ' + x.u.ad : '?') + ' · ' + x.ayar + ' → ' + x.adet + (x.adet < 0 ? ' (eksik)' : '')).join('\n')), 300);
+  return ' · ' + hareketler.length + ' ürün stoktan düştü';
+}
+
+// ---- Ürünler › 📦 Stok ekranı ----
+let stkAlan = 'gercek', stkDeg = {}, stkListe = [];
+function stokEsik() { try { return Math.max(0, parseInt(localStorage.getItem('kk_stok_esik')) || 1); } catch (e) { return 1; } }
+async function stokRozetGuncelle() {
+  const b = document.getElementById('stokBtnSay'); if (!b) return;
+  if (!STOK.yuklendi.gercek) await stokYukle('gercek');
+  const n = new Set(Object.entries(STOK.harita.gercek || {}).filter(([, a]) => a <= 0).map(([k]) => k.split('|')[0])).size;
+  b.textContent = n; b.style.display = n ? '' : 'none';
+}
+async function stokModalAc(alan) {
+  if (!urunYetkiVar()) return;
+  stkAlan = alan || stkAlan; stkDeg = {};
+  const m = vkModal('stokModal', true);
+  m.innerHTML = '<div class="modal-header"><div class="modal-title">📦 Stok</div><button class="modal-close" onclick="stokModalKapat()">×</button></div><div class="modal-body"><div style="display:flex;gap:10px;align-items:center;color:var(--text2)"><div class="vk-don"></div>Yükleniyor…</div></div>';
+  await stokYukle(stkAlan);
+  if (STOK.tabloYok) { m.querySelector('.modal-body').innerHTML = '<div class="vk-not">Stok tablosu bulunamadı. Supabase › SQL Editor\'de <b>stok.sql</b> dosyasını bir kez çalıştırın.</div>'; return; }
+  const kat = typeof urunKategorileri !== 'undefined' ? urunKategorileri : [];
+  m.innerHTML = `<div class="modal-header"><div class="modal-title">📦 Stok <span class="stok-alan-sec"><button class="${stkAlan === 'gercek' ? 'aktif' : ''}" onclick="stokAlanDegis('gercek')">Gerçek stok</button><button class="${stkAlan === 'pilot' ? 'aktif pilot' : 'pilot'}" onclick="stokAlanDegis('pilot')">🧪 Pilot stoğu</button></span></div><button class="modal-close" onclick="stokModalKapat()">×</button></div>
+    <div class="modal-body" style="display:flex;flex-direction:column;min-height:0">
+      ${stkAlan === 'pilot' ? '<div class="vk-not" style="margin-bottom:10px;background:rgba(124,58,237,.1);border-color:rgba(167,139,250,.5);color:#DDD6FE">🧪 <b>Pilot stoğu:</b> sadece pilot mağazanın fişleri buradan düşer. Gerçek stoğa dokunmaz. Denemeden önce birkaç ürüne başlangıç stoğu girin.</div>' : ''}
+      <div class="vk-arac">
+        <select class="form-control" id="stkFiltre" onchange="stokCiz()"><option value="">Hepsi</option><option value="biten">⛔ Stoğu bitenler (0 ve altı)</option><option value="azalan">⚠️ Azalanlar</option><option value="var">✓ Stokta olanlar</option><option value="takip">Stok girilmiş ürünler</option><option value="degisen">Sadece değiştirdiklerim</option></select>
+        <select class="form-control" id="stkKat" onchange="stokCiz()"><option value="">Tüm kategoriler</option>${kat.map(k => `<option value="${vkEsc(k.kod)}">(${vkEsc(k.kod)}) ${vkEsc(k.ad)}</option>`).join('')}</select>
+        <input type="text" class="form-control" id="stkAra" placeholder="🔍 Kod ya da ad…" oninput="stokCiz()" style="min-width:170px">
+        <label class="vk-sayac" style="display:flex;align-items:center;gap:6px">Azalan sınırı ≤ <input type="number" min="0" class="form-control" id="stkEsik" value="${stokEsik()}" style="width:64px" onchange="try{localStorage.setItem('kk_stok_esik',this.value)}catch(e){};stokCiz()"></label>
+        <span class="vk-sayac" id="stkBilgi"></span>
+      </div>
+      <div class="vk-tablo-sar" style="flex:1;min-height:0" id="stkSar"></div>
+      <details style="margin-top:8px" ontoggle="if(this.open)stokHareketleriYukle()"><summary style="cursor:pointer;font-size:12.5px;color:var(--text2)">🕘 Son stok hareketleri</summary><div id="stkHareket" class="vk-detay"></div></details>
+    </div>
+    <div class="modal-footer">${stkAlan === 'pilot' ? '<button class="btn btn-sm" style="margin-right:auto;border-color:#A78BFA;color:#DDD6FE" onclick="stokPilotSifirla()">♻️ Pilot stoğunu sıfırla</button>' : '<span style="margin-right:auto"></span>'}<span class="vk-sayac" id="stkSayac"></span><button class="btn" onclick="stokModalKapat()">Kapat</button><button class="btn btn-primary" id="stkKaydet" onclick="stokKaydet()" disabled>💾 Kaydet</button></div>`;
+  const ov = document.getElementById('stokModal');
+  if (!ov._kur) {
+    ov._kur = true;
+    ov.addEventListener('input', e => { if (e.target.matches('input[data-sid]')) stokHucreDegisti(e.target); });
+    ov.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target.matches('input[data-sid]')) { e.preventDefault(); const tr = e.target.closest('tr'); let h = e.shiftKey ? tr.previousElementSibling : tr.nextElementSibling; const i = h && h.querySelector(`input[data-ayar="${e.target.dataset.ayar}"]`); if (i) { i.focus(); i.select(); } }
+      if (e.key === 'Escape') { e.stopPropagation(); stokModalKapat(); }
+    });
+  }
+  stokCiz();
+}
+function stokAlanDegis(a) { if (a === stkAlan) return; if (Object.keys(stkDeg).length && !confirm('Kaydedilmemiş değişiklikler var. Yine de geçilsin mi?')) return; stokModalAc(a); }
+function stokModalKapat() { if (Object.keys(stkDeg).length && !confirm('Kaydedilmemiş stok değişiklikleri var. Kaydetmeden kapatılsın mı?')) return; stkDeg = {}; vkModalKapat('stokModal'); }
+function stokCiz() {
+  const sar = document.getElementById('stkSar'); if (!sar) return;
+  const f = document.getElementById('stkFiltre').value, kat = document.getElementById('stkKat').value, q = (document.getElementById('stkAra').value || '').toLocaleLowerCase('tr-TR').trim();
+  const esik = parseInt(document.getElementById('stkEsik').value) || 0;
+  const a = (id, ay) => stokAdet(stkAlan, id, ay);
+  stkListe = sortUrunler(allUrunler).filter(u => {
+    if (kat && (getUrunMeta(u.id).kategori || '') !== kat) return false;
+    if (q && !((u.kod || '') + ' ' + (u.ad || '')).toLocaleLowerCase('tr-TR').includes(q)) return false;
+    const v = STOK_AYARLAR.map(ay => a(u.id, ay)).filter(x => x != null);
+    if (f === 'biten') return v.some(x => x <= 0);
+    if (f === 'azalan') return v.some(x => x > 0 && x <= esik);
+    if (f === 'var') return v.some(x => x > 0);
+    if (f === 'takip') return v.length > 0;
+    if (f === 'degisen') return Object.keys(stkDeg).some(k => k.startsWith(u.id + '|'));
+    return true;
+  });
+  const hucre = (u, ay) => {
+    const k = u.id + '|' + ay, v = a(u.id, ay), d = k in stkDeg ? stkDeg[k] : (v == null ? '' : v), n = parseInt(d);
+    const cls = k in stkDeg ? ' vk-degisti' : (v != null && v <= 0 ? ' stok-bitti' : v != null && v <= esik ? ' stok-az' : '');
+    return `<td class="vk-ort"><input type="text" inputmode="numeric" data-sid="${vkEsc(u.id)}" data-ayar="${ay}" value="${vkEsc(d)}" class="stok-hucre${cls}" placeholder="—" style="width:64px;text-align:center"></td>`;
+  };
+  sar.innerHTML = `<table class="vk-tablo"><thead><tr><th></th><th>Kod</th><th>Ad</th>${STOK_AYARLAR.map(ay => `<th class="vk-ort vk-grup">${ay}</th>`).join('')}<th class="vk-ort">Toplam</th></tr></thead>
+    <tbody>${stkListe.map(u => { const t = STOK_AYARLAR.reduce((s, ay) => s + (a(u.id, ay) || 0), 0); return `<tr><td>${u.fotograf_url ? `<img class="vk-foto" src="${vkEsc(u.fotograf_url)}" loading="lazy" alt="">` : '<div class="vk-foto-bos">💎</div>'}</td><td class="vk-kod">${vkEsc(u.kod)}</td><td><div class="vk-ad" title="${vkEsc(u.ad)}">${vkEsc(u.ad)}</div></td>${STOK_AYARLAR.map(ay => hucre(u, ay)).join('')}<td class="vk-ort"><b>${t}</b></td></tr>`; }).join('') || '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Eşleşen ürün yok</td></tr>'}</tbody></table>`;
+  const tum = Object.entries(STOK.harita[stkAlan] || {});
+  document.getElementById('stkBilgi').textContent = `${stkListe.length} ürün · ⛔ ${new Set(tum.filter(([, x]) => x <= 0).map(([k]) => k.split('|')[0])).size} bitmiş · ⚠️ ${new Set(tum.filter(([, x]) => x > 0 && x <= esik).map(([k]) => k.split('|')[0])).size} azalan`;
+  stokSayacGuncelle();
+}
+function stokHucreDegisti(el) {
+  const k = el.dataset.sid + '|' + el.dataset.ayar, v = stokAdet(stkAlan, el.dataset.sid, el.dataset.ayar);
+  const t = el.value.trim();
+  if (t === '' ? v == null : (/^-?\d+$/.test(t) && parseInt(t) === (v || 0) && v != null)) delete stkDeg[k]; else stkDeg[k] = t;
+  el.classList.toggle('vk-degisti', k in stkDeg);
+  stokSayacGuncelle();
+}
+function stokSayacGuncelle() {
+  const n = Object.keys(stkDeg).length, b = document.getElementById('stkKaydet'), s = document.getElementById('stkSayac');
+  if (s) s.textContent = n ? n + ' hücre değişti' : '';
+  if (b) b.disabled = !n;
+}
+async function stokKaydet() {
+  const hareketler = [], hatali = [];
+  Object.entries(stkDeg).forEach(([k, t]) => {
+    const [id, ayar] = k.split('|'); const v = stokAdet(stkAlan, id, ayar) || 0;
+    if (t === '') return;                                   // boşaltmak = dokunma
+    if (!/^-?\d+$/.test(t)) { hatali.push(t); return; }
+    const fark = parseInt(t) - v; if (!fark) return;
+    hareketler.push({ alan: stkAlan, urun_id: id, ayar, miktar: fark, tur: 'sayim', aciklama: 'Stok ekranından: ' + v + ' → ' + parseInt(t) });
+  });
+  if (hatali.length) { alert('Stok tam sayı olmalı: ' + hatali.join(', ')); return; }
+  if (!hareketler.length) { stkDeg = {}; stokCiz(); return; }
+  const b = document.getElementById('stkKaydet'); b.disabled = true;
+  try {
+    for (let i = 0; i < hareketler.length; i += 200) await api('stok_hareketleri', 'POST', hareketler.slice(i, i + 200));
+    stkDeg = {}; await stokYukle(stkAlan); stokCiz(); stokRozetGuncelle();
+    showToast('✓ ' + hareketler.length + ' stok kaydedildi');
+  } catch (e) { alert('Kaydedilemedi: ' + e.message); b.disabled = false; }
+}
+async function stokHareketleriYukle() {
+  const el = document.getElementById('stkHareket'); if (!el) return;
+  el.textContent = 'Yükleniyor…';
+  try {
+    const r = await api('stok_hareketleri?alan=eq.' + stkAlan + '&select=*&order=id.desc&limit=60');
+    const tur = { siparis: '🛒 Sipariş', sayim: '✏️ Sayım', giris: '➕ Giriş', duzeltme: '✏️ Düzeltme' };
+    el.innerHTML = (r || []).length ? '<ul style="list-style:none;display:flex;flex-direction:column;gap:3px">' + r.map(h => { const u = allUrunler.find(x => String(x.id) === h.urun_id); return `<li>${vkTarih(h.zaman)} · ${tur[h.tur] || vkEsc(h.tur)} · <b>${vkEsc(u ? u.kod : '?')}</b> ${vkEsc(h.ayar)} <b style="color:${h.miktar < 0 ? '#F87171' : '#34D399'}">${h.miktar > 0 ? '+' : ''}${h.miktar}</b>${h.aciklama ? ' · ' + vkEsc(h.aciklama) : ''}</li>`; }).join('') + '</ul>' : 'Henüz hareket yok.';
+  } catch (e) { el.textContent = 'Okunamadı: ' + e.message; }
+}
+async function stokPilotSifirla() {
+  if (stkAlan !== 'pilot') return;
+  if (!confirm('🧪 Pilot stoğundaki bütün sayılar ve hareketler silinsin mi?\n\nGerçek stoğa dokunulmaz. Pilot siparişleri silinmez.')) return;
+  try {
+    await api('stok_hareketleri?alan=eq.pilot', 'DELETE');
+    stkDeg = {}; await stokYukle('pilot'); stokCiz(); showToast('♻️ Pilot stoğu sıfırlandı');
+  } catch (e) { alert('Sıfırlanamadı: ' + e.message); }
+}
+
 </script>
 </body>
 </html>
