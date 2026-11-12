@@ -1,4 +1,4 @@
-<!-- SURUM-V151-STOK-KART --><!DOCTYPE html>
+<!-- SURUM-V152-SIPARIS-KARTI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1225,6 +1225,31 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .stok-cip.bitti { background:#FEE2E2; color:#B91C1C; }
 .stok-cip.pilot { outline:1.5px dashed #8B5CF6; outline-offset:-1.5px; }
 .detay-stok { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:10px 0; padding:10px 12px; border-radius:12px; background:rgba(96,165,250,.07); border:1px solid rgba(96,165,250,.3); }
+
+/* V152: sipariş kartı */
+.stok-satir.stoksuz { background:rgba(255,255,255,.03); border-color:rgba(212,175,55,.25); }
+.stok-sec-bekliyor { border-color:#FBBF24 !important; box-shadow:0 0 0 2px rgba(251,191,36,.25); }
+.gb-kod-rozet { display:inline-block; margin-left:4px; padding:1px 7px; border-radius:20px; background:rgba(212,175,55,.15); color:#F7DA84; font-size:10.5px; font-weight:700; }
+.sk-kart { background:#FFFDF8; color:#1F1B14; border-radius:16px; padding:18px; font-family:'DM Sans',sans-serif; }
+.sk-ust { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; border-bottom:1px dashed #D8CFB8; padding-bottom:10px; margin-bottom:14px; }
+.sk-ust .sk-magaza { font-weight:800; font-size:15px; }
+.sk-ust .sk-no { font-size:12.5px; color:#6B6455; }
+.sk-govde { display:grid; grid-template-columns:minmax(200px, 300px) 1fr; gap:18px; }
+@media (max-width:640px) { .sk-govde { grid-template-columns:1fr; } }
+.sk-foto { width:100%; aspect-ratio:1; object-fit:contain; background:#fff; border-radius:12px; border:1px solid #EEE7D6; }
+.sk-foto-bos { width:100%; aspect-ratio:1; border-radius:12px; background:#F4EFE3; display:flex; align-items:center; justify-content:center; font-size:48px; }
+.sk-fis-foto { width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid #EEE7D6; margin-top:8px; cursor:zoom-in; }
+.sk-kod { font-size:30px; font-weight:800; letter-spacing:.02em; color:#8C6D23; line-height:1; }
+.sk-boy { display:inline-block; margin-left:8px; padding:3px 10px; border-radius:20px; background:#1F1B14; color:#F7DA84; font-size:13px; font-weight:700; vertical-align:middle; }
+.sk-ad { font-size:16px; font-weight:700; margin:6px 0 2px; }
+.sk-baslik { font-size:12px; color:#6B6455; margin-bottom:10px; }
+.sk-tablo { width:100%; border-collapse:collapse; font-size:13.5px; }
+.sk-kart table.sk-tablo, .sk-kart table.sk-tablo tr, .sk-kart table.sk-tablo td { background:transparent !important; }
+.sk-kart .sk-tablo td { padding:6px 4px !important; border:0 !important; border-bottom:1px solid #EFE8D8 !important; vertical-align:top; color:#1F1B14 !important; font-size:13.5px !important; text-transform:none !important; letter-spacing:0 !important; }
+.sk-kart .sk-tablo td:first-child { color:#6B6455 !important; width:38%; font-weight:500 !important; }
+.sk-kart .sk-tablo td:last-child { font-weight:700 !important; }
+.sk-ayar { display:inline-block; padding:2px 10px; border-radius:20px; font-weight:800; }
+.sk-ayar.k14 { background:#FDE68A; color:#78350F; } .sk-ayar.k10 { background:#BFDBFE; color:#1E3A8A; } .sk-ayar.k925 { background:#E5E7EB; color:#374151; }
 </style>
 </head>
 <body>
@@ -6727,7 +6752,7 @@ function renderGrupBTablo() {
       <td style="color:var(--text);font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
       <td style="white-space:nowrap;">${gbDurumRozet(s)}</td>
       <td>${s.tarih||'-'}</td>
-      <td style="font-weight:500"><div class="gb-urun-hucre">${s.foto ? `<img class="gb-foto" src="${s.foto}" alt="" onclick="gbFotoBuyut(this.src)">` : ''}<div>${gbEsc(s.urun_adi||'-')}${s.harici_no ? `<div class="gb-etsy-no">#${gbEsc(s.harici_no)}</div>` : ''}</div></div></td>
+      <td style="font-weight:500"><div class="gb-urun-hucre">${(() => { const f = gbSiparisFoto(s); return f ? `<img class="gb-foto" src="${f}" alt="" title="Sipariş kartı" onclick="gbSiparisKartAc('${s.id}')">` : ''; })()}<div>${gbEsc(s.urun_adi||'-')}${s.detay && s.detay.kod ? ` <span class="gb-kod-rozet">${gbEsc(s.detay.kod)}${s.detay.boy ? ' · ' + stokBoyAd(s.detay.boy) : ''}</span>` : ''}${s.harici_no ? `<div class="gb-etsy-no">#${gbEsc(s.harici_no)}</div>` : ''}</div></div></td>
       <td>${parseFloat(s.gram).toString()}</td>
       <td>${(()=>{const r=gbNotlarRenk(s.notlar);const lbl=(s.notlar||'-').replace(/\|?TAŞ:[\d.]+/,'').trim();return `<span style="background:${r.bg};color:${r.clr};font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">${lbl}</span>`;})()}</td>
       <td>${parseFloat(s.milyem||0).toString()}</td>
@@ -6735,7 +6760,7 @@ function renderGrupBTablo() {
       <td>${maliyetHas.toFixed(2)}</td>
       <td class="gizle-rakam">${hasKar.toFixed(2)}</td>
       <td><span class="gizle-rakam" style="padding:3px 10px;border-radius:20px;font-weight:600;font-size:12px;background:${bg};color:${renk}">$${fmtPara(kar)}</span></td>
-      <td><button class="btn btn-sm" onclick="editGrupBSiparis('${s.id}')" style="margin-right:4px">Düz</button><button class="btn btn-sm btn-danger" onclick="deleteGrupBSiparis('${s.id}')">Sil</button></td>
+      <td style="white-space:nowrap"><button class="btn btn-sm" onclick="gbSiparisKartAc('${s.id}')" title="Sipariş kartı: ürün fotoğrafı ve özellikleri" style="margin-right:4px">📇</button><button class="btn btn-sm" onclick="editGrupBSiparis('${s.id}')" style="margin-right:4px">Düz</button><button class="btn btn-sm btn-danger" onclick="deleteGrupBSiparis('${s.id}')">Sil</button></td>
     </tr>`;
   }).join('');
 }
@@ -7786,7 +7811,16 @@ async function gbAyParam(ay) {
   }
   return _cache['param:' + ay];
 }
+let gbDetayVar = null;
+async function gbDetayKontrol() { if (gbDetayVar === null) { try { await api('platform_siparisler?select=detay&limit=1'); gbDetayVar = true; } catch (e) { gbDetayVar = false; } } return gbDetayVar; }
+function gbSiparisDetay(r) {
+  const oz = Object.assign({}, r.urun.ozellik || {}); delete oz.quantity;
+  return { sku: r.urun.sku || '', kod: r.stokKod || '', urun_id: r.stokUrunId || null, boy: r.stokBoyut || '', ayar: r.stokAyar || r.urun.ayar || '',
+    renk: r.urun.renk || '', uzunluk: r.urun.uzunluk || '', baslik: r.urun.baslik || '', ozellik: oz,
+    alici: r.siparis.alici || '', ulke: r.siparis.ulke || '', siparis_no: r.siparis.siparisNo || '', son_gonderim: r.siparis.sonGonderim || '', magaza: r.siparis.magaza || '' };
+}
 async function gbPdfEkle() {
+  await gbDetayKontrol();
   const secilen = gbPdfSatirlar.filter(r => r.sec);
   if (!secilen.length && !gbPdfGuncelle.length) { alert('Eklenecek ürün seçilmedi.'); return; }
   const eksikGram = secilen.filter(r => !r.gram);
@@ -7816,9 +7850,11 @@ async function gbPdfEkle() {
       if (gbDurumAktif()) d.durum = 'bekliyor';
       if (gbHariciVar) { d.harici_no = r.siparis.siparisNo; d.son_gonderim = r.siparis.sonGonderim || null; }
       if (gbFotoVar) d.foto = r.foto || null;   // toplu eklemede tüm satırlar aynı alanlara sahip olmalı
+      if (gbDetayVar) d.detay = gbSiparisDetay(r);
       satirlar.push(d);
     }
     const eklenen = (await api('platform_siparisler', 'POST', satirlar)) || [];
+    if (gbDetayVar === false) showToast('ℹ️ Sipariş kartı için Supabase\'de siparis-detay.sql çalıştırın');
     const stokNot = await gbPdfStokDus(secilen, eklenen);
     gbModalKapat(); gbOnbellekTemizle();
     showToast('✓ ' + satirlar.length + ' sipariş fişten eklendi' + stokNot + (tamamlanan ? ' · ' + tamamlanan + ' kaydın eksikleri tamamlandı' : ''));
@@ -15104,7 +15140,22 @@ const STOK = { harita: {}, yuklendi: {}, tabloYok: false };
 function stokAlani(p) { const m = ozelMagazaBul(p); return m && m.pilot ? 'pilot' : (m && m.stokDus ? 'gercek' : null); }
 function stokKodNorm(k) { return String(k || '').toLocaleUpperCase('tr-TR').replace(/\s+/g, ''); }
 function stokUrunBul(kod) { const n = stokKodNorm(kod); return n ? (allUrunler || []).find(u => stokKodNorm(u.kod) === n) || null : null; }
-function stokKodlari(sku) { return String(sku || '').split(/[\/|,;]+/).map(p => (p.trim().split(/\s+/)[0] || '').replace(/[.:]+$/, '')).filter(Boolean); }
+const STOK_KUCUK_RE = /^(small|mini|petite|tiny|küçük|kucuk|s)$/i, STOK_BUYUK_RE = /^(big|large|büyük|buyuk|maxi|l)$/i;
+// SKU → [{kod, boy}] — "D12/D13", "D12 / D13", "Small D11 - Big D12", "D11 Small, D12 Big"
+function stokSkuCoz(sku) {
+  const parcalar = String(sku || '').split(/\s*[\/|,;]\s*|\s+[-–—]\s+/).map(x => x.trim()).filter(Boolean);
+  const sonuc = [];
+  parcalar.forEach(p => {
+    const kelime = p.split(/[\s:=]+/).filter(Boolean);
+    let boy = '';
+    kelime.forEach(k => { if (STOK_KUCUK_RE.test(k)) boy = 'kucuk'; else if (STOK_BUYUK_RE.test(k)) boy = 'buyuk'; });
+    const kod = kelime.find(k => /\d/.test(k) && !/^\d+([.,]\d+)?\s*(gr|g)$/i.test(k) && !STOK_KUCUK_RE.test(k) && !STOK_BUYUK_RE.test(k));
+    if (kod) sonuc.push({ kod: kod.replace(/[.:)]+$/, '').replace(/^[(]+/, ''), boy });
+  });
+  if (sonuc.length > 1) { sonuc.forEach((x, i) => { if (!x.boy) x.boy = i === 0 ? 'kucuk' : i === sonuc.length - 1 ? 'buyuk' : ''; }); }
+  return sonuc;
+}
+function stokKodlari(sku) { return stokSkuCoz(sku).map(x => x.kod); }
 function stokBoyut(u) {
   const t = Object.entries(u.ozellik || {}).filter(([k]) => !/gold color|color|material|quantity|personali/i.test(k)).map(([, v]) => v).join(' ') + ' ' + (u.ozellik && u.ozellik.size || '');
   if (/\b(small|mini|petite|tiny|küçük|kucuk)\b/i.test(t)) return 'kucuk';
@@ -15112,11 +15163,13 @@ function stokBoyut(u) {
   return '';
 }
 function stokKodSec(u) {
-  const kodlar = stokKodlari(u.sku);
-  if (kodlar.length <= 1) return { kod: kodlar[0] || '', kodlar, boyut: '' };
+  const liste = stokSkuCoz(u.sku), kodlar = liste.map(x => x.kod);
+  if (liste.length <= 1) return { kod: kodlar[0] || '', kodlar, liste, boyut: '' };
   const boyut = stokBoyut(u);
-  return { kod: boyut === 'kucuk' ? kodlar[0] : boyut === 'buyuk' ? kodlar[kodlar.length - 1] : '', kodlar, boyut };
+  const bul = boyut && liste.find(x => x.boy === boyut);
+  return { kod: bul ? bul.kod : '', kodlar, liste, boyut };
 }
+function stokBoyAd(b) { return b === 'kucuk' ? 'küçük' : b === 'buyuk' ? 'büyük' : ''; }
 function stokAyarBul(u, tip) {
   if (/silver|gümüş|925/i.test((u.renk || '') + ' ' + (u.baslik || ''))) return '925';
   if (u.ayar) return u.ayar;
@@ -15136,42 +15189,40 @@ function stokAdet(alan, id, ayar) { const v = (STOK.harita[alan] || {})[id + '|'
 let gbPdfStokAlan = null;
 async function gbPdfStokHazirla() {
   gbPdfStokAlan = stokAlani(aktifPlatformB);
-  if (!gbPdfStokAlan) return;
   if (!allUrunler || !allUrunler.length) { try { allUrunler = await apiTumSatirlar('urunler?select=*&order=olusturma_tarihi.desc,id.asc'); } catch (e) {} }
-  await stokYukle(gbPdfStokAlan);
+  if (gbPdfStokAlan) await stokYukle(gbPdfStokAlan);
   gbPdfSatirlar.forEach(r => {
     const s = stokKodSec(r.urun);
-    r.stokKodlar = s.kodlar; r.stokBoyut = s.boyut; r.stokKod = s.kod;
+    r.stokKodlar = s.kodlar; r.stokListe = s.liste; r.stokBoyut = s.boyut; r.stokKod = s.kod;
+    if (s.kod && s.liste.length > 1) r.stokBoyut = (s.liste.find(x => x.kod === s.kod) || {}).boy || s.boyut;
     r.stokAyar = stokAyarBul(r.urun, r.tip);
     const u = stokUrunBul(r.stokKod); r.stokUrunId = u ? u.id : null; r.stokDus = !!u && r.sec;
   });
 }
-function gbPdfStokHtml(r, i) {
-  if (!gbPdfStokAlan) return '';
-  return `<div class="stok-satir" id="stokSatir${i}"></div>`;
-}
+function gbPdfStokHtml(r, i) { return `<div class="stok-satir${gbPdfStokAlan ? '' : ' stoksuz'}" id="stokSatir${i}"></div>`; }
 function gbPdfStokCiz() {
-  if (!gbPdfStokAlan) return;
   const kullanilan = {};
   gbPdfSatirlar.forEach((r, i) => {
     const el = document.getElementById('stokSatir' + i); if (!el) return;
     const u = r.stokUrunId ? allUrunler.find(x => x.id === r.stokUrunId) : null;
     let bilgi;
-    if (STOK.tabloYok) bilgi = '<span class="stok-uyari">Stok tablosu yok: Supabase\'de stok.sql çalıştırın</span>';
-    else if (!r.stokKod && r.stokKodlar.length > 1) bilgi = `<span class="stok-uyari">⚠️ SKU'da ${r.stokKodlar.length} kod var (${gbEsc(r.stokKodlar.join(' / '))}) ama siparişte boy (Small/Big) bulunamadı — kodu seçin</span>`;
-    else if (!u) bilgi = `<span class="stok-uyari">⚠️ ${r.stokKod ? '"' + gbEsc(r.stokKod) + '" kodlu ürün bulunamadı' : 'SKU\'da ürün kodu yok'} — stoktan düşmeyecek</span>`;
+    if (gbPdfStokAlan && STOK.tabloYok) bilgi = '<span class="stok-uyari">Stok tablosu yok: Supabase\'de stok.sql çalıştırın</span>';
+    else if (!r.stokKod && r.stokKodlar.length > 1) bilgi = `<span class="stok-uyari">⚠️ Siparişte boy (Small/Big) yazmıyor — soldan küçük ya da büyük olanı seçin</span>`;
+    else if (!u) bilgi = `<span class="stok-uyari">⚠️ ${r.stokKod ? '"' + gbEsc(r.stokKod) + '" kodlu ürün bulunamadı' : 'SKU\'da ürün kodu yok'}${gbPdfStokAlan ? ' — stoktan düşmeyecek' : ''}</span>`;
+    else if (!gbPdfStokAlan) bilgi = `<span class="stok-bulundu">✓ ${gbEsc(u.kod)} · ${gbEsc(u.ad)}${r.stokBoyut ? ' · ' + stokBoyAd(r.stokBoyut) : ''}</span>`;
     else {
       const k = u.id + '|' + r.stokAyar, mevcut = stokAdet(gbPdfStokAlan, u.id, r.stokAyar) || 0;
       const once = mevcut - (kullanilan[k] || 0), sonra = r.sec && r.stokDus ? once - 1 : once;
       if (r.sec && r.stokDus) kullanilan[k] = (kullanilan[k] || 0) + 1;
-      bilgi = `<span class="stok-bulundu">✓ ${gbEsc(u.kod)} · ${gbEsc(u.ad)}${r.stokBoyut ? ' · ' + (r.stokBoyut === 'kucuk' ? 'küçük' : 'büyük') : ''}</span> <span class="stok-adet ${sonra < 0 ? 'eksi' : sonra === 0 ? 'sifir' : ''}">stok ${once}${r.sec && r.stokDus ? ' → ' + sonra : ''}${sonra < 0 ? ' (eksik!)' : sonra === 0 ? ' (bitiyor)' : ''}</span>`;
+      bilgi = `<span class="stok-bulundu">✓ ${gbEsc(u.kod)} · ${gbEsc(u.ad)}${r.stokBoyut ? ' · ' + stokBoyAd(r.stokBoyut) : ''}</span> <span class="stok-adet ${sonra < 0 ? 'eksi' : sonra === 0 ? 'sifir' : ''}">stok ${once}${r.sec && r.stokDus ? ' → ' + sonra : ''}${sonra < 0 ? ' (eksik!)' : sonra === 0 ? ' (bitiyor)' : ''}</span>`;
     }
-    const kodSec = r.stokKodlar.length > 1
-      ? `<select class="form-control" onchange="gbPdfStokDegis(${i},'kod',this.value)"><option value="">kod seçin</option>${r.stokKodlar.map((k, j) => `<option value="${gbEsc(k)}" ${k === r.stokKod ? 'selected' : ''}>${gbEsc(k)}${j === 0 ? ' (küçük)' : j === r.stokKodlar.length - 1 ? ' (büyük)' : ''}</option>`).join('')}</select>`
-      : `<input class="form-control" list="stokKodListe" value="${gbEsc(r.stokKod)}" placeholder="ürün kodu" onchange="gbPdfStokDegis(${i},'kod',this.value)">`;
-    el.innerHTML = `<span class="stok-et">📦 Stok</span>${kodSec}
+    const elle = r.stokKod && !r.stokKodlar.includes(r.stokKod);
+    const kodSec = r.stokKodlar.length > 1 && !r.stokElle
+      ? `<select class="form-control ${r.stokKod ? '' : 'stok-sec-bekliyor'}" onchange="gbPdfStokDegis(${i},'kod',this.value)"><option value="">Boy seçin…</option>${(r.stokListe || []).map(x => `<option value="${gbEsc(x.kod)}" ${x.kod === r.stokKod ? 'selected' : ''}>${x.boy ? (x.boy === 'kucuk' ? '🔹 Küçük (Small) — ' : '🔷 Büyük (Big) — ') : ''}${gbEsc(x.kod)}</option>`).join('')}</select><button type="button" class="btn btn-sm" title="Başka bir kod yaz" onclick="gbPdfSatirlar[${i}].stokElle=true;gbPdfStokCiz()">✏️</button>`
+      : `<input class="form-control" list="stokKodListe" value="${gbEsc(r.stokKod)}" placeholder="ürün kodu" onchange="gbPdfStokDegis(${i},'kod',this.value)">${r.stokKodlar.length > 1 ? `<button type="button" class="btn btn-sm" title="Küçük/büyük listesine dön" onclick="gbPdfSatirlar[${i}].stokElle=false;gbPdfStokCiz()">↩</button>` : ''}`;
+    el.innerHTML = `<span class="stok-et">${gbPdfStokAlan ? '📦 Stok' : '🏷 Ürün'}</span>${kodSec}
       <select class="form-control stok-ayar" onchange="gbPdfStokDegis(${i},'ayar',this.value)">${STOK_AYARLAR.map(a => `<option ${a === r.stokAyar ? 'selected' : ''}>${a}</option>`).join('')}</select>
-      <label class="stok-dus"><input type="checkbox" ${r.stokDus ? 'checked' : ''} ${u ? '' : 'disabled'} onchange="gbPdfStokDegis(${i},'dus',this.checked)"> düş</label> ${bilgi}`;
+      ${gbPdfStokAlan ? `<label class="stok-dus"><input type="checkbox" ${r.stokDus ? 'checked' : ''} ${u ? '' : 'disabled'} onchange="gbPdfStokDegis(${i},'dus',this.checked)"> düş</label>` : ''} ${bilgi}`;
   });
   if (!document.getElementById('stokKodListe')) {
     const dl = document.createElement('datalist'); dl.id = 'stokKodListe';
@@ -15181,7 +15232,10 @@ function gbPdfStokCiz() {
 }
 function gbPdfStokDegis(i, alan, deger) {
   const r = gbPdfSatirlar[i];
-  if (alan === 'kod') { r.stokKod = String(deger || '').trim(); const u = stokUrunBul(r.stokKod); r.stokUrunId = u ? u.id : null; r.stokDus = !!u; }
+  if (alan === 'kod') {
+    r.stokKod = String(deger || '').trim(); const u = stokUrunBul(r.stokKod); r.stokUrunId = u ? u.id : null; r.stokDus = !!u;
+    const b = (r.stokListe || []).find(x => x.kod === r.stokKod); if (b) r.stokBoyut = b.boy;
+  }
   else if (alan === 'ayar') r.stokAyar = deger;
   else r.stokDus = !!deger;
   gbPdfStokCiz();
@@ -15357,6 +15411,74 @@ async function detayStokDuzenle(id) {
   await stokModalAc('gercek');
   const a = document.getElementById('stkAra'); if (a && u) { a.value = u.kod; stokCiz(); const i = document.querySelector('#stkSar input[data-ayar="14K"]'); if (i) { i.focus(); i.select(); } }
 }
+</script>
+<script>
+// ===== V152: 📇 Sipariş kartı (ürünün kendi fotoğrafı + fişteki özellikler) =====
+function gbSiparisUrun(s) {
+  const d = s.detay || {};
+  return (d.urun_id && (allUrunler || []).find(u => String(u.id) === String(d.urun_id))) || (d.kod && typeof stokUrunBul === 'function' && stokUrunBul(d.kod)) || null;
+}
+function gbSiparisFoto(s) { const u = gbSiparisUrun(s); return (u && u.fotograf_url) || s.foto || ''; }
+function gbSiparisKartAc(id) {
+  const s = gbSiparisBul(id); if (!s) return;
+  const d = s.detay || {}, u = gbSiparisUrun(s);
+  const ayar = d.ayar || (String(s.notlar || '').match(/(14K|10K|925)/i) || [])[1] || s.ayar || '';
+  const ayarCls = /14/.test(ayar) ? 'k14' : /10/.test(ayar) ? 'k10' : /925/.test(ayar) ? 'k925' : '';
+  const tip = String(s.notlar || '').replace(/\|?TAŞ:[\d.]+/, '').replace(/\|$/, '').trim();
+  const tas = (String(s.notlar || '').match(/TAŞ:([\d.]+)/) || [])[1];
+  const satir = (k, v) => v === undefined || v === null || v === '' ? '' : `<tr><td>${gbEsc(k)}</td><td>${v}</td></tr>`;
+  const ozBaslik = { 'gold color': 'Renk', 'color': 'Renk', 'necklace length': 'Uzunluk', 'length': 'Uzunluk', 'size': 'Boy (fiş)', 'personalization': 'Kişiselleştirme', 'material': 'Malzeme', 'ring size': 'Yüzük ölçüsü', 'bracelet length': 'Bileklik uzunluğu', 'chain': 'Zincir' };
+  const oz = Object.entries(d.ozellik || {}).filter(([k]) => !['gold color', 'color'].includes(k) || !d.renk);
+  const durum = s.durum === 'kargolandi' ? '🚚 Kargolandı' + (s.kargo_tarihi ? ' · ' + s.kargo_tarihi : '') : s.durum === 'bekliyor' ? (gbUcAsama() ? (s.asama === 'hazirlaniyor' ? '🛠 Hazırlanıyor' : '🆕 Yeni') : '⏳ Bekliyor') : '';
+  const magaza = PLATFORM_LABELS[s.platform] || s.platform || '';
+  gbModal(`
+    <div class="ds-ust"><div class="ds-baslik">📇 Sipariş kartı</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
+    <div id="skKart" class="sk-kart">
+      <div class="sk-ust"><div><div class="sk-magaza">${gbEsc(magaza)}</div><div class="sk-no">Sipariş ${s.musteri_adi ? '<b>' + gbEsc(s.musteri_adi) + '</b>' : ''}${s.harici_no ? ' · Etsy #' + gbEsc(s.harici_no) : ''}</div></div>
+        <div style="text-align:right"><div class="sk-no">📅 ${gbEsc(s.tarih || '')}</div>${s.son_gonderim ? `<div class="sk-no" style="color:#B45309;font-weight:700">⏰ Son gönderim ${gbEsc(s.son_gonderim)}</div>` : ''}${durum ? `<div class="sk-no">${durum}</div>` : ''}</div></div>
+      <div class="sk-govde">
+        <div>${u && u.fotograf_url ? `<img class="sk-foto" src="${gbEsc(u.fotograf_url)}" crossorigin="anonymous" alt="">` : s.foto ? `<img class="sk-foto" src="${s.foto}" alt="">` : '<div class="sk-foto-bos">💎</div>'}
+          ${u && u.fotograf_url && s.foto ? `<div style="font-size:11px;color:#6B6455;margin-top:6px">Fişteki fotoğraf:</div><img class="sk-fis-foto" src="${s.foto}" alt="" onclick="gbFotoBuyut(this.src)">` : ''}</div>
+        <div>
+          <div><span class="sk-kod">${gbEsc((u && u.kod) || d.kod || '—')}</span>${d.boy ? `<span class="sk-boy">${d.boy === 'kucuk' ? 'KÜÇÜK' : 'BÜYÜK'}</span>` : ''}</div>
+          <div class="sk-ad">${gbEsc((u && u.ad) || s.urun_adi || '')}</div>
+          ${d.baslik ? `<div class="sk-baslik">${gbEsc(d.baslik)}</div>` : '<div style="height:8px"></div>'}
+          <table class="sk-tablo">
+            ${satir('Ayar', ayar ? `<span class="sk-ayar ${ayarCls}">${gbEsc(ayar)}</span>` : '')}
+            ${satir('Renk', gbEsc(d.renk || ''))}
+            ${satir('Uzunluk', gbEsc(d.uzunluk || ''))}
+            ${oz.filter(([k]) => !['necklace length', 'length'].includes(k) || !d.uzunluk).map(([k, v]) => satir(ozBaslik[k] || k.replace(/\b\w/g, c => c.toUpperCase()), gbEsc(v))).join('')}
+            ${satir('Gram', parseFloat(s.gram) ? gbEsc(String(parseFloat(s.gram))) + ' gr' : '')}
+            ${satir('Tip', gbEsc(tip))}
+            ${satir('Taş', tas && parseFloat(tas) ? gbEsc(tas) + ' gr' : '')}
+            ${satir('SKU', gbEsc(d.sku || ''))}
+            ${satir('Alıcı', gbEsc([d.alici, d.ulke || s.ulke].filter(Boolean).join(' · ')))}
+          </table>
+          ${!s.detay ? '<div style="font-size:11.5px;color:#9A8F78;margin-top:10px">Bu sipariş, özellikleri kaydedilmeden önce eklenmiş. Fişten yeni eklenen siparişlerde renk, uzunluk, boy ve SKU da görünür.</div>' : ''}
+        </div>
+      </div>
+    </div>
+    <div class="ds-butonlar"><button class="btn" onclick="gbSiparisKartKopyala('${s.id}')">📋 Metni kopyala</button><button class="btn" onclick="gbModalKapat()">Kapat</button><button class="btn btn-primary" onclick="gbSiparisKartIndir('${s.id}', this)">📥 Resim olarak indir</button></div>`);
+  const kutu = document.querySelector('#gbKargoModal .ds-kutu'); if (kutu) kutu.style.width = 'min(820px,100%)';
+}
+async function gbSiparisKartIndir(id, btn) {
+  const el = document.getElementById('skKart'); if (!el || typeof html2canvas !== 'function') { alert('Resim oluşturulamadı (html2canvas yüklenmedi).'); return; }
+  btn.disabled = true;
+  try {
+    const c = await html2canvas(el, { scale: 2, backgroundColor: '#FFFDF8', useCORS: true });
+    const s = gbSiparisBul(id) || {}, d = s.detay || {};
+    const a = document.createElement('a'); a.href = c.toDataURL('image/jpeg', 0.92);
+    a.download = ('siparis-' + (s.musteri_adi || '') + '-' + (d.kod || s.harici_no || id) + '.jpg').replace(/[^\w.-]+/g, '_');
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch (e) { alert('Resim oluşturulamadı: ' + e.message); }
+  btn.disabled = false;
+}
+function gbSiparisKartKopyala(id) {
+  const el = document.getElementById('skKart'); if (!el) return;
+  const metin = el.innerText.replace(/\n{3,}/g, '\n\n').trim();
+  navigator.clipboard.writeText(metin).then(() => showToast('📋 Kopyalandı'), () => alert(metin));
+}
+
 </script>
 </body>
 </html>
