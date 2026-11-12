@@ -1,4 +1,4 @@
-<!-- SURUM-V155-KART-MAGAZA --><!DOCTYPE html>
+<!-- SURUM-V156-TOPLU-YAZDIR --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1277,6 +1277,38 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .gb-magaza-uyari { border-color:#F87171 !important; }
 .gb-magaza-uyari ul { margin:6px 0 0 18px; padding:0; }
 .gb-magaza-rozet { display:inline-block; padding:1px 8px; border-radius:20px; background:rgba(212,175,55,.18); color:#F7DA84; font-size:11px; font-weight:800; }
+
+/* V156: A4 toplu yazdırma */
+.yz-secenek { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:10px 0 4px; }
+@media (max-width:640px) { .yz-secenek { grid-template-columns:1fr; } }
+.yz-kutu { display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 10px; border-radius:14px; border:1.5px solid var(--border, #3A3428); background:rgba(255,255,255,.03); color:inherit; cursor:pointer; font:inherit; }
+.yz-kutu:hover { border-color:#D4AF37; background:rgba(212,175,55,.08); }
+.yz-kutu span { font-size:12px; color:var(--text2, #A39A85); }
+.yz-sema { width:56px; height:78px; border:2px solid #D4AF37; border-radius:4px; padding:4px; display:grid; gap:3px; }
+.yz-sema i { background:rgba(212,175,55,.45); border-radius:2px; }
+.yz1 { grid-template:1fr / 1fr; } .yz2 { grid-template:1fr 1fr / 1fr; } .yz4 { grid-template:1fr 1fr / 1fr 1fr; }
+#skBaski { position:fixed; left:-10000px; top:0; }
+.yz-sayfa { position:relative; width:194mm; height:279mm; overflow:hidden; break-inside:avoid; page-break-inside:avoid; background:#fff; }
+.yz-yuva { position:absolute; display:flex; align-items:center; justify-content:center; overflow:hidden; min-width:0; min-height:0; }
+.yz-olcek { flex:none; }
+.yz-olcek .sk-kart { border:1px solid #D8CFB8; }
+.yz-olcek .sk-bagla { display:none !important; }
+.yz-olcek .sk-govde { grid-template-columns:minmax(200px, 300px) 1fr !important; }
+.yz-dikey .sk-govde { grid-template-columns:1fr !important; gap:12px; }
+.yz-dikey .sk-foto, .yz-dikey .sk-foto-bos { display:block; width:62%; margin:0 auto; }
+.yz-dikey .sk-fis-foto { display:none; }
+.yz-dikey .sk-govde > div:first-child > div { display:none; }
+@page { size:A4 portrait; margin:8mm; }
+@media print {
+  body.yz-modu > *:not(#skBaski) { display:none !important; }
+  html:has(body.yz-modu), body.yz-modu { height:auto !important; min-height:0 !important; max-height:none !important; overflow:visible !important; }
+  body.yz-modu { background:#fff !important; margin:0 !important; padding:0 !important; }
+  body.yz-modu #skBaski { position:static; left:auto; }
+  body.yz-modu #skBaski, body.yz-modu #skBaski * { visibility:visible !important; }
+  body.yz-modu .yz-sayfa { break-after:page; page-break-after:always; }
+  body.yz-modu .yz-sayfa:last-child { break-after:auto; page-break-after:auto; }
+  body.yz-modu #skBaski, body.yz-modu #skBaski * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+}
 </style>
 </head>
 <body>
@@ -7501,6 +7533,7 @@ function gbSecimCubugu() {
     ${gbGonderiTabloVar ? '<button class="btn btn-primary btn-sm" onclick="gbKargoModalAc()">📦 Kargoya Ver</button>' : ''}
     ${gbUcAsama() ? '' : '<button class="btn btn-sm" onclick="gbDurumYap(\'bekliyor\')" title="Seçilenleri bekleyen siparişlere ekle">⏳ Bekliyor yap</button>'}
     <button class="btn btn-sm" onclick="gbDurumYap(\'kargolandi\')" title="Daha önce gönderilmiş eski kayıtlar için: kargo ücreti yazmadan kargolandı işaretler">✔ Gönderilmiş say</button>
+    <button class="btn btn-sm" onclick="gbYazdirSecenek()" title="Seçilen siparişlerin kartlarını A4'e sığdırıp yazdır">🖨 Kartları yazdır</button>
     <button class="btn btn-sm" onclick="gbSecili.clear();renderGrupBTablo();gbSecimCubugu()">Seçimi kaldır</button>`;
 }
 async function gbHazirlaniyorYap() {
@@ -15236,7 +15269,7 @@ setTimeout(() => { dunyaSaatleriCiz(); setInterval(dunyaSaatleriCiz, 60000); }, 
 // ogeler: [{s, x, y, sayfa}] (pdf.js textContent). Sol sütun (alıcı, tarih…) ve fiyatlar atılır;
 // orta sütun görsel sırayla satırlara çevrilir: "N items" → ürünler → toplamlar → notlar.
 const GB_FIS_TOPLAM = /^(items? total|shop discount|discount|subtotal|tax|sales tax|vat|shipping total|shipping|order total|total|gift wrap)\b/i;
-const GB_FIS_NOT_BASLIK = /^(private notes?|notes? from (the )?buyer|note to seller|buyer note|gift message|message from buyer)\s*:?\s*$/i;
+const GB_FIS_NOT_BASLIK = /^(private notes?|notes? from (the )?buyer|notes? from \S+( \S+){0,3}|note to seller|buyer'?s? notes?|gift (message|note)|message from \S+( \S+){0,3}|order notes?|seller notes?)\s*:?\s*$/i;
 const GB_FIS_FIYAT = /^(-\s*)?(us)?\$\s*[\d.,]+$|^\d+\s*x\s*(us)?\$|^[€£]\s*[\d.,]+$/i;
 function gbFisSatirlar(ogeler) {
   const bas = ogeler.find(o => /^\d+\s+items?$/i.test(o.s.trim()));
@@ -15635,9 +15668,7 @@ async function gbSiparisUrunBagla(id) {
   } catch (e) { alert('Kaydedilemedi: ' + e.message); }
 }
 function gbSiparisFoto(s) { const u = gbSiparisUrun(s); return (u && u.fotograf_url) || s.foto || ''; }
-function gbSiparisKartAc(id) {
-  const s = gbSiparisBul(id); if (!s) return;
-  gbKodDatalist();
+function gbSiparisKartHtml(s, kartId) {
   const d = s.detay || {}, u = gbSiparisUrun(s);
   const ayar = d.ayar || (String(s.notlar || '').match(/(14K|10K|925)/i) || [])[1] || s.ayar || '';
   const ayarCls = /14/.test(ayar) ? 'k14' : /10/.test(ayar) ? 'k10' : /925/.test(ayar) ? 'k925' : '';
@@ -15648,9 +15679,8 @@ function gbSiparisKartAc(id) {
   const oz = Object.entries(d.ozellik || {}).filter(([k]) => !['gold color', 'color'].includes(k) || !d.renk);
   const durum = s.durum === 'kargolandi' ? '🚚 Kargolandı' + (s.kargo_tarihi ? ' · ' + s.kargo_tarihi : '') : s.durum === 'bekliyor' ? (gbUcAsama() ? (s.asama === 'hazirlaniyor' ? '🛠 Hazırlanıyor' : '🆕 Yeni') : '⏳ Bekliyor') : '';
   const magaza = PLATFORM_LABELS[s.platform] || s.platform || '';
-  gbModal(`
-    <div class="ds-ust"><div class="ds-baslik">📇 Sipariş kartı</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
-    <div id="skKart" class="sk-kart">
+  return `
+    <div ${kartId ? `id="${kartId}" ` : ''}class="sk-kart">
       <div class="sk-magaza-bant"><span class="sk-magaza-et">MAĞAZA</span><span class="sk-magaza-ad">${gbEsc(d.magaza || magaza)}</span>${d.magaza && d.magaza !== magaza ? `<span class="sk-magaza-alt">${gbEsc(magaza)}</span>` : ''}</div>
       <div class="sk-ust"><div><div class="sk-magaza">${gbEsc(d.alici || '')}</div><div class="sk-no">Sipariş ${s.musteri_adi ? '<b>' + gbEsc(s.musteri_adi) + '</b>' : ''}${s.harici_no ? ' · Etsy #' + gbEsc(s.harici_no) : ''}</div></div>
         <div style="text-align:right"><div class="sk-no">📅 ${gbEsc(s.tarih || '')}</div>${s.son_gonderim ? `<div class="sk-no" style="color:#B45309;font-weight:700">⏰ Son gönderim ${gbEsc(s.son_gonderim)}</div>` : ''}${durum ? `<div class="sk-no">${durum}</div>` : ''}</div></div>
@@ -15680,8 +15710,15 @@ function gbSiparisKartAc(id) {
           <div class="sk-bagla" data-html2canvas-ignore="true"><span>${u ? '🔗 Başka ürün:' : '🔗 Bu sipariş hangi ürün? Kodu yazın:'}</span><input id="skKodGir" class="form-control" list="stokKodListe" placeholder="örn. D12" onkeydown="if(event.key==='Enter')gbSiparisUrunBagla('${s.id}')"><button class="btn btn-sm" onclick="gbSiparisUrunBagla('${s.id}')">Bağla</button></div>
         </div>
       </div>
-    </div>
-    <div class="ds-butonlar"><button class="btn" onclick="gbSiparisKartKopyala('${s.id}')">📋 Metni kopyala</button><button class="btn" onclick="gbModalKapat()">Kapat</button><button class="btn btn-primary" onclick="gbSiparisKartIndir('${s.id}', this)">📥 Resim olarak indir</button></div>`);
+    </div>`;
+}
+function gbSiparisKartAc(id) {
+  const s = gbSiparisBul(id); if (!s) return;
+  gbKodDatalist();
+  gbModal(`
+    <div class="ds-ust"><div class="ds-baslik">📇 Sipariş kartı</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
+    ${gbSiparisKartHtml(s, 'skKart')}
+    <div class="ds-butonlar"><button class="btn" onclick="gbSiparisKartKopyala('${s.id}')">📋 Metni kopyala</button><button class="btn" onclick="gbKartlariYazdir(['${s.id}'], 1)">🖨 Yazdır</button><button class="btn" onclick="gbModalKapat()">Kapat</button><button class="btn btn-primary" onclick="gbSiparisKartIndir('${s.id}', this)">📥 Resim olarak indir</button></div>`);
   const kutu = document.querySelector('#gbKargoModal .ds-kutu'); if (kutu) kutu.style.width = 'min(820px,100%)';
 }
 async function gbSiparisKartIndir(id, btn) {
@@ -15695,6 +15732,64 @@ async function gbSiparisKartIndir(id, btn) {
     document.body.appendChild(a); a.click(); a.remove();
   } catch (e) { alert('Resim oluşturulamadı: ' + e.message); }
   btn.disabled = false;
+}
+
+// V156: seçilen sipariş kartlarını A4'e sığdırarak yazdır
+function gbYazdirSecenek() {
+  const idler = [...gbSecili]; if (!idler.length) return;
+  const notlu = idler.map(gbSiparisBul).filter(x => x && x.detay && (x.detay.notlar || []).length).length;
+  gbModal(`
+    <div class="ds-ust"><div class="ds-baslik">🖨 Kartları yazdır — ${idler.length} sipariş</div><button class="ds-x" onclick="gbModalKapat()">✕</button></div>
+    <div class="ds-aciklama">Her kart seçtiğiniz düzende A4 sayfaya <b>tam sığacak</b> şekilde küçültülür/büyütülür. Mağaza adı ve müşteri notları kartta yazılıdır${notlu ? ` (<b>${notlu}</b> siparişte not var)` : ''}.</div>
+    <div class="yz-secenek">
+      <button class="yz-kutu" onclick="gbKartlariYazdir(null,1)"><div class="yz-sema yz1"><i></i></div><b>Sayfa başına 1</b><span>${idler.length} sayfa · en büyük</span></button>
+      <button class="yz-kutu" onclick="gbKartlariYazdir(null,2)"><div class="yz-sema yz2"><i></i><i></i></div><b>Sayfa başına 2</b><span>${Math.ceil(idler.length / 2)} sayfa</span></button>
+      <button class="yz-kutu" onclick="gbKartlariYazdir(null,4)"><div class="yz-sema yz4"><i></i><i></i><i></i><i></i></div><b>Sayfa başına 4</b><span>${Math.ceil(idler.length / 4)} sayfa · kâğıt tasarrufu</span></button>
+    </div>
+    <div class="ds-butonlar"><button class="btn" onclick="gbModalKapat()">Vazgeç</button></div>`);
+}
+const YZ_DUZEN = { 1: { kolon: 1, satir: 1, gen: 640, dikey: true }, 2: { kolon: 1, satir: 2, gen: 900 }, 4: { kolon: 2, satir: 2, gen: 470, dikey: true } };
+async function gbKartlariYazdir(idler, adet) {
+  idler = idler || [...gbSecili];
+  const liste = idler.map(gbSiparisBul).filter(Boolean);
+  if (!liste.length) return;
+  // tabloyla aynı sırada (sipariş no)
+  liste.sort((a, b) => (parseInt(a.musteri_adi) || 9e9) - (parseInt(b.musteri_adi) || 9e9) || String(a.tarih).localeCompare(String(b.tarih)));
+  const dz = YZ_DUZEN[adet] || YZ_DUZEN[1];
+  gbModalKapat();
+  document.getElementById('skBaski')?.remove();
+  const kap = document.createElement('div'); kap.id = 'skBaski';
+  const sayfalar = [];
+  for (let i = 0; i < liste.length; i += adet) sayfalar.push(liste.slice(i, i + adet));
+  const SW = 194, SH = 279, ARA = 4, yw = (SW - ARA * (dz.kolon - 1)) / dz.kolon, yh = (SH - ARA * (dz.satir - 1)) / dz.satir;
+  const yuvaStil = i => `left:${(i % dz.kolon) * (yw + ARA)}mm;top:${Math.floor(i / dz.kolon) * (yh + ARA)}mm;width:${yw}mm;height:${yh}mm`;
+  kap.innerHTML = sayfalar.map(sp => `<div class="yz-sayfa">${sp.map((s, i) => `<div class="yz-yuva" style="${yuvaStil(i)}"><div class="yz-olcek${dz.dikey ? ' yz-dikey' : ''}" style="width:${dz.gen}px">${gbSiparisKartHtml(s, '')}</div></div>`).join('')}</div>`).join('');
+  document.body.appendChild(kap);
+  showToast('🖨 ' + liste.length + ' kart hazırlanıyor…');
+  // fotoğraflar yüklensin (en fazla 8 sn)
+  await Promise.race([Promise.all([...kap.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))), new Promise(r => setTimeout(r, 8000))]);
+  gbYazdirOlcekle(kap);
+  document.body.classList.add('yz-modu');
+  const bitir = () => { document.body.classList.remove('yz-modu'); kap.remove(); window.removeEventListener('afterprint', bitir); };
+  window.addEventListener('afterprint', bitir);
+  setTimeout(() => { window.print(); setTimeout(() => { if (document.getElementById('skBaski') && !matchMedia('print').matches) bitir(); }, 30000); }, 60);
+}
+// Her kartı yuvasına tam sığdır (oran bozulmadan, ortalanmış)
+function gbYazdirOlcekle(kap) {
+  document.body.classList.add('yz-olcum');
+  kap.querySelectorAll('.yz-yuva').forEach(y => {
+    const o = y.querySelector('.yz-olcek'); o.style.zoom = '';
+    const yw = y.clientWidth, yh = y.clientHeight, w = o.offsetWidth, h = o.offsetHeight;
+    const k = Math.floor(Math.min(yw / w, yh / h) * 1000) / 1000;
+    let z = k * 0.98; o.style.zoom = z;   // transform yerine zoom: yazdırırken kart kesilmesin
+    for (let t = 0; t < 4; t++) {          // küçük ölçekte yazılar biraz uzayabilir: sığana dek düzelt
+      const r = o.getBoundingClientRect(), f = Math.min(yw / r.width, yh / r.height);
+      if (f >= 1) break; z = z * f * 0.99; o.style.zoom = z;
+    }
+    const k2 = z;
+    o.dataset.olcek = k2.toFixed(3);
+  });
+  document.body.classList.remove('yz-olcum');
 }
 function gbSiparisKartKopyala(id) {
   const el = document.getElementById('skKart'); if (!el) return;
