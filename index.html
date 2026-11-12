@@ -1,4 +1,4 @@
-<!-- SURUM-V152-SIPARIS-KARTI --><!DOCTYPE html>
+<!-- SURUM-V154-FIS-OKUYUCU --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -653,7 +653,8 @@ tr.gb-secili td{background:rgba(212,175,55,.10) !important}
 .gb-foto{width:42px;height:42px;border-radius:8px;object-fit:cover;background:#fff;flex-shrink:0;cursor:zoom-in}
 .gb-foto-b{width:56px;height:56px;cursor:default}
 #gbTabloKart.gb-durumsuz th:nth-child(1),#gbTabloKart.gb-durumsuz th:nth-child(3),#gbTabloKart.gb-durumsuz #gbTablo td:nth-child(1),#gbTabloKart.gb-durumsuz #gbTablo td:nth-child(3){display:none}
-.gb-urun-hucre{display:flex;align-items:center;gap:10px;min-width:180px}
+.gb-urun-hucre{display:flex;align-items:center;gap:10px;min-width:180px;max-width:340px}
+.gb-urun-hucre .gb-urun-ad{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}
 .gb-etsy-no{font-size:11.5px;color:#A39A85;font-weight:500;margin-top:2px}
 .gb-foto-buyuk{position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:zoom-out}
 .gb-foto-buyuk img{width:min(260px,80vw);height:auto;border-radius:14px;background:#fff;image-rendering:auto}
@@ -1250,6 +1251,22 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .sk-kart .sk-tablo td:last-child { font-weight:700 !important; }
 .sk-ayar { display:inline-block; padding:2px 10px; border-radius:20px; font-weight:800; }
 .sk-ayar.k14 { background:#FDE68A; color:#78350F; } .sk-ayar.k10 { background:#BFDBFE; color:#1E3A8A; } .sk-ayar.k925 { background:#E5E7EB; color:#374151; }
+.sk-bagla { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:12px; padding:8px 10px; border-radius:10px; background:#F4EFE3; font-size:12.5px; color:#6B6455; }
+.sk-bagla .form-control { width:120px; padding:5px 8px; background:#fff !important; color:#1F1B14 !important; border:1px solid #D8CFB8 !important; }
+
+/* V154: renk, notlar */
+.renk-rozet { display:inline-block; padding:1px 8px; border-radius:20px; font-size:10.5px; font-weight:800; letter-spacing:.03em; }
+.renk-rose { background:#FBCFE8; color:#9D174D; } .renk-beyaz { background:#E5E7EB; color:#1F2937; border:1px solid #9CA3AF; } .renk-sari { background:#FDE68A; color:#78350F; } .renk-gumus { background:#CBD5E1; color:#1E293B; }
+.sk-renk { display:inline-block; margin:8px 0 4px; padding:6px 16px; border-radius:10px; font-size:18px; font-weight:900; letter-spacing:.06em; }
+.sk-renk.renk-rose { background:linear-gradient(135deg,#F9A8D4,#FBCFE8); color:#831843; } .sk-renk.renk-beyaz { background:linear-gradient(135deg,#F3F4F6,#D1D5DB); color:#111827; border:2px solid #9CA3AF; } .sk-renk.renk-sari { background:linear-gradient(135deg,#FCD34D,#FDE68A); color:#713F12; }
+.sk-siparis-adi { margin:8px 0 10px; padding:8px 10px; border-radius:10px; background:#F4EFE3; font-size:13.5px; font-weight:700; color:#1F1B14; line-height:1.4; }
+.sk-siparis-adi span { display:block; font-size:10.5px; font-weight:700; color:#8C6D23; text-transform:uppercase; letter-spacing:.06em; margin-bottom:2px; }
+.sk-not { margin-top:12px; padding:10px 12px; border-radius:10px; border:1.5px dashed #D8CFB8; background:#FFFBEB; }
+.sk-not-baslik { font-size:11.5px; font-weight:800; color:#92400E; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+.sk-not-metin { white-space:pre-wrap; font-size:13px; color:#1F1B14; line-height:1.5; }
+.sk-not-metin + .sk-not-baslik { margin-top:8px; }
+.fis-gram { font-size:10.5px; font-weight:700; color:#93C5FD; margin-left:4px; text-decoration:underline dotted; }
+.stok-satir .stok-miktar { min-width:76px; }
 </style>
 </head>
 <body>
@@ -1845,7 +1862,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
           <button class="btn btn-sm" id="gbKargoUcretEkleBtn" onclick="gbKargoUcretAc()" style="display:none" title="Bu bayiye kargo ücreti yaz (dolar borcuna eklenir)">📦 Kargo Ücreti</button>
           <button class="btn btn-sm" onclick="gbEkBorcAc()">➕ Ek Borç</button>
           <button class="btn btn-sm btn-success" onclick="openGrupBOdemeModal()">💰 Ödeme Al</button>
-          <label class="btn btn-sm" style="cursor:pointer;" title="Etsy sipariş fişi PDF'ini yükleyin; içindeki tüm siparişler tek seferde eklenir">📄 Fişten Ekle<input type="file" accept="application/pdf" style="display:none" onchange="gbFisPdfSec(this)"></label>
+          <label class="btn btn-sm" style="cursor:pointer;" title="Etsy sipariş fişi PDF'ini yükleyin; içindeki tüm siparişler tek seferde eklenir">📄 Fişten Ekle<input type="file" accept="application/pdf" multiple style="display:none" onchange="gbFisPdfSec(this)"></label>
           <button class="btn btn-primary btn-sm" onclick="openGrupBModal()">+ Satış Ekle</button>
         </div>
       </div>
@@ -6752,7 +6769,7 @@ function renderGrupBTablo() {
       <td style="color:var(--text);font-weight:700;font-size:14px;">${s.musteri_adi ? s.musteri_adi + '.' : (i+1) + '.'}</td>
       <td style="white-space:nowrap;">${gbDurumRozet(s)}</td>
       <td>${s.tarih||'-'}</td>
-      <td style="font-weight:500"><div class="gb-urun-hucre">${(() => { const f = gbSiparisFoto(s); return f ? `<img class="gb-foto" src="${f}" alt="" title="Sipariş kartı" onclick="gbSiparisKartAc('${s.id}')">` : ''; })()}<div>${gbEsc(s.urun_adi||'-')}${s.detay && s.detay.kod ? ` <span class="gb-kod-rozet">${gbEsc(s.detay.kod)}${s.detay.boy ? ' · ' + stokBoyAd(s.detay.boy) : ''}</span>` : ''}${s.harici_no ? `<div class="gb-etsy-no">#${gbEsc(s.harici_no)}</div>` : ''}</div></div></td>
+      <td style="font-weight:500"><div class="gb-urun-hucre">${(() => { const f = gbSiparisFoto(s); return f ? `<img class="gb-foto" src="${f}" alt="" title="Sipariş kartı" onclick="gbSiparisKartAc('${s.id}')">` : ''; })()}<div style="min-width:0"><span class="gb-urun-ad" title="${gbEsc(s.urun_adi||'')}">${gbEsc(s.urun_adi||'-')}</span>${(() => { const u = gbSiparisUrun(s); const kod = (u && u.kod) || (s.detay && s.detay.kod); return kod ? ` <span class="gb-kod-rozet">${gbEsc(kod)}${s.detay && s.detay.boy ? ' · ' + stokBoyAd(s.detay.boy) : ''}</span>` : ''; })()}${s.harici_no ? `<div class="gb-etsy-no">#${gbEsc(s.harici_no)}</div>` : ''}</div></div></td>
       <td>${parseFloat(s.gram).toString()}</td>
       <td>${(()=>{const r=gbNotlarRenk(s.notlar);const lbl=(s.notlar||'-').replace(/\|?TAŞ:[\d.]+/,'').trim();return `<span style="background:${r.bg};color:${r.clr};font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;white-space:nowrap;">${lbl}</span>`;})()}</td>
       <td>${parseFloat(s.milyem||0).toString()}</td>
@@ -6763,6 +6780,7 @@ function renderGrupBTablo() {
       <td style="white-space:nowrap"><button class="btn btn-sm" onclick="gbSiparisKartAc('${s.id}')" title="Sipariş kartı: ürün fotoğrafı ve özellikleri" style="margin-right:4px">📇</button><button class="btn btn-sm" onclick="editGrupBSiparis('${s.id}')" style="margin-right:4px">Düz</button><button class="btn btn-sm btn-danger" onclick="deleteGrupBSiparis('${s.id}')">Sil</button></td>
     </tr>`;
   }).join('');
+  if (typeof gbSipUrunTamamla === 'function' && stokAlani(aktifPlatformB)) gbSipUrunTamamla(liste);
 }
 
 function updateGrupBOzet() {
@@ -7279,8 +7297,10 @@ async function saveGrupBSiparis() {
 
 async function deleteGrupBSiparis(id) {
   if (!confirm('Kaydı silmek istediğinize emin misiniz?')) return;
-  await api('platform_siparisler?id=eq.' + id, 'DELETE');
-  delete _cache['sipB:' + aktifPlatformB + ':' + document.getElementById('gbAy').value];
+  try { await api('platform_siparisler?id=eq.' + id, 'DELETE'); }
+  catch (e) { alert('Silinemedi: ' + e.message); return; }
+  gbSecili.delete(String(id)); gbOnbellekTemizle();
+  showToast('🗑 Sipariş silindi');
   await gbBosGonderileriTemizle(true);
   loadGrupBData();
 }
@@ -7659,10 +7679,20 @@ async function gbSayfaFotolari(page) {
   } catch (e) { return []; }
 }
 
+// Ürün başlığından önce gelebilen toplam / özel not / kontrol listesi satırlarını ayıklar
+const GB_FIS_GURULTU = /^(item total|items total|shop discount|discount|subtotal|shipping total|shipping|sales tax|tax|vat|order total|total|private notes?|note from buyer|notes? to seller|gift message|gift wrap|payment method|order date|order #|ship to|scheduled to ship by|shop\b|\d+\s+items?$|=|.*\[\s*\]|[-–•]\s|(us)?\$|€|£|tl\b|[\d.,\s]+$)/i;
+function gbFisBaslikTemizle(blok) {
+  const satirlar = String(blok || '').split('\n').map(x => x.trim()).filter(Boolean);
+  const out = [];
+  for (let k = satirlar.length - 1; k >= 0; k--) { if (GB_FIS_GURULTU.test(satirlar[k])) { if (out.length) break; continue; } out.unshift(satirlar[k]); if (out.length >= 4) break; }
+  return (out.length ? out : satirlar.filter(x => !GB_FIS_GURULTU.test(x)).slice(-3)).join(' ').slice(0, 200);
+}
 // Bir siparişin metni → { siparisNo, alici, adresSatirlari, ulke, sonGonderim, tarih, magaza, urunler:[{baslik, sku, gram, adet, renk, ayar, uzunluk}] }
-function gbFisCozumle(metin) {
+function gbFisCozumle(metin, ogeler) {
   const no = (metin.match(/Order\s*#\s*(\d+)/i) || [])[1];
   if (!no) return null;
+  const konumlu = ogeler && ogeler.length ? gbFisSatirlar(ogeler) : null;
+  const icerik = konumlu ? gbFisIcerikCoz(konumlu) : null;
   const adres = gbBlok(metin, 'Ship to', ['Scheduled to ship by', 'Shop', 'Order date', 'Payment method']).split('\n').filter(Boolean);
   const sonGonderim = gbEnTarih(gbBlok(metin, 'Scheduled to ship by', ['Shop', 'Order date', 'Payment method']));
   const tarih = gbEnTarih(gbBlok(metin, 'Order date', ['Payment method', '\\d+\\s+items?']));
@@ -7673,7 +7703,7 @@ function gbFisCozumle(metin) {
   const re = /([\s\S]*?)\n\s*SKU:\s*([^\n]*)\n([\s\S]*?)(?=\n\s*\n|$)/g;
   let m;
   while ((m = re.exec(bolum))) {
-    const baslik = m[1].split('\n').map(x => x.trim()).filter(Boolean).join(' ');
+    const baslik = gbFisBaslikTemizle(m[1]);
     if (!baslik && !m[2]) continue;
     const ozellik = {};
     m[3].split('\n').forEach(l => { const k = l.match(/^\s*([^:]+):\s*(.*)$/); if (k) ozellik[k[1].trim().toLowerCase()] = k[2].trim(); });
@@ -7683,7 +7713,21 @@ function gbFisCozumle(metin) {
     const ayar = (renk.match(/(10|14|18|22)\s*K/i) || baslik.match(/(10|14|18|22)\s*K/i) || [])[1] || '';
     urunler.push({ baslik, sku, gram, adet: parseInt(ozellik['quantity']) || 1, renk, ayar: ayar ? ayar + 'K' : '', uzunluk: ozellik['necklace length'] || ozellik['length'] || '', ozellik });
   }
-  return { siparisNo: no, alici: adres[0] || '', adresSatirlari: adres, ulke: adres[adres.length - 1] || '', sonGonderim, tarih, magaza, urunler };
+  if (icerik && icerik.urunler.length) {
+    urunler.length = 0;
+    icerik.urunler.forEach(x => {
+      const oz = x.ozellik, sku = x.sku;
+      const renkAnahtar = Object.keys(oz).find(k => /colou?r|renk|metal|material/.test(k));
+      const renk = renkAnahtar ? oz[renkAnahtar] : '';
+      const ayar = (renk.match(/(10|14|18|22)\s*K/i) || x.baslik.match(/(10|14|18|22)\s*K/i) || [])[1] || '';
+      const q = gbFisAdet(oz['quantity']);
+      const uzAnahtar = Object.keys(oz).find(k => /length|uzunluk/.test(k));
+      urunler.push({ baslik: x.baslik, sku, gram: 0, fisGram: gbFisGram(sku), adet: q.adet, parca: q.parca, adetMetin: oz['quantity'] || '', renk, renkKod: gbRenkKod(renk),
+        ayar: ayar ? ayar + 'K' : (/silver|925/i.test(renk) ? '925' : ''), uzunluk: uzAnahtar ? oz[uzAnahtar] : '', ozellik: oz });
+    });
+  }
+  return { siparisNo: no, alici: adres[0] || '', adresSatirlari: adres, ulke: adres[adres.length - 1] || '', sonGonderim, tarih, magaza, urunler,
+    notlar: icerik ? icerik.notlar : [], hediye: /Marked as gift/i.test(metin) };
 }
 function gbKisaAd(u) {
   const ad = u.baslik.split(/\s*[,|]\s*/)[0].replace(/\b(14K|10K|18K)\s+Solid Gold\b/i, '').replace(/\bSolid Gold\b/i, '').replace(/\s+/g, ' ').trim();
@@ -7692,23 +7736,31 @@ function gbKisaAd(u) {
   return (ad || u.baslik) + (kod ? ' (' + kod + ')' : '') + renk;
 }
 async function gbFisPdfSec(input) {
-  const file = input.files && input.files[0]; input.value = '';
-  if (!file) return;
+  const dosyalar = [...(input.files || [])]; input.value = '';
+  if (!dosyalar.length) return;
+  const file = dosyalar.length === 1 ? dosyalar[0] : { name: dosyalar.length + ' dosya: ' + dosyalar.map(d => d.name).join(', ') };
   try {
     if (!pdfjsHazirla()) throw new Error('PDF kütüphanesi yüklenemedi (internet bağlantısını kontrol edin)');
-    showToast('PDF okunuyor…');
-    const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+    showToast(dosyalar.length > 1 ? dosyalar.length + ' PDF okunuyor…' : 'PDF okunuyor…');
     // Sayfaları siparişlere ayır (Order # olmayan sayfa önceki siparişin devamıdır)
-    const parcalar = [], parcaFoto = [];
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const sayfa = await pdf.getPage(i);
-      const c = await sayfa.getTextContent();
-      const t = c.items.map(it => it.str).join('\n');
-      const fotolar = await gbSayfaFotolari(sayfa);
-      if (/Order\s*#\s*\d+/i.test(t) || !parcalar.length) { parcalar.push(t); parcaFoto.push(fotolar); }
-      else { parcalar[parcalar.length - 1] += '\n' + t.replace(/^[\s\S]*?\n\s*\d+\s+items?\s*\n/i, '\n'); parcaFoto[parcaFoto.length - 1].push(...fotolar); }
+    const parcalar = [], parcaFoto = [], parcaOge = [];
+    for (const dosya of dosyalar) {
+      const pdf = await pdfjsLib.getDocument({ data: await dosya.arrayBuffer() }).promise;
+      let ilk = true;
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const sayfa = await pdf.getPage(i);
+        const c = await sayfa.getTextContent();
+        const t = c.items.map(it => it.str).join('\n');
+        const ogeler = c.items.filter(it => it.str && it.str.trim()).map(it => ({ s: it.str, x: it.transform[4], y: it.transform[5], sayfa: i }));
+        const fotolar = await gbSayfaFotolari(sayfa);
+        if (/Order\s*#\s*\d+/i.test(t) || ilk) { parcalar.push(t); parcaFoto.push(fotolar); parcaOge.push(ogeler); }
+        else { parcalar[parcalar.length - 1] += '\n' + t.replace(/^[\s\S]*?\n\s*\d+\s+items?\s*\n/i, '\n'); parcaFoto[parcaFoto.length - 1].push(...fotolar); parcaOge[parcaOge.length - 1].push(...ogeler); }
+        ilk = false;
+      }
     }
-    const siparisler = parcalar.map((t, i) => { const c = gbFisCozumle(t); if (c) c.fotolar = parcaFoto[i] || []; return c; }).filter(Boolean);
+    const gorulen = new Set();
+    const siparisler = parcalar.map((t, i) => { const c = gbFisCozumle(t, parcaOge[i]); if (c) c.fotolar = parcaFoto[i] || []; return c; })
+      .filter(c => c && !gorulen.has(c.siparisNo) && gorulen.add(c.siparisNo));
     if (gbFotoVar === null) { try { await api('platform_siparisler?select=foto&limit=1'); gbFotoVar = true; } catch (e) { gbFotoVar = false; } }
     if (!siparisler.length) throw new Error('PDF\'te sipariş bulunamadı (Etsy sipariş fişi biçiminde olmalı).');
     // Daha önce eklenmiş mi? (harici_no)
@@ -7754,7 +7806,7 @@ async function gbFisPdfSec(input) {
           gbPdfSatirlar.push({
             sec: !zatenVar, zatenVar, siparis: s, urun: u, tarih, foto: s.fotolar[ui] || s.fotolar[0] || '',
             no: zatenVar ? '' : String(++sonNo[ay]),
-            ad: gbKisaAd(u), gram: 0, tip: u.ayar === '10K' ? 'kolye10' : 'kolye14', tas: 0
+            ad: gbKisaAd(u), gram: 0, tip: u.ayar === '10K' ? 'kolye10' : 'kolye14', tas: 0, stokMiktar: u.parca || 1
           });
         }
       });
@@ -7778,12 +7830,12 @@ function gbPdfOnizle(dosya) {
         ${r.foto ? `<img class="gb-foto gb-foto-b" src="${r.foto}" alt="">` : ''}
         <div class="gb-pdf-bilgi">
           <div class="gb-pdf-ust"><b>#${gbEsc(r.siparis.siparisNo)}</b> · ${gbEsc(r.siparis.alici)} · ${gbEsc(r.siparis.ulke)} · ${gbEsc(r.tarih)}${r.siparis.sonGonderim ? ' · <span class="gb-son">⏰ ' + gbEsc(r.siparis.sonGonderim) + '</span>' : ''}${r.zatenVar ? ' · <b style="color:#F87171">zaten kayıtlı</b>' : ''}</div>
-          <div class="gb-pdf-alt">${gbEsc(r.urun.sku)} · ${gbEsc(r.urun.renk)}${r.urun.uzunluk ? ' · ' + gbEsc(r.urun.uzunluk) : ''}${/inch|cm/i.test(r.urun.uzunluk) && !/no chain/i.test(r.urun.uzunluk) ? ' <span class="gb-son">⛓ zincirli — gramı kontrol edin</span>' : ''}</div>
+          <div class="gb-pdf-alt">${r.urun.renkKod ? `<span class="renk-rozet renk-${r.urun.renkKod}">${gbRenkAd(r.urun.renkKod)}</span> ` : ''}${r.urun.parca > 1 ? `<span class="renk-rozet" style="background:#1F1B14;color:#F7DA84">${gbEsc(r.urun.adetMetin || 'çift')} → ${r.urun.parca} parça</span> ` : ''}${r.siparis.notlar && r.siparis.notlar.length ? '<span title="Fişte not var; sipariş kartında görünür">📝</span> ' : ''}${r.siparis.hediye ? '<span title="Hediye olarak işaretli">🎁</span> ' : ''}${gbEsc(r.urun.sku)} · ${gbEsc(r.urun.renk)}${r.urun.uzunluk ? ' · ' + gbEsc(r.urun.uzunluk) : ''}${/inch|cm/i.test(r.urun.uzunluk) && !/no chain/i.test(r.urun.uzunluk) ? ' <span class="gb-son">⛓ zincirli — gramı kontrol edin</span>' : ''}</div>
           ${gbPdfStokHtml(r, i)}
           <div class="gb-pdf-alanlar">
             <label>No<input class="form-control" value="${gbEsc(r.no)}" oninput="gbPdfSatirlar[${i}].no=this.value"></label>
             <label class="genis">Ürün<input class="form-control" value="${gbEsc(r.ad)}" oninput="gbPdfSatirlar[${i}].ad=this.value"></label>
-            <label>Gram<input type="number" step="0.01" class="form-control" value="${r.gram || ''}" oninput="gbPdfSatirlar[${i}].gram=parseFloat(this.value)||0;gbPdfOzet()"></label>
+            <label>Gram${r.urun.fisGram ? ` <a href="#" class="fis-gram" title="Fişte yazan gramı kullan" onclick="event.preventDefault();const g=this.closest('label').querySelector('input');g.value=${r.urun.fisGram};g.dispatchEvent(new Event('input'))">fişte ${String(r.urun.fisGram).replace('.', ',')}</a>` : ''}<input type="number" step="0.01" class="form-control" value="${r.gram || ''}" oninput="gbPdfSatirlar[${i}].gram=parseFloat(this.value)||0;gbPdfOzet()"></label>
             <label>Tip<select class="form-control" onchange="gbPdfSatirlar[${i}].tip=this.value;gbPdfOzet()">${tipSecenek(r.tip)}</select></label>
             <label>Taş gr<input type="number" step="0.001" class="form-control" value="0" oninput="gbPdfSatirlar[${i}].tas=parseFloat(this.value)||0"></label>
           </div>
@@ -7816,7 +7868,9 @@ async function gbDetayKontrol() { if (gbDetayVar === null) { try { await api('pl
 function gbSiparisDetay(r) {
   const oz = Object.assign({}, r.urun.ozellik || {}); delete oz.quantity;
   return { sku: r.urun.sku || '', kod: r.stokKod || '', urun_id: r.stokUrunId || null, boy: r.stokBoyut || '', ayar: r.stokAyar || r.urun.ayar || '',
-    renk: r.urun.renk || '', uzunluk: r.urun.uzunluk || '', baslik: r.urun.baslik || '', ozellik: oz,
+    renk: r.urun.renk || '', renk_kod: r.urun.renkKod || gbRenkKod(r.urun.renk), uzunluk: r.urun.uzunluk || '', baslik: r.urun.baslik || '', ozellik: oz,
+    parca: r.stokMiktar || 1, adet_metin: r.urun.adetMetin || oz.quantity || '', fis_gram: r.urun.fisGram || 0,
+    notlar: r.siparis.notlar || [], hediye: !!r.siparis.hediye,
     alici: r.siparis.alici || '', ulke: r.siparis.ulke || '', siparis_no: r.siparis.siparisNo || '', son_gonderim: r.siparis.sonGonderim || '', magaza: r.siparis.magaza || '' };
 }
 async function gbPdfEkle() {
@@ -15128,6 +15182,76 @@ dunyaSaatleriCiz();
 setTimeout(() => { dunyaSaatleriCiz(); setInterval(dunyaSaatleriCiz, 60000); }, (60 - new Date().getSeconds()) * 1000 + 50);
 </script>
 <script>
+// ===== V154: Fiş okuyucu — satır konumlarına göre (Etsy yazdırılmış ve tarayıcıdan kaydedilmiş fişler) =====
+// ogeler: [{s, x, y, sayfa}] (pdf.js textContent). Sol sütun (alıcı, tarih…) ve fiyatlar atılır;
+// orta sütun görsel sırayla satırlara çevrilir: "N items" → ürünler → toplamlar → notlar.
+const GB_FIS_TOPLAM = /^(items? total|shop discount|discount|subtotal|tax|sales tax|vat|shipping total|shipping|order total|total|gift wrap)\b/i;
+const GB_FIS_NOT_BASLIK = /^(private notes?|notes? from (the )?buyer|note to seller|buyer note|gift message|message from buyer)\s*:?\s*$/i;
+const GB_FIS_FIYAT = /^(-\s*)?(us)?\$\s*[\d.,]+$|^\d+\s*x\s*(us)?\$|^[€£]\s*[\d.,]+$/i;
+function gbFisSatirlar(ogeler) {
+  const bas = ogeler.find(o => /^\d+\s+items?$/i.test(o.s.trim()));
+  if (!bas) return null;
+  const solSinir = bas.x - 8;
+  const icerik = ogeler.filter(o => o.s.trim() && o.x >= solSinir && !GB_FIS_FIYAT.test(o.s.trim()));
+  const sayfalar = [...new Set(icerik.map(o => o.sayfa))].sort((a, b) => a - b), satirlar = [];
+  sayfalar.forEach(p => {
+    const l = icerik.filter(o => o.sayfa === p).sort((a, b) => b.y - a.y || a.x - b.x);
+    let grup = [];
+    const bitir = () => { if (grup.length) { grup.sort((a, b) => a.x - b.x); satirlar.push({ s: grup.map(g => g.s.trim()).join(' ').replace(/\s+/g, ' ').trim(), x: grup[0].x }); grup = []; } };
+    l.forEach(o => { if (grup.length && Math.abs(grup[0].y - o.y) > 3) bitir(); grup.push(o); });
+    bitir();
+  });
+  return satirlar;
+}
+function gbFisAlanMi(s) { return /^[A-Za-zÀ-ÿ&'’/() .\-]{2,45}:\s*\S/.test(s) && !/^https?:/i.test(s); }
+// → { urunler:[{baslik, sku, ozellik}], notlar:[{baslik, metin}] }
+function gbFisIcerikCoz(satirlar) {
+  const urunler = [], notlar = [];
+  let bolge = 'bekle', not = null, u = null, alanlar = false;
+  for (const { s } of satirlar) {
+    if (/^\d+\s+items?$/i.test(s)) { bolge = 'urun'; continue; }
+    if (/^do the green thing/i.test(s)) break;
+    if (GB_FIS_NOT_BASLIK.test(s)) { bolge = 'not'; not = { baslik: s.replace(/:$/, ''), metin: [] }; notlar.push(not); continue; }
+    if (GB_FIS_TOPLAM.test(s)) { if (bolge === 'urun') bolge = 'toplam'; continue; }
+    if (bolge === 'not') { not.metin.push(s); continue; }
+    if (bolge !== 'urun') continue;
+    if (/^SKU\s*:/i.test(s) || gbFisAlanMi(s)) {
+      if (!u) { u = { baslik: '', sku: '', ozellik: {}, satir: [] }; urunler.push(u); }
+      const m = s.match(/^([^:]+):\s*(.*)$/);
+      if (/^SKU$/i.test(m[1].trim())) u.sku = m[2].trim();
+      else u.ozellik[m[1].trim().toLowerCase()] = m[2].trim();
+      alanlar = true; u.sonAlan = /^SKU$/i.test(m[1].trim()) ? 'sku' : m[1].trim().toLowerCase();
+    } else if (u && alanlar && /^[-–]\s*\S/.test(s) && u.sonAlan === 'sku') {
+      u.sku += ' ' + s;                                   // "SKU: D3" + "- Gram :1,30"
+    } else {
+      if (!u || alanlar) { u = { baslik: '', sku: '', ozellik: {}, satir: [] }; urunler.push(u); alanlar = false; }
+      u.satir.push(s);
+    }
+  }
+  // alan değeri alt satıra taşmışsa (başlığı olup alanı olmayan son "ürün") öncekine ekle
+  for (let i = urunler.length - 1; i > 0; i--) {
+    const x = urunler[i];
+    if (!Object.keys(x.ozellik).length && !x.sku) { const o = urunler[i - 1]; if (o.sonAlan && o.sonAlan !== 'sku') o.ozellik[o.sonAlan] += ' ' + x.satir.join(' '); else o.satir.push(...x.satir); urunler.splice(i, 1); }
+  }
+  urunler.forEach(x => { x.baslik = x.satir.join(' ').trim(); delete x.satir; delete x.sonAlan; });
+  return { urunler: urunler.filter(x => x.baslik || x.sku), notlar: notlar.map(n => ({ baslik: n.baslik, metin: n.metin.join('\n') })).filter(n => n.metin.trim()) };
+}
+// Adet / parça: "One Pair (2 piece)" → 1 sipariş, 2 parça stoktan düşer
+function gbFisAdet(q) {
+  q = String(q || '').trim();
+  const sayi = parseInt(q);
+  const parca = (q.match(/(\d+)\s*(piece|pcs|adet|parça)/i) || [])[1];
+  const cift = /\b(pair|çift|both)\b/i.test(q);
+  const tek = /\b(single|one piece|half|tek)\b/i.test(q);
+  const adet = sayi > 0 ? sayi : 1;
+  return { adet, parca: parca ? parseInt(parca) : cift ? 2 : tek ? 1 : 1 };
+}
+function gbRenkKod(r) { r = String(r || ''); return /rose|pembe|roze/i.test(r) ? 'rose' : /white|beyaz|platin/i.test(r) ? 'beyaz' : /yellow|sarı|sari|gold/i.test(r) ? 'sari' : /silver|gümüş/i.test(r) ? 'gumus' : ''; }
+function gbRenkAd(k) { return { rose: 'ROSE GOLD', beyaz: 'BEYAZ ALTIN', sari: 'SARI ALTIN', gumus: 'GÜMÜŞ' }[k] || ''; }
+function gbFisGram(sku) { const m = String(sku || '').match(/(?:gr|gram|g)\s*[:=]?\s*(\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?)\s*(?:gr|gram)\b/i); return m ? parseFloat((m[1] || m[2]).replace(',', '.')) : 0; }
+
+</script>
+<script>
 // =====================================================================
 // V150 — STOK (ürün + ayar). Veritabanı: stok.sql
 //  • SKU: "D12" ya da iki boylu ürünlerde "D12/D13" (küçük/büyük sırasıyla).
@@ -15143,13 +15267,15 @@ function stokUrunBul(kod) { const n = stokKodNorm(kod); return n ? (allUrunler |
 const STOK_KUCUK_RE = /^(small|mini|petite|tiny|küçük|kucuk|s)$/i, STOK_BUYUK_RE = /^(big|large|büyük|buyuk|maxi|l)$/i;
 // SKU → [{kod, boy}] — "D12/D13", "D12 / D13", "Small D11 - Big D12", "D11 Small, D12 Big"
 function stokSkuCoz(sku) {
-  const parcalar = String(sku || '').split(/\s*[\/|,;]\s*|\s+[-–—]\s+/).map(x => x.trim()).filter(Boolean);
+  const parcalar = String(sku || '').split(/\s*(?:[\/|;]|,(?!\d))\s*|\s+[-–—]\s+/).map(x => x.trim()).filter(Boolean);
   const sonuc = [];
   parcalar.forEach(p => {
+    if (/^(gr|gram|g|weight|ağırlık)\b\s*[:=]?/i.test(p)) return;          // "Gram :1,30", "Gr: 0,35"
+    p = p.replace(/[-_\s]*\d+(?:[.,]\d+)?\s*(?:gr|gram|g)\b.*$/i, '').trim();   // "1042-0.67gr" → "1042"
     const kelime = p.split(/[\s:=]+/).filter(Boolean);
     let boy = '';
     kelime.forEach(k => { if (STOK_KUCUK_RE.test(k)) boy = 'kucuk'; else if (STOK_BUYUK_RE.test(k)) boy = 'buyuk'; });
-    const kod = kelime.find(k => /\d/.test(k) && !/^\d+([.,]\d+)?\s*(gr|g)$/i.test(k) && !STOK_KUCUK_RE.test(k) && !STOK_BUYUK_RE.test(k));
+    const kod = kelime.find(k => /\d/.test(k) && !/^\d+[.,]\d+$/.test(k) && !/^\d+([.,]\d+)?\s*(gr|g)$/i.test(k) && !STOK_KUCUK_RE.test(k) && !STOK_BUYUK_RE.test(k));
     if (kod) sonuc.push({ kod: kod.replace(/[.:)]+$/, '').replace(/^[(]+/, ''), boy });
   });
   if (sonuc.length > 1) { sonuc.forEach((x, i) => { if (!x.boy) x.boy = i === 0 ? 'kucuk' : i === sonuc.length - 1 ? 'buyuk' : ''; }); }
@@ -15212,8 +15338,9 @@ function gbPdfStokCiz() {
     else if (!gbPdfStokAlan) bilgi = `<span class="stok-bulundu">✓ ${gbEsc(u.kod)} · ${gbEsc(u.ad)}${r.stokBoyut ? ' · ' + stokBoyAd(r.stokBoyut) : ''}</span>`;
     else {
       const k = u.id + '|' + r.stokAyar, mevcut = stokAdet(gbPdfStokAlan, u.id, r.stokAyar) || 0;
-      const once = mevcut - (kullanilan[k] || 0), sonra = r.sec && r.stokDus ? once - 1 : once;
-      if (r.sec && r.stokDus) kullanilan[k] = (kullanilan[k] || 0) + 1;
+      const mk = r.stokMiktar || 1;
+      const once = mevcut - (kullanilan[k] || 0), sonra = r.sec && r.stokDus ? once - mk : once;
+      if (r.sec && r.stokDus) kullanilan[k] = (kullanilan[k] || 0) + mk;
       bilgi = `<span class="stok-bulundu">✓ ${gbEsc(u.kod)} · ${gbEsc(u.ad)}${r.stokBoyut ? ' · ' + stokBoyAd(r.stokBoyut) : ''}</span> <span class="stok-adet ${sonra < 0 ? 'eksi' : sonra === 0 ? 'sifir' : ''}">stok ${once}${r.sec && r.stokDus ? ' → ' + sonra : ''}${sonra < 0 ? ' (eksik!)' : sonra === 0 ? ' (bitiyor)' : ''}</span>`;
     }
     const elle = r.stokKod && !r.stokKodlar.includes(r.stokKod);
@@ -15222,7 +15349,7 @@ function gbPdfStokCiz() {
       : `<input class="form-control" list="stokKodListe" value="${gbEsc(r.stokKod)}" placeholder="ürün kodu" onchange="gbPdfStokDegis(${i},'kod',this.value)">${r.stokKodlar.length > 1 ? `<button type="button" class="btn btn-sm" title="Küçük/büyük listesine dön" onclick="gbPdfSatirlar[${i}].stokElle=false;gbPdfStokCiz()">↩</button>` : ''}`;
     el.innerHTML = `<span class="stok-et">${gbPdfStokAlan ? '📦 Stok' : '🏷 Ürün'}</span>${kodSec}
       <select class="form-control stok-ayar" onchange="gbPdfStokDegis(${i},'ayar',this.value)">${STOK_AYARLAR.map(a => `<option ${a === r.stokAyar ? 'selected' : ''}>${a}</option>`).join('')}</select>
-      ${gbPdfStokAlan ? `<label class="stok-dus"><input type="checkbox" ${r.stokDus ? 'checked' : ''} ${u ? '' : 'disabled'} onchange="gbPdfStokDegis(${i},'dus',this.checked)"> düş</label>` : ''} ${bilgi}`;
+      ${gbPdfStokAlan ? `<select class="form-control stok-miktar" title="Stoktan düşülecek parça (çift küpe = 2)" onchange="gbPdfSatirlar[${i}].stokMiktar=+this.value;gbPdfStokCiz()">${[1, 2, 3, 4].map(n => `<option value="${n}" ${n === (r.stokMiktar || 1) ? 'selected' : ''}>×${n}${n === 2 ? ' (çift)' : ''}</option>`).join('')}</select><label class="stok-dus"><input type="checkbox" ${r.stokDus ? 'checked' : ''} ${u ? '' : 'disabled'} onchange="gbPdfStokDegis(${i},'dus',this.checked)"> düş</label>` : ''} ${bilgi}`;
   });
   if (!document.getElementById('stokKodListe')) {
     const dl = document.createElement('datalist'); dl.id = 'stokKodListe';
@@ -15245,7 +15372,7 @@ async function gbPdfStokDus(secilen, eklenen) {
   const hareketler = [];
   secilen.forEach((r, k) => {
     if (!r.stokDus || !r.stokUrunId || !eklenen[k]) return;
-    hareketler.push({ alan: gbPdfStokAlan, urun_id: String(r.stokUrunId), ayar: r.stokAyar, miktar: -1, tur: 'siparis', siparis_id: String(eklenen[k].id), platform: aktifPlatformB, aciklama: ('#' + (r.siparis.siparisNo || '') + ' ' + (r.ad || '')).trim().slice(0, 200) });
+    hareketler.push({ alan: gbPdfStokAlan, urun_id: String(r.stokUrunId), ayar: r.stokAyar, miktar: -(r.stokMiktar || 1), tur: 'siparis', siparis_id: String(eklenen[k].id), platform: aktifPlatformB, aciklama: ('#' + (r.siparis.siparisNo || '') + ' ' + (r.ad || '')).trim().slice(0, 200) });
   });
   if (!hareketler.length) return '';
   try { await api('stok_hareketleri', 'POST', hareketler); }
@@ -15253,8 +15380,9 @@ async function gbPdfStokDus(secilen, eklenen) {
   await stokYukle(gbPdfStokAlan);
   const biten = [...new Set(hareketler.map(h => h.urun_id + '|' + h.ayar))].map(k => { const [id, ayar] = k.split('|'); return { u: allUrunler.find(x => String(x.id) === id), ayar, adet: stokAdet(gbPdfStokAlan, id, ayar) }; }).filter(x => x.adet <= 0);
   stokRozetGuncelle();
+  const parcaToplam = hareketler.reduce((t, h) => t - h.miktar, 0);
   if (biten.length) setTimeout(() => alert('📦 Stoğu biten ürünler' + (gbPdfStokAlan === 'pilot' ? ' (🧪 pilot stoğu)' : '') + ':\n\n' + biten.map(x => '• ' + (x.u ? x.u.kod + ' ' + x.u.ad : '?') + ' · ' + x.ayar + ' → ' + x.adet + (x.adet < 0 ? ' (eksik)' : '')).join('\n')), 300);
-  return ' · ' + hareketler.length + ' ürün stoktan düştü';
+  return ' · ' + parcaToplam + ' parça stoktan düştü';
 }
 
 // ---- Ürünler › 📦 Stok ekranı ----
@@ -15414,13 +15542,52 @@ async function detayStokDuzenle(id) {
 </script>
 <script>
 // ===== V152: 📇 Sipariş kartı (ürünün kendi fotoğrafı + fişteki özellikler) =====
+let gbSipUrun = {};   // sipariş id → ürün id (detayı olmayan eski siparişler için stok hareketlerinden)
 function gbSiparisUrun(s) {
-  const d = s.detay || {};
-  return (d.urun_id && (allUrunler || []).find(u => String(u.id) === String(d.urun_id))) || (d.kod && typeof stokUrunBul === 'function' && stokUrunBul(d.kod)) || null;
+  const d = s.detay || {}, h = gbSipUrun[String(s.id)];
+  return (d.urun_id && (allUrunler || []).find(u => String(u.id) === String(d.urun_id))) || (d.kod && typeof stokUrunBul === 'function' && stokUrunBul(d.kod))
+    || (h && (allUrunler || []).find(u => String(u.id) === String(h))) || null;
+}
+let gbSipUrunYukleniyor = false;
+async function gbSipUrunTamamla(liste) {
+  if (gbSipUrunYukleniyor) return;
+  const ids = liste.filter(s => !(s.detay && (s.detay.urun_id || s.detay.kod)) && !(String(s.id) in gbSipUrun)).map(s => String(s.id));
+  if (!ids.length) return;
+  gbSipUrunYukleniyor = true; let yeni = false;
+  try {
+    for (let i = 0; i < ids.length; i += 100) {
+      const parca = ids.slice(i, i + 100);
+      const r = await api('stok_hareketleri?siparis_id=in.(' + parca.join(',') + ')&select=siparis_id,urun_id').catch(() => []);
+      parca.forEach(id => { gbSipUrun[id] = null; });
+      (r || []).forEach(h => { gbSipUrun[h.siparis_id] = h.urun_id; yeni = true; });
+    }
+  } finally { gbSipUrunYukleniyor = false; }
+  if (yeni) renderGrupBTablo();
+}
+function gbKodDatalist() {
+  if (document.getElementById('stokKodListe')) return;
+  const dl = document.createElement('datalist'); dl.id = 'stokKodListe';
+  dl.innerHTML = (allUrunler || []).map(u => `<option value="${gbEsc(u.kod)}">${gbEsc(u.ad)}</option>`).join('');
+  document.body.appendChild(dl);
+}
+async function gbSiparisUrunBagla(id) {
+  const s = gbSiparisBul(id), inp = document.getElementById('skKodGir'); if (!s || !inp) return;
+  const u = stokUrunBul(inp.value);
+  if (!u) { alert('"' + inp.value + '" kodlu ürün bulunamadı.'); return; }
+  if (!(await gbDetayKontrol())) { alert('Önce Supabase\'de siparis-detay.sql dosyasını bir kez çalıştırın.'); return; }
+  const detay = Object.assign({}, s.detay || {}, { kod: u.kod, urun_id: u.id });
+  try {
+    await api('platform_siparisler?id=eq.' + id, 'PATCH', { detay });
+    s.detay = detay; [grupbSiparisler, gbBekleyenTum, gbKargolananAy].forEach(l => (l || []).forEach(x => { if (String(x.id) === String(id)) x.detay = detay; }));
+    gbOnbellekTemizle();
+    showToast('🔗 Sipariş ' + u.kod + ' ürününe bağlandı');
+    renderGrupBTablo(); gbSiparisKartAc(id);
+  } catch (e) { alert('Kaydedilemedi: ' + e.message); }
 }
 function gbSiparisFoto(s) { const u = gbSiparisUrun(s); return (u && u.fotograf_url) || s.foto || ''; }
 function gbSiparisKartAc(id) {
   const s = gbSiparisBul(id); if (!s) return;
+  gbKodDatalist();
   const d = s.detay || {}, u = gbSiparisUrun(s);
   const ayar = d.ayar || (String(s.notlar || '').match(/(14K|10K|925)/i) || [])[1] || s.ayar || '';
   const ayarCls = /14/.test(ayar) ? 'k14' : /10/.test(ayar) ? 'k10' : /925/.test(ayar) ? 'k925' : '';
@@ -15440,21 +15607,26 @@ function gbSiparisKartAc(id) {
         <div>${u && u.fotograf_url ? `<img class="sk-foto" src="${gbEsc(u.fotograf_url)}" crossorigin="anonymous" alt="">` : s.foto ? `<img class="sk-foto" src="${s.foto}" alt="">` : '<div class="sk-foto-bos">💎</div>'}
           ${u && u.fotograf_url && s.foto ? `<div style="font-size:11px;color:#6B6455;margin-top:6px">Fişteki fotoğraf:</div><img class="sk-fis-foto" src="${s.foto}" alt="" onclick="gbFotoBuyut(this.src)">` : ''}</div>
         <div>
-          <div><span class="sk-kod">${gbEsc((u && u.kod) || d.kod || '—')}</span>${d.boy ? `<span class="sk-boy">${d.boy === 'kucuk' ? 'KÜÇÜK' : 'BÜYÜK'}</span>` : ''}</div>
+          <div><span class="sk-kod">${gbEsc((u && u.kod) || d.kod || '—')}</span>${d.boy ? `<span class="sk-boy">${d.boy === 'kucuk' ? 'KÜÇÜK' : 'BÜYÜK'}</span>` : ''}${d.hediye ? '<span class="sk-boy" style="background:#BE185D;color:#fff">🎁 HEDİYE</span>' : ''}</div>
           <div class="sk-ad">${gbEsc((u && u.ad) || s.urun_adi || '')}</div>
-          ${d.baslik ? `<div class="sk-baslik">${gbEsc(d.baslik)}</div>` : '<div style="height:8px"></div>'}
+          ${(() => { const rk = d.renk_kod || gbRenkKod(d.renk); return rk ? `<div class="sk-renk renk-${rk}">${gbRenkAd(rk)}</div>` : ''; })()}
+          ${d.baslik ? `<div class="sk-siparis-adi"><span>Sipariş adı</span>${gbEsc(d.baslik)}</div>` : '<div style="height:8px"></div>'}
           <table class="sk-tablo">
             ${satir('Ayar', ayar ? `<span class="sk-ayar ${ayarCls}">${gbEsc(ayar)}</span>` : '')}
             ${satir('Renk', gbEsc(d.renk || ''))}
+            ${satir('Adet', d.adet_metin || (d.parca > 1) ? gbEsc(d.adet_metin || '') + (d.parca > 1 ? ` <span class="sk-ayar" style="background:#1F1B14;color:#F7DA84">${d.parca} parça</span>` : '') : '')}
             ${satir('Uzunluk', gbEsc(d.uzunluk || ''))}
-            ${oz.filter(([k]) => !['necklace length', 'length'].includes(k) || !d.uzunluk).map(([k, v]) => satir(ozBaslik[k] || k.replace(/\b\w/g, c => c.toUpperCase()), gbEsc(v))).join('')}
+            ${oz.filter(([k]) => !/length|uzunluk/.test(k) || !d.uzunluk).filter(([k]) => !/colou?r|renk|metal|material/.test(k) || !d.renk).map(([k, v]) => satir(ozBaslik[k] || k.replace(/\b\w/g, c => c.toUpperCase()), gbEsc(v))).join('')}
             ${satir('Gram', parseFloat(s.gram) ? gbEsc(String(parseFloat(s.gram))) + ' gr' : '')}
             ${satir('Tip', gbEsc(tip))}
             ${satir('Taş', tas && parseFloat(tas) ? gbEsc(tas) + ' gr' : '')}
             ${satir('SKU', gbEsc(d.sku || ''))}
+            ${satir('Fişteki gram', d.fis_gram ? String(d.fis_gram).replace('.', ',') + ' gr' : '')}
             ${satir('Alıcı', gbEsc([d.alici, d.ulke || s.ulke].filter(Boolean).join(' · ')))}
           </table>
           ${!s.detay ? '<div style="font-size:11.5px;color:#9A8F78;margin-top:10px">Bu sipariş, özellikleri kaydedilmeden önce eklenmiş. Fişten yeni eklenen siparişlerde renk, uzunluk, boy ve SKU da görünür.</div>' : ''}
+          ${(d.notlar || []).length ? `<div class="sk-not">${d.notlar.map(n => `<div class="sk-not-baslik">📝 ${gbEsc(n.baslik === 'Private notes' ? 'Not (Private notes)' : n.baslik)}</div><div class="sk-not-metin">${gbEsc(n.metin)}</div>`).join('')}</div>` : ''}
+          <div class="sk-bagla" data-html2canvas-ignore="true"><span>${u ? '🔗 Başka ürün:' : '🔗 Bu sipariş hangi ürün? Kodu yazın:'}</span><input id="skKodGir" class="form-control" list="stokKodListe" placeholder="örn. D12" onkeydown="if(event.key==='Enter')gbSiparisUrunBagla('${s.id}')"><button class="btn btn-sm" onclick="gbSiparisUrunBagla('${s.id}')">Bağla</button></div>
         </div>
       </div>
     </div>
