@@ -1,4 +1,4 @@
-<!-- SURUM-V150-STOK --><!DOCTYPE html>
+<!-- SURUM-V151-STOK-KART --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1216,6 +1216,15 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .stok-alan-sec button { font-family:'DM Sans',sans-serif; font-size:12px; font-weight:600; padding:4px 12px; border-radius:20px; border:1px solid rgba(212,175,55,.35); background:transparent; color:#C9BFA8; cursor:pointer; }
 .stok-alan-sec button.aktif { background:linear-gradient(135deg,#F3D27A,#C9A132); color:#1A1408; border-color:transparent; }
 .stok-alan-sec button.pilot.aktif { background:#7C3AED; color:#fff; }
+
+/* V151: stok kart */
+.stok-kart { display:flex; flex-wrap:wrap; gap:4px; align-items:center; margin-top:6px; font-size:11px; cursor:pointer; }
+.stok-cip { padding:2px 8px; border-radius:20px; font-size:10.5px; font-weight:600; white-space:nowrap; }
+.stok-cip.var { background:#D1FAE5; color:#065F46; }
+.stok-cip.az { background:#FEF3C7; color:#92400E; }
+.stok-cip.bitti { background:#FEE2E2; color:#B91C1C; }
+.stok-cip.pilot { outline:1.5px dashed #8B5CF6; outline-offset:-1.5px; }
+.detay-stok { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:10px 0; padding:10px 12px; border-radius:12px; background:rgba(96,165,250,.07); border:1px solid rgba(96,165,250,.3); }
 </style>
 </head>
 <body>
@@ -3412,6 +3421,7 @@ function renderUrunGrid(urunler) {
         <div class="ayar-badges">${ayarlar.map(a=>`<span class="ayar-badge">${a} Ayar</span>`).join('')}${(()=>{const t=meta.tas||{};return(!t.tasSiz&&t.gram)?`<span class="tas-badge" style="font-size:10px;padding:2px 8px">💎 ${t.gram} gr</span>`:'';})()}</div>
         ${(()=>{const g10=kolyeUcuGram(u.id,'10');const g14=kolyeUcuGram(u.id,'14');if(!g10&&!g14)return '';return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;font-size:10px;color:var(--text2);">${g10?`<span>10K Kolye Ucu: <b>${g10} gr</b></span>`:''}${g14?`<span>14K Kolye Ucu: <b>${g14} gr</b></span>`:''}</div>`;})()}
         <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;">${badge('Yeşil Mum')}${badge('3D Project')}</div>
+        ${typeof stokKartHtml === 'function' ? stokKartHtml(u.id) : ''}
       </div>
     </div>`;
   }).join('');
@@ -3996,7 +4006,7 @@ function openDetay(urunId) {
       </div>
     </div>
     ${vars.length ? ayarlar.map(buildAyarBlok).join('') : '<div style="color:var(--text3);font-size:13px;margin-bottom:1rem;">Henüz varyant eklenmemiş.</div>'}
-    ${urunYetkiVar() ? '<div class="stl-panel" id="stlPanel"></div>' : ''}
+    ${urunYetkiVar() ? '<div id="detayStok"></div><div class="stl-panel" id="stlPanel"></div>' : ''}
     <div class="detay-actions">
       <button class="btn btn-sm" onclick="dokumSiparisVer('${u.id}')">🔥 Döküm Siparişine Ekle</button>
       <button class="btn btn-sm" onclick="toggleUrunFlag('${u.id}','fotoYuklendi');openDetay('${u.id}')" style="${meta.fotoYuklendi ? 'background:#1B7A4A;color:#fff;border-color:#1B7A4A;' : ''}">📷 Fotoğrafları Yüklendi${meta.fotoYuklendi ? ' ✓' : ''}</button>
@@ -4004,7 +4014,7 @@ function openDetay(urunId) {
       ${urunYetkiVar() ? `<button class="btn btn-sm btn-danger" onclick="deleteUrun('${u.id}')">Sil</button>` : ''}
     </div>`;
   openModal('detayModal');
-  if (urunYetkiVar()) { stlPanelYukle(u.id); detayBirakKur(u.id); }
+  if (urunYetkiVar()) { stlPanelYukle(u.id); detayBirakKur(u.id); if (typeof detayStokCiz === 'function') detayStokCiz(u.id); }
 }
 
 // ===== STL DOSYALARI (Cloudflare R2 — kilicoglu-stl Worker üzerinden, sadece "Ürünler" yetkilisi) =====
@@ -5615,7 +5625,7 @@ function applyRol() {
     const tdBtn = document.getElementById('topluDuzenBtn');
     if (tdBtn) tdBtn.style.display = urunYetkiVar() ? '' : 'none';
     const skBtn = document.getElementById('stokBtn');
-    if (skBtn) { skBtn.style.display = urunYetkiVar() ? '' : 'none'; if (urunYetkiVar()) stokRozetGuncelle(); }
+    if (skBtn) { skBtn.style.display = urunYetkiVar() ? '' : 'none'; if (urunYetkiVar()) stokKartYukle(); }
   }, 500);
   // Kullanıcı adını navda göster (tekrar tekrar çağrılırsa eski etiketi temizle)
   const navRight = document.querySelector('.nav-right');
@@ -15291,6 +15301,7 @@ async function stokKaydet() {
   try {
     for (let i = 0; i < hareketler.length; i += 200) await api('stok_hareketleri', 'POST', hareketler.slice(i, i + 200));
     stkDeg = {}; await stokYukle(stkAlan); stokCiz(); stokRozetGuncelle();
+    if (typeof filterUrunler === 'function') filterUrunler();
     showToast('✓ ' + hareketler.length + ' stok kaydedildi');
   } catch (e) { alert('Kaydedilemedi: ' + e.message); b.disabled = false; }
 }
@@ -15312,6 +15323,40 @@ async function stokPilotSifirla() {
   } catch (e) { alert('Sıfırlanamadı: ' + e.message); }
 }
 
+</script>
+<script>
+// ---- V151: stok ürün kartında ve detayda ----
+async function stokKartYukle() {
+  await Promise.all([stokYukle('gercek'), stokYukle('pilot')]);
+  stokRozetGuncelle();
+  if (typeof filterUrunler === 'function' && document.getElementById('urunGrid')) filterUrunler();
+}
+function stokCipler(alan, id) {
+  if (!STOK.yuklendi[alan]) return '';
+  const esik = stokEsik();
+  return STOK_AYARLAR.map(ay => { const a = stokAdet(alan, id, ay); if (a == null) return '';
+    const cls = a <= 0 ? 'bitti' : a <= esik ? 'az' : 'var';
+    return `<span class="stok-cip ${cls}${alan === 'pilot' ? ' pilot' : ''}" title="${alan === 'pilot' ? 'Pilot stoğu' : 'Stok'} · ${ay}">${alan === 'pilot' ? '🧪 ' : ''}${ay}: <b>${a}</b></span>`; }).join('');
+}
+function stokKartHtml(id) {
+  if (!urunYetkiVar() || STOK.tabloYok) return '';
+  const g = stokCipler('gercek', id), p = stokCipler('pilot', id);
+  if (!g && !p) return '';
+  return `<div class="stok-kart" onclick="event.stopPropagation();stokModalAc('${p && !g ? 'pilot' : 'gercek'}')" title="Stoğu düzenlemek için tıklayın">📦 ${g}${p}</div>`;
+}
+async function detayStokCiz(id) {
+  const el = document.getElementById('detayStok'); if (!el) return;
+  if (!STOK.yuklendi.gercek || !STOK.yuklendi.pilot) await Promise.all([stokYukle('gercek'), stokYukle('pilot')]);
+  if (STOK.tabloYok) { el.innerHTML = ''; return; }
+  const g = stokCipler('gercek', id), p = stokCipler('pilot', id);
+  el.innerHTML = `<div class="detay-stok"><span class="stok-et">📦 Stok</span>${g || '<span style="color:rgba(220,230,255,.6)">girilmemiş</span>'}${p}
+    <button class="btn btn-sm" style="margin-left:auto" onclick="detayStokDuzenle('${id}')">✏️ Stok gir</button></div>`;
+}
+async function detayStokDuzenle(id) {
+  const u = allUrunler.find(x => x.id === id);
+  await stokModalAc('gercek');
+  const a = document.getElementById('stkAra'); if (a && u) { a.value = u.kod; stokCiz(); const i = document.querySelector('#stkSar input[data-ayar="14K"]'); if (i) { i.focus(); i.select(); } }
+}
 </script>
 </body>
 </html>
