@@ -1,4 +1,4 @@
-<!-- SURUM-V156-TOPLU-YAZDIR --><!DOCTYPE html>
+<!-- SURUM-V157-SADECE-BAKIYE --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1309,6 +1309,12 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
   body.yz-modu .yz-sayfa:last-child { break-after:auto; page-break-after:auto; }
   body.yz-modu #skBaski, body.yz-modu #skBaski * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
 }
+
+/* V157: cari paylaş — sadece bakiye */
+.cari-paylas-mod { display:inline-flex; gap:4px; padding:4px; margin-bottom:12px; border-radius:12px; background:var(--bg2); border:1px solid var(--border); }
+.cari-paylas-mod button { border:0; background:transparent; color:var(--text2); font:inherit; font-size:13px; font-weight:700; padding:7px 14px; border-radius:9px; cursor:pointer; }
+.cari-paylas-mod button.aktif { background:#25D366; color:#fff; }
+.cari-paylas-mod button:disabled { opacity:.4; cursor:not-allowed; }
 </style>
 </head>
 <body>
@@ -13853,9 +13859,14 @@ function cariMesajBakiyeSatirlari(o) {
     .map(b => ' * ' + cariMesajTutar(o[b], b) + (o[b] > 0 ? ' (alacağınız)' : ' (borcunuz)'));
   return s.length ? s.join('\n') : ' * Bakiye yok (hesap kapalı)';
 }
-function cariPaylasVeri(id) {
+function cariPaylasVeri(id, sadece) {
   cariSirala();
   const m = cariMusteriler.find(x => x.id === cariSeciliId);
+  if (sadece) {   // V157: son işlemden bağımsız, sadece güncel bakiye
+    if (!m) return null;
+    const sonra = cariBos(); cariIslemler.forEach(x => cariEtkiEkle(sonra, x));
+    return { m, r: { tarih: cariSimdi(), fis_no: null }, once: cariBos(), sonra, tipAd: '', islem: '', sadece: true };
+  }
   const idx = cariIslemler.findIndex(x => x.id === id);
   if (!m || idx < 0) return null;
   const r = cariIslemler[idx];
@@ -13885,11 +13896,16 @@ function cariPaylasVeri(id) {
   }
   return { m, r, once, sonra, tipAd, islem };
 }
-function cariPaylasMetni(id) {
-  const v = cariPaylasVeri(id);
+function cariPaylasMetni(id, sadece) {
+  const v = cariPaylasVeri(id, sadece);
   if (!v) return null;
   const { m, r, once, sonra, tipAd, islem } = v;
   const y = cariYaklasikDeger(sonra);
+  if (sadece) return '*Tarih:* ' + cariTarihGoster(r.tarih) + '\n' +
+    '*Müşteri ismi :* ' + m.ad + '\n\n' +
+    '*GÜNCEL BAKİYE:*\n\n' + cariMesajBakiyeSatirlari(sonra) + '\n\n' +
+    (Math.abs(y.net) >= 1 ? '*Bugünkü yaklaşık değeri:* ≈ ' + cariMesajSayi(Math.round(y.net)) + '₺ ' + (y.net > 0 ? '(alacağınız)' : '(borcunuz)') + '\n\n' : '') +
+    '*KILIÇOĞLU KUYUMCULUK*';
   // *...* WhatsApp'ta kalın görünür
   return '*Tarih:* ' + cariTarihGoster(r.tarih) + '\n' +
     '*Müşteri ismi :* ' + m.ad + '\n\n' +
@@ -13932,8 +13948,8 @@ function cariIkonCiz(c, b, x, y, s) {
   c.fillText(CARI_BIRIM_SEMBOL[b] || b.slice(0, 2), x + s / 2, y + s / 2 + 1);
   c.textAlign = 'left'; c.textBaseline = 'alphabetic';
 }
-async function cariBakiyeGorsel(id) {
-  const v = cariPaylasVeri(id);
+async function cariBakiyeGorsel(id, sadece) {
+  const v = cariPaylasVeri(id, sadece);
   if (!v) return null;
   try { await document.fonts.ready; } catch (_) {}
   const { m, r, once, sonra, tipAd, islem } = v;
@@ -13944,7 +13960,7 @@ async function cariBakiyeGorsel(id) {
   const W = 760, P = 40, S = 2;
   const sans = "'DM Sans', 'Segoe UI', Arial, sans-serif", serif = "'DM Serif Display', Georgia, serif";
   // yükseklik: üst 160 + müşteri 110 + önce (40 + n*44) + işlem (24+84) + son (44 + n*80) + değer (112) + alt 100
-  const H = 160 + 110 + 40 + Math.max(1, onceS.length) * 44 + 108 + 44 + Math.max(1, sonS.length) * 80 + (degerVar ? 112 : 0) + 100;
+  const H = 160 + 110 + (sadece ? 0 : 40 + Math.max(1, onceS.length) * 44 + 108) + 44 + Math.max(1, sonS.length) * 80 + (degerVar ? 112 : 0) + 100;
   const cv = document.createElement('canvas');
   cv.width = W * S; cv.height = H * S;
   const c = cv.getContext('2d');
@@ -13986,6 +14002,7 @@ async function cariBakiyeGorsel(id) {
   y += 94;
   c.fillStyle = '#EFE6D2'; c.fillRect(P, y, W - 2 * P, 1);
 
+  if (!sadece) {
   // 1) işlem öncesi bakiye
   y += 32;
   c.fillStyle = '#8A7F6A'; c.font = '700 12px ' + sans; c.fillText('İŞLEM ÖNCESİ BAKİYE', P + 4, y);
@@ -14010,10 +14027,11 @@ async function cariBakiyeGorsel(id) {
   while (c.measureText(islem).width > W - 2 * P - 40 && fs > 13) { fs--; c.font = '700 ' + fs + 'px ' + sans; }
   c.fillStyle = '#1A1A18'; c.fillText(islem, P + 20, y + 60);
   y += 84;
+  }
 
   // 3) son bakiye
   y += 34;
-  c.fillStyle = '#8B6508'; c.font = '800 13px ' + sans; c.fillText('SON BAKİYE', P + 4, y);
+  c.fillStyle = '#8B6508'; c.font = '800 13px ' + sans; c.fillText(sadece ? 'GÜNCEL BAKİYE' : 'SON BAKİYE', P + 4, y);
   y += 10;
   if (!sonS.length) {
     cariYuvarlakDikdortgen(c, P, y, W - 2 * P, 66, 14); c.fillStyle = '#F3F0E8'; c.fill();
@@ -14058,16 +14076,21 @@ async function cariBakiyeGorsel(id) {
 }
 
 let cariPaylasDurum = null;
-async function cariPaylas(id) {
+let cariPaylasSadece = false;
+async function cariPaylas(id, sadece) {
+  if (sadece === undefined) sadece = cariPaylasSadece;
+  cariPaylasSadece = !!sadece;
   if (!id) {
     cariSirala();
-    if (!cariIslemler.length) { alert('Paylaşılacak işlem yok.'); return; }
-    id = cariSeciliIslemId || cariIslemler[cariIslemler.length - 1].id;
+    if (!cariIslemler.length && !sadece) { sadece = cariPaylasSadece = true; }
+    else if (!sadece) id = cariSeciliIslemId || cariIslemler[cariIslemler.length - 1].id;
   }
-  const metin = cariPaylasMetni(id);
+  const metin = cariPaylasMetni(id, sadece);
   if (!metin) return;
   const m = cariMusteriler.find(x => x.id === cariSeciliId);
-  const r = cariIslemler.find(x => x.id === id);
+  const r = sadece ? { tarih: cariSimdi() } : cariIslemler.find(x => x.id === id);
+  const islemVar = !!cariIslemler.length;
+  const idArg = id ? id : 'null';
   let ov = document.getElementById('cariPaylasModal');
   if (!ov) {
     ov = document.createElement('div');
@@ -14078,7 +14101,7 @@ async function cariPaylas(id) {
   }
   ov.style.display = 'flex';
   ov.innerHTML = '<div class="card" style="max-width:860px;width:100%;max-height:92vh;overflow:auto;"><div class="loading">Görsel hazırlanıyor...</div></div>';
-  const gorsel = await cariBakiyeGorsel(id);
+  const gorsel = await cariBakiyeGorsel(id, sadece);
   const dosyaAdi = (m ? m.ad : 'bakiye').replace(/[^\wçğıöşüÇĞİÖŞÜ]+/g, '_') + '_' + String(r.tarih || '').slice(0, 10) + '.png';
   const dosya = gorsel && gorsel.blob ? new File([gorsel.blob], dosyaAdi, { type: 'image/png' }) : null;
   const paylasilir = !!(dosya && navigator.canShare && navigator.canShare({ files: [dosya] }));
@@ -14087,6 +14110,10 @@ async function cariPaylas(id) {
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
       <div style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px;color:#128C7E;">${CARI_WA_IKON} WhatsApp ile Paylaş</div>
       <button class="btn btn-sm" onclick="cariPaylasKapat()">✕</button>
+    </div>
+    <div class="cari-paylas-mod">
+      <button class="${sadece ? '' : 'aktif'}" ${islemVar ? '' : 'disabled'} onclick="cariPaylas(${idArg}, false)">🧾 Son işlemle</button>
+      <button class="${sadece ? 'aktif' : ''}" onclick="cariPaylas(${idArg}, true)">💰 Sadece bakiye</button>
     </div>
     <div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px;" class="cari-paylas-grid">
       <img src="${gorsel ? gorsel.url : ''}" style="width:100%;border-radius:12px;border:1px solid var(--border);">
