@@ -79,6 +79,29 @@ tr.top td{font-weight:800;color:var(--altin);background:rgba(245,196,81,.05)}
 .magazalar button.aktif{border-color:var(--altin);background:linear-gradient(135deg,rgba(245,196,81,.16),rgba(201,161,50,.06));box-shadow:0 0 0 1px var(--altin) inset}
 .secili-baslik{display:flex;align-items:center;gap:10px;font-size:15px;margin:2px 0 10px;color:var(--altin)}
 @media(max-width:820px){.toplam{grid-template-columns:1fr}}
+
+/* müşteri sipariş gönderme */
+.btn.ekle{background:linear-gradient(135deg,#34D399,#059669);color:#04130C;font-size:14px;padding:10px 16px;box-shadow:0 6px 18px -6px rgba(52,211,153,.55)}
+.gelen{background:var(--kart);border:1px solid rgba(52,211,153,.35);border-radius:16px;padding:12px 16px;margin-bottom:16px}
+.gelen .ust{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:14px;margin-bottom:6px}
+.gelen ul{list-style:none;display:flex;flex-direction:column}
+.gelen li{display:flex;align-items:center;gap:10px;font-size:13px;padding:7px 0;border-top:1px solid rgba(255,255,255,.06)}
+.gelen li .ad{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gelen li button{background:none;border:1px solid rgba(248,113,113,.4);color:var(--kirmizi);border-radius:8px;padding:3px 9px;font-size:12px}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .ic{width:min(620px,100%);max-height:92vh;overflow:auto;background:var(--kart);border:1px solid var(--cizgi);border-radius:20px;padding:18px}
+.modal h3{font-size:18px;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.modal .x{margin-left:auto;background:rgba(255,255,255,.06);border:1px solid var(--cizgi);color:var(--metin);border-radius:10px;width:34px;height:34px}
+.birak{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:34px 16px;margin:12px 0;border:2px dashed rgba(52,211,153,.55);border-radius:16px;background:rgba(52,211,153,.05);cursor:pointer;transition:.15s}
+.birak:hover,.birak.ust{background:rgba(52,211,153,.13);border-color:var(--yesil)}
+.birak b{font-size:16px}.birak span{font-size:12.5px;color:var(--soluk)}
+.birak .ikon{font-size:38px}
+.yukleme{list-style:none;display:flex;flex-direction:column;gap:6px}
+.yukleme li{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:var(--kart2);font-size:13px}
+.yukleme li .ad{flex:1;min-width:0}.yukleme li .ad small{display:block;color:var(--soluk);font-size:11.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.yukleme .ok{color:var(--yesil);font-weight:700}.yukleme .uy{color:var(--sari);font-weight:700}.yukleme .hz{color:var(--kirmizi);font-weight:700}
+.surukle-kaplama{position:fixed;inset:0;z-index:55;background:rgba(5,40,28,.82);display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:#D1FAE5;font-size:22px;font-weight:800;border:4px dashed var(--yesil)}
+.surukle-kaplama.acik{display:flex}
 footer{margin-top:26px;text-align:center;font-size:11.5px;color:#6F685A}
 @media(max-width:640px){
   .gizle-m{display:none}
@@ -93,7 +116,8 @@ footer{margin-top:26px;text-align:center;font-size:11.5px;color:#6F685A}
 const SUPABASE_URL = 'https://xufyzwioeguudrynkjvc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_jQeVQUHMze43X1cwak2ELA_VHTCMqyV';
 let V = null, sekme = 'tum', ara = '', ayFiltre = '';
-let ORTAK = null, ortakSecili = '';   // ortak link: birden fazla mağaza (bayi.html#ortak=<anahtar>)
+let ORTAK = null, ortakSecili = '';
+let FIS = { acik: false, fisler: [] }, fisYukleme = [];   // müşteriden sipariş fişi gönderme   // ortak link: birden fazla mağaza (bayi.html#ortak=<anahtar>)
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const n = v => Number(v) || 0;
@@ -129,6 +153,7 @@ async function yukle(sessiz) {
       const sec = d.magazalar.find(m => m.platform === ortakSecili) || d.magazalar[0];
       ortakSecili = sec.platform; V = sec;
     } else { ORTAK = null; V = d; }
+    await fisDurumYukle();
     ciz();
   } catch (e) {
     if (!sessiz || !V) hata('Bağlantı kurulamadı', 'İnternet bağlantınızı kontrol edip sayfayı yenileyin.');
@@ -247,10 +272,11 @@ function ciz() {
     <header>
       ${ORTAK ? `<div class="logolar">${ORTAK.magazalar.map(m => logoHtml(m)).join('')}</div>` : (V.logo ? `<div class="logo"><img src="${esc(V.logo)}" alt=""></div>` : `<div class="logo harf">${esc(harf)}</div>`)}
       <div class="baslik"><h1>${esc(ORTAK ? (ORTAK.magazalar.map(m => m.ad).join(' & ')) : (V.ad || 'Sipariş Takip'))}</h1><p><b>KILIÇOĞLU</b> · Sipariş ve hesap takibi</p></div>
-      <div class="sag"><span>Güncelleme ${zaman}</span><button class="btn" id="yenile" onclick="yukle()">↻ Yenile</button></div>
+      <div class="sag"><span>Güncelleme ${zaman}</span>${FIS.acik && !ORTAK ? '<button class="btn ekle" onclick="fisModalAc()">＋ Sipariş ekle</button>' : ''}<button class="btn" id="yenile" onclick="yukle()">↻ Yenile</button></div>
     </header>
     ${ortakHtml}
-    ${ORTAK ? `<div class="secili-baslik">${logoHtml(V, true)}<b>${esc(V.ad)}</b></div>` : ''}
+    ${ORTAK ? `<div class="secili-baslik">${logoHtml(V, true)}<b>${esc(V.ad)}</b>${FIS.acik ? '<button class="btn ekle" style="margin-left:auto;font-size:13px;padding:7px 12px" onclick="fisModalAc()">＋ Bu mağazaya sipariş ekle</button>' : ''}</div>` : ''}
+    ${gelenHtml()}
     <div class="kartlar">
       <div class="k mor"><div class="u">💳 Has borcu</div><div class="d">${hasF(h.hasBorc)} <small>has</small></div><div class="a">Tüm siparişler − ödemeler</div></div>
       <div class="k mavi"><div class="u">💵 Dolar borcu</div><div class="d">${usdF(h.usdBorc)}</div><div class="a">${kargoVar() ? 'Kargo + ek borç − ödemeler' : 'Ek borç − ödemeler'}</div></div>
@@ -271,11 +297,123 @@ function ciz() {
   if (odak) { const a = document.getElementById('ara'); a.focus(); a.setSelectionRange(a.value.length, a.value.length); }
 }
 function sekmeSec(s) { sekme = s; ayFiltre = ''; ciz(); }
-function magazaSec(p) {
+async function magazaSec(p) {
   if (!ORTAK || p === ortakSecili) return;
   const m = ORTAK.magazalar.find(x => x.platform === p); if (!m) return;
   ortakSecili = p; V = m; sekme = 'tum'; ayFiltre = ''; ara = ''; ciz();
+  await fisDurumYukle(); ciz();
 }
+
+// ===== Sipariş ekle: Etsy sipariş fişlerini (PDF) gönder =====
+async function rpc(ad, govde) {
+  const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + ad, { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(govde), referrerPolicy: 'no-referrer', cache: 'no-store' });
+  if (!r.ok) throw new Error('Sunucu yanıtı: ' + r.status);
+  return r.json();
+}
+async function fisDurumYukle() {
+  try { const d = await rpc('bayi_fis_liste', { p_token: linkBilgi().t, p_platform: ORTAK ? ortakSecili : null }); FIS = d && d.acik ? { acik: true, fisler: d.fisler || [] } : { acik: false, fisler: [] }; }
+  catch (e) { FIS = { acik: false, fisler: [] }; }   // özellik kurulmamışsa buton görünmez
+}
+function gelenHtml() {
+  if (!FIS.acik) return '';
+  const gun = 3 * 86400000;
+  const liste = FIS.fisler.filter(f => f.durum === 'yeni' || (f.durum === 'eklendi' && Date.now() - new Date(f.zaman) < gun));
+  if (!liste.length) return '';
+  const bekleyen = liste.filter(f => f.durum === 'yeni').length;
+  const etiket = f => f.siparis_no ? f.siparis_no.split(',').map(x => '#' + x).join(', ') : (f.dosya_adi || 'Fiş');
+  return `<div class="gelen"><div class="ust"><b>📥 Gönderdiğiniz siparişler</b>${bekleyen ? `<span class="rozet r-yeni">${bekleyen} işleme alınmayı bekliyor</span>` : ''}</div>
+    <ul>${liste.map(f => `<li><span class="ad">${esc(etiket(f))}${f.alici ? ' · ' + esc(f.alici) : ''} <span class="alt">${new Date(f.zaman).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span></span>
+      ${f.durum === 'yeni' ? `<span class="rozet r-bek">⏳ Bekliyor</span><button onclick="fisIptal(${Number(f.id)})" title="Bu fişi geri çek">Geri çek</button>` : '<span class="rozet r-kar">✓ Siparişlere eklendi</span>'}</li>`).join('')}</ul></div>`;
+}
+async function fisIptal(id) {
+  if (!confirm('Bu fiş geri çekilsin mi?')) return;
+  try { await rpc('bayi_fis_iptal', { p_token: linkBilgi().t, p_platform: ORTAK ? ortakSecili : null, p_id: id }); } catch (e) { alert('Geri çekilemedi.'); }
+  await fisDurumYukle(); ciz();
+}
+function fisModalAc() {
+  if (!FIS.acik) return;
+  fisYukleme = [];
+  let m = document.getElementById('fisModal');
+  if (!m) { m = document.createElement('div'); m.id = 'fisModal'; m.className = 'modal'; m.addEventListener('click', e => { if (e.target === m) fisModalKapat(); }); document.body.appendChild(m); }
+  m.style.display = 'flex';
+  fisModalCiz();
+}
+function fisModalKapat() { const m = document.getElementById('fisModal'); if (m) m.style.display = 'none'; if (fisYukleme.length) { fisDurumYukle().then(ciz); } }
+function fisModalCiz() {
+  const m = document.getElementById('fisModal'); if (!m) return;
+  const durum = { bek: '<span class="alt">Sırada…</span>', oku: '<span class="alt">Okunuyor…</span>', gon: '<span class="alt">Gönderiliyor…</span>', ok: '<span class="ok">✓ Gönderildi</span>', zaten: '<span class="uy">Zaten gönderilmiş</span>', hata: '<span class="hz">✕ Gönderilemedi</span>' };
+  m.innerHTML = `<div class="ic">
+    <h3>＋ Sipariş ekle<button class="x" onclick="fisModalKapat()">✕</button></h3>
+    <div class="alt">${ORTAK ? '<b style="color:var(--altin)">' + esc(V.ad) + '</b> mağazasına · ' : ''}Etsy'den indirdiğiniz sipariş fişlerini (PDF) buraya bırakın. Bir PDF'te birden fazla sipariş olabilir.</div>
+    <label class="birak" id="birakAlan" ondragover="event.preventDefault();this.classList.add('ust')" ondragleave="this.classList.remove('ust')" ondrop="event.preventDefault();this.classList.remove('ust');fisDosyalar(event.dataTransfer.files)">
+      <span class="ikon">📄</span><b>PDF'leri sürükleyip bırakın</b><span>ya da dokunup seçin · birden fazla seçebilirsiniz</span>
+      <input type="file" accept="application/pdf,.pdf" multiple style="display:none" onchange="fisDosyalar(this.files);this.value=''">
+    </label>
+    ${fisYukleme.length ? `<ul class="yukleme">${fisYukleme.map(y => `<li><span>📄</span><span class="ad">${esc(y.etiket || y.ad)}<small>${esc(y.alt || y.ad)}</small></span>${durum[y.durum] || ''}</li>`).join('')}</ul>` : ''}
+    ${fisYukleme.length && fisYukleme.every(y => !['bek', 'oku', 'gon'].includes(y.durum)) ? `<div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn" onclick="fisModalKapat()">Tamam</button></div>` : ''}
+    <div class="alt" style="margin-top:12px;font-size:11.5px">Gönderdiğiniz siparişler Kılıçoğlu tarafından işleme alınınca listenizde görünür.</div>
+  </div>`;
+}
+let pdfjsSoz = null;
+function pdfjsYukle() {
+  if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  return pdfjsSoz = pdfjsSoz || new Promise((ok, red) => {
+    const sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    sc.onload = () => { pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; ok(pdfjsLib); };
+    sc.onerror = () => { pdfjsSoz = null; red(new Error('PDF okuyucu yüklenemedi')); }; document.head.appendChild(sc);
+  });
+}
+// PDF'ten sipariş numaraları, alıcı ve ürün sayısı (sadece listede göstermek ve tekrarı önlemek için)
+async function fisOzet(buf) {
+  const lib = await pdfjsYukle();
+  const pdf = await lib.getDocument({ data: buf.slice(0) }).promise;
+  let metin = '';
+  for (let i = 1; i <= pdf.numPages; i++) { const c = await (await pdf.getPage(i)).getTextContent(); metin += c.items.map(x => x.str).join('\n') + '\n'; }
+  const nolar = [...new Set([...metin.matchAll(/Order\s*#\s*(\d{5,})/gi)].map(m => m[1]))];
+  const satir = metin.split('\n').map(x => x.trim()).filter(Boolean);
+  const i = satir.findIndex(x => /^ship to$/i.test(x));
+  const alici = i >= 0 ? satir[i + 1] || '' : '';
+  const urun = [...metin.matchAll(/(\d+)\s+items?\b/gi)].reduce((t, m) => t + Number(m[1]), 0);
+  return { nolar, alici: nolar.length > 1 ? nolar.length + ' sipariş' : alici, urun };
+}
+const b64 = buf => { const b = new Uint8Array(buf); let s = ''; for (let i = 0; i < b.length; i += 0x8000) s += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000)); return btoa(s); };
+async function fisDosyalar(liste) {
+  const dosyalar = [...(liste || [])].filter(f => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
+  if (!dosyalar.length) { alert('Lütfen PDF dosyası seçin (Etsy sipariş fişi).'); return; }
+  if (!document.getElementById('fisModal') || document.getElementById('fisModal').style.display === 'none') fisModalAc();
+  const yeni = dosyalar.map(f => ({ ad: f.name, dosya: f, durum: 'bek' }));
+  fisYukleme.push(...yeni); fisModalCiz();
+  for (const y of yeni) {
+    try {
+      if (y.dosya.size > 15 * 1024 * 1024) throw new Error('15 MB\'tan büyük');
+      y.durum = 'oku'; fisModalCiz();
+      const buf = await y.dosya.arrayBuffer();
+      let oz = { nolar: [], alici: '', urun: 0 };
+      try { oz = await fisOzet(buf); } catch (e) { /* okunamazsa da gönder; Kılıçoğlu tarafında açılır */ }
+      y.etiket = oz.nolar.length ? oz.nolar.map(x => '#' + x).join(', ') : y.ad;
+      y.alt = [oz.alici, oz.urun ? oz.urun + ' ürün' : '', y.ad].filter(Boolean).join(' · ');
+      y.durum = 'gon'; fisModalCiz();
+      const r = await rpc('bayi_fis_gonder', { p_token: linkBilgi().t, p_platform: ORTAK ? ortakSecili : null, p_dosya_adi: y.ad, p_pdf: b64(buf), p_siparis_no: oz.nolar.join(',') || null, p_alici: oz.alici || null, p_urun_sayisi: oz.urun || null });
+      if (r && r.durum === 'alindi') y.durum = 'ok';
+      else if (r && r.durum === 'zaten') y.durum = 'zaten';
+      else { y.durum = 'hata'; y.alt = (r && (r.mesaj || (r.durum === 'kapali' ? 'Bu mağazaya sipariş gönderme kapalı' : ''))) || y.alt; }
+    } catch (e) { y.durum = 'hata'; y.alt = e.message; }
+    fisModalCiz();
+  }
+  await fisDurumYukle();
+  const kok = document.getElementById('kok'), y0 = window.scrollY; ciz(); window.scrollTo(0, y0);
+  fisModalCiz();
+}
+// Sayfanın herhangi bir yerine PDF bırakılınca da gönder
+(() => {
+  let sayac = 0;
+  const kaplama = () => { let k = document.getElementById('surukleKaplama'); if (!k) { k = document.createElement('div'); k.id = 'surukleKaplama'; k.className = 'surukle-kaplama'; k.innerHTML = '<div style="font-size:54px">📄</div>Sipariş fişlerini bırakın'; document.body.appendChild(k); } return k; };
+  const dosyaMi = e => FIS.acik && e.dataTransfer && [...(e.dataTransfer.types || [])].includes('Files');
+  window.addEventListener('dragenter', e => { if (!dosyaMi(e)) return; e.preventDefault(); sayac++; if (!document.querySelector('#fisModal[style*=flex]')) kaplama().classList.add('acik'); });
+  window.addEventListener('dragover', e => { if (dosyaMi(e)) e.preventDefault(); });
+  window.addEventListener('dragleave', e => { if (!dosyaMi(e)) return; if (--sayac <= 0) { sayac = 0; kaplama().classList.remove('acik'); } });
+  window.addEventListener('drop', e => { if (!dosyaMi(e)) return; e.preventDefault(); sayac = 0; kaplama().classList.remove('acik'); if (!e.target.closest || !e.target.closest('#birakAlan')) fisDosyalar(e.dataTransfer.files); });
+})();
 window.addEventListener('hashchange', () => yukle());
 document.addEventListener('visibilitychange', () => { if (!document.hidden && V) yukle(true); });
 yukle();
