@@ -1,4 +1,4 @@
-<!-- SURUM-V157-SADECE-BAKIYE --><!DOCTYPE html>
+<!-- SURUM-V158-MUSTERI-SIPARIS --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1315,6 +1315,19 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .cari-paylas-mod button { border:0; background:transparent; color:var(--text2); font:inherit; font-size:13px; font-weight:700; padding:7px 14px; border-radius:9px; cursor:pointer; }
 .cari-paylas-mod button.aktif { background:#25D366; color:#fff; }
 .cari-paylas-mod button:disabled { opacity:.4; cursor:not-allowed; }
+
+/* V158: müşteriden gelen fişler */
+.gb-gelen { margin:0 0 14px; padding:12px 16px; border-radius:14px; border:1px solid rgba(52,211,153,.45); background:linear-gradient(135deg,rgba(52,211,153,.12),rgba(52,211,153,.03)); }
+.gb-gelen.bos { font-size:12.5px; color:#A7F3D0; border-style:dashed; background:transparent; padding:9px 14px; }
+.gb-gelen.bos span { color:#A39A85; }
+.gb-gelen-ust { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.gb-gelen-ust > div { flex:1; min-width:220px; } .gb-gelen-ust b { color:#6EE7B7; font-size:15px; }
+.gb-gelen-ikon { font-size:26px; }
+.gb-gelen-alt { font-size:12px; color:#A39A85; margin-top:2px; }
+.gb-gelen ul { list-style:none; margin:10px 0 0; padding:0; }
+.gb-gelen li { display:flex; align-items:center; gap:8px; padding:6px 0; border-top:1px solid rgba(255,255,255,.06); font-size:13px; }
+.gb-gelen li label { flex:1; display:flex; align-items:center; gap:6px; cursor:pointer; min-width:0; }
+.gb-gelen-zaman { font-size:11.5px; color:#A39A85; }
 </style>
 </head>
 <body>
@@ -1916,6 +1929,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       </div>
     </div>
     <div id="gbKurulumUyari" class="gb-uyari" style="display:none;">⚠️ Sipariş durumu ve toplu kargo için <b>grupb-kargo.sql</b> dosyasını Supabase'de bir kez çalıştırın. Çalıştırana kadar sayfa eskisi gibi çalışır.</div>
+    <div id="gbGelenFis"></div>
     <div id="gbPano" class="gb-pano"></div>
     <div style="display:flex;gap:10px;margin-bottom:1rem;align-items:stretch;">
       <div class="card" style="min-width:220px;max-width:280px;display:flex;flex-direction:column;padding:1rem 1.25rem;gap:4px;">
@@ -5930,9 +5944,10 @@ function mgModalHazirla() {
       <div id="mgTurKilit" class="mg-not" style="display:none;margin-top:6px">Tür, mağaza açıldıktan sonra değiştirilemez (siparişler buna göre tutuluyor).</div>
     </div>
     <label id="mgKargoSatir" style="display:flex;align-items:center;gap:8px;font-size:13px;color:#E8DFC8;cursor:pointer"><input type="checkbox" id="mgKargoTakip"> 📦 Sipariş durumu ve kargo takibi (Bailey's gibi: bekliyor / kargolandı, toplu kargo)</label>
-    <label id="mgPilotSatir" class="mg-pilot"><input type="checkbox" id="mgPilot"> <span><b>🧪 Pilot (deneme) mağazası</b> — siparişleri, ödemeleri ve kargoları raporlara, kâra ve toplam sipariş sayısına <b>girmez</b>. Fiş, bayi linki, kargo… hepsi denenebilir; işiniz bitince tek tuşla silinir. Siparişler <b>Yeni → Hazırlanıyor → Kargolandı</b> aşamalarıyla takip edilir.</span></label>
+    <label id="mgPilotSatir" class="mg-pilot"><input type="checkbox" id="mgPilot" onchange="if(this.checked)document.getElementById('mgMusteriSiparis').checked=true"> <span><b>🧪 Pilot (deneme) mağazası</b> — siparişleri, ödemeleri ve kargoları raporlara, kâra ve toplam sipariş sayısına <b>girmez</b>. Fiş, bayi linki, kargo… hepsi denenebilir; işiniz bitince tek tuşla silinir. Siparişler <b>Yeni → Hazırlanıyor → Kargolandı</b> aşamalarıyla takip edilir.</span></label>
     <div id="mgPilotSil" class="mg-pilot" style="display:none"><span>🧪 Bu bir <b>pilot</b> mağaza. Raporları ve kârı etkilemez.</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button type="button" class="btn btn-sm" onclick="pilotSifirla(false)">♻️ Verilerini sıfırla</button><button type="button" class="btn btn-sm" style="border-color:#F87171;color:#F87171" onclick="pilotSifirla(true)">🗑 Pilotu tamamen sil</button></div></div>
+    <label id="mgMusteriSiparisSatir" style="display:none;align-items:flex-start;gap:8px;font-size:13px;color:#E8DFC8;cursor:pointer"><input type="checkbox" id="mgMusteriSiparis" style="margin-top:3px"> <span>📥 <b>Müşteri linkinden sipariş gönderebilsin</b> — bayi, linkindeki <b>＋ Sipariş ekle</b> ile Etsy fişlerini (PDF) sürükleyip bırakır; fişler burada <b>Müşteriden gelen fişler</b> olarak görünür, siz tek tuşla eklersiniz. <span style="color:#A39A85">(Supabase'de bayi-siparis.sql gerekir)</span></span></label>
     <div id="mgKargoUcretSatir" class="mg-ku">
       <div class="mg-ku-soru">💵 Bu bayiden kargo ücreti alınacak mı? *</div>
       <label><input type="radio" name="mgKargoUcret" value="evet"> <span><b>Evet</b> — kargo ücreti bayinin dolar borcuna yazılır</span></label>
@@ -5974,6 +5989,7 @@ function magazaModalAc(kod) {
   document.getElementById('mgSirket').value = mgTaslak.sirket || '';
   document.getElementById('mgKargoTakip').checked = !!mgTaslak.kargoTakip;
   document.getElementById('mgPilot').checked = !!mgTaslak.pilot;
+  document.getElementById('mgMusteriSiparis').checked = mgTaslak.musteriSiparis === true || (!!mgTaslak.pilot && mgTaslak.musteriSiparis !== false);
   document.querySelectorAll('input[name=mgKargoUcret]').forEach(r => { r.checked = mgTaslak.kargoUcret === true ? r.value === 'evet' : mgTaslak.kargoUcret === false ? r.value === 'hayir' : false; });
   document.getElementById('mgRenk').value = mgTaslak.renk || '#8C6D23';
   document.getElementById('mgLogoDosya').value = '';
@@ -5993,6 +6009,7 @@ function mgTurSec(tur, ilk) {
   document.getElementById('mgFaturaSatir').style.display = tur === 'kendi' ? '' : 'none';
   document.getElementById('mgKargoSatir').style.display = tur === 'bayi' ? 'flex' : 'none';
   document.getElementById('mgKargoUcretSatir').style.display = tur === 'bayi' ? '' : 'none';
+  document.getElementById('mgMusteriSiparisSatir').style.display = tur === 'bayi' ? 'flex' : 'none';
   const pm = mgDuzenlenen && ozelMagazaBul(mgDuzenlenen);
   document.getElementById('mgPilotSatir').style.display = tur === 'bayi' && !mgDuzenlenen ? 'flex' : 'none';
   document.getElementById('mgPilotSil').style.display = pm && pm.pilot ? '' : 'none';
@@ -6038,7 +6055,7 @@ async function mgKaydet() {
   const kuSecim = (document.querySelector('input[name=mgKargoUcret]:checked') || {}).value;
   if (mgTaslak.tur === 'bayi' && !kuSecim) { alert('Bu bayiden kargo ücreti alınıp alınmayacağını seçin.'); return; }
   const kayit = { ad, tur: mgTaslak.tur, sirket: mgTaslak.tur === 'kendi' ? document.getElementById('mgSirket').value : '', kargoTakip: mgTaslak.tur === 'bayi' && document.getElementById('mgKargoTakip').checked, logo: mgTaslak.logo || '', renk: mgTaslak.renk || '#8C6D23', gizli: !!mgTaslak.gizli };
-  if (mgTaslak.tur === 'bayi') kayit.kargoUcret = kuSecim === 'evet';
+  if (mgTaslak.tur === 'bayi') { kayit.kargoUcret = kuSecim === 'evet'; kayit.musteriSiparis = document.getElementById('mgMusteriSiparis').checked; }
   if (mgTaslak.tur === 'bayi' && (mgDuzenlenen ? mgTaslak.pilot : document.getElementById('mgPilot').checked)) { kayit.pilot = true; kayit.kargoTakip = true; kayit.ucAsama = true; }
   const liste = OZEL_MAGAZALAR.map(m => Object.assign({}, m));
   let kod = mgDuzenlenen;
@@ -6790,6 +6807,7 @@ async function loadGrupBData() {
   gbPanoCiz();
   if (gbSekme === 'gonderiler') gbGonderiListeCiz();
   gbSecimCubugu();
+  gbGelenFisCiz();
 }
 let gbSonPlatform = null;
 
@@ -7960,10 +7978,66 @@ function gbSiparisDetay(r) {
     notlar: r.siparis.notlar || [], hediye: !!r.siparis.hediye,
     alici: r.siparis.alici || '', ulke: r.siparis.ulke || '', siparis_no: r.siparis.siparisNo || '', son_gonderim: r.siparis.sonGonderim || '', magaza: r.siparis.magaza || '' };
 }
+
+// ===== V158: Müşteriden gelen fişler (bayi linkindeki "＋ Sipariş ekle") =====
+let gbGelenVar = null, gbGelenListe = [], gbGelenAcilan = null;
+function gbMusteriSiparisAcik(p) { const m = ozelMagazaBul(p || aktifPlatformB); return !!(m && (m.musteriSiparis === true || (m.pilot && m.musteriSiparis !== false))); }
+async function gbGelenFisCiz() {
+  const el = document.getElementById('gbGelenFis'); if (!el) return;
+  const p = aktifPlatformB;
+  if (gbGelenVar === false) { el.innerHTML = ''; return; }
+  let liste = [];
+  try {
+    liste = await api(`bayi_gelen_fisler?platform=eq.${p}&durum=eq.yeni&select=id,dosya_adi,siparis_no,alici,urun_sayisi,boyut,zaman&order=zaman.asc`) || [];
+    gbGelenVar = true;
+  } catch (e) { gbGelenVar = false; el.innerHTML = ''; return; }
+  if (p !== aktifPlatformB) return;
+  gbGelenListe = liste;
+  if (!liste.length) { el.innerHTML = gbMusteriSiparisAcik(p) ? '<div class="gb-gelen bos">📥 Müşteri linkinden yeni fiş yok. <span>Bayi, linkindeki <b>＋ Sipariş ekle</b> ile gönderdiğinde burada görünür.</span></div>' : ''; return; }
+  const etiket = f => f.siparis_no ? f.siparis_no.split(',').map(x => '#' + x).join(', ') : (f.dosya_adi || 'Fiş');
+  el.innerHTML = `<div class="gb-gelen">
+    <div class="gb-gelen-ust"><span class="gb-gelen-ikon">📥</span><div><b>Müşteriden ${liste.length} yeni fiş geldi</b><div class="gb-gelen-alt">Bayi, linkinden gönderdi. Açınca her zamanki fiş ekranı gelir: gramı, stoğu kontrol edip eklersiniz.</div></div>
+      <button class="btn btn-primary btn-sm" onclick="gbGelenAc()">📄 Hepsini aç ve ekle</button></div>
+    <ul>${liste.map(f => `<li><label><input type="checkbox" class="gb-gelen-cb" value="${f.id}" checked> <b>${gbEsc(etiket(f))}</b>${f.alici ? ' · ' + gbEsc(f.alici) : ''}${f.urun_sayisi ? ' · ' + f.urun_sayisi + ' ürün' : ''}</label>
+      <span class="gb-gelen-zaman">${new Date(f.zaman).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+      <button class="btn btn-sm" onclick="gbGelenAc([${f.id}])">Aç</button><button class="btn btn-sm" style="color:#F87171;border-color:rgba(248,113,113,.5)" onclick="gbGelenReddet(${f.id})" title="Eklemeden kaldır">🗑</button></li>`).join('')}</ul></div>`;
+}
+const gbHexBytes = h => { h = String(h || '').replace(/^\\x/, ''); const b = new Uint8Array(h.length / 2); for (let i = 0; i < b.length; i++) b[i] = parseInt(h.substr(i * 2, 2), 16); return b; };
+async function gbGelenAc(idler) {
+  idler = idler || [...document.querySelectorAll('.gb-gelen-cb:checked')].map(x => Number(x.value));
+  if (!idler.length) { alert('Açılacak fiş seçin.'); return; }
+  showToast('📥 ' + idler.length + ' fiş indiriliyor…');
+  try {
+    const r = await api(`bayi_gelen_fisler?id=in.(${idler.join(',')})&select=id,dosya_adi,siparis_no,pdf`);
+    const files = (r || []).map(f => new File([gbHexBytes(f.pdf)], f.dosya_adi || ('fis-' + f.id + '.pdf'), { type: 'application/pdf' }));
+    if (!files.length) throw new Error('Fiş bulunamadı (silinmiş olabilir)');
+    gbGelenAcilan = { platform: aktifPlatformB, fisler: (r || []).map(f => ({ id: f.id, nolar: String(f.siparis_no || '').split(',').filter(Boolean) })) };
+    await gbFisPdfSec({ files, value: '' });
+  } catch (e) { alert('Fişler açılamadı: ' + e.message); }
+}
+// Fiş ekranında eklenen (ya da zaten kayıtlı) siparişlerin gelen fişlerini "eklendi" yap
+async function gbGelenIsle(eklenenNolar) {
+  const a = gbGelenAcilan; gbGelenAcilan = null;
+  if (!a || a.platform !== aktifPlatformB) return;
+  const set = new Set([...eklenenNolar].map(String));
+  const biten = a.fisler.filter(f => !f.nolar.length || f.nolar.every(n => set.has(n))).map(f => f.id);
+  if (!biten.length) return;
+  try { await api(`bayi_gelen_fisler?id=in.(${biten.join(',')})`, 'PATCH', { durum: 'eklendi', islem_zamani: new Date().toISOString() }); } catch (e) {}
+  gbGelenFisCiz();
+}
+async function gbGelenReddet(id) {
+  if (!confirm('Bu fiş eklenmeden kaldırılsın mı? (Müşteri listesinden de düşer)')) return;
+  try { await api('bayi_gelen_fisler?id=eq.' + id, 'PATCH', { durum: 'reddedildi', islem_zamani: new Date().toISOString() }); } catch (e) { alert('Kaldırılamadı: ' + e.message); }
+  gbGelenFisCiz();
+}
 async function gbPdfEkle() {
   await gbDetayKontrol();
   const secilen = gbPdfSatirlar.filter(r => r.sec);
-  if (!secilen.length && !gbPdfGuncelle.length) { alert('Eklenecek ürün seçilmedi.'); return; }
+  if (!secilen.length && !gbPdfGuncelle.length) {
+    const zaten = gbPdfSatirlar.filter(r => r.zatenVar).map(r => String(r.siparis.siparisNo));
+    if (gbGelenAcilan && zaten.length) { await gbGelenIsle(zaten); gbModalKapat(); showToast('Bu fişlerdeki siparişler zaten kayıtlı — gelen fişler listesinden düşüldü'); return; }
+    alert('Eklenecek ürün seçilmedi.'); return;
+  }
   const farkli = secilen.filter(gbPdfMagazaSorunlu);
   if (farkli.length && !confirm(`⚠️ ${farkli.length} ürünün fişi başka bir Etsy mağazasından görünüyor (${[...new Set(farkli.map(r => r.siparis.magaza))].join(', ')}).\n\nYine de ${PLATFORM_LABELS[aktifPlatformB] || aktifPlatformB} mağazasına eklensin mi?`)) return;
   const eksikGram = secilen.filter(r => !r.gram);
@@ -7976,7 +8050,8 @@ async function gbPdfEkle() {
       } catch (e) {}
     }
     gbPdfGuncelle = [];
-    if (!secilen.length) { gbModalKapat(); gbOnbellekTemizle(); showToast('✓ ' + tamamlanan + ' siparişin eksikleri tamamlandı'); await loadGrupBData(); return; }
+    const islenenNolar = gbPdfSatirlar.filter(r => r.sec || r.zatenVar).map(r => String(r.siparis.siparisNo));
+    if (!secilen.length) { gbModalKapat(); gbOnbellekTemizle(); showToast('✓ ' + tamamlanan + ' siparişin eksikleri tamamlandı'); await gbGelenIsle(islenenNolar); await loadGrupBData(); return; }
     const satirlar = [];
     for (const r of secilen) {
       const ay = r.tarih.slice(0, 7), altin = parseFloat((await gbAyParam(ay)).altin_fiyati_usd) || 0;
@@ -7999,6 +8074,7 @@ async function gbPdfEkle() {
     const eklenen = (await api('platform_siparisler', 'POST', satirlar)) || [];
     if (gbDetayVar === false) showToast('ℹ️ Sipariş kartı için Supabase\'de siparis-detay.sql çalıştırın');
     const stokNot = await gbPdfStokDus(secilen, eklenen);
+    await gbGelenIsle(islenenNolar);
     gbModalKapat(); gbOnbellekTemizle();
     showToast('✓ ' + satirlar.length + ' sipariş fişten eklendi' + stokNot + (tamamlanan ? ' · ' + tamamlanan + ' kaydın eksikleri tamamlandı' : ''));
     await loadGrupBData();
@@ -13398,7 +13474,7 @@ async function cariSec(id) {
         <div class="cari-hero-alt">Müşteri hesabı${m.telefon ? ' <i>•</i> ' + bozEsc(m.telefon) : ''}${m.notlar ? ' <i>•</i> ' + bozEsc(m.notlar) : ''}<span id="cariIslemSayisi"></span></div>
       </div>
       <div class="cari-hero-btnlar">
-        <button class="btn cari-btn-wa" onclick="cariPaylas()" title="Seçili (yoksa son) işlemi WhatsApp ile müşteriye gönder">${CARI_WA_IKON} Paylaş</button>
+        <button class="btn cari-btn-wa" onclick="cariPaylas()" title="Müşterinin güncel bakiyesini WhatsApp ile gönder (tablodan bir işlem seçiliyse o işlemi)">${CARI_WA_IKON} Paylaş</button>
         <button class="btn cari-btn-cizgi" onclick="cariMusteriModalAc(${m.id})">${CARI_SVG.kalem} Düzenle</button>
         <button class="btn cari-btn-cizgi kirmizi" onclick="cariMusteriSil(${m.id})" title="Müşteriyi sil">${CARI_SVG.cop}</button>
       </div>
@@ -14078,7 +14154,8 @@ async function cariBakiyeGorsel(id, sadece) {
 let cariPaylasDurum = null;
 let cariPaylasSadece = false;
 async function cariPaylas(id, sadece) {
-  if (sadece === undefined) sadece = cariPaylasSadece;
+  // üstteki Paylaş: işlem seçili değilse doğrudan SADECE BAKİYE; satırdaki WhatsApp simgesi: o işlem
+  if (sadece === undefined) sadece = !id && !cariSeciliIslemId;
   cariPaylasSadece = !!sadece;
   if (!id) {
     cariSirala();
