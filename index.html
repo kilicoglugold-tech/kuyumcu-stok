@@ -1,4 +1,4 @@
-<!-- SURUM-V158-MUSTERI-SIPARIS --><!DOCTYPE html>
+<!-- SURUM-V159-BASKI-KESIM --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1328,6 +1328,45 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .gb-gelen li { display:flex; align-items:center; gap:8px; padding:6px 0; border-top:1px solid rgba(255,255,255,.06); font-size:13px; }
 .gb-gelen li label { flex:1; display:flex; align-items:center; gap:6px; cursor:pointer; min-width:0; }
 .gb-gelen-zaman { font-size:11.5px; color:#A39A85; }
+
+/* V159: baskıda beyaz zemin siyah yazı; sadece altın rengi ve ayar renkli; altta kesilecek alıcı şeridi */
+.yz-kart-alan { position:absolute; left:0; right:0; top:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.yz-yuva { display:block !important; }
+.yz-olcek .sk-kart { background:#fff !important; color:#000 !important; border:1px solid #000 !important; border-radius:6px !important; }
+.yz-olcek .sk-magaza-bant { background:#fff !important; color:#000 !important; border-bottom:2px solid #000; border-radius:0 !important; margin:-18px -18px 12px; }
+.yz-olcek .sk-magaza-et { color:#000 !important; }
+.yz-olcek .sk-magaza-ad { color:#000 !important; }
+.yz-olcek .sk-magaza-alt { color:#000 !important; font-weight:600; }
+.yz-olcek .sk-ust { border-bottom-color:#000 !important; }
+.yz-olcek .sk-ust .sk-no, .yz-olcek .sk-no[style] { color:#000 !important; }
+.yz-olcek .sk-kod { color:#000 !important; }
+.yz-olcek .sk-boy, .yz-olcek .sk-boy[style] { background:#fff !important; color:#000 !important; border:1.5px solid #000; }
+.yz-olcek .sk-ad, .yz-olcek .sk-siparis-adi, .yz-olcek .sk-siparis-adi span { color:#000 !important; }
+.yz-olcek .sk-siparis-adi { background:#fff !important; border:1px solid #000; }
+.yz-olcek .sk-tablo td { color:#000 !important; border-bottom-color:#BBB !important; }
+.yz-olcek .sk-tablo td:first-child { color:#333 !important; }
+.yz-olcek .sk-not { background:#fff !important; border:1.5px dashed #000 !important; }
+.yz-olcek .sk-not-baslik, .yz-olcek .sk-not-metin { color:#000 !important; }
+.yz-olcek .sk-foto, .yz-olcek .sk-foto-bos { border-color:#000 !important; background:#fff !important; }
+.yz-olcek .sk-ayar[style] { background:#fff !important; color:#000 !important; border:1.5px solid #000; }
+/* renkli kalanlar: altın rengi + ayar — "arka plan grafikleri" kapalı da olsa görünsün diye kalın renkli çerçeve + renkli yazı */
+.yz-olcek .sk-renk { background:#fff !important; border:3px solid currentColor !important; }
+.yz-olcek .sk-renk.renk-rose { color:#DB2777 !important; } .yz-olcek .sk-renk.renk-sari { color:#CA8A04 !important; }
+.yz-olcek .sk-renk.renk-beyaz { color:#475569 !important; } .yz-olcek .sk-renk.renk-gumus { color:#64748B !important; }
+.yz-olcek .sk-ayar.k14 { background:#FDE68A !important; color:#B45309 !important; border:2px solid #D97706; }
+.yz-olcek .sk-ayar.k10 { background:#BFDBFE !important; color:#1D4ED8 !important; border:2px solid #2563EB; }
+.yz-olcek .sk-ayar.k925 { background:#E5E7EB !important; color:#374151 !important; border:2px solid #6B7280; }
+.yz-kesim { position:absolute; left:0; right:0; bottom:0; box-sizing:border-box; border:1.6px dashed #000; padding:3mm 5mm; background:#fff; color:#000; font-family:'DM Sans',Arial,sans-serif; }
+.yz-makas { position:absolute; top:-3.4mm; font-size:5mm; line-height:1; background:#fff; padding:0 1mm; color:#000; }
+.yz-makas.sol { left:4mm; } .yz-makas.sag { right:4mm; transform:scaleX(-1); }
+.yz-kesim-ic { display:flex; gap:4mm; height:100%; overflow:hidden; }
+.yz-kesim-sol { flex:1; min-width:0; }
+.yz-kesim-et { font-size:2.4mm; font-weight:800; letter-spacing:.14em; color:#444; }
+.yz-kesim-ad { font-size:5.2mm; font-weight:900; line-height:1.15; margin:.6mm 0 .8mm; }
+.yz-kesim-adres { font-size:3.5mm; line-height:1.3; }
+.yz-kesim-tel { font-size:3.5mm; font-weight:800; margin-top:.8mm; }
+.yz-kesim-sag { text-align:right; font-size:3mm; line-height:1.45; color:#222; white-space:nowrap; border-left:1px solid #BBB; padding-left:4mm; }
+.yz-kesim.kucuk { padding:2.5mm 3.5mm; } .yz-kesim.kucuk .yz-kesim-ad { font-size:4.4mm; } .yz-kesim.kucuk .yz-kesim-adres, .yz-kesim.kucuk .yz-kesim-tel { font-size:3mm; } .yz-kesim.kucuk .yz-kesim-sag { font-size:2.5mm; padding-left:2.5mm; }
 </style>
 </head>
 <body>
@@ -15772,7 +15811,7 @@ async function gbSiparisUrunBagla(id) {
   } catch (e) { alert('Kaydedilemedi: ' + e.message); }
 }
 function gbSiparisFoto(s) { const u = gbSiparisUrun(s); return (u && u.fotograf_url) || s.foto || ''; }
-function gbSiparisKartHtml(s, kartId) {
+function gbSiparisKartHtml(s, kartId, baski) {
   const d = s.detay || {}, u = gbSiparisUrun(s);
   const ayar = d.ayar || (String(s.notlar || '').match(/(14K|10K|925)/i) || [])[1] || s.ayar || '';
   const ayarCls = /14/.test(ayar) ? 'k14' : /10/.test(ayar) ? 'k10' : /925/.test(ayar) ? 'k925' : '';
@@ -15787,7 +15826,7 @@ function gbSiparisKartHtml(s, kartId) {
     <div ${kartId ? `id="${kartId}" ` : ''}class="sk-kart">
       <div class="sk-magaza-bant"><span class="sk-magaza-et">MAĞAZA</span><span class="sk-magaza-ad">${gbEsc(d.magaza || magaza)}</span>${d.magaza && d.magaza !== magaza ? `<span class="sk-magaza-alt">${gbEsc(magaza)}</span>` : ''}</div>
       <div class="sk-ust"><div><div class="sk-magaza">${gbEsc(d.alici || '')}</div><div class="sk-no">Sipariş ${s.musteri_adi ? '<b>' + gbEsc(s.musteri_adi) + '</b>' : ''}${s.harici_no ? ' · Etsy #' + gbEsc(s.harici_no) : ''}</div></div>
-        <div style="text-align:right"><div class="sk-no">📅 ${gbEsc(s.tarih || '')}</div>${s.son_gonderim ? `<div class="sk-no" style="color:#B45309;font-weight:700">⏰ Son gönderim ${gbEsc(s.son_gonderim)}</div>` : ''}${durum ? `<div class="sk-no">${durum}</div>` : ''}</div></div>
+        <div style="text-align:right"><div class="sk-no">${baski ? 'Tarih ' : '📅 '}${gbEsc(s.tarih || '')}</div>${s.son_gonderim ? `<div class="sk-no" style="color:#B45309;font-weight:700">${baski ? '' : '⏰ '}Son gönderim ${gbEsc(s.son_gonderim)}</div>` : ''}${durum && !baski ? `<div class="sk-no">${durum}</div>` : ''}</div></div>
       <div class="sk-govde">
         <div>${u && u.fotograf_url ? `<img class="sk-foto" src="${gbEsc(u.fotograf_url)}" crossorigin="anonymous" alt="">` : s.foto ? `<img class="sk-foto" src="${s.foto}" alt="">` : '<div class="sk-foto-bos">💎</div>'}
           ${u && u.fotograf_url && s.foto ? `<div style="font-size:11px;color:#6B6455;margin-top:6px">Fişteki fotoğraf:</div><img class="sk-fis-foto" src="${s.foto}" alt="" onclick="gbFotoBuyut(this.src)">` : ''}</div>
@@ -15807,11 +15846,11 @@ function gbSiparisKartHtml(s, kartId) {
             ${satir('Taş', tas && parseFloat(tas) ? gbEsc(tas) + ' gr' : '')}
             ${satir('SKU', gbEsc(d.sku || ''))}
             ${satir('Fişteki gram', d.fis_gram ? String(d.fis_gram).replace('.', ',') + ' gr' : '')}
-            ${satir('Alıcı', gbEsc([d.alici, d.ulke || s.ulke].filter(Boolean).join(' · ')))}
+            ${baski ? '' : satir('Alıcı', gbEsc([d.alici, d.ulke || s.ulke].filter(Boolean).join(' · ')))}
           </table>
           ${!s.detay ? '<div style="font-size:11.5px;color:#9A8F78;margin-top:10px">Bu sipariş, özellikleri kaydedilmeden önce eklenmiş. Fişten yeni eklenen siparişlerde renk, uzunluk, boy ve SKU da görünür.</div>' : ''}
           ${(d.notlar || []).length ? `<div class="sk-not">${d.notlar.map(n => `<div class="sk-not-baslik">📝 ${gbEsc(n.baslik === 'Private notes' ? 'Not (Private notes)' : n.baslik)}</div><div class="sk-not-metin">${gbEsc(n.metin)}</div>`).join('')}</div>` : ''}
-          <div class="sk-bagla" data-html2canvas-ignore="true"><span>${u ? '🔗 Başka ürün:' : '🔗 Bu sipariş hangi ürün? Kodu yazın:'}</span><input id="skKodGir" class="form-control" list="stokKodListe" placeholder="örn. D12" onkeydown="if(event.key==='Enter')gbSiparisUrunBagla('${s.id}')"><button class="btn btn-sm" onclick="gbSiparisUrunBagla('${s.id}')">Bağla</button></div>
+          ${baski ? '' : `<div class="sk-bagla" data-html2canvas-ignore="true"><span>${u ? '🔗 Başka ürün:' : '🔗 Bu sipariş hangi ürün? Kodu yazın:'}</span><input id="skKodGir" class="form-control" list="stokKodListe" placeholder="örn. D12" onkeydown="if(event.key==='Enter')gbSiparisUrunBagla('${s.id}')"><button class="btn btn-sm" onclick="gbSiparisUrunBagla('${s.id}')">Bağla</button></div>`}
         </div>
       </div>
     </div>`;
@@ -15852,7 +15891,7 @@ function gbYazdirSecenek() {
     </div>
     <div class="ds-butonlar"><button class="btn" onclick="gbModalKapat()">Vazgeç</button></div>`);
 }
-const YZ_DUZEN = { 1: { kolon: 1, satir: 1, gen: 640, dikey: true }, 2: { kolon: 1, satir: 2, gen: 900 }, 4: { kolon: 2, satir: 2, gen: 470, dikey: true } };
+const YZ_DUZEN = { 1: { kolon: 1, satir: 1, gen: 640, dikey: true, serit: 36 }, 2: { kolon: 1, satir: 2, gen: 900, serit: 30 }, 4: { kolon: 2, satir: 2, gen: 470, dikey: true, serit: 34 } };
 async function gbKartlariYazdir(idler, adet) {
   idler = idler || [...gbSecili];
   const liste = idler.map(gbSiparisBul).filter(Boolean);
@@ -15867,7 +15906,7 @@ async function gbKartlariYazdir(idler, adet) {
   for (let i = 0; i < liste.length; i += adet) sayfalar.push(liste.slice(i, i + adet));
   const SW = 194, SH = 279, ARA = 4, yw = (SW - ARA * (dz.kolon - 1)) / dz.kolon, yh = (SH - ARA * (dz.satir - 1)) / dz.satir;
   const yuvaStil = i => `left:${(i % dz.kolon) * (yw + ARA)}mm;top:${Math.floor(i / dz.kolon) * (yh + ARA)}mm;width:${yw}mm;height:${yh}mm`;
-  kap.innerHTML = sayfalar.map(sp => `<div class="yz-sayfa">${sp.map((s, i) => `<div class="yz-yuva" style="${yuvaStil(i)}"><div class="yz-olcek${dz.dikey ? ' yz-dikey' : ''}" style="width:${dz.gen}px">${gbSiparisKartHtml(s, '')}</div></div>`).join('')}</div>`).join('');
+  kap.innerHTML = sayfalar.map(sp => `<div class="yz-sayfa">${sp.map((s, i) => `<div class="yz-yuva" style="${yuvaStil(i)}"><div class="yz-kart-alan" style="bottom:${dz.serit + 3}mm"><div class="yz-olcek${dz.dikey ? ' yz-dikey' : ''}" style="width:${dz.gen}px">${gbSiparisKartHtml(s, '', true)}</div></div>${gbKesimSerit(s, dz)}</div>`).join('')}</div>`).join('');
   document.body.appendChild(kap);
   showToast('🖨 ' + liste.length + ' kart hazırlanıyor…');
   // fotoğraflar yüklensin (en fazla 8 sn)
@@ -15878,10 +15917,28 @@ async function gbKartlariYazdir(idler, adet) {
   window.addEventListener('afterprint', bitir);
   setTimeout(() => { window.print(); setTimeout(() => { if (document.getElementById('skBaski') && !matchMedia('print').matches) bitir(); }, 30000); }, 60);
 }
+// V159: kartın altında kesilecek alıcı şeridi (ad, adres, telefon)
+function gbKesimSerit(s, dz) {
+  const d = s.detay || {};
+  let sat = String(s.adres || '').split('\n').map(x => x.trim()).filter(Boolean);
+  if (!sat.length) sat = [d.alici, d.ulke || s.ulke].filter(Boolean);
+  const telMi = x => /^(phone|tel|telefon)\b/i.test(x) || /^\+?[\d\s().-]{7,}$/.test(x);
+  const tel = sat.filter(telMi).map(x => x.replace(/^(phone|tel|telefon)\s*:?\s*/i, ''));
+  const ad = sat[0] && !telMi(sat[0]) ? sat[0] : (d.alici || '');
+  const adres = sat.slice(sat[0] === ad ? 1 : 0).filter(x => !telMi(x));
+  const kucuk = dz.kolon > 1;
+  return `<div class="yz-kesim${kucuk ? ' kucuk' : ''}" style="height:${dz.serit}mm">
+    <span class="yz-makas sol">✂</span><span class="yz-makas sag">✂</span>
+    <div class="yz-kesim-ic">
+      <div class="yz-kesim-sol"><div class="yz-kesim-et">ALICI · SHIP TO</div><div class="yz-kesim-ad">${gbEsc(ad || '—')}</div>
+        <div class="yz-kesim-adres">${adres.map(gbEsc).join('<br>')}</div>${tel.length ? `<div class="yz-kesim-tel">☎ ${tel.map(gbEsc).join(' · ')}</div>` : ''}</div>
+      <div class="yz-kesim-sag"><div>${gbEsc(d.magaza || PLATFORM_LABELS[s.platform] || '')}</div>${s.musteri_adi ? `<div>Sipariş <b>${gbEsc(s.musteri_adi)}</b></div>` : ''}${s.harici_no ? `<div>#${gbEsc(s.harici_no)}</div>` : ''}</div>
+    </div></div>`;
+}
 // Her kartı yuvasına tam sığdır (oran bozulmadan, ortalanmış)
 function gbYazdirOlcekle(kap) {
   document.body.classList.add('yz-olcum');
-  kap.querySelectorAll('.yz-yuva').forEach(y => {
+  kap.querySelectorAll('.yz-kart-alan').forEach(y => {
     const o = y.querySelector('.yz-olcek'); o.style.zoom = '';
     const yw = y.clientWidth, yh = y.clientHeight, w = o.offsetWidth, h = o.offsetHeight;
     const k = Math.floor(Math.min(yw / w, yh / h) * 1000) / 1000;

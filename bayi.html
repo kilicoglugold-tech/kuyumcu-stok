@@ -30,6 +30,8 @@ button{font:inherit;cursor:pointer}
 .k .d{font-size:26px;font-weight:800;margin-top:4px}
 .k .d small{font-size:13px;font-weight:600;color:var(--soluk)}
 .k .a{font-size:12px;color:var(--soluk);margin-top:3px}
+.k.altin{--k:var(--altin)}.k .bar{height:6px;border-radius:6px;background:rgba(255,255,255,.08);margin-top:8px;overflow:hidden}.k .bar i{display:block;height:100%;background:var(--yesil);border-radius:6px}
+.kartlar:has(> .k:nth-child(4)){grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:1000px){.kartlar:has(> .k:nth-child(4)){grid-template-columns:repeat(2,minmax(0,1fr))}}
 .k.yesil{--k:var(--yesil)}.k.mavi{--k:var(--mavi)}.k.mor{--k:#A5B4FC}
 .sekmeler{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
 .sekmeler button{background:rgba(255,255,255,.04);border:1px solid var(--cizgi);color:#E8DFC8;border-radius:22px;padding:7px 15px;font-size:13px;font-weight:600}
@@ -198,6 +200,13 @@ function takipLink(g) {
 }
 function fotoImg(s, k) { return /^data:image\//.test(s.foto || '') ? `<img class="foto ${k || ''}" src="${s.foto}" alt="" onclick="buyut(this.src)">` : ''; }
 function buyut(src) { const d = document.createElement('div'); d.className = 'buyuk'; d.onclick = () => d.remove(); const i = document.createElement('img'); i.src = src; d.appendChild(i); document.body.appendChild(d); }
+// Dolar borcu kutusu: mağazadan kargo ücreti alınıyorsa ya da dolar hareketi varsa
+function dolarGoster(h) {
+  if (FIS.kargoUcret === true) return true;
+  const dolarVar = Math.abs(h.usdBorc) > 0.004 || (V.odemeler || []).some(o => n(o.usd)) || (V.gonderiler || []).some(g => n(g.kargo_usd));
+  if (FIS.kargoUcret === false) return dolarVar && Math.abs(h.usdBorc) > 0.004;
+  return dolarVar;
+}
 function kargoVar() { return (V.gonderiler || []).length > 0 || (V.siparisler || []).some(s => s.durum); }
 function siparisTablo(liste, kargoKolon) {
   const durumKolon = kargoVar(); kargoKolon = kargoKolon && durumKolon;
@@ -279,9 +288,11 @@ function ciz() {
     ${gelenHtml()}
     <div class="kartlar">
       <div class="k mor"><div class="u">💳 Has borcu</div><div class="d">${hasF(h.hasBorc)} <small>has</small></div><div class="a">Tüm siparişler − ödemeler</div></div>
-      <div class="k mavi"><div class="u">💵 Dolar borcu</div><div class="d">${usdF(h.usdBorc)}</div><div class="a">${kargoVar() ? 'Kargo + ek borç − ödemeler' : 'Ek borç − ödemeler'}</div></div>
-      ${kargoVar() ? `<div class="k yesil"><div class="u">📦 Bu ay kargolanan</div><div class="d">${h.kargoAy} <small>sipariş</small></div><div class="a">${ayAd(h.buAy)}</div></div>`
-        : `<div class="k yesil"><div class="u">📋 Bu ay sipariş</div><div class="d">${h.sip.filter(s => String(s.tarih || '').slice(0, 7) === h.buAy).length} <small>sipariş</small></div><div class="a">${ayAd(h.buAy)}</div></div>`}
+      ${dolarGoster(h) ? `<div class="k mavi"><div class="u">💵 Dolar borcu</div><div class="d">${usdF(h.usdBorc)}</div><div class="a">${FIS.kargoUcret === true || kargoVar() ? 'Kargo + ek borç − ödemeler' : 'Ek borç − ödemeler'}</div></div>` : ''}
+      ${(() => { const ay = (sekme === 'tum' && ayFiltre) || h.buAy, ayS = h.sip.filter(s => String(s.tarih || '').slice(0, 7) === ay);
+        const kg = ayS.filter(s => s.durum === 'kargolandi').length, yuz = ayS.length ? Math.round(kg / ayS.length * 100) : 0;
+        return `<div class="k yesil"><div class="u">📋 ${ayAd(ay)} siparişleri</div><div class="d">${ayS.length} <small>sipariş</small></div><div class="a">Bu ay girilen toplam sipariş</div></div>
+          <div class="k altin"><div class="u">🚚 Kargolanan</div><div class="d">${kg} <small>/ ${ayS.length}</small></div><div class="bar"><i style="width:${yuz}%"></i></div><div class="a">${ayS.length - kg ? `⏳ ${ayS.length - kg} sipariş henüz kargolanmadı` : ayS.length ? '✓ Hepsi kargolandı' : '—'}</div></div>`; })()}
     </div>
     <div class="sekmeler">
       <button class="${sekme === 'tum' ? 'aktif' : ''}" onclick="sekmeSec('tum')">📋 Tüm siparişler</button>
@@ -311,7 +322,7 @@ async function rpc(ad, govde) {
   return r.json();
 }
 async function fisDurumYukle() {
-  try { const d = await rpc('bayi_fis_liste', { p_token: linkBilgi().t, p_platform: ORTAK ? ortakSecili : null }); FIS = d && d.acik ? { acik: true, fisler: d.fisler || [] } : { acik: false, fisler: [] }; }
+  try { const d = await rpc('bayi_fis_liste', { p_token: linkBilgi().t, p_platform: ORTAK ? ortakSecili : null }); FIS = d && d.acik ? { acik: true, fisler: d.fisler || [] } : { acik: false, fisler: [] }; FIS.kargoUcret = d ? d.kargo_ucret : null; }
   catch (e) { FIS = { acik: false, fisler: [] }; }   // özellik kurulmamışsa buton görünmez
 }
 function gelenHtml() {
