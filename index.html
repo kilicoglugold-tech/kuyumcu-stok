@@ -1,4 +1,4 @@
-<!-- SURUM-V159-BASKI-KESIM --><!DOCTYPE html>
+<!-- SURUM-V160-HIZLI-FOTO --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1367,6 +1367,11 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .yz-kesim-tel { font-size:3.5mm; font-weight:800; margin-top:.8mm; }
 .yz-kesim-sag { text-align:right; font-size:3mm; line-height:1.45; color:#222; white-space:nowrap; border-left:1px solid #BBB; padding-left:4mm; }
 .yz-kesim.kucuk { padding:2.5mm 3.5mm; } .yz-kesim.kucuk .yz-kesim-ad { font-size:4.4mm; } .yz-kesim.kucuk .yz-kesim-adres, .yz-kesim.kucuk .yz-kesim-tel { font-size:3mm; } .yz-kesim.kucuk .yz-kesim-sag { font-size:2.5mm; padding-left:2.5mm; }
+
+/* V160: foto hızlandırma */
+.foto-hiz { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 14px; padding:12px 16px; border-radius:14px; border:1px solid rgba(212,175,55,.45); background:rgba(212,175,55,.07); font-size:13.5px; }
+.foto-hiz > span { font-size:24px; } .foto-hiz > div { flex:1; min-width:240px; }
+.foto-hiz-alt { font-size:12px; color:var(--text3); margin-top:3px; }
 </style>
 </head>
 <body>
@@ -1727,6 +1732,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
       </div>
     </div>
   </div>
+  <div id="fotoHizBanner"></div>
   <div class="urun-grid" id="urunGrid"><div class="loading">Yükleniyor...</div></div>
 </div>
 
@@ -3212,9 +3218,36 @@ function notlarWithTas(base, tasGr) {
   return tasGr > 0 ? (clean ? clean + '|TAŞ:' + parseFloat(tasGr).toFixed(3) : 'TAŞ:' + parseFloat(tasGr).toFixed(3)) : clean;
 }
 
+// V160: fotoğraflar yüklenirken küçültülür (büyük: 1600 px, küçük: 480 px); listeler küçüğünü kullanır
+const FOTO_BUYUK = 1600, FOTO_KUCUK = 480;
+function fotoKucukUrl(url) { return url && /_b\.jpg(\?.*)?$/.test(url) ? url.replace(/_b\.jpg/, '_k.jpg') : (url || ''); }
+async function fotoBlobKucult(kaynak, maks, kalite) {
+  const bmp = await createImageBitmap(kaynak);
+  const o = Math.min(1, maks / Math.max(bmp.width, bmp.height));
+  const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(bmp.width * o)); c.height = Math.max(1, Math.round(bmp.height * o));
+  const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);   // saydam PNG siyah olmasın
+  x.imageSmoothingQuality = 'high'; x.drawImage(bmp, 0, 0, c.width, c.height);
+  if (bmp.close) bmp.close();
+  return await new Promise((ok, red) => c.toBlob(b => b ? ok(b) : red(new Error('Fotoğraf dönüştürülemedi')), 'image/jpeg', kalite));
+}
+async function fotoDepoyaYaz(ad, blob, session) {
+  const r = await fetch(`${SUPABASE_URL}/storage/v1/object/urun-fotograflari/${ad}`, {
+    method: 'POST',
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + session.access_token, 'Content-Type': blob.type || 'image/jpeg', 'cache-control': 'max-age=31536000' },
+    body: blob
+  });
+  if (!r.ok) throw new Error('Depoya yazılamadı (' + r.status + ')');
+  return `${SUPABASE_URL}/storage/v1/object/public/urun-fotograflari/${ad}`;
+}
 async function uploadFoto(file) {
   const session = await ensureValidSession();
   if (!session) return null;
+  try {
+    const kok = Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+    const buyuk = await fotoBlobKucult(file, FOTO_BUYUK, 0.86), kucuk = await fotoBlobKucult(file, FOTO_KUCUK, 0.8);
+    await fotoDepoyaYaz(kok + '_k.jpg', kucuk, session);
+    return await fotoDepoyaYaz(kok + '_b.jpg', buyuk, session);
+  } catch (e) { console.warn('Fotoğraf küçültülemedi, aslı yükleniyor:', e); }
   const ext = file.name.split('.').pop();
   const name = Date.now() + '.' + ext;
   const r = await fetch(`${SUPABASE_URL}/storage/v1/object/urun-fotograflari/${name}`, {
@@ -3226,6 +3259,46 @@ async function uploadFoto(file) {
   return `${SUPABASE_URL}/storage/v1/object/public/urun-fotograflari/${name}`;
 }
 
+
+// V160: eski (büyük, küçültülmemiş) fotoğrafları hızlı biçime çevir
+let fotoHizCalisiyor = false;
+function fotoEskiler() { return (allUrunler || []).filter(u => u.fotograf_url && !/_b\.jpg(\?.*)?$/.test(u.fotograf_url) && /\/storage\/v1\/object\/public\/urun-fotograflari\//.test(u.fotograf_url)); }
+function fotoHizBannerCiz() {
+  const el = document.getElementById('fotoHizBanner'); if (!el) return;
+  const n = fotoEskiler().length;
+  if (!n || (typeof isAdmin === 'function' && !isAdmin())) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="foto-hiz"><span>🖼</span><div><b>${n} ürünün fotoğrafı tam boy duruyor</b> — liste açılırken hepsi büyük boyutta iniyor, bu yüzden geç geliyor.<div class="foto-hiz-alt">Hızlandır deyince her fotoğrafın 1600 px'lik bir kopyası ve listeler için 480 px'lik küçüğü hazırlanır. Görüntü kalitesi bozulmaz; asıl dosyalar silinmez.</div></div>
+    <button class="btn btn-primary btn-sm" id="fotoHizBtn" onclick="fotoHizlandir()">${fotoHizCalisiyor ? 'Çalışıyor…' : '⚡ Hızlandır'}</button></div>`;
+}
+async function fotoHizlandir() {
+  if (fotoHizCalisiyor) return;
+  const liste = fotoEskiler(); if (!liste.length) return;
+  if (!confirm(liste.length + ' fotoğraf küçültülüp yeniden yüklenecek. Bu birkaç dakika sürebilir; bu sırada sayfayı kapatmayın. Başlansın mı?')) return;
+  fotoHizCalisiyor = true;
+  let tamam = 0, hata = 0;
+  const btn = () => document.getElementById('fotoHizBtn');
+  try {
+    const session = await ensureValidSession(); if (!session) throw new Error('Oturum yok');
+    for (const u of liste) {
+      try {
+        const r = await fetch(u.fotograf_url, { cache: 'no-store' });
+        if (!r.ok) throw new Error('indirilemedi ' + r.status);
+        const blob = await r.blob();
+        const kok = Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+        const buyuk = await fotoBlobKucult(blob, FOTO_BUYUK, 0.86), kucuk = await fotoBlobKucult(blob, FOTO_KUCUK, 0.8);
+        await fotoDepoyaYaz(kok + '_k.jpg', kucuk, session);
+        const url = await fotoDepoyaYaz(kok + '_b.jpg', buyuk, session);
+        await api('urunler?id=eq.' + u.id, 'PATCH', { fotograf_url: url });
+        u.fotograf_url = url; tamam++;
+      } catch (e) { hata++; console.warn('Foto hızlandırma', u.kod, e); }
+      if (btn()) btn().textContent = `${tamam + hata} / ${liste.length}…`;
+    }
+  } catch (e) { alert('Durdu: ' + e.message); }
+  fotoHizCalisiyor = false;
+  showToast(`⚡ ${tamam} fotoğraf hızlandırıldı${hata ? ` · ${hata} tanesi atlandı` : ''}`);
+  fotoHizBannerCiz();
+  if (typeof filterUrunler === 'function') filterUrunler();
+}
 // NAV
 let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
@@ -3556,7 +3629,7 @@ function renderUrunGrid(urunler) {
         <button onclick="event.stopPropagation();toggleUrunFlag('${u.id}','mumBitti')" style="background:${meta.mumBitti?'#C0392B':'#F1F0EC'};color:${meta.mumBitti?'#fff':'#6B6960'};border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">🕯️ Mumu Bitti${meta.mumBitti?' ✓':''}</button>
       </div>
       <div style="position:absolute;top:6px;right:6px;z-index:2;display:flex;flex-direction:column;gap:3px;"><button onclick="event.stopPropagation();dokumSiparisVer('${u.id}','10K',this)" style="background:#3B82F6;color:#fff;border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">10K + Döküm</button><button onclick="event.stopPropagation();dokumSiparisVer('${u.id}','14K',this)" style="background:#D97706;color:#fff;border:none;border-radius:10px;padding:2px 8px;font-size:10px;font-weight:700;cursor:pointer;">14K + Döküm</button></div>
-      ${u.fotograf_url ? `<div class="urun-card-foto" style="position:relative;">${turHtml}${olcuKartHtml}<img src="${u.fotograf_url}" loading="lazy"></div>` : `<div class="urun-card-foto-placeholder" style="position:relative;">${turHtml}${olcuKartHtml}💍</div>`}
+      ${u.fotograf_url ? `<div class="urun-card-foto" style="position:relative;">${turHtml}${olcuKartHtml}<img src="${fotoKucukUrl(u.fotograf_url)}" loading="lazy" decoding="async"></div>` : `<div class="urun-card-foto-placeholder" style="position:relative;">${turHtml}${olcuKartHtml}💍</div>`}
       <div class="urun-card-body">
         <span class="stl-rozet" ${stlSay ? '' : 'hidden'}>🧊 STL${stlSay > 1 ? ' ×' + stlSay : ''}</span>
         <div class="urun-card-kod">${u.kod}</div>
@@ -3976,6 +4049,7 @@ function getFiltreVal(name) {
 }
 
 function filterUrunler() {
+  try { fotoHizBannerCiz(); } catch (e) {}
   const q = document.getElementById('urunArama').value.toLowerCase();
   const sonuc = allUrunler.filter(u => {
     if (q && !u.ad.toLowerCase().includes(q) && !u.kod.toLowerCase().includes(q)) return false;
@@ -10334,7 +10408,7 @@ function dokumRenderListe() {
   }
   el.innerHTML = liste.map(item => {
     const foto = item.fotograf_url
-      ? `<img src="${item.fotograf_url}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
+      ? `<img src="${fotoKucukUrl(item.fotograf_url)}" loading="lazy" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0;">`
       : `<div style="width:44px;height:44px;background:var(--bg2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">💍</div>`;
     const tasHtml = item.tas_gram ? `<span style="color:var(--text2);font-size:12px;">💎 ${item.tas_gram} gr</span>` : '';
     const ayarRenk = item.ayar==='10K' ? '#3B82F6' : '#D97706';
@@ -15186,7 +15260,7 @@ function tdSatirHtml(u) {
   const siz = v('tasSiz');
   const txt = (f, w, ph, dis) => `<input type="text" data-u="${vkEsc(id)}" data-f="${f}" value="${vkEsc(v(f))}" style="width:${w}px" class="${cls(f).trim()}" ${ph ? `placeholder="${ph}"` : ''} ${dis ? 'disabled' : ''} inputmode="${/tasGram|en|yukseklik|kalinlik/.test(f) ? 'decimal' : 'text'}">`;
   const chk = (f, sol) => `<td class="vk-ort${sol ? ' vk-sol' : ''}"><input type="checkbox" data-u="${vkEsc(id)}" data-f="${vkEsc(f)}" ${v(f) ? 'checked' : ''} class="${cls(f).trim()}"></td>`;
-  const foto = u.fotograf_url ? `<img class="vk-foto" src="${vkEsc(u.fotograf_url)}" loading="lazy" alt="">` : '<div class="vk-foto-bos">💎</div>';
+  const foto = u.fotograf_url ? `<img class="vk-foto" src="${vkEsc(fotoKucukUrl(u.fotograf_url))}" loading="lazy" alt="">` : '<div class="vk-foto-bos">💎</div>';
   return `<tr data-u="${vkEsc(id)}" class="${Object.keys(d).length ? 'vk-satir-degisti' : ''}">
     <td>${foto}</td><td class="vk-kod">${vkEsc(u.kod)}</td><td><div class="vk-ad" title="${vkEsc(u.ad)}">${vkEsc(u.ad)}</div></td>
     <td class="vk-sol">${txt('tasGram', 64, 'gr', siz)}</td><td>${txt('tasOlcu', 120, 'örn. 2mm x 4', siz)}</td>${chk('tasSiz')}
@@ -15677,7 +15751,7 @@ function stokCiz() {
     return `<td class="vk-ort"><input type="text" inputmode="numeric" data-sid="${vkEsc(u.id)}" data-ayar="${ay}" value="${vkEsc(d)}" class="stok-hucre${cls}" placeholder="—" style="width:64px;text-align:center"></td>`;
   };
   sar.innerHTML = `<table class="vk-tablo"><thead><tr><th></th><th>Kod</th><th>Ad</th>${STOK_AYARLAR.map(ay => `<th class="vk-ort vk-grup">${ay}</th>`).join('')}<th class="vk-ort">Toplam</th></tr></thead>
-    <tbody>${stkListe.map(u => { const t = STOK_AYARLAR.reduce((s, ay) => s + (a(u.id, ay) || 0), 0); return `<tr><td>${u.fotograf_url ? `<img class="vk-foto" src="${vkEsc(u.fotograf_url)}" loading="lazy" alt="">` : '<div class="vk-foto-bos">💎</div>'}</td><td class="vk-kod">${vkEsc(u.kod)}</td><td><div class="vk-ad" title="${vkEsc(u.ad)}">${vkEsc(u.ad)}</div></td>${STOK_AYARLAR.map(ay => hucre(u, ay)).join('')}<td class="vk-ort"><b>${t}</b></td></tr>`; }).join('') || '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Eşleşen ürün yok</td></tr>'}</tbody></table>`;
+    <tbody>${stkListe.map(u => { const t = STOK_AYARLAR.reduce((s, ay) => s + (a(u.id, ay) || 0), 0); return `<tr><td>${u.fotograf_url ? `<img class="vk-foto" src="${vkEsc(fotoKucukUrl(u.fotograf_url))}" loading="lazy" alt="">` : '<div class="vk-foto-bos">💎</div>'}</td><td class="vk-kod">${vkEsc(u.kod)}</td><td><div class="vk-ad" title="${vkEsc(u.ad)}">${vkEsc(u.ad)}</div></td>${STOK_AYARLAR.map(ay => hucre(u, ay)).join('')}<td class="vk-ort"><b>${t}</b></td></tr>`; }).join('') || '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3)">Eşleşen ürün yok</td></tr>'}</tbody></table>`;
   const tum = Object.entries(STOK.harita[stkAlan] || {});
   document.getElementById('stkBilgi').textContent = `${stkListe.length} ürün · ⛔ ${new Set(tum.filter(([, x]) => x <= 0).map(([k]) => k.split('|')[0])).size} bitmiş · ⚠️ ${new Set(tum.filter(([, x]) => x > 0 && x <= esik).map(([k]) => k.split('|')[0])).size} azalan`;
   stokSayacGuncelle();
