@@ -1,4 +1,4 @@
-<!-- SURUM-V160-HIZLI-FOTO --><!DOCTYPE html>
+<!-- SURUM-V161-STL-INDIR --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -4379,6 +4379,32 @@ async function stlDosyalariYukle(dosyalar, urunId) {
 async function stlBlob(urunId, ad) { return (await stlIstek(stlYol(urunId, ad))).blob(); }
 async function stlIndir(urunId, ad, btn) {
   const eski = btn ? btn.textContent : '';
+  // V161: Chrome/Edge'de dosya doğrudan diske yazılır (tarayıcı hafızasına/ön belleğine alınmaz).
+  // Büyük STL'lerde "yer yok" (FILE_ERROR_NO_SPACE) ve yarım kalan indirmeleri önler.
+  if (window.showSaveFilePicker && window.WritableStream) {
+    let tutamac = null;
+    try { tutamac = await window.showSaveFilePicker({ suggestedName: ad }); }
+    catch (e) { if (e && e.name === 'AbortError') return; tutamac = null; }
+    if (tutamac) {
+      if (btn) { btn.textContent = '0%'; btn.disabled = true; }
+      let yazici = null;
+      try {
+        const r = await stlIstek(stlYol(urunId, ad));
+        const toplam = Number(r.headers.get('Content-Length')) || 0;
+        let gelen = 0;
+        yazici = await tutamac.createWritable();
+        const sayac = new TransformStream({ transform(parca, k) { gelen += parca.byteLength; if (btn && toplam) btn.textContent = Math.floor(gelen / toplam * 100) + '%'; k.enqueue(parca); } });
+        await r.body.pipeThrough(sayac).pipeTo(yazici);
+        yazici = null;
+        showToast('⬇ ' + ad + ' indirildi (' + stlBoyut(gelen) + ')');
+      } catch (e) {
+        try { if (yazici) await yazici.abort(); } catch (_) {}
+        alert('İndirilemedi: ' + (e && e.message || e) + (/space|yer|quota/i.test(String(e && e.message)) ? '\n\nSeçtiğiniz diskte yer kalmamış olabilir.' : ''));
+      }
+      if (btn) { btn.textContent = eski; btn.disabled = false; }
+      return;
+    }
+  }
   if (btn) { btn.textContent = '…'; btn.disabled = true; }
   try {
     const b = await stlBlob(urunId, ad);
