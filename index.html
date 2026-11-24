@@ -1,4 +1,4 @@
-<!-- SURUM-V167-YAZICI-FOTO2 --><!DOCTYPE html>
+<!-- SURUM-V168-YAZICI-BITISIK --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -2812,11 +2812,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .birak b{font-size:17px;display:block;margin-bottom:4px}.birak span{color:var(--soluk);font-size:13px}
 #durum{margin:0 20px;color:var(--soluk);font-size:13px;min-height:20px}
 #sayfalar{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;padding:10px 20px 60px}
-.sayfa{background:#fff;width:210mm;height:297mm;padding:4mm;box-shadow:0 10px 30px rgba(0,0,0,.5);transform-origin:top left}
-.izgara{display:grid;width:100%;height:100%;gap:1.6mm}
-.hucre{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.izgara.kesim .hucre{outline:.3mm dashed #888;outline-offset:.8mm}
-.hucre img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.sayfa{background:#fff;width:210mm;height:296mm;padding:4mm;overflow:hidden;box-sizing:border-box;break-inside:avoid;box-shadow:0 10px 30px rgba(0,0,0,.5);transform-origin:top left}
+.izgara{position:relative;width:100%;height:100%}
+.hucre{position:absolute;overflow:hidden}
+.izgara.kesim .hucre{outline:.3mm dashed #888;outline-offset:.75mm}
+.hucre img{width:100%;height:100%;display:block}
 .hucre .sil{position:absolute;top:2px;right:2px;width:26px;height:26px;min-height:0;padding:0;border-radius:50%;background:#B91C1C;color:#fff;border:0;font-weight:700;opacity:0;transition:.15s}
 .hucre:hover .sil{opacity:1}
 .hucre .no{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:1px 6px;border-radius:8px}
@@ -2830,18 +2830,17 @@ button:disabled{opacity:.45;cursor:not-allowed}
   .sayfa:last-child{break-after:auto;page-break-after:auto}
   .sil,.no{display:none!important}
 }
-body.yatay .sayfa{width:297mm;height:210mm}
-@media print{body.yatay .sayfa{width:297mm;height:210mm}}
+body.yatay .sayfa{width:297mm;height:209mm}
+@media print{body.yatay .sayfa{width:297mm;height:209mm}}
 &lt;/style&gt;
 &lt;style id=&quot;sayfaYonu&quot;&gt;@page{size:A4 portrait;margin:0}&lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;header&gt;
   &lt;h1&gt;Fiş Baskı&lt;/h1&gt;
-  &lt;label class=&quot;sec&quot;&gt;Sayfa başına
+  &lt;label class=&quot;sec&quot;&gt;Sütun
     &lt;select id=&quot;adet&quot;&gt;
-      &lt;option value=&quot;1&quot;&gt;1 fiş&lt;/option&gt;&lt;option value=&quot;2&quot;&gt;2 fiş&lt;/option&gt;&lt;option value=&quot;4&quot;&gt;4 fiş&lt;/option&gt;
-      &lt;option value=&quot;6&quot; selected&gt;6 fiş&lt;/option&gt;&lt;option value=&quot;8&quot;&gt;8 fiş&lt;/option&gt;&lt;option value=&quot;9&quot;&gt;9 fiş&lt;/option&gt;
+      &lt;option value=&quot;1&quot;&gt;1 sütun (en büyük)&lt;/option&gt;&lt;option value=&quot;2&quot; selected&gt;2 sütun&lt;/option&gt;&lt;option value=&quot;3&quot;&gt;3 sütun (en küçük)&lt;/option&gt;
     &lt;/select&gt;&lt;/label&gt;
   &lt;label class=&quot;sec&quot;&gt;Kâğıt
     &lt;select id=&quot;yon&quot;&gt;&lt;option value=&quot;dikey&quot;&gt;Dikey&lt;/option&gt;&lt;option value=&quot;yatay&quot;&gt;Yatay&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;
@@ -3116,31 +3115,44 @@ function birlestir(f, A) {
   return o;
 }
 async function resimleriHazirla() {
-  const kirpAcik = $(&#x27;kirp&#x27;).checked, A = kutuOrani();
+  const kirpAcik = $(&#x27;kirp&#x27;).checked;
   for (const f of fisler) {
-    const istenen = kirpAcik ? &#x27;k&#x27; + A.toFixed(3) : &#x27;t&#x27;;
+    const istenen = kirpAcik ? &#x27;k&#x27; : &#x27;t&#x27;;
     if (f.tur === istenen &amp;&amp; f.url) continue;
     if (f.url) URL.revokeObjectURL(f.url);
-    f.url = await urlYap(kirpAcik ? f.kirpik : f.tam); f.tur = istenen;
+    const kaynak = kirpAcik ? f.kirpik : f.tam; f.w = kaynak.width; f.h = kaynak.height;
+    f.url = await urlYap(kaynak); f.tur = istenen;
   }
 }
 
+// Fişleri sütunlara boşluksuz diz: her fiş sütun genişliğinde, kendi boyu kadar yer kaplar
+function yerlestir() {
+  const kol = +$(&#x27;adet&#x27;).value, yatay = $(&#x27;yon&#x27;).value === &#x27;yatay&#x27;;
+  const W = yatay ? 289 : 202, H = yatay ? 200 : 287, G = 1.5;
+  const sg = (W - G * (kol - 1)) / kol;
+  const sayfalar = []; let sayfa = null, k = 0, y = 0;
+  fisler.forEach((f, n) =&gt; {
+    let h = sg * (f.h || 1) / (f.w || 1), w = sg;
+    if (h &gt; H) { w = w * H / h; h = H; }                     // tek fiş sayfadan uzunsa sığdır
+    if (!sayfa || y + h &gt; H + 0.01) {
+      if (sayfa &amp;&amp; k &lt; kol - 1) { k++; y = 0; }
+      else { sayfa = []; sayfalar.push(sayfa); k = 0; y = 0; }
+    }
+    sayfa.push({ f, n, x: k * (sg + G), y, w, h });
+    y += h + G;
+  });
+  return sayfalar;
+}
 function ciz() {
-  const adet = +$(&#x27;adet&#x27;).value, yatay = $(&#x27;yon&#x27;).value === &#x27;yatay&#x27;;
-  const [kol, sat] = (yatay ? DUZEN_YATAY : DUZEN)[adet];
+  const yatay = $(&#x27;yon&#x27;).value === &#x27;yatay&#x27;;
   document.body.classList.toggle(&#x27;yatay&#x27;, yatay);
   $(&#x27;sayfaYonu&#x27;).textContent = `@page{size:A4 ${yatay ? &#x27;landscape&#x27; : &#x27;portrait&#x27;};margin:0}`;
-  const sayfaSay = Math.ceil(fisler.length / adet);
-  $(&#x27;ozet&#x27;).textContent = fisler.length ? `${fisler.length} fiş → ${sayfaSay} sayfa` : &#x27;&#x27;;
+  const sayfalar = yerlestir();
+  $(&#x27;ozet&#x27;).textContent = fisler.length ? `${fisler.length} fiş → ${sayfalar.length} sayfa` : &#x27;&#x27;;
   $(&#x27;yazdir&#x27;).disabled = !fisler.length || isleniyor;
-  let html = &#x27;&#x27;;
-  for (let s = 0; s &lt; sayfaSay; s++) {
-    const parca = fisler.slice(s * adet, s * adet + adet);
-    html += `&lt;div class=&quot;olcek&quot;&gt;&lt;div class=&quot;sayfa&quot;&gt;&lt;div class=&quot;izgara${$(&#x27;kesim&#x27;).checked ? &#x27; kesim&#x27; : &#x27;&#x27;}&quot; style=&quot;grid-template-columns:repeat(${kol},minmax(0,1fr));grid-template-rows:repeat(${sat},minmax(0,1fr))&quot;&gt;`
-      + parca.map((f, j) =&gt; { const n = s * adet + j; return `&lt;div class=&quot;hucre&quot;&gt;&lt;img src=&quot;${f.url}&quot; alt=&quot;&quot;&gt;&lt;span class=&quot;no&quot;&gt;${n + 1}&lt;/span&gt;&lt;button class=&quot;sil&quot; data-n=&quot;${n}&quot; title=&quot;Bu fişi çıkar&quot;&gt;×&lt;/button&gt;&lt;/div&gt;`; }).join(&#x27;&#x27;)
-      + &#x27;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
-  }
-  $(&#x27;sayfalar&#x27;).innerHTML = html;
+  $(&#x27;sayfalar&#x27;).innerHTML = sayfalar.map(sp =&gt; `&lt;div class=&quot;olcek&quot;&gt;&lt;div class=&quot;sayfa&quot;&gt;&lt;div class=&quot;izgara${$(&#x27;kesim&#x27;).checked ? &#x27; kesim&#x27; : &#x27;&#x27;}&quot;&gt;`
+    + sp.map(c =&gt; `&lt;div class=&quot;hucre&quot; style=&quot;left:${c.x}mm;top:${c.y}mm;width:${c.w}mm;height:${c.h}mm&quot;&gt;&lt;img src=&quot;${c.f.url}&quot; alt=&quot;&quot;&gt;&lt;span class=&quot;no&quot;&gt;${c.n + 1}&lt;/span&gt;&lt;button class=&quot;sil&quot; data-n=&quot;${c.n}&quot; title=&quot;Bu fişi çıkar&quot;&gt;×&lt;/button&gt;&lt;/div&gt;`).join(&#x27;&#x27;)
+    + &#x27;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&#x27;).join(&#x27;&#x27;);
   olcekle();
 }
 // Ekrana sığdır (baskıda gerçek boyut)
@@ -3153,7 +3165,7 @@ function olcekle() {
 }
 
 $(&#x27;sayfalar&#x27;).addEventListener(&#x27;click&#x27;, e =&gt; { const b = e.target.closest(&#x27;.sil&#x27;); if (!b) return; const [f] = fisler.splice(+b.dataset.n, 1); if (f &amp;&amp; f.url) URL.revokeObjectURL(f.url); ciz(); });
-[&#x27;adet&#x27;, &#x27;yon&#x27;].forEach(id =&gt; $(id).addEventListener(&#x27;change&#x27;, async () =&gt; { await resimleriHazirla(); ciz(); }));
+[&#x27;adet&#x27;, &#x27;yon&#x27;].forEach(id =&gt; $(id).addEventListener(&#x27;change&#x27;, ciz));
 $(&#x27;kesim&#x27;).addEventListener(&#x27;change&#x27;, ciz);
 $(&#x27;kirp&#x27;).addEventListener(&#x27;change&#x27;, async () =&gt; { await resimleriHazirla(); ciz(); });
 $(&#x27;ekle&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; $(&#x27;dosya&#x27;).click());
