@@ -1,4 +1,4 @@
-<!-- SURUM-V163-YAZICI-FIS --><!DOCTYPE html>
+<!-- SURUM-V167-YAZICI-FOTO2 --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1372,49 +1372,6 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .foto-hiz { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 14px; padding:12px 16px; border-radius:14px; border:1px solid rgba(212,175,55,.45); background:rgba(212,175,55,.07); font-size:13.5px; }
 .foto-hiz > span { font-size:24px; } .foto-hiz > div { flex:1; min-width:240px; }
 .foto-hiz-alt { font-size:12px; color:var(--text3); margin-top:3px; }
-
-/* V163: YAZICI */
-.yzc-ust { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:12px; }
-.yzc-baslik { font-size:20px; margin:0 8px 0 0; color:#F7DA84; }
-.yzc-sec { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text2); }
-.yzc-sec select { padding:7px 10px; border-radius:9px; background:var(--bg2); color:var(--text); border:1px solid var(--border); }
-.yzc-ozet { margin-left:auto; font-size:13px; color:var(--text2); }
-.yzc-birak { display:block; text-align:center; padding:26px 16px; border:2px dashed rgba(212,175,55,.5); border-radius:16px; background:rgba(212,175,55,.04); cursor:pointer; margin-bottom:10px; }
-.yzc-birak.ust { background:rgba(212,175,55,.14); border-color:#D4AF37; }
-.yzc-birak b { display:block; font-size:16px; margin-bottom:4px; } .yzc-birak span { font-size:12.5px; color:var(--text3); }
-.yzc-durum { font-size:13px; color:var(--text2); min-height:18px; margin-bottom:10px; }
-.yzc-onizleme { overflow:hidden; }
-.yzc-olcek-ic { display:flex; flex-direction:column; align-items:center; gap:16px; transform-origin:top left; }
-.yzc-olcek-ic .yz-sayfa { box-shadow:0 10px 30px rgba(0,0,0,.5); }
-.yzc-kesik { outline:.3mm dashed #888; outline-offset:2mm; }
-.yzc-sil { position:absolute; top:4px; right:4px; z-index:2; width:28px; height:28px; border-radius:50%; border:0; background:#B91C1C; color:#fff; font-weight:800; cursor:pointer; opacity:0; transition:.15s; }
-.yz-yuva:hover .yzc-sil { opacity:1; }
-.yzf { background:#fff; color:#000; font-family:Arial,Helvetica,sans-serif; padding:14px 16px 12px; font-size:15px; line-height:1.35; }
-.yzf-ust { display:flex; align-items:baseline; justify-content:space-between; gap:10px; border-bottom:2px solid #000; padding-bottom:6px; }
-.yzf-magaza { font-size:24px; font-weight:900; color:#D00000; letter-spacing:.02em; overflow-wrap:anywhere; }
-.yzf-no { font-size:17px; font-weight:700; }
-.yzf-tarih { font-size:13px; margin:6px 0 8px; }
-.yzf-hediye { color:#D00000; }
-.yzf-urun { display:flex; gap:14px; align-items:flex-start; padding:8px 0; border-bottom:1px solid #CCC; }
-.yzf-foto { width:42%; max-width:280px; aspect-ratio:1; object-fit:cover; border:1px solid #999; border-radius:6px; flex:none; }
-.yzf-bilgi { flex:1; min-width:0; }
-.yzf-baslik { font-size:13px; margin-bottom:6px; color:#222; }
-.yzf-oz { border-collapse:collapse; width:100%; }
-.yzf-oz td { padding:2px 0; vertical-align:top; font-size:14.5px; }
-.yzf-oz tr, .yzf-oz td { background:none !important; border:0 !important; box-shadow:none !important; }
-.yzf-oz td { white-space:normal !important; overflow-wrap:anywhere; padding:2px 0 !important; height:auto !important; }
-.yzf-oz td:first-child { color:#333 !important; padding-right:10px !important; white-space:nowrap !important; width:1%; font-weight:400 !important; }
-.yzf-oz td:last-child { font-weight:800 !important; color:#D00000 !important; }
-.yzf-not { margin:8px 0 0; padding:6px 9px; border:1.5px solid #000; font-size:14px; }
-.yzf-not b { display:block; font-size:12px; text-transform:uppercase; }
-.yzf-kes { position:relative; border-top:2px dashed #000; margin:14px 0 8px; height:0; }
-.yzf-kes span { position:absolute; left:6px; top:-13px; background:#fff; padding:0 4px; font-size:20px; line-height:1; }
-.yzf-adres { font-size:15px; line-height:1.35; }
-.yzf-adres b { font-size:18px; }
-.yzf-adres-et { font-size:11px; font-weight:800; letter-spacing:.12em; color:#444; }
-.yzf.dikey .yzf-urun { flex-direction:column; align-items:center; }
-.yzf.dikey .yzf-foto { width:78%; max-width:none; }
-.yzf.dikey .yzf-bilgi { width:100%; }
 </style>
 </head>
 <body>
@@ -2826,25 +2783,397 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 </main>
 
 <!-- FATURA -->
-<!-- YAZICI (fiş baskı; geçici) -->
+<!-- YAZICI (fiş baskı aracı; geçici) -->
 <div class="page" id="page-yazici">
-  <div class="yzc-ust">
-    <h2 class="yzc-baslik">🖨 Fiş Baskı</h2>
-    <label class="yzc-sec">Sayfa başına
-      <select id="yzcAdet" onchange="yzcCiz()"><option value="1">1 fiş</option><option value="2">2 fiş</option><option value="4">4 fiş</option><option value="6" selected>6 fiş</option><option value="8">8 fiş</option></select></label>
-    <label class="yzc-sec"><input type="checkbox" id="yzcKesim" checked onchange="yzcCiz()"> Kesim çizgisi</label>
-    <button class="btn" onclick="document.getElementById('yzcDosya').click()">＋ Fiş ekle</button>
-    <button class="btn" onclick="yzcTemizle()">Temizle</button>
-    <button class="btn btn-primary" id="yzcYazdirBtn" onclick="yzcYazdir()" disabled>🖨 Yazdır</button>
-    <span class="yzc-ozet" id="yzcOzet"></span>
-  </div>
-  <label class="yzc-birak" id="yzcBirak" ondragover="event.preventDefault();this.classList.add('ust')" ondragleave="this.classList.remove('ust')" ondrop="event.preventDefault();this.classList.remove('ust');yzcDosyalar(event.dataTransfer.files)">
-    <b>Etsy sipariş fişlerini (PDF) buraya sürükleyin</b>
-    <span>ya da tıklayıp seçin · birden fazla dosya olabilir · dosyalar hiçbir yere yüklenmez, sisteme kaydedilmez</span>
-    <input type="file" id="yzcDosya" accept="application/pdf,.pdf" multiple hidden onchange="yzcDosyalar(this.files);this.value=''">
-  </label>
-  <div id="yzcDurum" class="yzc-durum"></div>
-  <div id="yzcOnizleme" class="yzc-onizleme"></div>
+  <iframe id="yaziciCerceve" title="Fiş Baskı" style="width:100%;height:calc(100vh - 150px);min-height:600px;border:1px solid var(--border);border-radius:14px;background:#121110" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;tr&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;Fiş Baskı&lt;/title&gt;
+&lt;style&gt;
+/* VOICE: atölye aracı, sade ve hızlı
+   IDEA: fişleri A4&#x27;e dizen bir montaj masası
+   PICTURE: A4 sayfa önizlemeleri
+   COLOUR/TYPE: koyu zemin, altın vurgu; sistem fontu
+   LAYOUT: üstte ayarlar, altta sayfalar */
+:root{--bg:#121110;--kart:#1C1A17;--cizgi:#3A342A;--metin:#F2ECDD;--soluk:#A69E8B;--altin:#D4AF37}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--metin);font:15px/1.5 -apple-system,&quot;Segoe UI&quot;,Roboto,Arial,sans-serif}
+header{position:sticky;top:0;z-index:5;background:rgba(18,17,16,.96);border-bottom:1px solid var(--cizgi);padding:12px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+h1{font-size:18px;margin:0 8px 0 0;color:var(--altin)}
+label.sec{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--soluk)}
+select,button{font:inherit;font-size:14px;border-radius:10px;border:1px solid var(--cizgi);background:var(--kart);color:var(--metin);padding:8px 12px;min-height:40px}
+button{cursor:pointer}button.ana{background:var(--altin);color:#1A1405;border-color:var(--altin);font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+.ozet{margin-left:auto;font-size:13px;color:var(--soluk)}
+.birak{display:block;margin:20px;border:2px dashed #6B5A2A;border-radius:16px;padding:34px 16px;text-align:center;cursor:pointer;background:rgba(212,175,55,.04)}
+.birak.ust{background:rgba(212,175,55,.14);border-color:var(--altin)}
+.birak b{font-size:17px;display:block;margin-bottom:4px}.birak span{color:var(--soluk);font-size:13px}
+#durum{margin:0 20px;color:var(--soluk);font-size:13px;min-height:20px}
+#sayfalar{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;padding:10px 20px 60px}
+.sayfa{background:#fff;width:210mm;height:297mm;padding:4mm;box-shadow:0 10px 30px rgba(0,0,0,.5);transform-origin:top left}
+.izgara{display:grid;width:100%;height:100%;gap:1.6mm}
+.hucre{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.izgara.kesim .hucre{outline:.3mm dashed #888;outline-offset:.8mm}
+.hucre img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.hucre .sil{position:absolute;top:2px;right:2px;width:26px;height:26px;min-height:0;padding:0;border-radius:50%;background:#B91C1C;color:#fff;border:0;font-weight:700;opacity:0;transition:.15s}
+.hucre:hover .sil{opacity:1}
+.hucre .no{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:1px 6px;border-radius:8px}
+.olcek{display:inline-block}
+@page{size:A4 portrait;margin:0}
+@media print{
+  body{background:#fff}header,.birak,#durum{display:none!important}
+  #sayfalar{display:block;padding:0}
+  .olcek{display:block!important;width:auto!important;height:auto!important}
+  .sayfa{box-shadow:none;transform:none!important;break-after:page;page-break-after:always;margin:0}
+  .sayfa:last-child{break-after:auto;page-break-after:auto}
+  .sil,.no{display:none!important}
+}
+body.yatay .sayfa{width:297mm;height:210mm}
+@media print{body.yatay .sayfa{width:297mm;height:210mm}}
+&lt;/style&gt;
+&lt;style id=&quot;sayfaYonu&quot;&gt;@page{size:A4 portrait;margin:0}&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;header&gt;
+  &lt;h1&gt;Fiş Baskı&lt;/h1&gt;
+  &lt;label class=&quot;sec&quot;&gt;Sayfa başına
+    &lt;select id=&quot;adet&quot;&gt;
+      &lt;option value=&quot;1&quot;&gt;1 fiş&lt;/option&gt;&lt;option value=&quot;2&quot;&gt;2 fiş&lt;/option&gt;&lt;option value=&quot;4&quot;&gt;4 fiş&lt;/option&gt;
+      &lt;option value=&quot;6&quot; selected&gt;6 fiş&lt;/option&gt;&lt;option value=&quot;8&quot;&gt;8 fiş&lt;/option&gt;&lt;option value=&quot;9&quot;&gt;9 fiş&lt;/option&gt;
+    &lt;/select&gt;&lt;/label&gt;
+  &lt;label class=&quot;sec&quot;&gt;Kâğıt
+    &lt;select id=&quot;yon&quot;&gt;&lt;option value=&quot;dikey&quot;&gt;Dikey&lt;/option&gt;&lt;option value=&quot;yatay&quot;&gt;Yatay&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;
+  &lt;label class=&quot;sec&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;kirp&quot; checked&gt; Boşlukları sıkıştır&lt;/label&gt;
+  &lt;label class=&quot;sec&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;kesim&quot; checked&gt; Kesim çizgisi&lt;/label&gt;
+  &lt;button id=&quot;ekle&quot;&gt;＋ Fiş ekle&lt;/button&gt;
+  &lt;button id=&quot;temizle&quot;&gt;Temizle&lt;/button&gt;
+  &lt;button class=&quot;ana&quot; id=&quot;yazdir&quot; disabled&gt;🖨 Yazdır&lt;/button&gt;
+  &lt;span class=&quot;ozet&quot; id=&quot;ozet&quot;&gt;&lt;/span&gt;
+&lt;/header&gt;
+&lt;label class=&quot;birak&quot; id=&quot;birak&quot;&gt;
+  &lt;b&gt;Fiş PDF&#x27;lerini buraya sürükleyin&lt;/b&gt;
+  &lt;span&gt;ya da tıklayıp seçin · birden fazla dosya olabilir · her PDF sayfası bir fiş sayılır · dosyalar bilgisayarınızdan çıkmaz&lt;/span&gt;
+  &lt;input type=&quot;file&quot; id=&quot;dosya&quot; accept=&quot;application/pdf,.pdf&quot; multiple hidden&gt;
+&lt;/label&gt;
+&lt;div id=&quot;durum&quot;&gt;&lt;/div&gt;
+&lt;div id=&quot;sayfalar&quot;&gt;&lt;/div&gt;
+
+&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+{
+const $ = id =&gt; document.getElementById(id);
+const DUZEN = { 1: [1, 1], 2: [1, 2], 4: [2, 2], 6: [2, 3], 8: [2, 4], 9: [3, 3] };
+const DUZEN_YATAY = { 1: [1, 1], 2: [2, 1], 4: [2, 2], 6: [3, 2], 8: [4, 2], 9: [3, 3] };
+let fisler = [];          // { ad, kaynak (canvas), url (img) }
+let isleniyor = false;
+
+if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = &#x27;https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js&#x27;;
+
+// Kenarlardaki beyaz boşluğu at, aradaki büyük boş bantları da sıkıştır (fiş altındaki Etsy yazısıyla içerik arası gibi)
+function kirp(c) {
+  const w = c.width, h = c.height, d = c.getContext(&#x27;2d&#x27;).getImageData(0, 0, w, h).data;
+  const satirDolu = new Uint8Array(h); let sol = w, sag = -1;
+  for (let y = 0; y &lt; h; y++) for (let x = 0; x &lt; w; x += 2) { const i = (y * w + x) * 4; if (d[i] &lt; 235 || d[i + 1] &lt; 235 || d[i + 2] &lt; 235) { satirDolu[y] = 1; if (x &lt; sol) sol = x; if (x &gt; sag) sag = x; } }
+  if (sag &lt; 0) return null;                       // boş sayfa
+  const p = Math.round(Math.min(w, h) * 0.012), azBosluk = Math.round(h * 0.016), kalan = Math.round(h * 0.007);
+  // dolu satır aralıklarını bul; aradaki uzun boşlukları kısalt
+  const parcalar = []; let y = 0;
+  while (y &lt; h) { while (y &lt; h &amp;&amp; !satirDolu[y]) y++; if (y &gt;= h) break; const bas = y; while (y &lt; h &amp;&amp; (satirDolu[y] || (() =&gt; { let k = y; while (k &lt; h &amp;&amp; !satirDolu[k] &amp;&amp; k - y &lt; azBosluk) k++; return k &lt; h &amp;&amp; satirDolu[k] &amp;&amp; k - y &lt; azBosluk; })())) y++; parcalar.push([bas, y]); }
+  sol = Math.max(0, sol - p); sag = Math.min(w - 1, sag + p);
+  const gen = sag - sol + 1, yuk = parcalar.reduce((t, [a, b]) =&gt; t + (b - a), 0) + kalan * (parcalar.length - 1) + 2 * p;
+  const o = document.createElement(&#x27;canvas&#x27;); o.width = gen; o.height = yuk;
+  const x = o.getContext(&#x27;2d&#x27;); x.fillStyle = &#x27;#fff&#x27;; x.fillRect(0, 0, gen, yuk);
+  let hy = p;
+  parcalar.forEach(([a, b], i) =&gt; { x.drawImage(c, sol, a, gen, b - a, 0, hy, gen, b - a); hy += b - a + (i &lt; parcalar.length - 1 ? kalan : 0); });
+  return o;
+}
+// ---- Vurgular: yazının yeri ve boyutu değişmez; sadece kırmızı + kalın yapılır ----
+function ogeKutu(it, vp) {
+  const fs = Math.hypot(it.transform[2], it.transform[3]) || it.height || 9;
+  const [x0, yb] = vp.convertToViewportPoint(it.transform[4], it.transform[5]);
+  const h = fs * vp.scale;
+  return { x: x0, y: yb - h * 0.92, w: Math.max(1, it.width * vp.scale), h: h * 1.18, fs: h };
+}
+function kutuBirlestir(k) { const x = Math.min(...k.map(b =&gt; b.x)), y = Math.min(...k.map(b =&gt; b.y)); return { x, y, w: Math.max(...k.map(b =&gt; b.x + b.w)) - x, h: Math.max(...k.map(b =&gt; b.y + b.h)) - y, fs: Math.max(...k.map(b =&gt; b.fs)) }; }
+function kirmiziKalin(ctx, b) {
+  const x = Math.max(0, Math.floor(b.x - 1)), y = Math.max(0, Math.floor(b.y - 1)), w = Math.ceil(b.w + 3), h = Math.ceil(b.h + 2);
+  const img = ctx.getImageData(x, y, w, h), d = img.data;
+  for (let i = 0; i &lt; d.length; i += 4) {
+    const koyu = 255 - (d[i] + d[i + 1] + d[i + 2]) / 3;
+    if (koyu &lt; 8) continue;
+    const a = Math.min(1, koyu / 200);
+    d[i] = Math.round(255 + (205 - 255) * a); d[i + 1] = Math.round(255 * (1 - a)); d[i + 2] = Math.round(255 * (1 - a));
+  }
+  ctx.putImageData(img, x, y);
+  // kalınlaştır: aynı yazıyı çok az kaydırarak üstüne bas (boyut aynı kalır)
+  const t = document.createElement(&#x27;canvas&#x27;); t.width = w; t.height = h; t.getContext(&#x27;2d&#x27;).putImageData(img, 0, 0);
+  const s = Math.max(1, b.fs * 0.055);
+  ctx.save(); ctx.globalCompositeOperation = &#x27;darken&#x27;;
+  ctx.drawImage(t, x + s, y); ctx.drawImage(t, x + s / 2, y);
+  ctx.restore();
+}
+function vurgula(ctx, vp, items) {
+  const ogeler = items.filter(o =&gt; o.str &amp;&amp; o.str.trim());
+  const X = o =&gt; o.transform[4], Y = o =&gt; o.transform[5], FS = o =&gt; Math.hypot(o.transform[2], o.transform[3]) || 9;
+  const kutular = [];
+  // 1) Mağaza adı: &quot;Shop&quot; başlığının altındaki satır
+  ogeler.forEach((o, i) =&gt; {
+    if (o.str.trim().toLowerCase() !== &#x27;shop&#x27;) return;
+    const deger = ogeler.find(v =&gt; v !== o &amp;&amp; Math.abs(X(v) - X(o)) &lt; 3 &amp;&amp; Y(v) &lt; Y(o) &amp;&amp; Y(o) - Y(v) &lt; FS(o) * 2.2);
+    if (deger) kutular.push(ogeKutu(deger, vp));
+  });
+  // 2) Ürün özellikleri: ürün sütununda &quot;Anahtar: değer&quot; satırları (aynı satırdaki devamıyla, alt satıra taşanlarla)
+  const sol = ogeler.find(o =&gt; /^ship to$/i.test(o.str.trim()));
+  const skuX = ogeler.filter(o =&gt; /^sku\s*:/i.test(o.str.trim())).map(X);
+  const urunX = skuX.length ? Math.min(...skuX) - 4 : (sol ? X(sol) + 170 : 200);
+  const fiyatX = Math.min(...ogeler.filter(o =&gt; /^\d+\s*x\s*\$|^\$\d/.test(o.str.trim())).map(X).concat([9999]));
+  const sutun = ogeler.filter(o =&gt; X(o) &gt;= urunX &amp;&amp; X(o) &lt; fiyatX - 5).sort((a, b) =&gt; Y(b) - Y(a) || X(a) - X(b));
+  let onceki = null;
+  sutun.forEach(o =&gt; {
+    const ozellik = /^[^:]{1,45}:\s*\S/.test(o.str.trim()) || /^[^:]{1,45}:$/.test(o.str.trim());
+    const ayniSatir = onceki &amp;&amp; Math.abs(Y(o) - Y(onceki)) &lt; 1.5 &amp;&amp; X(o) &gt; X(onceki);
+    const tasan = onceki &amp;&amp; !ozellik &amp;&amp; Math.abs(X(o) - X(onceki)) &lt; 3 &amp;&amp; Y(onceki) - Y(o) &gt; 0 &amp;&amp; Y(onceki) - Y(o) &lt; FS(o) * 1.5;
+    if (ozellik || ayniSatir || tasan) { kutular.push(ogeKutu(o, vp)); onceki = (ozellik || tasan) ? o : onceki; }
+    else onceki = null;
+  });
+  // 3) Hediye işareti ve hediye / müşteri notu başlığı
+  ogeler.forEach(o =&gt; { if (/^(marked as gift|gift message|gift note|note from|notes? from buyer|message from)/i.test(o.str.trim())) kutular.push(ogeKutu(o, vp)); });
+  kutular.forEach(b =&gt; kirmiziKalin(ctx, b));
+  // 4) Adres: &quot;Ship to&quot; bloğunun etrafına kesim çizgisi (yeri değişmez)
+  if (sol) {
+    const bitis = ogeler.filter(o =&gt; Math.abs(X(o) - X(sol)) &lt; 3 &amp;&amp; Y(o) &lt; Y(sol) &amp;&amp; /^(scheduled to ship by|shop|order date|payment method)$/i.test(o.str.trim())).sort((a, b) =&gt; Y(b) - Y(a))[0];
+    const blok = ogeler.filter(o =&gt; Math.abs(X(o) - X(sol)) &lt; 3 &amp;&amp; Y(o) &lt;= Y(sol) &amp;&amp; (!bitis || Y(o) &gt; Y(bitis)));
+    if (blok.length) {
+      const b = kutuBirlestir(blok.map(o =&gt; ogeKutu(o, vp)));
+      const p = b.fs * 0.7, x0 = b.x - p, y0 = b.y - p, w = b.w + 2 * p, h = b.h + 2 * p;
+      ctx.save(); ctx.strokeStyle = &#x27;#000&#x27;; ctx.lineWidth = Math.max(1.5, b.fs * 0.08); ctx.setLineDash([b.fs * 0.45, b.fs * 0.3]);
+      ctx.strokeRect(x0, y0, w, h);
+      ctx.setLineDash([]); ctx.font = `${Math.round(b.fs * 1.3)}px Arial, sans-serif`; ctx.fillStyle = &#x27;#fff&#x27;;
+      const mk = &#x27;✂&#x27;, mw = ctx.measureText(mk).width;
+      ctx.fillRect(x0 + w - mw - b.fs * 1.4, y0 - b.fs * 0.7, mw + b.fs * 0.5, b.fs * 1.3);
+      ctx.fillStyle = &#x27;#000&#x27;; ctx.textBaseline = &#x27;middle&#x27;; ctx.fillText(mk, x0 + w - mw - b.fs * 1.15, y0);
+      ctx.restore();
+    }
+  }
+}
+// ---- Ürün fotoğrafları: fişteki küçük fotoğrafın yüksek çözünürlüklü kopyası ----
+async function fotolariAl(sayfa, hedef = 700) {
+  const sonuc = [];
+  try {
+    const ops = await sayfa.getOperatorList(), O = pdfjsLib.OPS, U = pdfjsLib.Util;
+    let ctm = [1, 0, 0, 1, 0, 0]; const yigin = [], kutular = [];
+    for (let i = 0; i &lt; ops.fnArray.length; i++) {
+      const fn = ops.fnArray[i], a = ops.argsArray[i];
+      if (fn === O.save) yigin.push(ctm.slice());
+      else if (fn === O.restore) ctm = yigin.pop() || ctm;
+      else if (fn === O.transform) ctm = U.transform(ctm, a);
+      else if (fn === O.paintFormXObjectBegin) { yigin.push(ctm.slice()); if (Array.isArray(a[0]) &amp;&amp; a[0].length === 6) ctm = U.transform(ctm, a[0]); }
+      else if (fn === O.paintFormXObjectEnd) ctm = yigin.pop() || ctm;
+      else if (fn === O.paintImageXObject || fn === O.paintJpegXObject || fn === O.paintInlineImageXObject) {
+        const k = [[0, 0], [1, 0], [0, 1], [1, 1]].map(p =&gt; U.applyTransform(p, ctm)), xs = k.map(p =&gt; p[0]), ys = k.map(p =&gt; p[1]);
+        const b = [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+        if ((b[2] - b[0]) * (b[3] - b[1]) &gt; 400 &amp;&amp; (b[2] - b[0]) &lt; 200) kutular.push(b);   // logolar/ikonlar değil, ürün fotoğrafı
+      }
+    }
+    const v1 = sayfa.getViewport({ scale: 1 });
+    for (const kb of kutular.sort((p, q) =&gt; q[3] - p[3])) {
+      const r = v1.convertToViewportRectangle(kb);
+      const x = Math.min(r[0], r[2]), y = Math.min(r[1], r[3]), w = Math.abs(r[2] - r[0]), h = Math.abs(r[3] - r[1]);
+      const olcek = Math.min(10, Math.max(1, hedef / Math.max(w, h)));
+      const vp = sayfa.getViewport({ scale: olcek, offsetX: -x * olcek, offsetY: -y * olcek });
+      const c = document.createElement(&#x27;canvas&#x27;); c.width = Math.round(w * olcek); c.height = Math.round(h * olcek);
+      const cx = c.getContext(&#x27;2d&#x27;); cx.fillStyle = &#x27;#fff&#x27;; cx.fillRect(0, 0, c.width, c.height);
+      await sayfa.render({ canvasContext: cx, viewport: vp }).promise;
+      sonuc.push({ c, gen: w, r1: { x, y, w, h } });
+    }
+  } catch (e) { console.warn(&#x27;foto&#x27;, e); }
+  return sonuc;
+}
+// Fişteki ürün fotoğrafını yerinde biraz büyüt (en fazla ~1,7 kat; hiçbir yazının üstüne taşmaz)
+function fotoBuyut(ctx, vp, items, fotolar) {
+  const S = vp.scale;
+  const yazilar = items.filter(o =&gt; o.str &amp;&amp; o.str.trim()).map(o =&gt; ogeKutu(o, vp));
+  const kutular = fotolar.map(f =&gt; ({ f, x: f.r1.x * S, y: f.r1.y * S, w: f.r1.w * S, h: f.r1.h * S }));
+  const cakisir = (a, b) =&gt; a.x &lt; b.x + b.w &amp;&amp; a.x + a.w &gt; b.x &amp;&amp; a.y &lt; b.y + b.h &amp;&amp; a.y + a.h &gt; b.y;
+  kutular.forEach(k =&gt; {
+    let sec = null;
+    for (let s = 1.7; s &gt;= 1.1; s -= 0.05) {
+      const w = k.w * s, h = k.h * s, yeni = { x: k.x + k.w - w, y: k.y, w, h };   // sağ üst köşe sabit: başlığa doğru büyümez
+      const pay = 3 * S, genis = { x: yeni.x - pay, y: yeni.y - pay, w: yeni.w + 2 * pay, h: yeni.h + 2 * pay };
+      if (yeni.x &lt; 0) continue;
+      if (yazilar.some(t =&gt; cakisir(genis, t))) continue;
+      if (kutular.some(d =&gt; d !== k &amp;&amp; cakisir(genis, d))) continue;
+      sec = yeni; break;
+    }
+    if (!sec) return;
+    ctx.fillStyle = &#x27;#fff&#x27;; ctx.fillRect(sec.x, sec.y, sec.w, sec.h);
+    ctx.drawImage(k.f.c, sec.x, sec.y, sec.w, sec.h);
+  });
+}
+// Fişteki en büyük boş kare alanı bul (ızgara üzerinde DP)
+function bosKare(c) {
+  const H = 6, w = c.width, h = c.height, d = c.getContext(&#x27;2d&#x27;).getImageData(0, 0, w, h).data;
+  const C = Math.floor(w / H), R = Math.floor(h / H), bos = new Uint8Array(R * C);
+  for (let r = 0; r &lt; R; r++) for (let q = 0; q &lt; C; q++) {
+    let temiz = 1;
+    for (let y = r * H; y &lt; r * H + H &amp;&amp; temiz; y += 2) for (let x = q * H; x &lt; q * H + H; x += 2) { const i = (y * w + x) * 4; if (d[i] &lt; 238 || d[i + 1] &lt; 238 || d[i + 2] &lt; 238) { temiz = 0; break; } }
+    bos[r * C + q] = temiz;
+  }
+  const dp = new Uint16Array(R * C); let en = { n: 0, r: 0, q: 0 };
+  for (let r = 0; r &lt; R; r++) for (let q = 0; q &lt; C; q++) {
+    const i = r * C + q; if (!bos[i]) continue;
+    dp[i] = (r &amp;&amp; q) ? Math.min(dp[i - C], dp[i - 1], dp[i - C - 1]) + 1 : 1;
+    if (dp[i] &gt; en.n) en = { n: dp[i], r, q };
+  }
+  if (!en.n) return null;
+  return { x: (en.q - en.n + 1) * H, y: (en.r - en.n + 1) * H, s: en.n * H };
+}
+// Fotoğrafı boş alana büyük olarak yerleştir (hiçbir yazının yeri değişmez)
+function buyukFotoKoy(c, fotolar, olcek) {
+  const kopya = fotolar.slice(0, 3);
+  for (const f of kopya) {
+    const k = bosKare(c); if (!k) break;
+    const pay = Math.round(k.s * 0.06), s = k.s - 2 * pay;
+    if (s &lt; f.gen * olcek * 1.7) break;                    // yeterince büyük yer yoksa ekleme
+    const x = c.getContext(&#x27;2d&#x27;), oran = f.c.width / f.c.height;
+    const fw = oran &gt;= 1 ? s : s * oran, fh = oran &gt;= 1 ? s / oran : s;
+    const px = k.x + pay + (s - fw) / 2, py = k.y + pay + (s - fh) / 2;
+    x.drawImage(f.c, px, py, fw, fh);
+    x.save(); x.strokeStyle = &#x27;#999&#x27;; x.lineWidth = 2; x.strokeRect(px, py, fw, fh); x.restore();
+  }
+}
+function urlYap(c) { return new Promise(ok =&gt; c.toBlob(b =&gt; ok(URL.createObjectURL(b)), &#x27;image/png&#x27;)); }
+
+async function dosyalariIsle(liste) {
+  const pdfler = [...liste].filter(f =&gt; /\.pdf$/i.test(f.name) || f.type === &#x27;application/pdf&#x27;);
+  if (!pdfler.length) { $(&#x27;durum&#x27;).textContent = &#x27;PDF dosyası seçin.&#x27;; return; }
+  if (!window.pdfjsLib) { $(&#x27;durum&#x27;).textContent = &#x27;PDF okuyucu yüklenemedi; internet bağlantısını kontrol edip sayfayı yenileyin.&#x27;; return; }
+  isleniyor = true; ciz();
+  let bos = 0;
+  for (const f of pdfler) {
+    try {
+      const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+      for (let i = 1; i &lt;= pdf.numPages; i++) {
+        $(&#x27;durum&#x27;).textContent = `Okunuyor: ${f.name} · sayfa ${i}/${pdf.numPages}`;
+        const sayfa = await pdf.getPage(i), vp = sayfa.getViewport({ scale: 2.4 });
+        const c = document.createElement(&#x27;canvas&#x27;); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+        const x = c.getContext(&#x27;2d&#x27;); x.fillStyle = &#x27;#fff&#x27;; x.fillRect(0, 0, c.width, c.height);
+        await sayfa.render({ canvasContext: x, viewport: vp }).promise;
+        // &quot;Do the green thing&quot; + Etsy logosu satırını (fişin alt kısmı) sil
+        try {
+          const tc = await sayfa.getTextContent();
+          try { vurgula(x, vp, tc.items); } catch (e) { console.warn(&#x27;vurgu&#x27;, e); }
+          try { fotoBuyut(x, vp, tc.items, await fotolariAl(sayfa)); } catch (e) { console.warn(&#x27;foto&#x27;, e); }
+          const it = tc.items.find(o =&gt; /do the green thing/i.test(o.str));
+          if (it) {
+            const [, yTaban] = vp.convertToViewportPoint(it.transform[4], it.transform[5]);
+            const boy = Math.abs(it.transform[3] || it.height || 8) * vp.scale;
+            const ust = Math.max(0, Math.round(yTaban - boy * 2.2));
+            x.fillStyle = &#x27;#fff&#x27;; x.fillRect(0, ust, c.width, c.height - ust);
+          }
+        } catch (e) {}
+        const kirpik = kirp(c);
+        if (!kirpik) { bos++; continue; }
+        const fotolar = [];
+        fisler.push({ ad: f.name + (pdf.numPages &gt; 1 ? &#x27; · s.&#x27; + i : &#x27;&#x27;), tam: c, kirpik, fotolar, url: null });
+      }
+    } catch (e) { $(&#x27;durum&#x27;).textContent = f.name + &#x27; okunamadı: &#x27; + e.message; }
+  }
+  await resimleriHazirla();
+  isleniyor = false;
+  $(&#x27;durum&#x27;).textContent = bos ? bos + &#x27; boş sayfa atlandı.&#x27; : &#x27;&#x27;;
+  ciz();
+}
+// Seçili düzende bir kutunun en/boy oranı
+function kutuOrani() {
+  const adet = +$(&#x27;adet&#x27;).value, yatay = $(&#x27;yon&#x27;).value === &#x27;yatay&#x27;;
+  const [kol, sat] = (yatay ? DUZEN_YATAY : DUZEN)[adet];
+  const SW = yatay ? 289 : 202, SH = yatay ? 202 : 289, G = 1.6;
+  return ((SW - G * (kol - 1)) / kol) / ((SH - G * (sat - 1)) / sat);
+}
+// Fiş + büyük ürün fotoğrafı: fiş kutudan genişse foto altına (boşluğu doldurur), değilse fişteki boş alana
+function birlestir(f, A) {
+  const k = f.kirpik, fotolar = f.fotolar || [];
+  if (!fotolar.length) return k;
+  const ek = Math.round(k.width / A - k.height);
+  if (ek &gt; k.width * 0.12) {
+    const o = document.createElement(&#x27;canvas&#x27;); o.width = k.width; o.height = k.height + ek;
+    const x = o.getContext(&#x27;2d&#x27;); x.fillStyle = &#x27;#fff&#x27;; x.fillRect(0, 0, o.width, o.height); x.drawImage(k, 0, 0);
+    const n = Math.min(3, fotolar.length), pay = Math.round(ek * 0.05);
+    const s = Math.min(ek - 2 * pay, (k.width - pay * (n + 1)) / n);
+    const top = k.height + (ek - s) / 2, bas = (k.width - (s * n + pay * (n - 1))) / 2;
+    fotolar.slice(0, n).forEach((ft, i) =&gt; {
+      const oran = ft.c.width / ft.c.height, fw = oran &gt;= 1 ? s : s * oran, fh = oran &gt;= 1 ? s / oran : s;
+      const px = bas + i * (s + pay) + (s - fw) / 2, py = top + (s - fh) / 2;
+      x.drawImage(ft.c, px, py, fw, fh); x.strokeStyle = &#x27;#999&#x27;; x.lineWidth = 2; x.strokeRect(px, py, fw, fh);
+    });
+    return o;
+  }
+  const o = document.createElement(&#x27;canvas&#x27;); o.width = k.width; o.height = k.height; o.getContext(&#x27;2d&#x27;).drawImage(k, 0, 0);
+  buyukFotoKoy(o, fotolar, 2.4);
+  return o;
+}
+async function resimleriHazirla() {
+  const kirpAcik = $(&#x27;kirp&#x27;).checked, A = kutuOrani();
+  for (const f of fisler) {
+    const istenen = kirpAcik ? &#x27;k&#x27; + A.toFixed(3) : &#x27;t&#x27;;
+    if (f.tur === istenen &amp;&amp; f.url) continue;
+    if (f.url) URL.revokeObjectURL(f.url);
+    f.url = await urlYap(kirpAcik ? f.kirpik : f.tam); f.tur = istenen;
+  }
+}
+
+function ciz() {
+  const adet = +$(&#x27;adet&#x27;).value, yatay = $(&#x27;yon&#x27;).value === &#x27;yatay&#x27;;
+  const [kol, sat] = (yatay ? DUZEN_YATAY : DUZEN)[adet];
+  document.body.classList.toggle(&#x27;yatay&#x27;, yatay);
+  $(&#x27;sayfaYonu&#x27;).textContent = `@page{size:A4 ${yatay ? &#x27;landscape&#x27; : &#x27;portrait&#x27;};margin:0}`;
+  const sayfaSay = Math.ceil(fisler.length / adet);
+  $(&#x27;ozet&#x27;).textContent = fisler.length ? `${fisler.length} fiş → ${sayfaSay} sayfa` : &#x27;&#x27;;
+  $(&#x27;yazdir&#x27;).disabled = !fisler.length || isleniyor;
+  let html = &#x27;&#x27;;
+  for (let s = 0; s &lt; sayfaSay; s++) {
+    const parca = fisler.slice(s * adet, s * adet + adet);
+    html += `&lt;div class=&quot;olcek&quot;&gt;&lt;div class=&quot;sayfa&quot;&gt;&lt;div class=&quot;izgara${$(&#x27;kesim&#x27;).checked ? &#x27; kesim&#x27; : &#x27;&#x27;}&quot; style=&quot;grid-template-columns:repeat(${kol},minmax(0,1fr));grid-template-rows:repeat(${sat},minmax(0,1fr))&quot;&gt;`
+      + parca.map((f, j) =&gt; { const n = s * adet + j; return `&lt;div class=&quot;hucre&quot;&gt;&lt;img src=&quot;${f.url}&quot; alt=&quot;&quot;&gt;&lt;span class=&quot;no&quot;&gt;${n + 1}&lt;/span&gt;&lt;button class=&quot;sil&quot; data-n=&quot;${n}&quot; title=&quot;Bu fişi çıkar&quot;&gt;×&lt;/button&gt;&lt;/div&gt;`; }).join(&#x27;&#x27;)
+      + &#x27;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
+  }
+  $(&#x27;sayfalar&#x27;).innerHTML = html;
+  olcekle();
+}
+// Ekrana sığdır (baskıda gerçek boyut)
+function olcekle() {
+  const kap = $(&#x27;sayfalar&#x27;), gen = Math.min(kap.clientWidth - 40, 820);
+  document.querySelectorAll(&#x27;.olcek&#x27;).forEach(o =&gt; {
+    const s = o.firstElementChild, k = Math.min(1, gen / s.offsetWidth);
+    s.style.transform = `scale(${k})`; o.style.width = s.offsetWidth * k + &#x27;px&#x27;; o.style.height = s.offsetHeight * k + &#x27;px&#x27;;
+  });
+}
+
+$(&#x27;sayfalar&#x27;).addEventListener(&#x27;click&#x27;, e =&gt; { const b = e.target.closest(&#x27;.sil&#x27;); if (!b) return; const [f] = fisler.splice(+b.dataset.n, 1); if (f &amp;&amp; f.url) URL.revokeObjectURL(f.url); ciz(); });
+[&#x27;adet&#x27;, &#x27;yon&#x27;].forEach(id =&gt; $(id).addEventListener(&#x27;change&#x27;, async () =&gt; { await resimleriHazirla(); ciz(); }));
+$(&#x27;kesim&#x27;).addEventListener(&#x27;change&#x27;, ciz);
+$(&#x27;kirp&#x27;).addEventListener(&#x27;change&#x27;, async () =&gt; { await resimleriHazirla(); ciz(); });
+$(&#x27;ekle&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; $(&#x27;dosya&#x27;).click());
+$(&#x27;dosya&#x27;).addEventListener(&#x27;change&#x27;, e =&gt; { dosyalariIsle(e.target.files); e.target.value = &#x27;&#x27;; });
+$(&#x27;temizle&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { fisler.forEach(f =&gt; f.url &amp;&amp; URL.revokeObjectURL(f.url)); fisler = []; ciz(); });
+$(&#x27;yazdir&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; window.print());
+const b = $(&#x27;birak&#x27;);
+b.addEventListener(&#x27;dragover&#x27;, e =&gt; { e.preventDefault(); b.classList.add(&#x27;ust&#x27;); });
+b.addEventListener(&#x27;dragleave&#x27;, () =&gt; b.classList.remove(&#x27;ust&#x27;));
+window.addEventListener(&#x27;dragover&#x27;, e =&gt; e.preventDefault());
+window.addEventListener(&#x27;drop&#x27;, e =&gt; { e.preventDefault(); b.classList.remove(&#x27;ust&#x27;); if (e.dataTransfer.files.length) dosyalariIsle(e.dataTransfer.files); });
+window.addEventListener(&#x27;resize&#x27;, olcekle);
+window.addEventListener(&#x27;beforeprint&#x27;, () =&gt; document.querySelectorAll(&#x27;.sayfa&#x27;).forEach(s =&gt; s.style.transform = &#x27;none&#x27;));
+window.addEventListener(&#x27;afterprint&#x27;, olcekle);
+ciz();
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
 </div>
 <div class="page" id="page-fatura">
   <div class="page-header">
@@ -7913,7 +8242,7 @@ function gbBlok(metin, bas, sonlar) {
   return kalan.slice(0, son).split('\n').map(x => x.trim()).filter(Boolean).join('\n');
 }
 // Etsy fişi sayfasındaki ürün resimlerini bulur, sayfadan o bölgeyi çizip küçük JPEG olarak döndürür.
-async function gbSayfaFotolari(page, hedef = 140) {
+async function gbSayfaFotolari(page) {
   try {
     const ops = await page.getOperatorList(), O = pdfjsLib.OPS, U = pdfjsLib.Util;
     let ctm = [1, 0, 0, 1, 0, 0]; const yigin = []; const kutular = [];
@@ -7935,12 +8264,12 @@ async function gbSayfaFotolari(page, hedef = 140) {
     for (const kb of kutular.sort((p, q) => q[3] - p[3])) {          // PDF'te y yukarı doğru: büyük y = sayfanın üstü
     const r = v1.convertToViewportRectangle(kb);
     const x = Math.min(r[0], r[2]), y = Math.min(r[1], r[3]), w = Math.abs(r[2] - r[0]), h = Math.abs(r[3] - r[1]);
-    const olcek = Math.min(8, Math.max(1, (hedef + 20) / Math.max(w, h)));
+    const olcek = Math.min(6, Math.max(1, 160 / Math.max(w, h)));
     const vp = page.getViewport({ scale: olcek, offsetX: -x * olcek, offsetY: -y * olcek });
     const c = document.createElement('canvas'); c.width = Math.round(w * olcek); c.height = Math.round(h * olcek);
     const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
     await page.render({ canvasContext: ctx, viewport: vp }).promise;
-    const m = Math.min(1, hedef / Math.max(c.width, c.height)), o = document.createElement('canvas');
+    const m = Math.min(1, 140 / Math.max(c.width, c.height)), o = document.createElement('canvas');
     o.width = Math.round(c.width * m); o.height = Math.round(c.height * m);
     o.getContext('2d').drawImage(c, 0, 0, o.width, o.height);
     sonuc.push(o.toDataURL('image/jpeg', 0.78));
@@ -16080,116 +16409,6 @@ async function gbKartlariYazdir(idler, adet) {
   const bitir = () => { document.body.classList.remove('yz-modu'); kap.remove(); window.removeEventListener('afterprint', bitir); };
   window.addEventListener('afterprint', bitir);
   setTimeout(() => { window.print(); setTimeout(() => { if (document.getElementById('skBaski') && !matchMedia('print').matches) bitir(); }, 30000); }, 60);
-}
-
-// ===== V163: YAZICI — Etsy fişlerini okuyup sade baskı kartı olarak A4'e dizer (sisteme kaydetmez) =====
-let yzcFisler = [];
-const YZC_DUZEN = { 1: { kolon: 1, satir: 1, gen: 640, dikey: true }, 2: { kolon: 1, satir: 2, gen: 900 }, 4: { kolon: 2, satir: 2, gen: 560, dikey: true }, 6: { kolon: 2, satir: 3, gen: 620 }, 8: { kolon: 2, satir: 4, gen: 700 } };
-const yzcBuyuk = k => String(k || '').replace(/\b\w/g, c => c.toUpperCase());
-async function yzcDosyalar(liste) {
-  const dosyalar = [...(liste || [])].filter(f => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
-  const durum = document.getElementById('yzcDurum');
-  if (!dosyalar.length) { durum.textContent = 'PDF dosyası seçin.'; return; }
-  if (!pdfjsHazirla()) { durum.textContent = 'PDF okuyucu yüklenemedi (internet bağlantısını kontrol edin).'; return; }
-  let eklenen = 0, atlanan = 0;
-  for (const dosya of dosyalar) {
-    try {
-      const pdf = await pdfjsLib.getDocument({ data: await dosya.arrayBuffer() }).promise;
-      const parcalar = []; let ilk = true;
-      for (let i = 1; i <= pdf.numPages; i++) {
-        durum.textContent = `Okunuyor: ${dosya.name} · sayfa ${i}/${pdf.numPages}`;
-        const sayfa = await pdf.getPage(i), c = await sayfa.getTextContent();
-        const t = c.items.map(it => it.str).join('\n');
-        const ogeler = c.items.filter(it => it.str && it.str.trim()).map(it => ({ s: it.str, x: it.transform[4], y: it.transform[5], sayfa: i }));
-        const fotolar = await gbSayfaFotolari(sayfa, 600);
-        if (/Order\s*#\s*\d+/i.test(t) || ilk) parcalar.push({ t, ogeler, fotolar });
-        else { const p = parcalar[parcalar.length - 1]; p.t += '\n' + t.replace(/^[\s\S]*?\n\s*\d+\s+items?\s*\n/i, '\n'); p.ogeler.push(...ogeler); p.fotolar.push(...fotolar); }
-        ilk = false;
-      }
-      parcalar.forEach(p => {
-        const sp = gbFisCozumle(p.t, p.ogeler);
-        if (!sp) { atlanan++; return; }
-        if (yzcFisler.some(x => x.siparisNo === sp.siparisNo)) { atlanan++; return; }
-        sp.fotolar = p.fotolar; yzcFisler.push(sp); eklenen++;
-      });
-    } catch (e) { durum.textContent = dosya.name + ' okunamadı: ' + e.message; }
-  }
-  durum.textContent = (eklenen ? eklenen + ' fiş eklendi.' : '') + (atlanan ? ' ' + atlanan + ' tanesi atlandı (aynı sipariş ya da Etsy fişi değil).' : '');
-  yzcCiz();
-}
-function yzcTemizle() { yzcFisler = []; document.getElementById('yzcDurum').textContent = ''; yzcCiz(); }
-function yzcSil(no) { yzcFisler = yzcFisler.filter(x => x.siparisNo !== no); yzcCiz(); }
-function yzcTarih(t) { if (!t) return ''; const d = new Date(t + 'T12:00:00'); return isNaN(d) ? t : d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }); }
-// Tek fişin baskı kartı
-function yzcKartHtml(sp, dikey) {
-  const urunler = sp.urunler.map((u, i) => {
-    const foto = sp.fotolar[i] || sp.fotolar[0] || '';
-    const oz = Object.entries(u.ozellik || {}).filter(([k, v]) => v && !/^(price|item total|subtotal)$/i.test(k));
-    if (u.sku && !oz.some(([k]) => /^sku$/i.test(k))) oz.unshift(['sku', u.sku]);
-    return `<div class="yzf-urun">${foto ? `<img class="yzf-foto" src="${foto}" alt="">` : ''}
-      <div class="yzf-bilgi"><div class="yzf-baslik">${gbEsc(u.baslik || '')}</div>
-        <table class="yzf-oz">${oz.map(([k, v]) => `<tr><td>${gbEsc(yzcBuyuk(k))}</td><td>${gbEsc(v)}</td></tr>`).join('')}</table></div></div>`;
-  }).join('');
-  const notlar = (sp.notlar || []).map(n => `<div class="yzf-not"><b>${gbEsc(n.baslik || 'Not')}</b>${gbEsc(n.metin).replace(/\n/g, '<br>')}</div>`).join('');
-  const adres = (sp.adresSatirlari || []).filter(Boolean);
-  return `<div class="yzf${dikey ? ' dikey' : ''}">
-    <div class="yzf-ust"><span class="yzf-magaza">${gbEsc((sp.magaza || 'MAĞAZA ?').toUpperCase())}</span><span class="yzf-no">#${gbEsc(sp.siparisNo)}</span></div>
-    <div class="yzf-tarih">${sp.tarih ? 'Sipariş ' + gbEsc(yzcTarih(sp.tarih)) : ''}${sp.sonGonderim ? ' · <b>Son gönderim ' + gbEsc(yzcTarih(sp.sonGonderim)) + '</b>' : ''}${sp.hediye ? ' · <b class="yzf-hediye">🎁 HEDİYE</b>' : ''}</div>
-    ${urunler}${notlar}
-    <div class="yzf-kes"><span>✂</span></div>
-    <div class="yzf-adres"><div class="yzf-adres-et">SHIP TO</div><b>${gbEsc(adres[0] || sp.alici || '')}</b>${adres.slice(1).map(x => '<br>' + gbEsc(x)).join('')}</div>
-  </div>`;
-}
-function yzcSayfalarHtml(onizleme) {
-  const adet = +document.getElementById('yzcAdet').value, dz = YZC_DUZEN[adet] || YZC_DUZEN[6];
-  const SW = 194, SH = 279, ARA = 4, yw = (SW - ARA * (dz.kolon - 1)) / dz.kolon, yh = (SH - ARA * (dz.satir - 1)) / dz.satir;
-  const kesim = document.getElementById('yzcKesim').checked;
-  let html = '';
-  for (let i = 0; i < yzcFisler.length; i += adet) {
-    html += '<div class="yz-sayfa">' + yzcFisler.slice(i, i + adet).map((sp, j) => `<div class="yz-yuva${kesim ? ' yzc-kesik' : ''}" style="left:${(j % dz.kolon) * (yw + ARA)}mm;top:${Math.floor(j / dz.kolon) * (yh + ARA)}mm;width:${yw}mm;height:${yh}mm">
-      <div class="yz-kart-alan" style="bottom:0">${onizleme ? `<button class="yzc-sil" onclick="yzcSil('${gbEsc(sp.siparisNo)}')" title="Çıkar">×</button>` : ''}<div class="yz-olcek" style="width:${dz.gen}px">${yzcKartHtml(sp, dz.dikey)}</div></div></div>`).join('') + '</div>';
-  }
-  return html;
-}
-// Her fiş için yuvayı en iyi dolduran genişliği ve yerleşimi (yan yana / alt alta) seç, sonra sığdır
-function yzcSigdir(kap) {
-  kap.querySelectorAll('.yz-kart-alan').forEach(y => {
-    const o = y.querySelector('.yz-olcek'), kart = o.querySelector('.yzf'); o.style.zoom = '';
-    const yw = y.clientWidth, yh = y.clientHeight;
-    let en = null;
-    for (const dikey of [false, true]) for (let g = 380; g <= 1100; g += 40) {
-      kart.classList.toggle('dikey', dikey); o.style.width = g + 'px';
-      const k = Math.min(yw / o.offsetWidth, yh / o.offsetHeight);
-      if (!en || k > en.k + 0.005) en = { k, g, dikey };
-    }
-    kart.classList.toggle('dikey', en.dikey); o.style.width = en.g + 'px';
-  });
-  gbYazdirOlcekle(kap);
-}
-async function yzcResimBekle(kap) { await Promise.race([Promise.all([...kap.querySelectorAll('img')].map(im => im.complete ? 0 : new Promise(r => { im.onload = im.onerror = r; }))), new Promise(r => setTimeout(r, 5000))]); }
-async function yzcCiz() {
-  const kap = document.getElementById('yzcOnizleme'); if (!kap) return;
-  const adet = +document.getElementById('yzcAdet').value;
-  document.getElementById('yzcOzet').textContent = yzcFisler.length ? `${yzcFisler.length} fiş → ${Math.ceil(yzcFisler.length / adet)} sayfa` : '';
-  document.getElementById('yzcYazdirBtn').disabled = !yzcFisler.length;
-  kap.innerHTML = `<div class="yzc-olcek-ic">${yzcSayfalarHtml(true)}</div>`;
-  const ic = kap.firstElementChild;
-  await yzcResimBekle(ic);
-  yzcSigdir(ic);
-  const k = Math.min(1, (kap.clientWidth - 10) / (ic.firstElementChild ? ic.firstElementChild.offsetWidth : 1));
-  ic.style.zoom = k;
-}
-async function yzcYazdir() {
-  if (!yzcFisler.length) return;
-  document.getElementById('skBaski')?.remove();
-  const kap = document.createElement('div'); kap.id = 'skBaski'; kap.innerHTML = yzcSayfalarHtml(false);
-  document.body.appendChild(kap);
-  await yzcResimBekle(kap);
-  yzcSigdir(kap);
-  document.body.classList.add('yz-modu');
-  const bitir = () => { document.body.classList.remove('yz-modu'); kap.remove(); window.removeEventListener('afterprint', bitir); };
-  window.addEventListener('afterprint', bitir);
-  setTimeout(() => window.print(), 60);
 }
 // V159: kartın altında kesilecek alıcı şeridi (ad, adres, telefon)
 function gbKesimSerit(s, dz) {
