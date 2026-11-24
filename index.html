@@ -1,4 +1,4 @@
-<!-- SURUM-V161-STL-INDIR --><!DOCTYPE html>
+<!-- SURUM-V162-YAZICI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1413,6 +1413,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="nav-tab" onclick="showPage('borcalacak')" title="Kısayol: B"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h4"/></svg>Cari Hesap</button><button class="nav-tab" onclick="showPage('parametreler')" title="Kısayol: Y"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Parametreler</button><button class="nav-tab" onclick="showPage('sayim')" title="Kısayol: S"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>Sayım</button><button class="nav-tab" onclick="showPage('burak_ozel')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Burak</button><button class="nav-tab" onclick="showPage('sifreler_ortak')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l2 2M15 8l2 2"/></svg>Şifreler</button>
     <button class="nav-tab" onclick="showPage('ramat')" title="Ramat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L5 13"/><path d="m8.5 16.5-1.5 2.5 1.5 2.5"/><path d="M17 19h2.2a1.8 1.8 0 0 0 1.6-2.7L19 13"/><path d="M9.5 6.5 11 4a1.8 1.8 0 0 1 3 0l1.6 2.7"/><path d="m13.5 6.8 2.1.3.6-2"/><path d="m17.5 13.5-.3 2.6 2.4.6"/></svg>Ramat</button>
     <button class="nav-tab" onclick="showPage('fatura')" title="Fatura"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Fatura</button>
+    <button class="nav-tab" onclick="showPage('yazici')" title="Fiş Baskı"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>YAZICI</button>
   </div>
   <div class="nav-right">
   </div>
@@ -2782,6 +2783,199 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 </main>
 
 <!-- FATURA -->
+<!-- YAZICI (fiş baskı aracı; geçici) -->
+<div class="page" id="page-yazici">
+  <iframe id="yaziciCerceve" title="Fiş Baskı" style="width:100%;height:calc(100vh - 150px);min-height:600px;border:1px solid var(--border);border-radius:14px;background:#121110" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;tr&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;Fiş Baskı&lt;/title&gt;
+&lt;style&gt;
+/* VOICE: atölye aracı, sade ve hızlı
+   IDEA: fişleri A4&#x27;e dizen bir montaj masası
+   PICTURE: A4 sayfa önizlemeleri
+   COLOUR/TYPE: koyu zemin, altın vurgu; sistem fontu
+   LAYOUT: üstte ayarlar, altta sayfalar */
+:root{--bg:#121110;--kart:#1C1A17;--cizgi:#3A342A;--metin:#F2ECDD;--soluk:#A69E8B;--altin:#D4AF37}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--metin);font:15px/1.5 -apple-system,&quot;Segoe UI&quot;,Roboto,Arial,sans-serif}
+header{position:sticky;top:0;z-index:5;background:rgba(18,17,16,.96);border-bottom:1px solid var(--cizgi);padding:12px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+h1{font-size:18px;margin:0 8px 0 0;color:var(--altin)}
+label.sec{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--soluk)}
+select,button{font:inherit;font-size:14px;border-radius:10px;border:1px solid var(--cizgi);background:var(--kart);color:var(--metin);padding:8px 12px;min-height:40px}
+button{cursor:pointer}button.ana{background:var(--altin);color:#1A1405;border-color:var(--altin);font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+.ozet{margin-left:auto;font-size:13px;color:var(--soluk)}
+.birak{display:block;margin:20px;border:2px dashed #6B5A2A;border-radius:16px;padding:34px 16px;text-align:center;cursor:pointer;background:rgba(212,175,55,.04)}
+.birak.ust{background:rgba(212,175,55,.14);border-color:var(--altin)}
+.birak b{font-size:17px;display:block;margin-bottom:4px}.birak span{color:var(--soluk);font-size:13px}
+#durum{margin:0 20px;color:var(--soluk);font-size:13px;min-height:20px}
+#sayfalar{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;padding:10px 20px 60px}
+.sayfa{background:#fff;width:210mm;height:297mm;padding:6mm;box-shadow:0 10px 30px rgba(0,0,0,.5);transform-origin:top left}
+.izgara{display:grid;width:100%;height:100%;gap:3mm}
+.hucre{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.izgara.kesim .hucre{outline:.3mm dashed #888;outline-offset:1.2mm}
+.hucre img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.hucre .sil{position:absolute;top:2px;right:2px;width:26px;height:26px;min-height:0;padding:0;border-radius:50%;background:#B91C1C;color:#fff;border:0;font-weight:700;opacity:0;transition:.15s}
+.hucre:hover .sil{opacity:1}
+.hucre .no{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:1px 6px;border-radius:8px}
+.olcek{display:inline-block}
+@page{size:A4 portrait;margin:0}
+@media print{
+  body{background:#fff}header,.birak,#durum{display:none!important}
+  #sayfalar{display:block;padding:0}
+  .olcek{display:block!important;width:auto!important;height:auto!important}
+  .sayfa{box-shadow:none;transform:none!important;break-after:page;page-break-after:always;margin:0}
+  .sayfa:last-child{break-after:auto;page-break-after:auto}
+  .sil,.no{display:none!important}
+}
+body.yatay .sayfa{width:297mm;height:210mm}
+@media print{body.yatay .sayfa{width:297mm;height:210mm}}
+&lt;/style&gt;
+&lt;style id=&quot;sayfaYonu&quot;&gt;@page{size:A4 portrait;margin:0}&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;header&gt;
+  &lt;h1&gt;Fiş Baskı&lt;/h1&gt;
+  &lt;label class=&quot;sec&quot;&gt;Sayfa başına
+    &lt;select id=&quot;adet&quot;&gt;
+      &lt;option value=&quot;1&quot;&gt;1 fiş&lt;/option&gt;&lt;option value=&quot;2&quot;&gt;2 fiş&lt;/option&gt;&lt;option value=&quot;4&quot;&gt;4 fiş&lt;/option&gt;
+      &lt;option value=&quot;6&quot; selected&gt;6 fiş&lt;/option&gt;&lt;option value=&quot;8&quot;&gt;8 fiş&lt;/option&gt;&lt;option value=&quot;9&quot;&gt;9 fiş&lt;/option&gt;
+    &lt;/select&gt;&lt;/label&gt;
+  &lt;label class=&quot;sec&quot;&gt;Kâğıt
+    &lt;select id=&quot;yon&quot;&gt;&lt;option value=&quot;dikey&quot;&gt;Dikey&lt;/option&gt;&lt;option value=&quot;yatay&quot;&gt;Yatay&lt;/option&gt;&lt;/select&gt;&lt;/label&gt;
+  &lt;label class=&quot;sec&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;kirp&quot; checked&gt; Boşlukları sıkıştır&lt;/label&gt;
+  &lt;label class=&quot;sec&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;kesim&quot; checked&gt; Kesim çizgisi&lt;/label&gt;
+  &lt;button id=&quot;ekle&quot;&gt;＋ Fiş ekle&lt;/button&gt;
+  &lt;button id=&quot;temizle&quot;&gt;Temizle&lt;/button&gt;
+  &lt;button class=&quot;ana&quot; id=&quot;yazdir&quot; disabled&gt;🖨 Yazdır&lt;/button&gt;
+  &lt;span class=&quot;ozet&quot; id=&quot;ozet&quot;&gt;&lt;/span&gt;
+&lt;/header&gt;
+&lt;label class=&quot;birak&quot; id=&quot;birak&quot;&gt;
+  &lt;b&gt;Fiş PDF&#x27;lerini buraya sürükleyin&lt;/b&gt;
+  &lt;span&gt;ya da tıklayıp seçin · birden fazla dosya olabilir · her PDF sayfası bir fiş sayılır · dosyalar bilgisayarınızdan çıkmaz&lt;/span&gt;
+  &lt;input type=&quot;file&quot; id=&quot;dosya&quot; accept=&quot;application/pdf,.pdf&quot; multiple hidden&gt;
+&lt;/label&gt;
+&lt;div id=&quot;durum&quot;&gt;&lt;/div&gt;
+&lt;div id=&quot;sayfalar&quot;&gt;&lt;/div&gt;
+
+&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+{
+const $ = id =&gt; document.getElementById(id);
+const DUZEN = { 1: [1, 1], 2: [1, 2], 4: [2, 2], 6: [2, 3], 8: [2, 4], 9: [3, 3] };
+const DUZEN_YATAY = { 1: [1, 1], 2: [2, 1], 4: [2, 2], 6: [3, 2], 8: [4, 2], 9: [3, 3] };
+let fisler = [];          // { ad, kaynak (canvas), url (img) }
+let isleniyor = false;
+
+if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = &#x27;https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js&#x27;;
+
+// Kenarlardaki beyaz boşluğu at, aradaki büyük boş bantları da sıkıştır (fiş altındaki Etsy yazısıyla içerik arası gibi)
+function kirp(c) {
+  const w = c.width, h = c.height, d = c.getContext(&#x27;2d&#x27;).getImageData(0, 0, w, h).data;
+  const satirDolu = new Uint8Array(h); let sol = w, sag = -1;
+  for (let y = 0; y &lt; h; y++) for (let x = 0; x &lt; w; x += 2) { const i = (y * w + x) * 4; if (d[i] &lt; 235 || d[i + 1] &lt; 235 || d[i + 2] &lt; 235) { satirDolu[y] = 1; if (x &lt; sol) sol = x; if (x &gt; sag) sag = x; } }
+  if (sag &lt; 0) return null;                       // boş sayfa
+  const p = Math.round(Math.min(w, h) * 0.012), azBosluk = Math.round(h * 0.025), kalan = Math.round(h * 0.012);
+  // dolu satır aralıklarını bul; aradaki uzun boşlukları kısalt
+  const parcalar = []; let y = 0;
+  while (y &lt; h) { while (y &lt; h &amp;&amp; !satirDolu[y]) y++; if (y &gt;= h) break; const bas = y; while (y &lt; h &amp;&amp; (satirDolu[y] || (() =&gt; { let k = y; while (k &lt; h &amp;&amp; !satirDolu[k] &amp;&amp; k - y &lt; azBosluk) k++; return k &lt; h &amp;&amp; satirDolu[k] &amp;&amp; k - y &lt; azBosluk; })())) y++; parcalar.push([bas, y]); }
+  sol = Math.max(0, sol - p); sag = Math.min(w - 1, sag + p);
+  const gen = sag - sol + 1, yuk = parcalar.reduce((t, [a, b]) =&gt; t + (b - a), 0) + kalan * (parcalar.length - 1) + 2 * p;
+  const o = document.createElement(&#x27;canvas&#x27;); o.width = gen; o.height = yuk;
+  const x = o.getContext(&#x27;2d&#x27;); x.fillStyle = &#x27;#fff&#x27;; x.fillRect(0, 0, gen, yuk);
+  let hy = p;
+  parcalar.forEach(([a, b], i) =&gt; { x.drawImage(c, sol, a, gen, b - a, 0, hy, gen, b - a); hy += b - a + (i &lt; parcalar.length - 1 ? kalan : 0); });
+  return o;
+}
+function urlYap(c) { return new Promise(ok =&gt; c.toBlob(b =&gt; ok(URL.createObjectURL(b)), &#x27;image/png&#x27;)); }
+
+async function dosyalariIsle(liste) {
+  const pdfler = [...liste].filter(f =&gt; /\.pdf$/i.test(f.name) || f.type === &#x27;application/pdf&#x27;);
+  if (!pdfler.length) { $(&#x27;durum&#x27;).textContent = &#x27;PDF dosyası seçin.&#x27;; return; }
+  if (!window.pdfjsLib) { $(&#x27;durum&#x27;).textContent = &#x27;PDF okuyucu yüklenemedi; internet bağlantısını kontrol edip sayfayı yenileyin.&#x27;; return; }
+  isleniyor = true; ciz();
+  let bos = 0;
+  for (const f of pdfler) {
+    try {
+      const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+      for (let i = 1; i &lt;= pdf.numPages; i++) {
+        $(&#x27;durum&#x27;).textContent = `Okunuyor: ${f.name} · sayfa ${i}/${pdf.numPages}`;
+        const sayfa = await pdf.getPage(i), vp = sayfa.getViewport({ scale: 2.4 });
+        const c = document.createElement(&#x27;canvas&#x27;); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+        const x = c.getContext(&#x27;2d&#x27;); x.fillStyle = &#x27;#fff&#x27;; x.fillRect(0, 0, c.width, c.height);
+        await sayfa.render({ canvasContext: x, viewport: vp }).promise;
+        const kirpik = kirp(c);
+        if (!kirpik) { bos++; continue; }
+        fisler.push({ ad: f.name + (pdf.numPages &gt; 1 ? &#x27; · s.&#x27; + i : &#x27;&#x27;), tam: c, kirpik, url: null });
+      }
+    } catch (e) { $(&#x27;durum&#x27;).textContent = f.name + &#x27; okunamadı: &#x27; + e.message; }
+  }
+  await resimleriHazirla();
+  isleniyor = false;
+  $(&#x27;durum&#x27;).textContent = bos ? bos + &#x27; boş sayfa atlandı.&#x27; : &#x27;&#x27;;
+  ciz();
+}
+async function resimleriHazirla() {
+  const k = $(&#x27;kirp&#x27;).checked;
+  for (const f of fisler) {
+    const istenen = k ? &#x27;k&#x27; : &#x27;t&#x27;;
+    if (f.tur === istenen &amp;&amp; f.url) continue;
+    if (f.url) URL.revokeObjectURL(f.url);
+    f.url = await urlYap(k ? f.kirpik : f.tam); f.tur = istenen;
+  }
+}
+
+function ciz() {
+  const adet = +$(&#x27;adet&#x27;).value, yatay = $(&#x27;yon&#x27;).value === &#x27;yatay&#x27;;
+  const [kol, sat] = (yatay ? DUZEN_YATAY : DUZEN)[adet];
+  document.body.classList.toggle(&#x27;yatay&#x27;, yatay);
+  $(&#x27;sayfaYonu&#x27;).textContent = `@page{size:A4 ${yatay ? &#x27;landscape&#x27; : &#x27;portrait&#x27;};margin:0}`;
+  const sayfaSay = Math.ceil(fisler.length / adet);
+  $(&#x27;ozet&#x27;).textContent = fisler.length ? `${fisler.length} fiş → ${sayfaSay} sayfa` : &#x27;&#x27;;
+  $(&#x27;yazdir&#x27;).disabled = !fisler.length || isleniyor;
+  let html = &#x27;&#x27;;
+  for (let s = 0; s &lt; sayfaSay; s++) {
+    const parca = fisler.slice(s * adet, s * adet + adet);
+    html += `&lt;div class=&quot;olcek&quot;&gt;&lt;div class=&quot;sayfa&quot;&gt;&lt;div class=&quot;izgara${$(&#x27;kesim&#x27;).checked ? &#x27; kesim&#x27; : &#x27;&#x27;}&quot; style=&quot;grid-template-columns:repeat(${kol},minmax(0,1fr));grid-template-rows:repeat(${sat},minmax(0,1fr))&quot;&gt;`
+      + parca.map((f, j) =&gt; { const n = s * adet + j; return `&lt;div class=&quot;hucre&quot;&gt;&lt;img src=&quot;${f.url}&quot; alt=&quot;&quot;&gt;&lt;span class=&quot;no&quot;&gt;${n + 1}&lt;/span&gt;&lt;button class=&quot;sil&quot; data-n=&quot;${n}&quot; title=&quot;Bu fişi çıkar&quot;&gt;×&lt;/button&gt;&lt;/div&gt;`; }).join(&#x27;&#x27;)
+      + &#x27;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&#x27;;
+  }
+  $(&#x27;sayfalar&#x27;).innerHTML = html;
+  olcekle();
+}
+// Ekrana sığdır (baskıda gerçek boyut)
+function olcekle() {
+  const kap = $(&#x27;sayfalar&#x27;), gen = Math.min(kap.clientWidth - 40, 820);
+  document.querySelectorAll(&#x27;.olcek&#x27;).forEach(o =&gt; {
+    const s = o.firstElementChild, k = Math.min(1, gen / s.offsetWidth);
+    s.style.transform = `scale(${k})`; o.style.width = s.offsetWidth * k + &#x27;px&#x27;; o.style.height = s.offsetHeight * k + &#x27;px&#x27;;
+  });
+}
+
+$(&#x27;sayfalar&#x27;).addEventListener(&#x27;click&#x27;, e =&gt; { const b = e.target.closest(&#x27;.sil&#x27;); if (!b) return; const [f] = fisler.splice(+b.dataset.n, 1); if (f &amp;&amp; f.url) URL.revokeObjectURL(f.url); ciz(); });
+[&#x27;adet&#x27;, &#x27;yon&#x27;, &#x27;kesim&#x27;].forEach(id =&gt; $(id).addEventListener(&#x27;change&#x27;, ciz));
+$(&#x27;kirp&#x27;).addEventListener(&#x27;change&#x27;, async () =&gt; { await resimleriHazirla(); ciz(); });
+$(&#x27;ekle&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; $(&#x27;dosya&#x27;).click());
+$(&#x27;dosya&#x27;).addEventListener(&#x27;change&#x27;, e =&gt; { dosyalariIsle(e.target.files); e.target.value = &#x27;&#x27;; });
+$(&#x27;temizle&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { fisler.forEach(f =&gt; f.url &amp;&amp; URL.revokeObjectURL(f.url)); fisler = []; ciz(); });
+$(&#x27;yazdir&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; window.print());
+const b = $(&#x27;birak&#x27;);
+b.addEventListener(&#x27;dragover&#x27;, e =&gt; { e.preventDefault(); b.classList.add(&#x27;ust&#x27;); });
+b.addEventListener(&#x27;dragleave&#x27;, () =&gt; b.classList.remove(&#x27;ust&#x27;));
+window.addEventListener(&#x27;dragover&#x27;, e =&gt; e.preventDefault());
+window.addEventListener(&#x27;drop&#x27;, e =&gt; { e.preventDefault(); b.classList.remove(&#x27;ust&#x27;); if (e.dataTransfer.files.length) dosyalariIsle(e.dataTransfer.files); });
+window.addEventListener(&#x27;resize&#x27;, olcekle);
+window.addEventListener(&#x27;beforeprint&#x27;, () =&gt; document.querySelectorAll(&#x27;.sayfa&#x27;).forEach(s =&gt; s.style.transform = &#x27;none&#x27;));
+window.addEventListener(&#x27;afterprint&#x27;, olcekle);
+ciz();
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
+</div>
 <div class="page" id="page-fatura">
   <div class="page-header">
     <div><div class="page-title">🧾 Fatura</div><div class="page-sub">Uyumsoft e-Arşiv / e-Fatura — altın satırı Özel Matrah 805, işçilik %20 KDV</div></div>
@@ -3302,11 +3496,11 @@ async function fotoHizlandir() {
 // NAV
 let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
-  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel','sifreler_ortak','ramat','fatura'];
+  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel','sifreler_ortak','ramat','fatura','yazici'];
   const idx = pages.indexOf(page);
   // Ana Sayfa'daki kısayol kartları, alt menüler vb. üzerinden de olsa,
   // yetkisi olmayan bir role sayfa açtırma (sadece üst menüyü gizlemek yetmiyordu).
-  if (currentUser && currentUser.rol !== 'admin' && !rolSekmeleri().includes(idx)) {
+  if (currentUser && currentUser.rol !== 'admin' && !rolSekmeleri().includes(idx) && page !== 'yazici') {
     return;
   }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -5841,9 +6035,9 @@ async function loadRolIzinleri() {
   }
 }
 function rolSekmeleri() {
-  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9,10,11,12];
+  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9,10,11,12,13];
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
-  return izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined);
+  return [...izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined), 13];   // 13 = YAZICI (herkese açık, geçici)
 }
 function urunYetkiVar() {
   // admin dahil, "Urunler" sekmesini gorebilen herkes urun ekleyip/duzenleyip/silebilir

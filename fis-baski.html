@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fiş Baskı</title>
+<style>
+/* VOICE: atölye aracı, sade ve hızlı
+   IDEA: fişleri A4'e dizen bir montaj masası
+   PICTURE: A4 sayfa önizlemeleri
+   COLOUR/TYPE: koyu zemin, altın vurgu; sistem fontu
+   LAYOUT: üstte ayarlar, altta sayfalar */
+:root{--bg:#121110;--kart:#1C1A17;--cizgi:#3A342A;--metin:#F2ECDD;--soluk:#A69E8B;--altin:#D4AF37}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--metin);font:15px/1.5 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{position:sticky;top:0;z-index:5;background:rgba(18,17,16,.96);border-bottom:1px solid var(--cizgi);padding:12px 20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+h1{font-size:18px;margin:0 8px 0 0;color:var(--altin)}
+label.sec{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--soluk)}
+select,button{font:inherit;font-size:14px;border-radius:10px;border:1px solid var(--cizgi);background:var(--kart);color:var(--metin);padding:8px 12px;min-height:40px}
+button{cursor:pointer}button.ana{background:var(--altin);color:#1A1405;border-color:var(--altin);font-weight:700}
+button:disabled{opacity:.45;cursor:not-allowed}
+.ozet{margin-left:auto;font-size:13px;color:var(--soluk)}
+.birak{margin:20px;border:2px dashed #6B5A2A;border-radius:16px;padding:34px 16px;text-align:center;cursor:pointer;background:rgba(212,175,55,.04)}
+.birak.ust{background:rgba(212,175,55,.14);border-color:var(--altin)}
+.birak b{font-size:17px;display:block;margin-bottom:4px}.birak span{color:var(--soluk);font-size:13px}
+#durum{margin:0 20px;color:var(--soluk);font-size:13px;min-height:20px}
+#sayfalar{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;padding:10px 20px 60px}
+.sayfa{background:#fff;width:210mm;height:297mm;padding:6mm;box-shadow:0 10px 30px rgba(0,0,0,.5);transform-origin:top left}
+.izgara{display:grid;width:100%;height:100%;gap:3mm}
+.hucre{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.izgara.kesim .hucre{outline:.3mm dashed #888;outline-offset:1.2mm}
+.hucre img{max-width:100%;max-height:100%;object-fit:contain;display:block}
+.hucre .sil{position:absolute;top:2px;right:2px;width:26px;height:26px;min-height:0;padding:0;border-radius:50%;background:#B91C1C;color:#fff;border:0;font-weight:700;opacity:0;transition:.15s}
+.hucre:hover .sil{opacity:1}
+.hucre .no{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:1px 6px;border-radius:8px}
+.olcek{display:inline-block}
+@page{size:A4 portrait;margin:0}
+@media print{
+  body{background:#fff}header,.birak,#durum{display:none!important}
+  #sayfalar{display:block;padding:0}
+  .olcek{display:block!important;width:auto!important;height:auto!important}
+  .sayfa{box-shadow:none;transform:none!important;break-after:page;page-break-after:always;margin:0}
+  .sayfa:last-child{break-after:auto;page-break-after:auto}
+  .sil,.no{display:none!important}
+}
+body.yatay .sayfa{width:297mm;height:210mm}
+@media print{body.yatay .sayfa{width:297mm;height:210mm}}
+</style>
+<style id="sayfaYonu">@page{size:A4 portrait;margin:0}</style>
+</head>
+<body>
+<header>
+  <h1>Fiş Baskı</h1>
+  <label class="sec">Sayfa başına
+    <select id="adet">
+      <option value="1">1 fiş</option><option value="2">2 fiş</option><option value="4">4 fiş</option>
+      <option value="6" selected>6 fiş</option><option value="8">8 fiş</option><option value="9">9 fiş</option>
+    </select></label>
+  <label class="sec">Kâğıt
+    <select id="yon"><option value="dikey">Dikey</option><option value="yatay">Yatay</option></select></label>
+  <label class="sec"><input type="checkbox" id="kirp" checked> Boşlukları sıkıştır</label>
+  <label class="sec"><input type="checkbox" id="kesim" checked> Kesim çizgisi</label>
+  <button id="ekle">＋ Fiş ekle</button>
+  <button id="temizle">Temizle</button>
+  <button class="ana" id="yazdir" disabled>🖨 Yazdır</button>
+  <span class="ozet" id="ozet"></span>
+</header>
+<label class="birak" id="birak">
+  <b>Fiş PDF'lerini buraya sürükleyin</b>
+  <span>ya da tıklayıp seçin · birden fazla dosya olabilir · her PDF sayfası bir fiş sayılır · dosyalar bilgisayarınızdan çıkmaz</span>
+  <input type="file" id="dosya" accept="application/pdf,.pdf" multiple hidden>
+</label>
+<div id="durum"></div>
+<div id="sayfalar"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+{
+const $ = id => document.getElementById(id);
+const DUZEN = { 1: [1, 1], 2: [1, 2], 4: [2, 2], 6: [2, 3], 8: [2, 4], 9: [3, 3] };
+const DUZEN_YATAY = { 1: [1, 1], 2: [2, 1], 4: [2, 2], 6: [3, 2], 8: [4, 2], 9: [3, 3] };
+let fisler = [];          // { ad, kaynak (canvas), url (img) }
+let isleniyor = false;
+
+if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// Kenarlardaki beyaz boşluğu at, aradaki büyük boş bantları da sıkıştır (fiş altındaki Etsy yazısıyla içerik arası gibi)
+function kirp(c) {
+  const w = c.width, h = c.height, d = c.getContext('2d').getImageData(0, 0, w, h).data;
+  const satirDolu = new Uint8Array(h); let sol = w, sag = -1;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x += 2) { const i = (y * w + x) * 4; if (d[i] < 235 || d[i + 1] < 235 || d[i + 2] < 235) { satirDolu[y] = 1; if (x < sol) sol = x; if (x > sag) sag = x; } }
+  if (sag < 0) return null;                       // boş sayfa
+  const p = Math.round(Math.min(w, h) * 0.012), azBosluk = Math.round(h * 0.025), kalan = Math.round(h * 0.012);
+  // dolu satır aralıklarını bul; aradaki uzun boşlukları kısalt
+  const parcalar = []; let y = 0;
+  while (y < h) { while (y < h && !satirDolu[y]) y++; if (y >= h) break; const bas = y; while (y < h && (satirDolu[y] || (() => { let k = y; while (k < h && !satirDolu[k] && k - y < azBosluk) k++; return k < h && satirDolu[k] && k - y < azBosluk; })())) y++; parcalar.push([bas, y]); }
+  sol = Math.max(0, sol - p); sag = Math.min(w - 1, sag + p);
+  const gen = sag - sol + 1, yuk = parcalar.reduce((t, [a, b]) => t + (b - a), 0) + kalan * (parcalar.length - 1) + 2 * p;
+  const o = document.createElement('canvas'); o.width = gen; o.height = yuk;
+  const x = o.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, gen, yuk);
+  let hy = p;
+  parcalar.forEach(([a, b], i) => { x.drawImage(c, sol, a, gen, b - a, 0, hy, gen, b - a); hy += b - a + (i < parcalar.length - 1 ? kalan : 0); });
+  return o;
+}
+function urlYap(c) { return new Promise(ok => c.toBlob(b => ok(URL.createObjectURL(b)), 'image/png')); }
+
+async function dosyalariIsle(liste) {
+  const pdfler = [...liste].filter(f => /\.pdf$/i.test(f.name) || f.type === 'application/pdf');
+  if (!pdfler.length) { $('durum').textContent = 'PDF dosyası seçin.'; return; }
+  if (!window.pdfjsLib) { $('durum').textContent = 'PDF okuyucu yüklenemedi; internet bağlantısını kontrol edip sayfayı yenileyin.'; return; }
+  isleniyor = true; ciz();
+  let bos = 0;
+  for (const f of pdfler) {
+    try {
+      const pdf = await pdfjsLib.getDocument({ data: await f.arrayBuffer() }).promise;
+      for (let i = 1; i <= pdf.numPages; i++) {
+        $('durum').textContent = `Okunuyor: ${f.name} · sayfa ${i}/${pdf.numPages}`;
+        const sayfa = await pdf.getPage(i), vp = sayfa.getViewport({ scale: 2.4 });
+        const c = document.createElement('canvas'); c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+        const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+        await sayfa.render({ canvasContext: x, viewport: vp }).promise;
+        const kirpik = kirp(c);
+        if (!kirpik) { bos++; continue; }
+        fisler.push({ ad: f.name + (pdf.numPages > 1 ? ' · s.' + i : ''), tam: c, kirpik, url: null });
+      }
+    } catch (e) { $('durum').textContent = f.name + ' okunamadı: ' + e.message; }
+  }
+  await resimleriHazirla();
+  isleniyor = false;
+  $('durum').textContent = bos ? bos + ' boş sayfa atlandı.' : '';
+  ciz();
+}
+async function resimleriHazirla() {
+  const k = $('kirp').checked;
+  for (const f of fisler) {
+    const istenen = k ? 'k' : 't';
+    if (f.tur === istenen && f.url) continue;
+    if (f.url) URL.revokeObjectURL(f.url);
+    f.url = await urlYap(k ? f.kirpik : f.tam); f.tur = istenen;
+  }
+}
+
+function ciz() {
+  const adet = +$('adet').value, yatay = $('yon').value === 'yatay';
+  const [kol, sat] = (yatay ? DUZEN_YATAY : DUZEN)[adet];
+  document.body.classList.toggle('yatay', yatay);
+  $('sayfaYonu').textContent = `@page{size:A4 ${yatay ? 'landscape' : 'portrait'};margin:0}`;
+  const sayfaSay = Math.ceil(fisler.length / adet);
+  $('ozet').textContent = fisler.length ? `${fisler.length} fiş → ${sayfaSay} sayfa` : '';
+  $('yazdir').disabled = !fisler.length || isleniyor;
+  let html = '';
+  for (let s = 0; s < sayfaSay; s++) {
+    const parca = fisler.slice(s * adet, s * adet + adet);
+    html += `<div class="olcek"><div class="sayfa"><div class="izgara${$('kesim').checked ? ' kesim' : ''}" style="grid-template-columns:repeat(${kol},minmax(0,1fr));grid-template-rows:repeat(${sat},minmax(0,1fr))">`
+      + parca.map((f, j) => { const n = s * adet + j; return `<div class="hucre"><img src="${f.url}" alt=""><span class="no">${n + 1}</span><button class="sil" data-n="${n}" title="Bu fişi çıkar">×</button></div>`; }).join('')
+      + '</div></div></div>';
+  }
+  $('sayfalar').innerHTML = html;
+  olcekle();
+}
+// Ekrana sığdır (baskıda gerçek boyut)
+function olcekle() {
+  const kap = $('sayfalar'), gen = Math.min(kap.clientWidth - 40, 820);
+  document.querySelectorAll('.olcek').forEach(o => {
+    const s = o.firstElementChild, k = Math.min(1, gen / s.offsetWidth);
+    s.style.transform = `scale(${k})`; o.style.width = s.offsetWidth * k + 'px'; o.style.height = s.offsetHeight * k + 'px';
+  });
+}
+
+$('sayfalar').addEventListener('click', e => { const b = e.target.closest('.sil'); if (!b) return; const [f] = fisler.splice(+b.dataset.n, 1); if (f && f.url) URL.revokeObjectURL(f.url); ciz(); });
+['adet', 'yon', 'kesim'].forEach(id => $(id).addEventListener('change', ciz));
+$('kirp').addEventListener('change', async () => { await resimleriHazirla(); ciz(); });
+$('ekle').addEventListener('click', () => $('dosya').click());
+$('dosya').addEventListener('change', e => { dosyalariIsle(e.target.files); e.target.value = ''; });
+$('temizle').addEventListener('click', () => { fisler.forEach(f => f.url && URL.revokeObjectURL(f.url)); fisler = []; ciz(); });
+$('yazdir').addEventListener('click', () => window.print());
+const b = $('birak');
+b.addEventListener('dragover', e => { e.preventDefault(); b.classList.add('ust'); });
+b.addEventListener('dragleave', () => b.classList.remove('ust'));
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => { e.preventDefault(); b.classList.remove('ust'); if (e.dataTransfer.files.length) dosyalariIsle(e.dataTransfer.files); });
+window.addEventListener('resize', olcekle);
+window.addEventListener('beforeprint', () => document.querySelectorAll('.sayfa').forEach(s => s.style.transform = 'none'));
+window.addEventListener('afterprint', olcekle);
+ciz();
+}
+</script>
+</body>
+</html>
