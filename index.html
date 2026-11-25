@@ -1,4 +1,4 @@
-<!-- SURUM-V168-YAZICI-BITISIK --><!DOCTYPE html>
+<!-- SURUM-V169-YAZICI-SIKI --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -3128,20 +3128,28 @@ async function resimleriHazirla() {
 // Fişleri sütunlara boşluksuz diz: her fiş sütun genişliğinde, kendi boyu kadar yer kaplar
 function yerlestir() {
   const kol = +$(&#x27;adet&#x27;).value, yatay = $(&#x27;yon&#x27;).value === &#x27;yatay&#x27;;
-  const W = yatay ? 289 : 202, H = yatay ? 200 : 287, G = 1.5;
+  const W = yatay ? 289 : 202, H = yatay ? 200 : 287, G = 1.5, KUCULT = 0.86;   // sığmazsa en fazla %14 küçült
   const sg = (W - G * (kol - 1)) / kol;
-  const sayfalar = []; let sayfa = null, k = 0, y = 0;
+  const sayfalar = [];                               // her sayfa: { hucreler, sutunlar: [doluluk] }
+  const yeniSayfa = () =&gt; { const s = { hucreler: [], sutunlar: Array(kol).fill(0) }; sayfalar.push(s); return s; };
   fisler.forEach((f, n) =&gt; {
     let h = sg * (f.h || 1) / (f.w || 1), w = sg;
-    if (h &gt; H) { w = w * H / h; h = H; }                     // tek fiş sayfadan uzunsa sığdır
-    if (!sayfa || y + h &gt; H + 0.01) {
-      if (sayfa &amp;&amp; k &lt; kol - 1) { k++; y = 0; }
-      else { sayfa = []; sayfalar.push(sayfa); k = 0; y = 0; }
+    if (h &gt; H) { w *= H / h; h = H; }
+    // önce mevcut sayfalardaki boşluklara bak (ilk uyan yer); tam sığmıyorsa biraz küçülterek dene
+    for (const oran of [1, null]) {
+      for (const sp of sayfalar) for (let k = 0; k &lt; kol; k++) {
+        const bos = H - sp.sutunlar[k];
+        let ww = w, hh = h;
+        if (oran === null) { if (bos &lt; h * KUCULT || bos &gt;= h) continue; hh = bos; ww = w * bos / h; }
+        else if (bos + 0.01 &lt; h) continue;
+        sp.hucreler.push({ f, n, x: k * (sg + G) + (sg - ww) / 2, y: sp.sutunlar[k], w: ww, h: hh });
+        sp.sutunlar[k] += hh + G; return;
+      }
     }
-    sayfa.push({ f, n, x: k * (sg + G), y, w, h });
-    y += h + G;
+    const sp = yeniSayfa();
+    sp.hucreler.push({ f, n, x: (sg - w) / 2, y: 0, w, h }); sp.sutunlar[0] = h + G;
   });
-  return sayfalar;
+  return sayfalar.map(s =&gt; s.hucreler);
 }
 function ciz() {
   const yatay = $(&#x27;yon&#x27;).value === &#x27;yatay&#x27;;
