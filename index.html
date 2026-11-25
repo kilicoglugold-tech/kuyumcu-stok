@@ -1,4 +1,4 @@
-<!-- SURUM-V170-YAZICI-SURUKLE --><!DOCTYPE html>
+<!-- SURUM-V171-YAZICI-YENISAYFA --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -2820,6 +2820,9 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .hucre .sil{position:absolute;top:2px;right:2px;width:26px;height:26px;min-height:0;padding:0;border-radius:50%;background:#B91C1C;color:#fff;border:0;font-weight:700;opacity:0;transition:.15s}
 .hucre:hover .sil{opacity:1}
 .hucre{cursor:grab}.hucre.suruk{opacity:.35}
+.yeni-sayfa{display:flex;align-items:center;justify-content:center;text-align:center;background:rgba(255,255,255,.04)!important;border:3px dashed #6B5A2A;color:var(--soluk);height:80mm!important}
+.yeni-sayfa b{display:block;font-size:22px;color:var(--altin);margin-bottom:6px}.yeni-sayfa span{font-size:15px}
+@media print{.olcek.yeni-kap,.yeni-kap{display:none!important}}
 .sayfa.hedef{box-shadow:0 0 0 4px var(--altin),0 10px 30px rgba(0,0,0,.5)}
 .birak span.ipucu{display:block;margin-top:4px}
 .hucre .no{position:absolute;left:2px;top:2px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;padding:1px 6px;border-radius:8px}
@@ -3179,7 +3182,8 @@ function ciz() {
   $(&#x27;yazdir&#x27;).disabled = !fisler.length || isleniyor;
   $(&#x27;sayfalar&#x27;).innerHTML = sayfalar.map((sp, si) =&gt; `&lt;div class=&quot;olcek&quot;&gt;&lt;div class=&quot;sayfa&quot; data-s=&quot;${si}&quot;&gt;&lt;div class=&quot;izgara${$(&#x27;kesim&#x27;).checked ? &#x27; kesim&#x27; : &#x27;&#x27;}&quot;&gt;`
     + sp.map(c =&gt; `&lt;div class=&quot;hucre&quot; draggable=&quot;true&quot; data-n=&quot;${c.n}&quot; style=&quot;left:${c.x}mm;top:${c.y}mm;width:${c.w}mm;height:${c.h}mm&quot;&gt;&lt;img src=&quot;${c.f.url}&quot; alt=&quot;&quot; draggable=&quot;false&quot;&gt;&lt;span class=&quot;no&quot;&gt;${c.n + 1}&lt;/span&gt;&lt;button class=&quot;sil&quot; data-n=&quot;${c.n}&quot; title=&quot;Bu fişi çıkar&quot;&gt;×&lt;/button&gt;&lt;/div&gt;`).join(&#x27;&#x27;)
-    + &#x27;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&#x27;).join(&#x27;&#x27;);
+    + &#x27;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;&#x27;).join(&#x27;&#x27;)
+    + (fisler.length ? `&lt;div class=&quot;olcek yeni-kap&quot;&gt;&lt;div class=&quot;sayfa yeni-sayfa&quot; data-s=&quot;${sayfalar.length}&quot;&gt;&lt;div&gt;&lt;b&gt;＋ Yeni sayfa&lt;/b&gt;&lt;span&gt;Bir fişi ayrı sayfaya almak için buraya sürükleyin&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;` : &#x27;&#x27;);
   olcekle();
 }
 // Ekrana sığdır (baskıda gerçek boyut)
@@ -3211,7 +3215,8 @@ $(&#x27;sayfalar&#x27;).addEventListener(&#x27;drop&#x27;, e =&gt; {
   $(&#x27;durum&#x27;).textContent = &#x27;Elle yerleştirildi. Sığmazsa o sayfada küçültülür. Otomatiğe dönmek için &quot;Otomatik diz&quot;.&#x27;;
 });
 $(&#x27;sayfalar&#x27;).addEventListener(&#x27;click&#x27;, e =&gt; { const b = e.target.closest(&#x27;.sil&#x27;); if (!b) return; const [f] = fisler.splice(+b.dataset.n, 1); if (f &amp;&amp; f.url) URL.revokeObjectURL(f.url); ciz(); });
-[&#x27;adet&#x27;, &#x27;yon&#x27;].forEach(id =&gt; $(id).addEventListener(&#x27;change&#x27;, ciz));
+// sütun / kâğıt değişince elle yerleşim geçersiz olur: otomatiğe dön
+[&#x27;adet&#x27;, &#x27;yon&#x27;].forEach(id =&gt; $(id).addEventListener(&#x27;change&#x27;, () =&gt; { fisler.forEach(f =&gt; delete f.pin); $(&#x27;durum&#x27;).textContent = &#x27;&#x27;; ciz(); }));
 $(&#x27;kesim&#x27;).addEventListener(&#x27;change&#x27;, ciz);
 $(&#x27;kirp&#x27;).addEventListener(&#x27;change&#x27;, async () =&gt; { await resimleriHazirla(); ciz(); });
 $(&#x27;ekle&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; $(&#x27;dosya&#x27;).click());
