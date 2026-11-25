@@ -1,4 +1,4 @@
-<!-- SURUM-V171-YAZICI-YENISAYFA --><!DOCTYPE html>
+<!-- SURUM-V172-YAZICI-TAMGENISLIK --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -3152,7 +3152,7 @@ function yerlestir() {
   const serbest = fisler.map((f, n) =&gt; [f, n]).filter(([f]) =&gt; !Number.isInteger(f.pin));
   sabit.forEach(([f, n]) =&gt; {
     const { w, h } = boyut(f), sp = sayfaAl(f.pin);
-    if (sigdir(sp, f, n, w, h, EN_AZ)) return;
+    if (sigdir(sp, f, n, w, h, 1)) return;
     // yer yok ama siz bu sayfaya istediniz: en kısa sütuna koy, sayfa sonra bütünüyle küçültülür
     let k = 0; for (let i = 1; i &lt; kol; i++) if (sp.sutunlar[i] &lt; sp.sutunlar[k]) k = i;
     koy(sp, k, f, n, w, h); sp.zorla = true;
@@ -3160,7 +3160,6 @@ function yerlestir() {
   serbest.sort((p, q) =&gt; p[1] - q[1]).forEach(([f, n]) =&gt; {
     const { w, h } = boyut(f);
     for (const sp of sayfalar) if (sigdir(sp, f, n, w, h, 1)) return;          // tam sığan ilk boşluk
-    for (const sp of sayfalar) if (sigdir(sp, f, n, w, h, KUCULT)) return;     // biraz küçülterek
     sigdir(sayfaAl(sayfalar.length), f, n, w, h, 1);
   });
   // elle doldurulan sayfa taşıyorsa: o sayfadaki tüm fişleri aynı oranda küçült
