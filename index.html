@@ -1,4 +1,4 @@
-<!-- SURUM-V172-YAZICI-TAMGENISLIK --><!DOCTYPE html>
+<!-- SURUM-V173-YAZICI-KURAL --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -2810,6 +2810,14 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .birak{display:block;margin:20px;border:2px dashed #6B5A2A;border-radius:16px;padding:34px 16px;text-align:center;cursor:pointer;background:rgba(212,175,55,.04)}
 .birak.ust{background:rgba(212,175,55,.14);border-color:var(--altin)}
 .birak b{font-size:17px;display:block;margin-bottom:4px}.birak span{color:var(--soluk);font-size:13px}
+.kural-panel{margin:0 20px 14px;border:1px solid var(--cizgi);border-radius:14px;background:var(--kart);padding:14px 16px}
+.kp-ust{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}.kp-ust b{font-size:16px;color:var(--altin)}.kp-ust span{font-size:13px;color:var(--soluk)}
+.kp-x{margin-left:auto;min-height:32px;padding:4px 10px}
+.kp-satir{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.kp-satir input{font:inherit;font-size:14px;border-radius:10px;border:1px solid var(--cizgi);background:#0E0D0C;color:var(--metin);padding:8px 10px;min-height:40px;width:170px}
+.kp-satir input.kp-not{flex:1;min-width:220px}
+.kp-bos{color:var(--soluk);font-size:13px;margin-bottom:8px}
+.kp-alt{display:flex;gap:8px;align-items:center;flex-wrap:wrap}#kpDurum{font-size:13px;color:#6EE7B7}
 #durum{margin:0 20px;color:var(--soluk);font-size:13px;min-height:20px}
 #sayfalar{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;padding:10px 20px 60px}
 .sayfa{background:#fff;width:210mm;height:296mm;padding:4mm;overflow:hidden;box-sizing:border-box;break-inside:avoid;box-shadow:0 10px 30px rgba(0,0,0,.5);transform-origin:top left}
@@ -2829,7 +2837,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .olcek{display:inline-block}
 @page{size:A4 portrait;margin:0}
 @media print{
-  body{background:#fff}header,.birak,#durum{display:none!important}
+  body{background:#fff}header,.birak,#durum,.kural-panel{display:none!important}
   #sayfalar{display:block;padding:0}
   .olcek{display:block!important;width:auto!important;height:auto!important}
   .sayfa{box-shadow:none;transform:none!important;break-after:page;page-break-after:always;margin:0}
@@ -2853,6 +2861,7 @@ body.yatay .sayfa{width:297mm;height:209mm}
   &lt;label class=&quot;sec&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;kirp&quot; checked&gt; Boşlukları sıkıştır&lt;/label&gt;
   &lt;label class=&quot;sec&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;kesim&quot; checked&gt; Kesim çizgisi&lt;/label&gt;
   &lt;button id=&quot;ekle&quot;&gt;＋ Fiş ekle&lt;/button&gt;
+  &lt;button id=&quot;kurallarBtn&quot; title=&quot;Belli mağazaların fişlerine otomatik not&quot;&gt;⚙ Kurallar&lt;/button&gt;
   &lt;button id=&quot;otomatik&quot; title=&quot;Elle yaptığınız yerleşimi sıfırla&quot;&gt;Otomatik diz&lt;/button&gt;
   &lt;button id=&quot;temizle&quot;&gt;Temizle&lt;/button&gt;
   &lt;button class=&quot;ana&quot; id=&quot;yazdir&quot; disabled&gt;🖨 Yazdır&lt;/button&gt;
@@ -2863,6 +2872,7 @@ body.yatay .sayfa{width:297mm;height:209mm}
   &lt;span&gt;ya da tıklayıp seçin · birden fazla dosya olabilir · her PDF sayfası bir fiş sayılır · dosyalar bilgisayarınızdan çıkmaz&lt;/span&gt;&lt;span class=&quot;ipucu&quot;&gt;İpucu: Aşağıdaki fişleri fareyle tutup başka bir sayfaya ya da bir fişin üstüne sürükleyebilirsiniz.&lt;/span&gt;
   &lt;input type=&quot;file&quot; id=&quot;dosya&quot; accept=&quot;application/pdf,.pdf&quot; multiple hidden&gt;
 &lt;/label&gt;
+&lt;div id=&quot;kuralPanel&quot; class=&quot;kural-panel&quot; hidden&gt;&lt;/div&gt;
 &lt;div id=&quot;durum&quot;&gt;&lt;/div&gt;
 &lt;div id=&quot;sayfalar&quot;&gt;&lt;/div&gt;
 
@@ -3068,8 +3078,12 @@ async function dosyalariIsle(liste) {
         const x = c.getContext(&#x27;2d&#x27;); x.fillStyle = &#x27;#fff&#x27;; x.fillRect(0, 0, c.width, c.height);
         await sayfa.render({ canvasContext: x, viewport: vp }).promise;
         // &quot;Do the green thing&quot; + Etsy logosu satırını (fişin alt kısmı) sil
+        let magaza = &#x27;&#x27;, metin = &#x27;&#x27;;
         try {
           const tc = await sayfa.getTextContent();
+          metin = tc.items.map(o =&gt; o.str).join(&#x27; &#x27;);
+          { const og = tc.items.filter(o =&gt; o.str &amp;&amp; o.str.trim()); const si = og.findIndex(o =&gt; o.str.trim().toLowerCase() === &#x27;shop&#x27;);
+            if (si &gt;= 0) { const s0 = og[si], d = og.find(v =&gt; v !== s0 &amp;&amp; Math.abs(v.transform[4] - s0.transform[4]) &lt; 3 &amp;&amp; v.transform[5] &lt; s0.transform[5] &amp;&amp; s0.transform[5] - v.transform[5] &lt; 25); if (d) magaza = d.str.trim(); } }
           try { vurgula(x, vp, tc.items); } catch (e) { console.warn(&#x27;vurgu&#x27;, e); }
           try { fotoBuyut(x, vp, tc.items, await fotolariAl(sayfa)); } catch (e) { console.warn(&#x27;foto&#x27;, e); }
           const it = tc.items.find(o =&gt; /do the green thing/i.test(o.str));
@@ -3083,7 +3097,7 @@ async function dosyalariIsle(liste) {
         const kirpik = kirp(c);
         if (!kirpik) { bos++; continue; }
         const fotolar = [];
-        fisler.push({ ad: f.name + (pdf.numPages &gt; 1 ? &#x27; · s.&#x27; + i : &#x27;&#x27;), tam: c, kirpik, fotolar, url: null });
+        fisler.push({ ad: f.name + (pdf.numPages &gt; 1 ? &#x27; · s.&#x27; + i : &#x27;&#x27;), tam: c, kirpik, fotolar, url: null, magaza, metin });
       }
     } catch (e) { $(&#x27;durum&#x27;).textContent = f.name + &#x27; okunamadı: &#x27; + e.message; }
   }
@@ -3124,13 +3138,75 @@ function birlestir(f, A) {
 async function resimleriHazirla() {
   const kirpAcik = $(&#x27;kirp&#x27;).checked;
   for (const f of fisler) {
-    const istenen = kirpAcik ? &#x27;k&#x27; : &#x27;t&#x27;;
+    const notlar = kuralNotlari(f), istenen = (kirpAcik ? &#x27;k&#x27; : &#x27;t&#x27;) + &#x27;|&#x27; + notlar.join(&#x27;|&#x27;);
     if (f.tur === istenen &amp;&amp; f.url) continue;
     if (f.url) URL.revokeObjectURL(f.url);
-    const kaynak = kirpAcik ? f.kirpik : f.tam; f.w = kaynak.width; f.h = kaynak.height;
+    const kaynak = notEkle(kirpAcik ? f.kirpik : f.tam, notlar); f.w = kaynak.width; f.h = kaynak.height;
     f.url = await urlYap(kaynak); f.tur = istenen;
   }
 }
+
+// ===== Kurallar: belli mağazanın (ya da içinde belli yazı geçen) fişlerin altına otomatik not =====
+let kurallar = [];
+const normal = s =&gt; String(s || &#x27;&#x27;).toLocaleLowerCase(&#x27;tr&#x27;).replace(/[^a-z0-9ğüşıöç]/gi, &#x27;&#x27;);
+function kuralNotlari(f) {
+  return kurallar.filter(k =&gt; k.ara &amp;&amp; k.not &amp;&amp; (k.tur === &#x27;yazi&#x27; ? normal(f.metin).includes(normal(k.ara)) : normal(f.magaza).includes(normal(k.ara)))).map(k =&gt; k.not);
+}
+function notEkle(kaynak, notlar) {
+  if (!notlar.length) return kaynak;
+  const W = kaynak.width, fs = Math.round(W * 0.034), pay = Math.round(fs * 0.55), satirH = Math.round(fs * 1.35);
+  const o = document.createElement(&#x27;canvas&#x27;); o.width = W;
+  const t = o.getContext(&#x27;2d&#x27;); t.font = `900 ${fs}px Arial, sans-serif`;
+  const satirlar = [];   // uzun notları satırlara böl
+  notlar.forEach(n =&gt; { let s = &#x27;&#x27;; String(n).split(/\s+/).forEach(k =&gt; { const d = s ? s + &#x27; &#x27; + k : k; if (t.measureText(d).width &gt; W - 4 * pay &amp;&amp; s) { satirlar.push(s); s = k; } else s = d; }); if (s) satirlar.push(s); });
+  const kutuH = satirlar.length * satirH + 2 * pay;
+  o.height = kaynak.height + kutuH + pay;
+  const x = o.getContext(&#x27;2d&#x27;); x.fillStyle = &#x27;#fff&#x27;; x.fillRect(0, 0, o.width, o.height); x.drawImage(kaynak, 0, 0);
+  const y0 = kaynak.height + pay * 0.5;
+  x.strokeStyle = &#x27;#D00000&#x27;; x.lineWidth = Math.max(3, fs * 0.12); x.strokeRect(pay, y0, W - 2 * pay, kutuH);
+  x.fillStyle = &#x27;#D00000&#x27;; x.font = `900 ${fs}px Arial, sans-serif`; x.textBaseline = &#x27;middle&#x27;; x.textAlign = &#x27;center&#x27;;
+  satirlar.forEach((s, i) =&gt; x.fillText(s, W / 2, y0 + pay + satirH * (i + 0.5)));
+  return o;
+}
+// Kuralları kaydet / yükle: sistemin içindeyse herkes için (veritabanı), değilse bu bilgisayarda
+const ust = (() =&gt; { try { return window.parent !== window &amp;&amp; window.parent.api ? window.parent : null; } catch (e) { return null; } })();
+async function kurallariYukle() {
+  try { if (ust) { const r = await ust.api(&#x27;genel_ayarlar?anahtar=eq.yazici_kurallari&amp;select=deger&#x27;); if (r &amp;&amp; r[0] &amp;&amp; r[0].deger) { kurallar = r[0].deger.liste || []; return; } } } catch (e) {}
+  try { kurallar = JSON.parse(localStorage.getItem(&#x27;yazici_kurallari&#x27;) || &#x27;[]&#x27;); } catch (e) { kurallar = []; }
+}
+async function kurallariKaydet() {
+  try { localStorage.setItem(&#x27;yazici_kurallari&#x27;, JSON.stringify(kurallar)); } catch (e) {}
+  if (!ust) return &#x27;Bu bilgisayara kaydedildi.&#x27;;
+  try {
+    const deger = { liste: kurallar }, zaman = new Date().toISOString();
+    const r = await ust.api(&#x27;genel_ayarlar?anahtar=eq.yazici_kurallari&amp;select=anahtar&#x27;);
+    if (r &amp;&amp; r.length) await ust.api(&#x27;genel_ayarlar?anahtar=eq.yazici_kurallari&#x27;, &#x27;PATCH&#x27;, { deger, guncelleme: zaman });
+    else await ust.api(&#x27;genel_ayarlar&#x27;, &#x27;POST&#x27;, { anahtar: &#x27;yazici_kurallari&#x27;, deger, guncelleme: zaman });
+    return &#x27;Kaydedildi (herkes için).&#x27;;
+  } catch (e) { return &#x27;Sadece bu bilgisayara kaydedildi (&#x27; + e.message + &#x27;).&#x27;; }
+}
+const kEsc = s =&gt; String(s || &#x27;&#x27;).replace(/&amp;/g, &#x27;&amp;amp;&#x27;).replace(/&quot;/g, &#x27;&amp;quot;&#x27;).replace(/&lt;/g, &#x27;&amp;lt;&#x27;);
+function kuralPanelCiz() {
+  $(&#x27;kuralPanel&#x27;).innerHTML = `&lt;div class=&quot;kp-ust&quot;&gt;&lt;b&gt;Kurallar&lt;/b&gt;&lt;span&gt;Koşula uyan fişin altına not otomatik eklenir (kırmızı, kalın, çerçeveli).&lt;/span&gt;&lt;button class=&quot;kp-x&quot; data-kapat=&quot;1&quot;&gt;✕&lt;/button&gt;&lt;/div&gt;
+    ${kurallar.map((k, i) =&gt; `&lt;div class=&quot;kp-satir&quot;&gt;
+      &lt;select data-i=&quot;${i}&quot; data-a=&quot;tur&quot;&gt;&lt;option value=&quot;magaza&quot;${k.tur !== &#x27;yazi&#x27; ? &#x27; selected&#x27; : &#x27;&#x27;}&gt;Mağaza adı içerir&lt;/option&gt;&lt;option value=&quot;yazi&quot;${k.tur === &#x27;yazi&#x27; ? &#x27; selected&#x27; : &#x27;&#x27;}&gt;Fişte geçen yazı&lt;/option&gt;&lt;/select&gt;
+      &lt;input data-i=&quot;${i}&quot; data-a=&quot;ara&quot; value=&quot;${kEsc(k.ara)}&quot; placeholder=&quot;ör. Buse&quot;&gt;
+      &lt;span&gt;→&lt;/span&gt;
+      &lt;input data-i=&quot;${i}&quot; data-a=&quot;not&quot; class=&quot;kp-not&quot; value=&quot;${kEsc(k.not)}&quot; placeholder=&quot;ör. Poşetin ÜSTÜNE BRK yazılacak&quot;&gt;
+      &lt;button data-sil=&quot;${i}&quot; title=&quot;Sil&quot;&gt;🗑&lt;/button&gt;&lt;/div&gt;`).join(&#x27;&#x27;) || &#x27;&lt;div class=&quot;kp-bos&quot;&gt;Henüz kural yok.&lt;/div&gt;&#x27;}
+    &lt;div class=&quot;kp-alt&quot;&gt;&lt;button data-ekle=&quot;1&quot;&gt;＋ Kural ekle&lt;/button&gt;&lt;button class=&quot;ana&quot; data-kaydet=&quot;1&quot;&gt;Kaydet&lt;/button&gt;&lt;span id=&quot;kpDurum&quot;&gt;&lt;/span&gt;&lt;/div&gt;`;
+}
+$(&#x27;kuralPanel&#x27;).addEventListener(&#x27;input&#x27;, e =&gt; { const el = e.target; if (el.dataset.i === undefined) return; kurallar[+el.dataset.i][el.dataset.a] = el.value; });
+$(&#x27;kuralPanel&#x27;).addEventListener(&#x27;change&#x27;, e =&gt; { const el = e.target; if (el.dataset.i === undefined) return; kurallar[+el.dataset.i][el.dataset.a] = el.value; });
+$(&#x27;kuralPanel&#x27;).addEventListener(&#x27;click&#x27;, async e =&gt; {
+  const b = e.target.closest(&#x27;button&#x27;); if (!b) return;
+  if (b.dataset.kapat) { $(&#x27;kuralPanel&#x27;).hidden = true; }
+  else if (b.dataset.sil !== undefined) { kurallar.splice(+b.dataset.sil, 1); kuralPanelCiz(); }
+  else if (b.dataset.ekle) { kurallar.push({ tur: &#x27;magaza&#x27;, ara: &#x27;&#x27;, not: &#x27;&#x27; }); kuralPanelCiz(); const g = $(&#x27;kuralPanel&#x27;).querySelectorAll(&#x27;input[data-a=&quot;ara&quot;]&#x27;); if (g.length) g[g.length - 1].focus(); }
+  else if (b.dataset.kaydet) { kurallar = kurallar.filter(k =&gt; (k.ara || &#x27;&#x27;).trim() &amp;&amp; (k.not || &#x27;&#x27;).trim()); const m = await kurallariKaydet(); kuralPanelCiz(); $(&#x27;kpDurum&#x27;).textContent = &#x27;✓ &#x27; + m; await resimleriHazirla(); ciz(); }
+});
+$(&#x27;kurallarBtn&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { const p = $(&#x27;kuralPanel&#x27;); p.hidden = !p.hidden; if (!p.hidden) kuralPanelCiz(); });
+kurallariYukle().then(async () =&gt; { if (fisler.length) { await resimleriHazirla(); ciz(); } });
 
 // Fişleri sütunlara boşluksuz diz: her fiş sütun genişliğinde, kendi boyu kadar yer kaplar
 // Yerleşim: önce elle bir sayfaya sürüklenmiş fişler (o sayfaya sığdırılır, gerekirse küçültülür), sonra diğerleri boşluklara
