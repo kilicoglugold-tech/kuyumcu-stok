@@ -1,4 +1,4 @@
-<!-- SURUM-V175-DONER-BUYUK --><!DOCTYPE html>
+<!-- SURUM-V176-DONER-FIRE25 --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -2861,7 +2861,7 @@ tr:last-child td{border-bottom:0}
 &lt;header class=&quot;ust&quot;&gt;
   &lt;div class=&quot;marka&quot;&gt;YİRMİBEŞOĞLU ET&lt;/div&gt;
   &lt;h1&gt;Döner Fiyat Hesaplama Aracı&lt;/h1&gt;
-  &lt;p&gt;Taktığınız et çeşitlerini ve marinasyon masrafını girin; toplam çiğ etten %20 fire düşülür, 100 gramlık porsiyonun maliyeti anında çıkar.&lt;/p&gt;
+  &lt;p&gt;Taktığınız et çeşitlerini ve marinasyon masrafını girin; toplam çiğ etten (tranç + kuzu döş + kuyruk yağı) &lt;span id=&quot;ustFire&quot;&gt;%25&lt;/span&gt; fire düşülür, 100 gramlık porsiyonun maliyeti anında çıkar.&lt;/p&gt;
 &lt;/header&gt;
 
 &lt;main class=&quot;izgara&quot;&gt;
@@ -2884,7 +2884,7 @@ tr:last-child td{border-bottom:0}
     &lt;div class=&quot;kart&quot;&gt;
       &lt;h2&gt;Ayarlar&lt;/h2&gt;
       &lt;div class=&quot;alanlar&quot;&gt;
-        &lt;div&gt;&lt;label for=&quot;fire&quot;&gt;Fire (pişme, kesim kaybı)&lt;/label&gt;&lt;div class=&quot;giris&quot;&gt;&lt;input id=&quot;fire&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;0&quot; max=&quot;90&quot; step=&quot;1&quot;&gt;&lt;span class=&quot;birim&quot;&gt;%&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label for=&quot;fire&quot;&gt;Fire (toplam çiğ etten)&lt;/label&gt;&lt;div class=&quot;giris&quot;&gt;&lt;input id=&quot;fire&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;0&quot; max=&quot;90&quot; step=&quot;1&quot;&gt;&lt;span class=&quot;birim&quot;&gt;%&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
         &lt;div&gt;&lt;label for=&quot;porsiyon&quot;&gt;Porsiyon&lt;/label&gt;&lt;div class=&quot;giris&quot;&gt;&lt;input id=&quot;porsiyon&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;1&quot; step=&quot;5&quot;&gt;&lt;span class=&quot;birim&quot;&gt;gr&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
         &lt;div&gt;&lt;label for=&quot;satis&quot;&gt;Porsiyon satış fiyatı (isteğe bağlı)&lt;/label&gt;&lt;div class=&quot;giris&quot;&gt;&lt;input id=&quot;satis&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;0&quot; step=&quot;1&quot; placeholder=&quot;—&quot;&gt;&lt;span class=&quot;birim&quot;&gt;₺&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
       &lt;/div&gt;
@@ -2918,12 +2918,13 @@ tr:last-child td{border-bottom:0}
 &lt;script&gt;
 {
 const $ = id =&gt; document.getElementById(id);
-const ORNEK = { etler: [{ ad: &#x27;Tranç&#x27;, kg: 6, fiyat: 700 }, { ad: &#x27;Kuzu döş&#x27;, kg: 3, fiyat: 550 }, { ad: &#x27;Kuyruk yağı&#x27;, kg: 1, fiyat: 300 }], fire: 20, porsiyon: 100, satis: &#x27;&#x27;, kalemler: [
+const ORNEK = { etler: [{ ad: &#x27;Tranç&#x27;, kg: 6, fiyat: 700 }, { ad: &#x27;Kuzu döş&#x27;, kg: 3, fiyat: 550 }, { ad: &#x27;Kuyruk yağı&#x27;, kg: 1, fiyat: 300 }], fire: 25, surum: 2, porsiyon: 100, satis: &#x27;&#x27;, kalemler: [
   { ad: &#x27;Süt&#x27;, tutar: 60 }, { ad: &#x27;Yoğurt&#x27;, tutar: 90 }, { ad: &#x27;Soğan&#x27;, tutar: 40 }, { ad: &#x27;Baharatlar&#x27;, tutar: 120 }, { ad: &#x27;Sıvı yağ&#x27;, tutar: 70 } ] };
 let durum;
 try { durum = JSON.parse(localStorage.getItem(&#x27;doner-maliyet&#x27;) || &#x27;null&#x27;); } catch (e) { durum = null; }
 if (durum &amp;&amp; !durum.etler) { durum.etler = [{ ad: &#x27;Et&#x27;, kg: durum.kg || &#x27;&#x27;, fiyat: durum.fiyat || &#x27;&#x27; }]; delete durum.kg; delete durum.fiyat; }   // eski kayıt
 if (!durum) durum = JSON.parse(JSON.stringify(ORNEK));
+if (!durum.surum) { if (String(durum.fire) === &#x27;20&#x27;) durum.fire = 25; durum.surum = 2; }   // fire %25&#x27;e çıktı
 
 const tl = n =&gt; (isFinite(n) ? n : 0).toLocaleString(&#x27;tr-TR&#x27;, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + &#x27; ₺&#x27;;
 const sayi = v =&gt; { const n = parseFloat(String(v).replace(&#x27;,&#x27;, &#x27;.&#x27;)); return isFinite(n) &amp;&amp; n &gt; 0 ? n : 0; };
@@ -2958,6 +2959,7 @@ function hesapla() {
   $(&#x27;porsiyonEt&#x27;).textContent = `${gr.toLocaleString(&#x27;tr-TR&#x27;)} gr porsiyon maliyeti`;
   $(&#x27;porsiyonMaliyet&#x27;).textContent = tl(pMal);
   $(&#x27;porsiyonAlt&#x27;).textContent = kg ? `${kg.toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 2 })} kg çiğ etten %${fire.toLocaleString(&#x27;tr-TR&#x27;)} fire düşülünce ${Math.floor(adet).toLocaleString(&#x27;tr-TR&#x27;)} porsiyon` : &#x27;Et miktarını girin&#x27;;
+  $(&#x27;ustFire&#x27;).textContent = &#x27;%&#x27; + fire.toLocaleString(&#x27;tr-TR&#x27;);
   $(&#x27;sisNet&#x27;).style.width = (100 - fire) + &#x27;%&#x27;; $(&#x27;sisFire&#x27;).style.width = fire + &#x27;%&#x27;;
   $(&#x27;sisNetYazi&#x27;).textContent = `Net et ${netKg.toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 2 })} kg`;
   $(&#x27;sisFireYazi&#x27;).textContent = `Fire ${(kg - netKg).toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 2 })} kg (%${fire})`;
