@@ -1,4 +1,4 @@
-<!-- SURUM-V173-YAZICI-KURAL --><!DOCTYPE html>
+<!-- SURUM-V174-DONER --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1414,6 +1414,7 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <button class="nav-tab" onclick="showPage('ramat')" title="Ramat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19H4.8a1.8 1.8 0 0 1-1.6-2.7L5 13"/><path d="m8.5 16.5-1.5 2.5 1.5 2.5"/><path d="M17 19h2.2a1.8 1.8 0 0 0 1.6-2.7L19 13"/><path d="M9.5 6.5 11 4a1.8 1.8 0 0 1 3 0l1.6 2.7"/><path d="m13.5 6.8 2.1.3.6-2"/><path d="m17.5 13.5-.3 2.6 2.4.6"/></svg>Ramat</button>
     <button class="nav-tab" onclick="showPage('fatura')" title="Fatura"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>Fatura</button>
     <button class="nav-tab" onclick="showPage('yazici')" title="Fiş Baskı"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/></svg>YAZICI</button>
+    <button class="nav-tab" onclick="showPage('doner')" title="Yirmibeşoğlu Et — Döner Fiyat Hesaplama"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="M8 5h8l-1 5H9z"/><path d="M7 10h10l-1.5 7h-7z"/></svg>DÖNER</button>
   </div>
   <div class="nav-right">
   </div>
@@ -2783,6 +2784,212 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 </main>
 
 <!-- FATURA -->
+<!-- DÖNER (Yirmibeşoğlu Et — döner fiyat hesaplama) -->
+<div class="page" id="page-doner">
+  <iframe id="donerCerceve" title="Döner Fiyat Hesaplama" style="width:100%;height:calc(100vh - 150px);min-height:640px;border:1px solid var(--border);border-radius:14px;background:#FAF7F7" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;tr&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;title&gt;Yirmibeşoğlu Et Döner Fiyat Hesaplama&lt;/title&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;
+/* VOICE: kasap tezgâhı gibi net, hızlı; rakam ön planda
+   IDEA: dükkândaki maliyet fişi / şiş ölçeği
+   PICTURE: canlı sonuç kartı: 100 gr porsiyon maliyeti büyük, altında şiş çubuğu (fire / net et)
+   COLOUR and TYPE: bordo + beyaz (Yirmibeşoğlu Et); Archivo başlık, Inter metin
+   LAYOUT: solda girdiler, sağda yapışkan sonuç; telefonda sonuç üstte */
+:root{color-scheme:light;
+  --bg:#FAF7F7;--kart:#FFFFFF;--ink:#2A1015;--soluk:#7A6266;
+  --cizgi:#EADCDE;--ates:#8B1A2B;--ates2:#8B1A2B;--koz:#7A1424;--giris:#FFFFFF}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,.rakam{font-family:Archivo,Inter,sans-serif}
+.ust{background:linear-gradient(135deg,#7A1424,#5A0E1A);color:#FFFFFF;padding:clamp(22px,3vw,36px) max(5vw,16px)}
+.ust h1{margin:0;font-size:clamp(30px,4vw,44px);line-height:1.05;font-weight:800;text-wrap:balance}
+.ust p{margin:8px 0 0;color:#F3DADD;max-width:62ch}
+.ust .marka{font-size:13px;font-weight:700;letter-spacing:.08em;color:#F3DADD;margin-bottom:6px}
+.izgara{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:24px;max-width:1180px;margin:0 auto;padding:24px max(4vw,16px) 48px}
+@media(max-width:820px){.izgara{grid-template-columns:1fr}.sonuc{order:-1;position:static!important}}
+.kart{background:var(--kart);border:1px solid var(--cizgi);border-radius:18px;padding:20px}
+.kart+.kart{margin-top:16px}
+h2{font-size:18px;margin:0 0 12px;font-weight:700;color:#7A1424}
+.alanlar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(max-width:520px){.alanlar{grid-template-columns:1fr}}
+label{display:block;font-size:13px;color:var(--soluk);font-weight:600}
+.giris{display:flex;align-items:center;margin-top:5px;border:1px solid var(--cizgi);border-radius:12px;background:var(--giris)}
+.giris:focus-within{outline:2px solid var(--ates);outline-offset:1px}
+input{font:inherit;font-size:16px;color:var(--ink);background:transparent;border:0;outline:0;padding:11px 12px;width:100%;min-height:46px}
+input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
+.birim{padding:0 12px;color:var(--soluk);font-size:14px;white-space:nowrap}
+.ara{font-size:13px;color:var(--soluk);margin-top:10px}.ara b{color:var(--ink);font-variant-numeric:tabular-nums}
+.kalem{display:grid;grid-template-columns:minmax(0,1fr) 150px 44px;gap:8px;align-items:center;margin-bottom:8px}
+.kalem .giris{margin:0}
+.et-satir,.et-bas{display:grid;grid-template-columns:minmax(0,1.3fr) 110px 130px 110px 44px;gap:8px;align-items:center}
+.et-satir{margin-bottom:8px}.et-satir .giris{margin:0}
+.et-bas{font-size:12px;color:var(--soluk);font-weight:600;margin-bottom:6px}.et-bas span:nth-child(n+2){text-align:right;padding-right:10px}
+.et-tutar{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:14px}
+@media(max-width:600px){.et-bas{display:none}.et-satir{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;padding-bottom:10px;border-bottom:1px solid var(--cizgi)}.et-satir .ad{grid-column:1/3}.et-satir .sil{grid-row:1;grid-column:3}.et-satir .et-tutar{grid-column:1/4;text-align:left}}
+@media(max-width:520px){.kalem{grid-template-columns:minmax(0,1fr) 120px 44px}}
+button{font:inherit;cursor:pointer;border-radius:12px;min-height:44px}
+.sil{border:1px solid var(--cizgi);background:transparent;color:var(--soluk);font-size:18px;width:44px}
+.sil:hover{color:var(--ates2);border-color:var(--ates2)}
+.ekle{border:1px dashed var(--cizgi);background:transparent;color:var(--ink);padding:8px 14px;font-weight:600}
+.ekle:hover{border-color:var(--ates)}
+button:focus-visible{outline:2px solid var(--ates);outline-offset:2px}
+.sonuc{position:sticky;top:16px;align-self:start}
+.ana{background:linear-gradient(160deg,#8B1A2B,#5A0E1A);color:#FFFFFF;border:0}
+.ana .et{font-size:13px;color:#F3DADD;font-weight:600}
+.ana .rakam{font-size:clamp(44px,7vw,64px);font-weight:800;line-height:1;margin:6px 0 4px;color:#FFFFFF;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ana .alt{color:#F3DADD;font-size:14px}
+.sis{margin:18px 0 6px;height:26px;border-radius:13px;overflow:hidden;display:flex;background:rgba(255,255,255,.15)}
+.sis i{display:block;height:100%}
+.sis .net{background:#FFFFFF}.sis .fire{background:repeating-linear-gradient(45deg,rgba(255,255,255,.28) 0 6px,rgba(255,255,255,.1) 6px 12px)}
+.sis-yazi{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:#F3DADD;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:15px}
+td{padding:9px 0;border-bottom:1px solid var(--cizgi)}td:last-child{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.kar{margin-top:6px}.kar .iyi{color:#15803D}.kar .kotu{color:var(--ates2)}
+.not{font-size:12.5px;color:var(--soluk);margin-top:10px}
+.alt-satir{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.sifirla{border:1px solid var(--cizgi);background:transparent;color:var(--soluk);padding:8px 14px}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;header class=&quot;ust&quot;&gt;
+  &lt;div class=&quot;marka&quot;&gt;YİRMİBEŞOĞLU ET&lt;/div&gt;
+  &lt;h1&gt;Döner Fiyat Hesaplama Aracı&lt;/h1&gt;
+  &lt;p&gt;Taktığınız et çeşitlerini ve marinasyon masrafını girin; toplam çiğ etten %20 fire düşülür, 100 gramlık porsiyonun maliyeti anında çıkar.&lt;/p&gt;
+&lt;/header&gt;
+
+&lt;main class=&quot;izgara&quot;&gt;
+  &lt;section&gt;
+    &lt;div class=&quot;kart&quot;&gt;
+      &lt;h2&gt;Et çeşitleri&lt;/h2&gt;
+      &lt;div class=&quot;et-bas&quot;&gt;&lt;span&gt;Çeşit&lt;/span&gt;&lt;span&gt;Miktar&lt;/span&gt;&lt;span&gt;Kilo fiyatı&lt;/span&gt;&lt;span&gt;Tutar&lt;/span&gt;&lt;span&gt;&lt;/span&gt;&lt;/div&gt;
+      &lt;div id=&quot;etler&quot;&gt;&lt;/div&gt;
+      &lt;button class=&quot;ekle&quot; id=&quot;etEkle&quot;&gt;＋ Çeşit ekle&lt;/button&gt;
+      &lt;div class=&quot;ara&quot;&gt;Taktığınız toplam çiğ et: &lt;b id=&quot;etKg&quot;&gt;0 kg&lt;/b&gt; · Et tutarı: &lt;b id=&quot;etTutar&quot;&gt;0 ₺&lt;/b&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;kart&quot;&gt;
+      &lt;h2&gt;Marinasyon&lt;/h2&gt;
+      &lt;div id=&quot;kalemler&quot;&gt;&lt;/div&gt;
+      &lt;button class=&quot;ekle&quot; id=&quot;ekle&quot;&gt;＋ Kalem ekle&lt;/button&gt;
+      &lt;div class=&quot;ara&quot;&gt;Marinasyon toplamı: &lt;b id=&quot;marTutar&quot;&gt;0 ₺&lt;/b&gt;&lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;kart&quot;&gt;
+      &lt;h2&gt;Ayarlar&lt;/h2&gt;
+      &lt;div class=&quot;alanlar&quot;&gt;
+        &lt;div&gt;&lt;label for=&quot;fire&quot;&gt;Fire (pişme, kesim kaybı)&lt;/label&gt;&lt;div class=&quot;giris&quot;&gt;&lt;input id=&quot;fire&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;0&quot; max=&quot;90&quot; step=&quot;1&quot;&gt;&lt;span class=&quot;birim&quot;&gt;%&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label for=&quot;porsiyon&quot;&gt;Porsiyon&lt;/label&gt;&lt;div class=&quot;giris&quot;&gt;&lt;input id=&quot;porsiyon&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;1&quot; step=&quot;5&quot;&gt;&lt;span class=&quot;birim&quot;&gt;gr&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+        &lt;div&gt;&lt;label for=&quot;satis&quot;&gt;Porsiyon satış fiyatı (isteğe bağlı)&lt;/label&gt;&lt;div class=&quot;giris&quot;&gt;&lt;input id=&quot;satis&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;0&quot; step=&quot;1&quot; placeholder=&quot;—&quot;&gt;&lt;span class=&quot;birim&quot;&gt;₺&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;alt-satir&quot;&gt;&lt;button class=&quot;sifirla&quot; id=&quot;sifirla&quot;&gt;Örnek değerlere dön&lt;/button&gt;&lt;/div&gt;
+      &lt;div class=&quot;not&quot;&gt;Örnek rakamlar açılışta doldurulmuştur; kendi fiyatlarınızı yazın. Girdikleriniz bu tarayıcıda hatırlanır.&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/section&gt;
+
+  &lt;aside class=&quot;sonuc&quot;&gt;
+    &lt;div class=&quot;kart ana&quot;&gt;
+      &lt;div class=&quot;et&quot; id=&quot;porsiyonEt&quot;&gt;100 gr porsiyon maliyeti&lt;/div&gt;
+      &lt;div class=&quot;rakam&quot; id=&quot;porsiyonMaliyet&quot;&gt;0 ₺&lt;/div&gt;
+      &lt;div class=&quot;alt&quot; id=&quot;porsiyonAlt&quot;&gt;—&lt;/div&gt;
+      &lt;div class=&quot;sis&quot; aria-hidden=&quot;true&quot;&gt;&lt;i class=&quot;net&quot; id=&quot;sisNet&quot;&gt;&lt;/i&gt;&lt;i class=&quot;fire&quot; id=&quot;sisFire&quot;&gt;&lt;/i&gt;&lt;/div&gt;
+      &lt;div class=&quot;sis-yazi&quot;&gt;&lt;span id=&quot;sisNetYazi&quot;&gt;Net et&lt;/span&gt;&lt;span id=&quot;sisFireYazi&quot;&gt;Fire&lt;/span&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;kart&quot;&gt;
+      &lt;table&gt;
+        &lt;tr&gt;&lt;td&gt;Toplam çiğ et&lt;/td&gt;&lt;td id=&quot;cigKg&quot;&gt;0 kg&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Toplam maliyet (et + marinasyon)&lt;/td&gt;&lt;td id=&quot;toplam&quot;&gt;0 ₺&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Fire sonrası net et&lt;/td&gt;&lt;td id=&quot;netKg&quot;&gt;0 kg&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Net etin kilo maliyeti&lt;/td&gt;&lt;td id=&quot;netKgMal&quot;&gt;0 ₺&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Çıkan porsiyon sayısı&lt;/td&gt;&lt;td id=&quot;adet&quot;&gt;0&lt;/td&gt;&lt;/tr&gt;
+        &lt;tr&gt;&lt;td&gt;Marinasyonun porsiyona payı&lt;/td&gt;&lt;td id=&quot;marPay&quot;&gt;0 ₺&lt;/td&gt;&lt;/tr&gt;
+      &lt;/table&gt;
+      &lt;div class=&quot;kar&quot; id=&quot;kar&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/aside&gt;
+&lt;/main&gt;
+
+&lt;script&gt;
+{
+const $ = id =&gt; document.getElementById(id);
+const ORNEK = { etler: [{ ad: &#x27;Tranç&#x27;, kg: 6, fiyat: 700 }, { ad: &#x27;Kuzu döş&#x27;, kg: 3, fiyat: 550 }, { ad: &#x27;Kuyruk yağı&#x27;, kg: 1, fiyat: 300 }], fire: 20, porsiyon: 100, satis: &#x27;&#x27;, kalemler: [
+  { ad: &#x27;Süt&#x27;, tutar: 60 }, { ad: &#x27;Yoğurt&#x27;, tutar: 90 }, { ad: &#x27;Soğan&#x27;, tutar: 40 }, { ad: &#x27;Baharatlar&#x27;, tutar: 120 }, { ad: &#x27;Sıvı yağ&#x27;, tutar: 70 } ] };
+let durum;
+try { durum = JSON.parse(localStorage.getItem(&#x27;doner-maliyet&#x27;) || &#x27;null&#x27;); } catch (e) { durum = null; }
+if (durum &amp;&amp; !durum.etler) { durum.etler = [{ ad: &#x27;Et&#x27;, kg: durum.kg || &#x27;&#x27;, fiyat: durum.fiyat || &#x27;&#x27; }]; delete durum.kg; delete durum.fiyat; }   // eski kayıt
+if (!durum) durum = JSON.parse(JSON.stringify(ORNEK));
+
+const tl = n =&gt; (isFinite(n) ? n : 0).toLocaleString(&#x27;tr-TR&#x27;, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + &#x27; ₺&#x27;;
+const sayi = v =&gt; { const n = parseFloat(String(v).replace(&#x27;,&#x27;, &#x27;.&#x27;)); return isFinite(n) &amp;&amp; n &gt; 0 ? n : 0; };
+const esc = s =&gt; String(s ?? &#x27;&#x27;).replace(/&amp;/g, &#x27;&amp;amp;&#x27;).replace(/&quot;/g, &#x27;&amp;quot;&#x27;).replace(/&lt;/g, &#x27;&amp;lt;&#x27;);
+
+function kalemleriCiz() {
+  $(&#x27;kalemler&#x27;).innerHTML = durum.kalemler.map((k, i) =&gt; `&lt;div class=&quot;kalem&quot;&gt;
+    &lt;div class=&quot;giris&quot;&gt;&lt;input data-i=&quot;${i}&quot; data-a=&quot;ad&quot; value=&quot;${esc(k.ad)}&quot; placeholder=&quot;Kalem adı&quot; aria-label=&quot;Kalem adı&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;giris&quot;&gt;&lt;input data-i=&quot;${i}&quot; data-a=&quot;tutar&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;0&quot; step=&quot;1&quot; value=&quot;${esc(k.tutar)}&quot; aria-label=&quot;Tutar&quot;&gt;&lt;span class=&quot;birim&quot;&gt;₺&lt;/span&gt;&lt;/div&gt;
+    &lt;button class=&quot;sil&quot; data-sil=&quot;${i}&quot; title=&quot;Kalemi sil&quot; aria-label=&quot;Kalemi sil&quot;&gt;×&lt;/button&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
+}
+function etleriCiz() {
+  $(&#x27;etler&#x27;).innerHTML = durum.etler.map((k, i) =&gt; `&lt;div class=&quot;et-satir&quot;&gt;
+    &lt;div class=&quot;giris ad&quot;&gt;&lt;input data-e=&quot;${i}&quot; data-a=&quot;ad&quot; value=&quot;${esc(k.ad)}&quot; placeholder=&quot;Çeşit (ör. Tranç)&quot; aria-label=&quot;Et çeşidi&quot;&gt;&lt;/div&gt;
+    &lt;div class=&quot;giris&quot;&gt;&lt;input data-e=&quot;${i}&quot; data-a=&quot;kg&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;0&quot; step=&quot;0.1&quot; value=&quot;${esc(k.kg)}&quot; aria-label=&quot;Kilo&quot;&gt;&lt;span class=&quot;birim&quot;&gt;kg&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;giris&quot;&gt;&lt;input data-e=&quot;${i}&quot; data-a=&quot;fiyat&quot; type=&quot;number&quot; inputmode=&quot;decimal&quot; min=&quot;0&quot; step=&quot;1&quot; value=&quot;${esc(k.fiyat)}&quot; aria-label=&quot;Kilo fiyatı&quot;&gt;&lt;span class=&quot;birim&quot;&gt;₺/kg&lt;/span&gt;&lt;/div&gt;
+    &lt;div class=&quot;et-tutar&quot; id=&quot;etT${i}&quot;&gt;&lt;/div&gt;
+    &lt;button class=&quot;sil&quot; data-esil=&quot;${i}&quot; title=&quot;Çeşidi sil&quot; aria-label=&quot;Çeşidi sil&quot;&gt;×&lt;/button&gt;&lt;/div&gt;`).join(&#x27;&#x27;);
+}
+function alanlariDoldur() { [&#x27;fire&#x27;, &#x27;porsiyon&#x27;, &#x27;satis&#x27;].forEach(id =&gt; $(id).value = durum[id]); etleriCiz(); kalemleriCiz(); }
+function kaydet() { try { localStorage.setItem(&#x27;doner-maliyet&#x27;, JSON.stringify(durum)); } catch (e) {} }
+
+function hesapla() {
+  const fire = Math.min(90, sayi(durum.fire)), gr = sayi(durum.porsiyon) || 100;
+  let kg = 0, et = 0;
+  durum.etler.forEach((k, i) =&gt; { const t = sayi(k.kg) * sayi(k.fiyat); kg += sayi(k.kg); et += t; const el = $(&#x27;etT&#x27; + i); if (el) el.textContent = tl(t); });
+  $(&#x27;etKg&#x27;).textContent = kg.toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 2 }) + &#x27; kg&#x27;;
+  const mar = durum.kalemler.reduce((t, k) =&gt; t + sayi(k.tutar), 0), toplam = et + mar;
+  const netKg = kg * (1 - fire / 100), adet = netKg * 1000 / gr;
+  const pMal = adet ? toplam / adet : 0, netKgMal = netKg ? toplam / netKg : 0;
+  $(&#x27;etTutar&#x27;).textContent = tl(et); $(&#x27;marTutar&#x27;).textContent = tl(mar);
+  $(&#x27;porsiyonEt&#x27;).textContent = `${gr.toLocaleString(&#x27;tr-TR&#x27;)} gr porsiyon maliyeti`;
+  $(&#x27;porsiyonMaliyet&#x27;).textContent = tl(pMal);
+  $(&#x27;porsiyonAlt&#x27;).textContent = kg ? `${kg.toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 2 })} kg çiğ etten %${fire.toLocaleString(&#x27;tr-TR&#x27;)} fire düşülünce ${Math.floor(adet).toLocaleString(&#x27;tr-TR&#x27;)} porsiyon` : &#x27;Et miktarını girin&#x27;;
+  $(&#x27;sisNet&#x27;).style.width = (100 - fire) + &#x27;%&#x27;; $(&#x27;sisFire&#x27;).style.width = fire + &#x27;%&#x27;;
+  $(&#x27;sisNetYazi&#x27;).textContent = `Net et ${netKg.toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 2 })} kg`;
+  $(&#x27;sisFireYazi&#x27;).textContent = `Fire ${(kg - netKg).toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 2 })} kg (%${fire})`;
+  $(&#x27;toplam&#x27;).textContent = tl(toplam);
+  $(&#x27;cigKg&#x27;).textContent = kg.toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 2 }) + &#x27; kg&#x27;;
+  $(&#x27;netKg&#x27;).textContent = netKg.toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 2 }) + &#x27; kg&#x27;;
+  $(&#x27;netKgMal&#x27;).textContent = tl(netKgMal);
+  $(&#x27;adet&#x27;).textContent = Math.floor(adet).toLocaleString(&#x27;tr-TR&#x27;);
+  $(&#x27;marPay&#x27;).textContent = tl(adet ? mar / adet : 0);
+  const satis = sayi(durum.satis);
+  if (satis &amp;&amp; pMal) {
+    const kar = satis - pMal, oran = kar / satis * 100;
+    $(&#x27;kar&#x27;).innerHTML = `&lt;table&gt;&lt;tr&gt;&lt;td&gt;Porsiyon başı brüt kâr&lt;/td&gt;&lt;td class=&quot;${kar &gt;= 0 ? &#x27;iyi&#x27; : &#x27;kotu&#x27;}&quot;&gt;${tl(kar)}&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Brüt kâr oranı&lt;/td&gt;&lt;td class=&quot;${kar &gt;= 0 ? &#x27;iyi&#x27; : &#x27;kotu&#x27;}&quot;&gt;%${oran.toLocaleString(&#x27;tr-TR&#x27;, { maximumFractionDigits: 1 })}&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Bu partiden toplam brüt kâr&lt;/td&gt;&lt;td class=&quot;${kar &gt;= 0 ? &#x27;iyi&#x27; : &#x27;kotu&#x27;}&quot;&gt;${tl(kar * Math.floor(adet))}&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;`;
+  } else $(&#x27;kar&#x27;).innerHTML = &#x27;&#x27;;
+  kaydet();
+}
+
+$(&#x27;etler&#x27;).addEventListener(&#x27;input&#x27;, e =&gt; { const el = e.target; if (el.dataset.e === undefined) return; durum.etler[+el.dataset.e][el.dataset.a] = el.value; hesapla(); });
+$(&#x27;etler&#x27;).addEventListener(&#x27;click&#x27;, e =&gt; { const b = e.target.closest(&#x27;[data-esil]&#x27;); if (!b) return; durum.etler.splice(+b.dataset.esil, 1); etleriCiz(); hesapla(); });
+$(&#x27;etEkle&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { durum.etler.push({ ad: &#x27;&#x27;, kg: &#x27;&#x27;, fiyat: &#x27;&#x27; }); etleriCiz(); hesapla(); const g = $(&#x27;etler&#x27;).querySelectorAll(&#x27;input[data-a=&quot;ad&quot;]&#x27;); g[g.length - 1].focus(); });
+[&#x27;fire&#x27;, &#x27;porsiyon&#x27;, &#x27;satis&#x27;].forEach(id =&gt; $(id).addEventListener(&#x27;input&#x27;, e =&gt; { durum[id] = e.target.value; hesapla(); }));
+$(&#x27;kalemler&#x27;).addEventListener(&#x27;input&#x27;, e =&gt; { const el = e.target; if (el.dataset.i === undefined) return; durum.kalemler[+el.dataset.i][el.dataset.a] = el.value; hesapla(); });
+$(&#x27;kalemler&#x27;).addEventListener(&#x27;click&#x27;, e =&gt; { const b = e.target.closest(&#x27;[data-sil]&#x27;); if (!b) return; durum.kalemler.splice(+b.dataset.sil, 1); kalemleriCiz(); hesapla(); });
+$(&#x27;ekle&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { durum.kalemler.push({ ad: &#x27;&#x27;, tutar: &#x27;&#x27; }); kalemleriCiz(); hesapla(); const g = $(&#x27;kalemler&#x27;).querySelectorAll(&#x27;input[data-a=&quot;ad&quot;]&#x27;); g[g.length - 1].focus(); });
+$(&#x27;sifirla&#x27;).addEventListener(&#x27;click&#x27;, () =&gt; { durum = JSON.parse(JSON.stringify(ORNEK)); alanlariDoldur(); hesapla(); });
+
+alanlariDoldur(); hesapla();
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
+</div>
 <!-- YAZICI (fiş baskı aracı; geçici) -->
 <div class="page" id="page-yazici">
   <iframe id="yaziciCerceve" title="Fiş Baskı" style="width:100%;height:calc(100vh - 150px);min-height:600px;border:1px solid var(--border);border-radius:14px;background:#121110" srcdoc="&lt;!DOCTYPE html&gt;
@@ -3834,7 +4041,7 @@ async function fotoHizlandir() {
 // NAV
 let raporAyIlkZorlamaYapildi = false;
 function showPage(page) {
-  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel','sifreler_ortak','ramat','fatura','yazici'];
+  const pages = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','burak_ozel','sifreler_ortak','ramat','fatura','yazici','doner'];
   const idx = pages.indexOf(page);
   // Ana Sayfa'daki kısayol kartları, alt menüler vb. üzerinden de olsa,
   // yetkisi olmayan bir role sayfa açtırma (sadece üst menüyü gizlemek yetmiyordu).
@@ -4039,7 +4246,7 @@ async function sifreSifirlaEmail(email) {
   }
 }
 
-const ROL_IZIN_ETIKETLERI = {
+const ROL_IZIN_ETIKETLERI = { doner: 'Döner Hesap',
   anasayfa: 'Ana Sayfa', urunler: 'Ürünler', fiyat_hesaplama: 'Fiyat Hesaplama', rapor: 'Rapor', platformlar: 'Platformlar', giderler: 'Giderler',
   borcalacak: 'Cari Hesap (Borç/Alacak)', parametreler: 'Parametreler (kullanıcı/kur yönetimi)', sayim: 'Sayım Raporu', sifreler_ortak: 'Şifreler (Paylaşılan)', ramat: 'Ramat', fatura: 'Fatura (Uyumsoft)'
 };
@@ -6359,8 +6566,8 @@ async function doLogin() {
 // Nav sekmeleri: Ana Sayfa(0), Ürünler(1), Rapor(2), Platformlar(3), Giderler(4), Borç/Alacak(5), Parametreler(6)
 // Hepsi rol_izinleri tablosundan (admin > Parametreler > Rol İzinleri panelinden) ayarlanır.
 // admin her zaman hepsini görür ve buradan kısıtlanamaz (kilitlenmeyi önlemek için).
-const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8, burak_ozel:9, sifreler_ortak:10, ramat:11, fatura:12 };
-const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','sifreler_ortak','ramat','fatura'];
+const SEKME_INDEX = { anasayfa:0, urunler:1, fiyat_hesaplama:2, rapor:3, platformlar:4, giderler:5, borcalacak:6, parametreler:7, sayim:8, burak_ozel:9, sifreler_ortak:10, ramat:11, fatura:12, doner:14 };
+const AYARLANABILIR_SEKMELER = ['anasayfa','urunler','fiyat_hesaplama','rapor','platformlar','giderler','borcalacak','parametreler','sayim','sifreler_ortak','ramat','fatura','doner'];
 let rolIzinleriCache = null;
 
 async function loadRolIzinleri() {
@@ -6373,7 +6580,7 @@ async function loadRolIzinleri() {
   }
 }
 function rolSekmeleri() {
-  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9,10,11,12,13];
+  if (currentUser.rol === 'admin') return [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14];
   const izinli = (rolIzinleriCache && rolIzinleriCache[currentUser.rol]) || [];
   return [...izinli.map(s => SEKME_INDEX[s]).filter(i => i !== undefined), 13];   // 13 = YAZICI (herkese açık, geçici)
 }
