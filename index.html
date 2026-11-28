@@ -1,4 +1,4 @@
-<!-- SURUM-V178-DONER-ODEME --><!DOCTYPE html>
+<!-- SURUM-V179-RAPOR-SIRALA --><!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1372,6 +1372,12 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
 .foto-hiz { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin:0 0 14px; padding:12px 16px; border-radius:14px; border:1px solid rgba(212,175,55,.45); background:rgba(212,175,55,.07); font-size:13.5px; }
 .foto-hiz > span { font-size:24px; } .foto-hiz > div { flex:1; min-width:240px; }
 .foto-hiz-alt { font-size:12px; color:var(--text3); margin-top:3px; }
+
+/* V179: rapor sıralama */
+.rs-th { cursor:pointer; user-select:none; }
+.rs-th:hover { color:var(--gold); }
+.rs-th.rs-aktif { color:var(--gold); }
+.rs-ok { font-size:10px; }
 </style>
 </head>
 <body>
@@ -1837,14 +1843,14 @@ body.gizli-mod .gizle-rakam { filter: blur(7px); user-select: none; transition: 
     <div style="font-weight:700;font-size:14px;margin-bottom:12px;">🏪 Mağaza Bazlı Özet</div>
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
       <thead><tr style="background:var(--bg2);">
-        <th style="padding:8px 12px;text-align:left;white-space:nowrap;">Mağaza</th>
-        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Satış Adet</th>
-        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Satış Gr</th>
-        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Taş Gr</th>
-        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Brüt Kâr $</th>
-        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Reklam Gideri $</th>
-        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Net Kâr $</th>
-        <th style="padding:8px 12px;text-align:right;white-space:nowrap;">Net Kâr ₺</th>
+        <th class="rs-th" data-rs="ad" onclick="raporSirala('ad')" style="padding:8px 12px;text-align:left;white-space:nowrap;">Mağaza<span class="rs-ok"></span></th>
+        <th class="rs-th" data-rs="adet" onclick="raporSirala('adet')" style="padding:8px 12px;text-align:right;white-space:nowrap;">Satış Adet<span class="rs-ok"></span></th>
+        <th class="rs-th" data-rs="gram" onclick="raporSirala('gram')" style="padding:8px 12px;text-align:right;white-space:nowrap;">Satış Gr<span class="rs-ok"></span></th>
+        <th class="rs-th" data-rs="tasGr" onclick="raporSirala('tasGr')" style="padding:8px 12px;text-align:right;white-space:nowrap;">Taş Gr<span class="rs-ok"></span></th>
+        <th class="rs-th" data-rs="brut" onclick="raporSirala('brut')" style="padding:8px 12px;text-align:right;white-space:nowrap;">Brüt Kâr $<span class="rs-ok"></span></th>
+        <th class="rs-th" data-rs="reklam" onclick="raporSirala('reklam')" style="padding:8px 12px;text-align:right;white-space:nowrap;">Reklam Gideri $<span class="rs-ok"></span></th>
+        <th class="rs-th" data-rs="net" onclick="raporSirala('net')" style="padding:8px 12px;text-align:right;white-space:nowrap;">Net Kâr $<span class="rs-ok"></span></th>
+        <th class="rs-th" data-rs="netTry" onclick="raporSirala('netTry')" style="padding:8px 12px;text-align:right;white-space:nowrap;">Net Kâr ₺<span class="rs-ok"></span></th>
       </tr></thead>
       <tbody id="raporPlatformTablo"><tr><td colspan="8" class="loading">Yükleniyor...</td></tr></tbody>
     </table>
@@ -6620,12 +6626,18 @@ async function loadRapor() {
     });
 
     let toplamAdet=0, toplamGram=0, toplamTasGr=0, toplamBrutKar=0, toplamReklam=0, toplamNetKarUsd=0;
-    const satirlarHtml = RAPOR_MAGAZA_SIRA.filter(key => key !== 'ebay' || (gruplar.ebay && gruplar.ebay.adet)).map(key => {
+    raporMagazaVeri = RAPOR_MAGAZA_SIRA.filter(key => key !== 'ebay' || (gruplar.ebay && gruplar.ebay.adet)).map((key, sira) => {
+      const g = gruplar[key], netKarUsd = g.brutKarUsd - g.reklamUsd;
+      toplamAdet += g.adet; toplamGram += g.gram; toplamTasGr += g.tasGr;
+      toplamBrutKar += g.brutKarUsd; toplamReklam += g.reklamUsd; toplamNetKarUsd += netKarUsd;
+      return { key, sira, g, ad: RAPOR_MAGAZA_AD[key] || key, adet: g.adet || 0, gram: g.gram || 0, tasGr: g.tasGr || 0, brut: g.brutKarUsd || 0, reklam: g.reklamUsd || 0, net: netKarUsd, netTry: netKarUsd * kur };
+    });
+    raporMagazaKur = kur;
+    const satirlarHtml = raporMagazaSatirlar();
+    const _eskiSatirlar = [].map(key => {
       const g = gruplar[key];
       const netKarUsd = g.brutKarUsd - g.reklamUsd;
       const netKarTry = netKarUsd * kur;
-      toplamAdet += g.adet; toplamGram += g.gram; toplamTasGr += g.tasGr;
-      toplamBrutKar += g.brutKarUsd; toplamReklam += g.reklamUsd; toplamNetKarUsd += netKarUsd;
       return `<tr>
         <td style="padding:8px 12px;font-weight:500;">${RAPOR_MAGAZA_AD[key] || key}</td>
         <td style="padding:8px 12px;text-align:right;">${g.adet ? g.adet.toFixed(0) : 0}</td>
@@ -6650,7 +6662,9 @@ async function loadRapor() {
       <td style="padding:8px 12px;text-align:right;color:${toplamNetKarUsd>=0?'var(--green)':'var(--red)'}">${fmtTLTam(toplamNetKarTry)} ₺</td>
     </tr>`;
 
+    raporMagazaToplamHtml = toplamHtml;
     document.getElementById('raporPlatformTablo').innerHTML = satirlarHtml + toplamHtml;
+    raporSiraOklari();
 
     // ---- Bu ayki genel giderler (Giderler sayfası: sabit + maaş + değişken, TL) ----
     const giderListesi = giderKayitlari || [];
@@ -6677,6 +6691,33 @@ async function loadRapor() {
   } catch(e) { document.getElementById('raporPlatformTablo').innerHTML = '<tr><td colspan="8">Hata: '+e.message+'</td></tr>'; }
 }
 
+
+// V179: Mağaza Bazlı Özet — başlığa tıklayınca o sütuna göre sırala (varsayılan: en çok satış adedi üstte)
+let raporMagazaVeri = [], raporMagazaToplamHtml = '', raporMagazaKur = 0, raporSira = { k: 'adet', yon: -1 };
+function raporMagazaSatirlar() {
+  const { k, yon } = raporSira;
+  const liste = raporMagazaVeri.slice().sort((a, b) => k === 'ad' ? yon * a.ad.localeCompare(b.ad, 'tr') : (yon * (a[k] - b[k]) || a.sira - b.sira));
+  return liste.map(r => `<tr>
+        <td style="padding:8px 12px;font-weight:500;">${r.ad}</td>
+        <td style="padding:8px 12px;text-align:right;">${r.adet ? r.adet.toFixed(0) : 0}</td>
+        <td style="padding:8px 12px;text-align:right;">${r.gram.toFixed(2)}</td>
+        <td style="padding:8px 12px;text-align:right;">${r.tasGr.toFixed(2)}</td>
+        <td style="padding:8px 12px;text-align:right;">$${fmtTLTam(r.brut)}</td>
+        <td style="padding:8px 12px;text-align:right;">$${fmtTLTam(r.reklam)}</td>
+        <td style="padding:8px 12px;text-align:right;font-weight:500;color:${r.net>=0?'var(--green)':'var(--red)'}">$${fmtTLTam(r.net)}</td>
+        <td style="padding:8px 12px;text-align:right;font-weight:500;color:${r.net>=0?'var(--green)':'var(--red)'}">${fmtTLTam(r.netTry)} ₺</td>
+      </tr>`).join('');
+}
+function raporSiraOklari() {
+  document.querySelectorAll('.rs-th').forEach(th => { const ok = th.querySelector('.rs-ok'), aktif = th.dataset.rs === raporSira.k; th.classList.toggle('rs-aktif', aktif); if (ok) ok.textContent = aktif ? (raporSira.yon < 0 ? ' ▼' : ' ▲') : ''; });
+}
+function raporSirala(k) {
+  if (raporSira.k === k) raporSira.yon = -raporSira.yon;
+  else raporSira = { k, yon: k === 'ad' ? 1 : -1 };   // sayılarda önce en büyük, mağaza adında A→Z
+  const tb = document.getElementById('raporPlatformTablo');
+  if (tb && raporMagazaVeri.length) tb.innerHTML = raporMagazaSatirlar() + raporMagazaToplamHtml;
+  raporSiraOklari();
+}
 
 // ===== GİRİŞ SİSTEMİ =====
 let currentUser = null;
